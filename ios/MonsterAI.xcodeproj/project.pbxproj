@@ -11,16 +11,6 @@
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		692221AE2EC3445D00D83707 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B125A412E43E43D9BDBF56EF /* GoogleService-Info.plist */; };
 		692221B12EC3520E00D83707 /* UIWindow+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221AF2EC3520E00D83707 /* UIWindow+Extension.swift */; };
-		692221B72EC3521C00D83707 /* MiniAppLauncher.m in Sources */ = {isa = PBXBuildFile; fileRef = 692221B32EC3521C00D83707 /* MiniAppLauncher.m */; };
-		692221B82EC3521C00D83707 /* MiniAppLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221B22EC3521C00D83707 /* MiniAppLauncher.swift */; };
-		692221B92EC3521C00D83707 /* RNLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221B42EC3521C00D83707 /* RNLocationService.swift */; };
-		692221BA2EC3521C00D83707 /* RNLocationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 692221B52EC3521C00D83707 /* RNLocationService.m */; };
-		692221C52EC3522200D83707 /* NetworkTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221C32EC3522200D83707 /* NetworkTrigger.swift */; };
-		692221C62EC3522200D83707 /* MiniAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 692221BC2EC3522200D83707 /* MiniAppViewController.m */; };
-		692221C72EC3522200D83707 /* MiniAppFactoryDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 692221C12EC3522200D83707 /* MiniAppFactoryDelegate.mm */; };
-		692221C82EC3522200D83707 /* MiniAppH5ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 692221BE2EC3522200D83707 /* MiniAppH5ViewController.m */; };
-		692221C92EC3522200D83707 /* MiniAppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221C22EC3522200D83707 /* MiniAppManager.swift */; };
-		692221CA2EC3522200D83707 /* NetworkTrigger.m in Sources */ = {isa = PBXBuildFile; fileRef = 692221C42EC3522200D83707 /* NetworkTrigger.m */; };
 		692221CB2EC3522200D83707 /* H5JSExecUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221BF2EC3522200D83707 /* H5JSExecUtil.swift */; };
 		7039A3809BD53B9F881D6527 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3094C3227435657AF770B4 /* ExpoModulesProvider.swift */; };
 		73CD3E1488B474606E63C396 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 30D2404EFD8E0BF21C291444 /* PrivacyInfo.xcprivacy */; };
@@ -37,20 +27,7 @@
 		37B212864F4CACA3473C3C86 /* Pods-MonsterAI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonsterAI.debug.xcconfig"; path = "Target Support Files/Pods-MonsterAI/Pods-MonsterAI.debug.xcconfig"; sourceTree = "<group>"; };
 		3D3094C3227435657AF770B4 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-MonsterAI/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		692221AF2EC3520E00D83707 /* UIWindow+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+Extension.swift"; sourceTree = "<group>"; };
-		692221B22EC3521C00D83707 /* MiniAppLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniAppLauncher.swift; sourceTree = "<group>"; };
-		692221B32EC3521C00D83707 /* MiniAppLauncher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MiniAppLauncher.m; sourceTree = "<group>"; };
-		692221B42EC3521C00D83707 /* RNLocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNLocationService.swift; sourceTree = "<group>"; };
-		692221B52EC3521C00D83707 /* RNLocationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNLocationService.m; sourceTree = "<group>"; };
-		692221BB2EC3522200D83707 /* MiniAppViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MiniAppViewController.h; sourceTree = "<group>"; };
-		692221BC2EC3522200D83707 /* MiniAppViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MiniAppViewController.m; sourceTree = "<group>"; };
-		692221BD2EC3522200D83707 /* MiniAppH5ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MiniAppH5ViewController.h; sourceTree = "<group>"; };
-		692221BE2EC3522200D83707 /* MiniAppH5ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MiniAppH5ViewController.m; sourceTree = "<group>"; };
 		692221BF2EC3522200D83707 /* H5JSExecUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = H5JSExecUtil.swift; sourceTree = "<group>"; };
-		692221C02EC3522200D83707 /* MiniAppFactoryDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MiniAppFactoryDelegate.h; sourceTree = "<group>"; };
-		692221C12EC3522200D83707 /* MiniAppFactoryDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MiniAppFactoryDelegate.mm; sourceTree = "<group>"; };
-		692221C22EC3522200D83707 /* MiniAppManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniAppManager.swift; sourceTree = "<group>"; };
-		692221C32EC3522200D83707 /* NetworkTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrigger.swift; sourceTree = "<group>"; };
-		692221C42EC3522200D83707 /* NetworkTrigger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NetworkTrigger.m; sourceTree = "<group>"; };
 		9B57EA941BAD754240BE1A91 /* Pods_MonsterAI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonsterAI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = MonsterAI/SplashScreen.storyboard; sourceTree = "<group>"; };
 		B125A412E43E43D9BDBF56EF /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "MonsterAI/GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -76,19 +53,9 @@
 		13B07FAE1A68108700A75B9A /* MonsterAI */ = {
 			isa = PBXGroup;
 			children = (
-				692221B62EC3521C00D83707 /* NativeModule */,
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
 				F11748442D0722820044C1D9 /* MonsterAI-Bridging-Header.h */,
-				692221BB2EC3522200D83707 /* MiniAppViewController.h */,
-				692221BC2EC3522200D83707 /* MiniAppViewController.m */,
-				692221BD2EC3522200D83707 /* MiniAppH5ViewController.h */,
-				692221BE2EC3522200D83707 /* MiniAppH5ViewController.m */,
 				692221BF2EC3522200D83707 /* H5JSExecUtil.swift */,
-				692221C02EC3522200D83707 /* MiniAppFactoryDelegate.h */,
-				692221C12EC3522200D83707 /* MiniAppFactoryDelegate.mm */,
-				692221C22EC3522200D83707 /* MiniAppManager.swift */,
-				692221C32EC3522200D83707 /* NetworkTrigger.swift */,
-				692221C42EC3522200D83707 /* NetworkTrigger.m */,
 				692221B02EC3520E00D83707 /* extension */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -123,17 +90,6 @@
 				692221AF2EC3520E00D83707 /* UIWindow+Extension.swift */,
 			);
 			path = extension;
-			sourceTree = "<group>";
-		};
-		692221B62EC3521C00D83707 /* NativeModule */ = {
-			isa = PBXGroup;
-			children = (
-				692221B22EC3521C00D83707 /* MiniAppLauncher.swift */,
-				692221B32EC3521C00D83707 /* MiniAppLauncher.m */,
-				692221B42EC3521C00D83707 /* RNLocationService.swift */,
-				692221B52EC3521C00D83707 /* RNLocationService.m */,
-			);
-			path = NativeModule;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -422,19 +378,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				692221B72EC3521C00D83707 /* MiniAppLauncher.m in Sources */,
-				692221B82EC3521C00D83707 /* MiniAppLauncher.swift in Sources */,
-				692221B92EC3521C00D83707 /* RNLocationService.swift in Sources */,
-				692221BA2EC3521C00D83707 /* RNLocationService.m in Sources */,
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
 				7039A3809BD53B9F881D6527 /* ExpoModulesProvider.swift in Sources */,
 				692221B12EC3520E00D83707 /* UIWindow+Extension.swift in Sources */,
-				692221C52EC3522200D83707 /* NetworkTrigger.swift in Sources */,
-				692221C62EC3522200D83707 /* MiniAppViewController.m in Sources */,
-				692221C72EC3522200D83707 /* MiniAppFactoryDelegate.mm in Sources */,
-				692221C82EC3522200D83707 /* MiniAppH5ViewController.m in Sources */,
-				692221C92EC3522200D83707 /* MiniAppManager.swift in Sources */,
-				692221CA2EC3522200D83707 /* NetworkTrigger.m in Sources */,
 				692221CB2EC3522200D83707 /* H5JSExecUtil.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

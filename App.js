@@ -57,17 +57,20 @@ export default function App() {
   // 注册推送通知
   async function registerForPushNotificationsAsync() {
     let token;
-
+    console.log('registerForPushNotificationsAsync');
     if (Platform.OS === 'android') {
       // Android 配置（暂时跳过）
       return null;
     }
 
     if (Device.isDevice) {
+      console.log('Device.isDevice');
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      console.log('getPermissionsAsync', existingStatus);
       let finalStatus = existingStatus;
-      
+      console.log('finalStatus', finalStatus);
       if (existingStatus !== 'granted') {
+        console.log('requestPermissionsAsync');
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
@@ -76,23 +79,35 @@ export default function App() {
         console.log('Failed to get push token!');
         return null;
       }
-      
-      token = (await Notifications.getExpoPushTokenAsync({
-        projectId: 'monsterai-20727',
-      })).data;
+      console.log('getDevicePushTokenAsync');
+      try {
+        token = await Notifications.getDevicePushTokenAsync();
+        console.log('getDevicePushTokenAsync success:', token);
+        console.log('Token data:', token.data);
+        return token.data; // 返回 token 字符串
+      } catch (error) {
+        console.error('Error getting push token:', error);
+        console.error('Error message:', error.message);
+        return null;
+      }
     } else {
       console.log('Must use physical device for Push Notifications');
+      return null;
     }
-
-    return token;
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>🔥 Firebase 已初始化</Text>
+      
       <Text style={styles.subtitle}>Auth: {user ? `已登录 (${user.email || user.uid})` : '未登录'}</Text>
       <Text style={styles.subtitle}>Analytics: ✅ 已配置</Text>
-      <Text style={styles.subtitle}>Push: {expoPushToken ? '✅ 已注册' : '⏳ 注册中...'}</Text>
+      <Text style={styles.subtitle}>Push: {expoPushToken ? `✅ 已注册` : '⏳ 注册中...'}</Text>
+      {expoPushToken ? (
+        <Text style={styles.tokenText} numberOfLines={3} ellipsizeMode="middle">
+          Token: {expoPushToken}
+        </Text>
+      ) : null}
       <StatusBar style="auto" />
     </View>
   );
@@ -115,5 +130,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: '#666',
+  },
+  tokenText: {
+    marginTop: 10,
+    fontSize: 12,
+    color: '#333',
+    padding: 10,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 5,
+    maxWidth: '90%',
   },
 });

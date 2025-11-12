@@ -27,6 +27,12 @@
     ],
     "android": {
       "package": "com.fanthus.monsterai.debug"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8379ece1-4306-4d0e-9c26-cdbb5c8efd41"
+      }
+    },
+    "owner": "fanthus"
   }
 }
