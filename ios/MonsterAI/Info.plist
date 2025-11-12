@@ -46,6 +46,8 @@
 	</dict>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>MonsterAI 想要访问你的日历数据</string>
+	<key>NSCameraUsageDescription</key>
+	<string>MonsterAI 想要访问相机</string>
 	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
 	<string>MonsteAI 想要记录你的健康数据</string>
 	<key>NSHealthUpdateUsageDescription</key>
