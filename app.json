@@ -3,6 +3,7 @@
     "name": "MonsterAI",
     "slug": "MonsterAI",
     "version": "1.0.0",
+    "scheme": "monsterai",
     "ios": {
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.fanthus.monsterai.debug",
@@ -13,9 +14,16 @@
       }
     },
     "plugins": [
+      "expo-router",
       "expo-notifications",
       "@react-native-firebase/auth",
-      "expo-build-properties"
+      "expo-build-properties",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Monster AI to access your camera to record moments."
+        }
+      ]
     ],
     "android": {
       "package": "com.fanthus.monsterai.debug"

@@ -1,0 +1,70 @@
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { Send } from 'lucide-react-native';
+import { useState } from 'react';
+
+export function InputField() {
+  const [text, setText] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <View style={styles.container}>
+      <BlurView intensity={70} tint="light" style={StyleSheet.absoluteFill} />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Typing…"
+          placeholderTextColor="#999999"
+          value={text}
+          onChangeText={setText}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          multiline
+        />
+        {text.length > 0 && (
+          <TouchableOpacity style={styles.sendButton}>
+            <Send size={20} color="#FFFFFF" strokeWidth={2} />
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    bottom: 110,
+    left: 20,
+    right: 20,
+    borderRadius: 25,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    minHeight: 50,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#000000',
+    maxHeight: 100,
+  },
+  sendButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+});
