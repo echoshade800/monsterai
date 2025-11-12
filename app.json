@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "MonsterAI",
+    "slug": "MonsterAI",
+    "version": "1.0.0",
+    "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.fanthus.monsterai.debug",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
+    },
+    "plugins": [
+      "expo-notifications",
+      "@react-native-firebase/auth",
+      "expo-build-properties"
+    ],
+    "android": {
+      "package": "com.fanthus.monsterai.debug"
+    }
+  }
+}
