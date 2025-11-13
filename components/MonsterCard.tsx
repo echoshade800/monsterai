@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   name: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: '700',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   categoryText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
@@ -129,11 +129,11 @@ const styles = StyleSheet.create({
     maxWidth: '85%',
   },
   description: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   imageContainer: {
     flex: 1,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   hireText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',

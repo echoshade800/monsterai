@@ -8,7 +8,7 @@ const MONSTERS_DATA = [
     name: 'Energy',
     category: 'Health',
     description: 'Stay strong and stress-free.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
   },
   {
@@ -16,7 +16,7 @@ const MONSTERS_DATA = [
     name: 'Face',
     category: 'Beauty',
     description: 'I make your skin glow with data.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
   },
   {
@@ -24,7 +24,7 @@ const MONSTERS_DATA = [
     name: 'Posture',
     category: 'Body',
     description: 'I fix your posture, so you feel great all day.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
   },
   {
@@ -32,7 +32,7 @@ const MONSTERS_DATA = [
     name: 'Sleep',
     category: 'Restful',
     description: 'I guide you to better sleep, naturally.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
   },
   {
@@ -40,7 +40,7 @@ const MONSTERS_DATA = [
     name: 'Stress',
     category: 'Physical',
     description: 'I help you stay strong and stress-free.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
   },
   {
@@ -48,7 +48,7 @@ const MONSTERS_DATA = [
     name: 'Feces',
     category: 'Available',
     description: 'Game with your mind and body.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#F5E6D3',
   },
 ];

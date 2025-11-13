@@ -15,7 +15,7 @@ const MONSTERS_DETAIL = {
       'Stress level monitoring',
       'Activity recommendations',
     ],
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
   },
   face: {
@@ -28,7 +28,7 @@ const MONSTERS_DETAIL = {
       'Daily skin condition tracking',
       'Product recommendations',
     ],
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
   },
   posture: {
@@ -41,7 +41,7 @@ const MONSTERS_DETAIL = {
       'Ergonomic recommendations',
       'Daily posture reports',
     ],
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
   },
   sleep: {
@@ -54,7 +54,7 @@ const MONSTERS_DETAIL = {
       'Sleep environment optimization',
       'Dream journaling',
     ],
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
   },
   stress: {
@@ -67,7 +67,7 @@ const MONSTERS_DETAIL = {
       'Meditation guidance',
       'Stress relief techniques',
     ],
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
   },
   feces: {
@@ -80,7 +80,7 @@ const MONSTERS_DETAIL = {
       'Health pattern analysis',
       'Wellness insights',
     ],
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces-monster.png',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#F5E6D3',
   },
 };
