@@ -212,8 +212,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   monsterImage: {
-    width: '80%',
-    height: '100%',
+    width: '320%',
+    height: '400%',
   },
   contentCard: {
     marginHorizontal: 20,

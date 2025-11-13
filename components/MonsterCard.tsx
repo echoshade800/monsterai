@@ -142,8 +142,8 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   monsterImage: {
-    width: '100%',
-    height: '100%',
+    width: '400%',
+    height: '400%',
   },
   footer: {
     flexDirection: 'row',
