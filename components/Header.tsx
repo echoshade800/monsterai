@@ -299,6 +299,7 @@ const styles = StyleSheet.create({
   header: {
     overflow: 'visible',
     marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
+    width: '100%',
   },
 
   // Expanded state styles
