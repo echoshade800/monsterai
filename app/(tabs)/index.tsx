@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar } from 'react-native';
 import { Header } from '../../components/Header';
 import { ConversationSection } from '../../components/ConversationSection';
 import { InputField } from '../../components/InputField';
@@ -17,6 +17,7 @@ export default function EchoTab() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       {/* Fixed Header at the top */}
       <View style={styles.headerContainer}>
         <Header
@@ -47,7 +48,7 @@ export default function EchoTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8D4B8',
+    backgroundColor: '#F5F7F9',
   },
   headerContainer: {
     zIndex: 10,
