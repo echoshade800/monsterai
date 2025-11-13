@@ -1,13 +1,17 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Alert, ActivityIndicator } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef } from 'react';
 import { Camera, X, RotateCw } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
+import { messageService, supabase } from '@/services/messageService';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 
 export default function CameraScreen() {
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
+  const [isUploading, setIsUploading] = useState(false);
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
 
@@ -36,12 +40,57 @@ export default function CameraScreen() {
   }
 
   async function takePicture() {
-    if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.8,
-      });
-      console.log('Photo taken:', photo);
-      router.back();
+    if (cameraRef.current && !isUploading) {
+      try {
+        setIsUploading(true);
+
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8,
+        });
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          Alert.alert('Error', 'You must be logged in to send photos');
+          setIsUploading(false);
+          return;
+        }
+
+        const base64 = await FileSystem.readAsStringAsync(photo.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        const fileName = `${user.id}/${Date.now()}.jpg`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('photos')
+          .upload(fileName, decode(base64), {
+            contentType: 'image/jpeg',
+          });
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          Alert.alert('Error', 'Failed to upload photo');
+          setIsUploading(false);
+          return;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('photos')
+          .getPublicUrl(fileName);
+
+        await messageService.sendMessage(
+          user.id,
+          'user',
+          'Sent a photo',
+          publicUrl
+        );
+
+        router.back();
+      } catch (error) {
+        console.error('Error taking picture:', error);
+        Alert.alert('Error', 'Failed to process photo');
+      } finally {
+        setIsUploading(false);
+      }
     }
   }
 
@@ -63,8 +112,16 @@ export default function CameraScreen() {
                 <RotateCw size={28} color="#FFFFFF" strokeWidth={2} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-                <View style={styles.captureButtonInner} />
+              <TouchableOpacity
+                style={styles.captureButton}
+                onPress={takePicture}
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <ActivityIndicator size="large" color="#FFFFFF" />
+                ) : (
+                  <View style={styles.captureButtonInner} />
+                )}
               </TouchableOpacity>
 
               <View style={styles.placeholder} />
