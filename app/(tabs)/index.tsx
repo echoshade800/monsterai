@@ -1,11 +1,15 @@
 import { View, StyleSheet, ScrollView } from 'react-native';
+import { useState } from 'react';
 import { Header } from '../../components/Header';
-import { UnifiedCard } from '../../components/UnifiedCard';
+import { ActionCard } from '../../components/ActionCard';
+import { StatusCard } from '../../components/StatusCard';
 import { ConversationSection } from '../../components/ConversationSection';
 import { InputField } from '../../components/InputField';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function EchoTab() {
+  const [showActionCard, setShowActionCard] = useState(true);
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -18,7 +22,13 @@ export default function EchoTab() {
         contentContainerStyle={styles.scrollContent}
       >
         <Header />
-        <UnifiedCard />
+
+        {showActionCard && (
+          <ActionCard onDismiss={() => setShowActionCard(false)} />
+        )}
+
+        <StatusCard />
+
         <ConversationSection />
       </ScrollView>
 
