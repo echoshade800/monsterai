@@ -40,10 +40,8 @@ export function InputField({ onFocus }: InputFieldProps) {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    bottom: 110,
-    left: 20,
-    right: 20,
+    marginHorizontal: 20,
+    marginBottom: 20,
     borderRadius: 25,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
