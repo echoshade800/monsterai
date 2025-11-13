@@ -55,9 +55,10 @@ export function ActionCard({ onDismiss }: ActionCardProps) {
       <LiquidGlassCard style={styles.card}>
         <View style={styles.content}>
           <View style={styles.leftSection}>
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarEmoji}>🦑</Text>
-            </View>
+            <Image
+              source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
+              style={styles.avatarImage}
+            />
             <View style={styles.textContainer}>
               <Text style={styles.timeText}>7:00-8:00</Text>
               <Text style={styles.taskText}>Eat breakfast!</Text>
@@ -103,17 +104,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  avatarContainer: {
+  avatarImage: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
     marginRight: 15,
-  },
-  avatarEmoji: {
-    fontSize: 30,
   },
   textContainer: {
     flex: 1,

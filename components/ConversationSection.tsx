@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 
 interface Message {
   id: string;
@@ -55,9 +55,10 @@ export function ConversationSection() {
         if (message.type === 'assistant') {
           return (
             <View key={message.id} style={styles.assistantMessageContainer}>
-              <View style={styles.avatarContainer}>
-                <Text style={styles.avatar}>{message.avatar}</Text>
-              </View>
+              <Image
+                source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
+                style={styles.avatarImage}
+              />
               <View style={styles.assistantBubble}>
                 <Text style={styles.assistantText}>{message.content}</Text>
               </View>
@@ -97,17 +98,10 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     alignItems: 'flex-start',
   },
-  avatarContainer: {
+  avatarImage: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
     marginRight: 10,
-  },
-  avatar: {
-    fontSize: 24,
   },
   assistantBubble: {
     flex: 1,
