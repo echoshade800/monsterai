@@ -92,18 +92,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   assistantMessageContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     marginBottom: 20,
     alignItems: 'flex-start',
   },
   avatarImage: {
     width: 40,
     height: 40,
-    marginRight: 12,
-    marginTop: 2,
+    marginBottom: 8,
   },
   assistantText: {
-    flex: 1,
     fontSize: 15,
     color: '#000000',
     lineHeight: 22,
