@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Message {
   id: string;
@@ -7,42 +8,41 @@ interface Message {
   avatar?: string;
 }
 
-const messages: Message[] = [
-  { id: '1', type: 'timestamp', content: '8:42' },
-  {
-    id: '2',
-    type: 'assistant',
-    content: 'What are your plans for breakfast this morning?',
-    avatar: '🦑',
-  },
-  {
-    id: '3',
-    type: 'user',
-    content: 'I had a cup of yogurt with cereal.',
-  },
-  {
-    id: '4',
-    type: 'assistant',
-    content: 'Let me take a quick look.',
-    avatar: '🦑',
-  },
-  {
-    id: '5',
-    type: 'assistant',
-    content: 'A croissant and latte are okay occasionally, but may be high in sugar and fats for your current goals.',
-    avatar: '🦑',
-  },
-  {
-    id: '6',
-    type: 'assistant',
-    content: "If you'd like to keep it balanced, here's a better portion suggestion:\n• Croissant: Half or pair with eggs\n• Latte: Choose oat milk or no sugar\n\nWould you like me to log this as your planned breakfast?",
-    avatar: '🦑',
-  },
-];
+interface ConversationSectionProps {
+  messages?: Message[];
+  isLoading?: boolean;
+}
 
-export function ConversationSection() {
+export function ConversationSection({ messages = [], isLoading = false }: ConversationSectionProps) {
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  // 当消息更新时，滚动到底部
+  useEffect(() => {
+    if (messages.length > 0 && scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [messages.length]);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.scrollContainer, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#999999" />
+      </View>
+    );
+  }
+
+  if (!messages || messages.length === 0) {
+    return (
+      <View style={[styles.scrollContainer, styles.emptyContainer]}>
+        <Text style={styles.emptyText}>暂无对话记录</Text>
+      </View>
+    );
+  }
   return (
     <ScrollView
+      ref={scrollViewRef}
       style={styles.scrollContainer}
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
@@ -59,11 +59,9 @@ export function ConversationSection() {
         if (message.type === 'assistant') {
           return (
             <View key={message.id} style={styles.assistantMessageContainer}>
-              <Image
-                source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
-                style={styles.avatarImage}
-              />
-              <Text style={styles.assistantText}>{message.content}</Text>
+              <View style={styles.assistantBubble}>
+                <Text style={styles.assistantText}>{message.content}</Text>
+              </View>
             </View>
           );
         }
@@ -101,14 +99,19 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
   },
   assistantMessageContainer: {
-    flexDirection: 'column',
-    marginBottom: 20,
-    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginBottom: 15,
   },
-  avatarImage: {
-    width: 40,
-    height: 40,
-    marginBottom: 8,
+  assistantBubble: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 18,
+    padding: 14,
+    maxWidth: '75%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   assistantText: {
     fontSize: 15,
@@ -136,5 +139,18 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
     lineHeight: 22,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 15,
+    fontFamily: 'SF Compact Rounded',
+    color: '#999999',
   },
 });

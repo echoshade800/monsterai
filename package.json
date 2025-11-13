@@ -29,7 +29,8 @@
     "react-native-reanimated": "^4.1.5",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.6.0",
-    "react-native-svg": "^15.14.0"
+    "react-native-svg": "^15.14.0",
+    "react-native-uuid": "^2.0.3"
   },
   "private": true,
   "devDependencies": {
