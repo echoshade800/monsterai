@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
   bannersContainer: {
     paddingHorizontal: 15,
     paddingBottom: 12,
-    marginTop: -20,
+    marginTop: -60,
   },
   monsterImageContainer: {
     width: '100%',
