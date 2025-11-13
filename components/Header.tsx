@@ -598,8 +598,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   cameraPlaceholder: {
-    width: 140,
+    width: 130,
     height: 94,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   profilePlaceholder: {
     width: 44,

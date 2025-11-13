@@ -1,62 +1,48 @@
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
-import { messageService, supabase, Message } from '@/services/messageService';
 
+interface Message {
+  id: string;
+  type: 'user' | 'assistant' | 'timestamp';
+  content: string;
+  avatar?: string;
+}
+
+const messages: Message[] = [
+  { id: '1', type: 'timestamp', content: '8:42' },
+  {
+    id: '2',
+    type: 'assistant',
+    content: 'What are your plans for breakfast this morning?',
+    avatar: '🦑',
+  },
+  {
+    id: '3',
+    type: 'user',
+    content: 'I had a cup of yogurt with cereal.',
+  },
+  {
+    id: '4',
+    type: 'assistant',
+    content: 'Let me take a quick look.',
+    avatar: '🦑',
+  },
+  {
+    id: '5',
+    type: 'assistant',
+    content: 'A croissant and latte are okay occasionally, but may be high in sugar and fats for your current goals.',
+    avatar: '🦑',
+  },
+  {
+    id: '6',
+    type: 'assistant',
+    content: "If you'd like to keep it balanced, here's a better portion suggestion:\n• Croissant: Half or pair with eggs\n• Latte: Choose oat milk or no sugar\n\nWould you like me to log this as your planned breakfast?",
+    avatar: '🦑',
+  },
+];
 
 export function ConversationSection() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const scrollViewRef = useRef<ScrollView>(null);
-
-  useEffect(() => {
-    loadMessages();
-    setupRealtimeSubscription();
-  }, []);
-
-  useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-    }
-  }, [messages]);
-
-  async function loadMessages() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const loadedMessages = await messageService.getMessages(user.id);
-      setMessages(loadedMessages);
-    }
-    setLoading(false);
-  }
-
-  function setupRealtimeSubscription() {
-    let unsubscribe: (() => void) | null = null;
-
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        unsubscribe = messageService.subscribeToMessages(user.id, (newMessage) => {
-          setMessages((prev) => [...prev, newMessage]);
-        });
-      }
-    });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading messages...</Text>
-      </View>
-    );
-  }
-
   return (
     <ScrollView
-      ref={scrollViewRef}
       style={styles.scrollContainer}
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
@@ -85,16 +71,7 @@ export function ConversationSection() {
         return (
           <View key={message.id} style={styles.userMessageContainer}>
             <View style={styles.userBubble}>
-              {message.image_url && (
-                <Image
-                  source={{ uri: message.image_url }}
-                  style={styles.messageImage}
-                  resizeMode="cover"
-                />
-              )}
-              {message.content && (
-                <Text style={styles.userText}>{message.content}</Text>
-              )}
+              <Text style={styles.userText}>{message.content}</Text>
             </View>
           </View>
         );
@@ -107,17 +84,6 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     backgroundColor: '#F5F7F9',
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: '#F5F7F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 15,
-    fontFamily: 'SF Compact Rounded',
-    color: '#999999',
   },
   container: {
     paddingHorizontal: 20,
@@ -170,11 +136,5 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
     lineHeight: 22,
-  },
-  messageImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 8,
   },
 });

@@ -65,7 +65,7 @@ export function CameraBox() {
 
 const styles = StyleSheet.create({
   cameraBox: {
-    width: 120,
+    width: 130,
     height: '100%',
     position: 'relative',
   },
