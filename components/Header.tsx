@@ -25,7 +25,7 @@ export function Header({ scrollable = false }: HeaderProps) {
     <View style={styles.header}>
       <View style={styles.topExtension} />
       <ImageBackground
-        source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20(92).png' }}
+        source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084.png' }}
         style={styles.backgroundImage}
         resizeMode="cover"
         imageStyle={styles.backgroundImageStyle}
