@@ -14,6 +14,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 interface HeaderProps {
+  scrollY?: Animated.SharedValue<number>;
   isCollapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
 }
@@ -22,7 +23,7 @@ const EXPANDED_HEIGHT = 600;
 const COLLAPSED_HEIGHT = 332;
 const COLLAPSE_THRESHOLD = 100;
 
-export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
+export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
 
@@ -328,8 +329,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
 const styles = StyleSheet.create({
   header: {
     overflow: 'visible',
-    position: 'relative',
-    zIndex: 10,
+    marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
   },
 
   // Expanded state styles

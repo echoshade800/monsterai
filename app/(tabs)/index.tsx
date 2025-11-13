@@ -1,11 +1,30 @@
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Header } from '../../components/Header';
 import { ConversationSection } from '../../components/ConversationSection';
 import { InputField } from '../../components/InputField';
 import { useState, useCallback } from 'react';
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  Extrapolate,
+} from 'react-native-reanimated';
+
+const HEADER_EXPANDED_HEIGHT = 520;
+const HEADER_COLLAPSED_HEIGHT = 180;
+const SCROLL_THRESHOLD = 50;
 
 export default function EchoTab() {
+  const scrollY = useSharedValue(0);
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
 
   const handleInputFocus = useCallback(() => {
     setIsCollapsed(true);
@@ -17,29 +36,22 @@ export default function EchoTab() {
 
   return (
     <View style={styles.container}>
-      {/* Fixed Header at the top */}
-      <View style={styles.headerContainer}>
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+      >
         <Header
+          scrollY={scrollY}
           isCollapsed={isCollapsed}
           onCollapse={handleCollapse}
         />
-      </View>
 
-      {/* Scrollable conversation area */}
-      <View style={styles.conversationWrapper}>
-        <ScrollView
-          style={styles.conversationContainer}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          <ConversationSection />
-        </ScrollView>
-      </View>
+        <ConversationSection />
+      </Animated.ScrollView>
 
-      {/* Fixed input at bottom */}
-      <View style={styles.inputWrapper}>
-        <InputField onFocus={handleInputFocus} />
-      </View>
+      <InputField onFocus={handleInputFocus} />
     </View>
   );
 }
@@ -49,23 +61,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#E8D4B8',
   },
-  headerContainer: {
-    zIndex: 10,
-  },
-  conversationWrapper: {
-    flex: 1,
-    backgroundColor: '#F5F7F9',
-  },
-  conversationContainer: {
-    flex: 1,
-  },
   scrollContent: {
-    paddingTop: 20,
-    paddingBottom: 20,
-  },
-  inputWrapper: {
+    paddingTop: 0,
     backgroundColor: '#F5F7F9',
-    paddingTop: 10,
-    paddingBottom: 90,
   },
 });
