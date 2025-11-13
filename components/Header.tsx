@@ -331,6 +331,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
   },
   statusBar: {
     flexDirection: 'row',
@@ -478,6 +481,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
   },
   collapsedHeader: {
     flexDirection: 'row',
