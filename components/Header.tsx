@@ -155,9 +155,25 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
 
   const stressGraphPath = "M 0 25 Q 15 15, 30 18 T 60 23 T 90 18 T 120 25 T 150 20 T 180 28 T 210 23 T 240 25";
 
+  const sharedCameraStyle = useAnimatedStyle(() => {
+    return {
+      position: 'absolute',
+      right: 18,
+      bottom: 18,
+      width: 120,
+      height: 94,
+      zIndex: 1000,
+    };
+  });
+
   return (
     <GestureDetector gesture={swipeGesture}>
       <Animated.View style={[styles.headerContainer, headerAnimatedStyle]}>
+        {/* Shared Camera Box - Always mounted */}
+        <Animated.View style={sharedCameraStyle}>
+          <CameraBox />
+        </Animated.View>
+
         {/* Expanded State - Full background with cards */}
         <Animated.View style={[styles.expandedContainer, backgroundContainerStyle]}>
           <View style={styles.topExtension} />
@@ -241,7 +257,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                       </Svg>
                     </View>
                   </View>
-                  <CameraBox />
+                  <View style={styles.cameraPlaceholder} />
                 </View>
               </Animated.View>
             </View>
@@ -297,7 +313,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                       </Svg>
                     </View>
                   </View>
-                  <CameraBox />
+                  <View style={styles.cameraPlaceholder} />
                 </View>
               </View>
             </View>
@@ -563,5 +579,9 @@ const styles = StyleSheet.create({
   graphContainer: {
     height: 40,
     marginTop: 2,
+  },
+  cameraPlaceholder: {
+    width: 120,
+    height: '100%',
   },
 });
