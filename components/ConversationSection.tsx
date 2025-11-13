@@ -1,5 +1,6 @@
+import Clipboard from '@react-native-clipboard/clipboard';
 import { useEffect, useRef } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Message {
   id: string;
@@ -24,6 +25,12 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
       }, 100);
     }
   }, [messages.length]);
+
+  // 复制消息到剪贴板
+  const handleCopyMessage = (content: string) => {
+    Clipboard.setString(content);
+    Alert.alert('已复制', '消息已复制到剪贴板', [{ text: '确定' }]);
+  };
 
   if (isLoading) {
     return (
@@ -59,18 +66,24 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
         if (message.type === 'assistant') {
           return (
             <View key={message.id} style={styles.assistantMessageContainer}>
-              <View style={styles.assistantBubble}>
+              <Pressable
+                onLongPress={() => handleCopyMessage(message.content)}
+                style={styles.assistantBubble}
+              >
                 <Text style={styles.assistantText}>{message.content}</Text>
-              </View>
+              </Pressable>
             </View>
           );
         }
 
         return (
           <View key={message.id} style={styles.userMessageContainer}>
-            <View style={styles.userBubble}>
+            <Pressable
+              onLongPress={() => handleCopyMessage(message.content)}
+              style={styles.userBubble}
+            >
               <Text style={styles.userText}>{message.content}</Text>
-            </View>
+            </Pressable>
           </View>
         );
       })}
