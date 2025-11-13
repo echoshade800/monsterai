@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ImageBackground, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { User, Check, Camera } from 'lucide-react-native';
@@ -340,22 +339,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    overflow: 'visible',
-  },
-  topExtension: {
-    position: 'absolute',
-    top: -100,
-    left: 0,
-    right: 0,
-    height: Platform.OS === 'ios' ? 160 : (StatusBar.currentHeight || 0) + 110,
-    backgroundColor: '#E8D4B8',
-    zIndex: -1,
-  },
-  backgroundImage: {
-    width: '100%',
-    height: '100%',
-    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    justifyContent: 'flex-end',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: 'hidden',
@@ -364,7 +347,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
+  },
+  topExtension: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
     backgroundColor: '#E8D4B8',
+    zIndex: -1,
+  },
+  backgroundImage: {
+    width: '100%',
+    height: '100%',
+    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
+    justifyContent: 'flex-end',
   },
   statusBar: {
     flexDirection: 'row',
@@ -389,19 +386,13 @@ const styles = StyleSheet.create({
   },
   bannersContainer: {
     paddingHorizontal: 15,
-    paddingTop: 12,
-    paddingBottom: 0,
-    marginTop: -32,
-    backgroundColor: '#F5F7F9',
-    marginHorizontal: 0,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+    paddingBottom: 12,
+    marginTop: -20,
   },
   monsterImageContainer: {
     width: '100%',
     overflow: 'hidden',
     borderRadius: 24,
-    marginBottom: 12,
   },
   monsterImage: {
     width: '100%',
@@ -415,7 +406,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    marginBottom: 12,
   },
   breakfastContent: {
     flex: 1,
@@ -482,7 +472,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    marginBottom: 12,
   },
 
   // Collapsed state styles
@@ -492,22 +481,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    overflow: 'visible',
-  },
-  collapsedTopExtension: {
-    position: 'absolute',
-    top: -100,
-    left: 0,
-    right: 0,
-    height: Platform.OS === 'ios' ? 160 : (StatusBar.currentHeight || 0) + 110,
-    backgroundColor: '#8B7355',
-    zIndex: -1,
-  },
-  collapsedBackground: {
-    width: '100%',
-    height: '100%',
-    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    justifyContent: 'flex-end',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: 'hidden',
@@ -516,7 +489,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
+  },
+  collapsedTopExtension: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
     backgroundColor: '#8B7355',
+    zIndex: -1,
+  },
+  collapsedBackground: {
+    width: '100%',
+    height: '100%',
+    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
+    justifyContent: 'flex-end',
   },
   collapsedHeader: {
     flexDirection: 'row',
@@ -537,12 +524,8 @@ const styles = StyleSheet.create({
   },
   collapsedBannerContainer: {
     paddingHorizontal: 15,
-    paddingTop: 12,
-    paddingBottom: 0,
-    backgroundColor: '#F5F7F9',
-    marginTop: -32,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+    marginTop: -38,
+    marginBottom: 12,
   },
   collapsedZappedBanner: {
     height: 130,
@@ -553,7 +536,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    marginBottom: 12,
   },
 
   // Shared zapped banner content styles
