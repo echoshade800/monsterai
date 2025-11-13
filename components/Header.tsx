@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
-    marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
+    marginTop: 0,
   },
   topExtension: {
     position: 'absolute',
@@ -139,8 +139,8 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     width: '100%',
-    height: 520,
-    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
+    height: Platform.OS === 'ios' ? 580 : 520 + (StatusBar.currentHeight || 0) + 10,
+    paddingTop: 0,
   },
   backgroundImageStyle: {
     transform: [{ translateY: 100 }],
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
+    paddingTop: Platform.OS === 'ios' ? 70 : (StatusBar.currentHeight || 20) + 20,
     paddingBottom: 15,
   },
   iconButton: {
