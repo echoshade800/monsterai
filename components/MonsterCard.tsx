@@ -12,6 +12,7 @@ interface MonsterCardProps {
   onFingerprintPress: () => void;
   isHired?: boolean;
   onHirePress?: () => void;
+  imageScale?: number;
 }
 
 export function MonsterCard({
@@ -23,12 +24,18 @@ export function MonsterCard({
   onFingerprintPress,
   isHired = false,
   onHirePress,
+  imageScale = 4,
 }: MonsterCardProps) {
   const [hired, setHired] = useState(isHired);
 
   const handleHirePress = () => {
     setHired(true);
     onHirePress?.();
+  };
+
+  const imageStyle = {
+    width: `${imageScale * 100}%`,
+    height: `${imageScale * 100}%`,
   };
 
   return (
@@ -47,7 +54,7 @@ export function MonsterCard({
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: imageUrl }}
-          style={styles.monsterImage}
+          style={imageStyle}
           resizeMode="contain"
         />
       </View>
@@ -140,10 +147,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 8,
-  },
-  monsterImage: {
-    width: '400%',
-    height: '400%',
+    overflow: 'hidden',
   },
   footer: {
     flexDirection: 'row',
