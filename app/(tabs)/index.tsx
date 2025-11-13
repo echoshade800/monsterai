@@ -1,8 +1,8 @@
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Header } from '../../components/Header';
 import { ConversationSection } from '../../components/ConversationSection';
 import { InputField } from '../../components/InputField';
-import { useState, useCallback } from 'react';
 
 export default function EchoTab() {
   const [isCollapsed, setIsCollapsed] = useState(false);
