@@ -58,7 +58,10 @@ export function ActionCard({ onDismiss }: ActionCardProps) {
             <View style={styles.avatarContainer}>
               <Text style={styles.avatarEmoji}>🦑</Text>
             </View>
-            <Text style={styles.taskText}>Eat breakfast!</Text>
+            <View style={styles.textContainer}>
+              <Text style={styles.timeText}>7:00-8:00</Text>
+              <Text style={styles.taskText}>Eat breakfast!</Text>
+            </View>
           </View>
 
           <Animated.View style={buttonAnimatedStyle}>
@@ -70,7 +73,7 @@ export function ActionCard({ onDismiss }: ActionCardProps) {
               {isChecked ? (
                 <Check size={20} color="#FFFFFF" strokeWidth={3} />
               ) : (
-                <Text style={styles.buttonText}>Down</Text>
+                <Text style={styles.buttonText}>Done</Text>
               )}
             </TouchableOpacity>
           </Animated.View>
@@ -111,6 +114,15 @@ const styles = StyleSheet.create({
   },
   avatarEmoji: {
     fontSize: 30,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  timeText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666666',
+    marginBottom: 2,
   },
   taskText: {
     fontSize: 20,

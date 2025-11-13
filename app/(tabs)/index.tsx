@@ -1,11 +1,4 @@
-import { View, StyleSheet, ImageBackground, Platform, StatusBar } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  interpolate,
-  Extrapolate,
-} from 'react-native-reanimated';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { Header } from '../../components/Header';
 import { ActionCard } from '../../components/ActionCard';
@@ -15,27 +8,7 @@ import { InputField } from '../../components/InputField';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function EchoTab() {
-  const scrollY = useSharedValue(0);
   const [showActionCard, setShowActionCard] = useState(true);
-
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
-
-  const contentAnimatedStyle = useAnimatedStyle(() => {
-    const marginTop = interpolate(
-      scrollY.value,
-      [0, 150],
-      [420, 120],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      marginTop,
-    };
-  });
 
   return (
     <View style={styles.container}>
@@ -44,24 +17,20 @@ export default function EchoTab() {
         style={StyleSheet.absoluteFill}
       />
 
-      <Header scrollY={scrollY} isCollapsed={scrollY.value > 150} />
-
-      <Animated.ScrollView
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <Animated.View style={contentAnimatedStyle}>
-          {showActionCard && (
-            <ActionCard onDismiss={() => setShowActionCard(false)} />
-          )}
+        <Header />
 
-          <StatusCard />
+        {showActionCard && (
+          <ActionCard onDismiss={() => setShowActionCard(false)} />
+        )}
 
-          <ConversationSection />
-        </Animated.View>
-      </Animated.ScrollView>
+        <StatusCard />
+
+        <ConversationSection />
+      </ScrollView>
 
       <InputField />
     </View>

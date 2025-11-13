@@ -1,46 +1,12 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Share2, Settings } from 'lucide-react-native';
-import Animated, { useAnimatedStyle, interpolate, Extrapolate } from 'react-native-reanimated';
+import { User } from 'lucide-react-native';
 
 interface HeaderProps {
-  scrollY: Animated.SharedValue<number>;
-  isCollapsed: boolean;
+  scrollable?: boolean;
 }
 
-export function Header({ scrollY, isCollapsed }: HeaderProps) {
-  const headerAnimatedStyle = useAnimatedStyle(() => {
-    const height = interpolate(
-      scrollY.value,
-      [0, 150],
-      [420, 120],
-      Extrapolate.CLAMP
-    );
-
-    const opacity = interpolate(
-      scrollY.value,
-      [0, 100, 150],
-      [1, 0.5, 0],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      height,
-      opacity: scrollY.value > 150 ? 0 : 1,
-    };
-  });
-
-  const charactersOpacity = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      scrollY.value,
-      [0, 100],
-      [1, 0],
-      Extrapolate.CLAMP
-    );
-
-    return { opacity };
-  });
-
+export function Header({ scrollable = false }: HeaderProps) {
   const getCurrentTime = () => {
     const now = new Date();
     const hours = now.getHours();
@@ -49,25 +15,18 @@ export function Header({ scrollY, isCollapsed }: HeaderProps) {
   };
 
   return (
-    <Animated.View style={[styles.header, headerAnimatedStyle]}>
+    <View style={styles.header}>
       <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
 
       <View style={styles.statusBar}>
         <Text style={styles.time}>{getCurrentTime()}</Text>
-        <View style={styles.rightButtons}>
-          <TouchableOpacity style={styles.iconButton}>
-            <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
-            <Share2 size={20} color="#000000" strokeWidth={2} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.iconButton}>
-            <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
-            <Settings size={20} color="#000000" strokeWidth={2} />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.iconButton}>
+          <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
+          <User size={20} color="#000000" strokeWidth={2} />
+        </TouchableOpacity>
       </View>
 
-      <Animated.View style={[styles.brandContainer, charactersOpacity]}>
+      <View style={styles.brandContainer}>
         <View style={styles.logoContainer}>
           <Text style={styles.logoText}>MONSTER AI</Text>
         </View>
@@ -79,18 +38,13 @@ export function Header({ scrollY, isCollapsed }: HeaderProps) {
           <Text style={styles.characterEmoji}>🥒</Text>
           <Text style={styles.characterEmoji}>🔥</Text>
         </View>
-      </Animated.View>
-    </Animated.View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
     overflow: 'hidden',
   },
   statusBar: {
@@ -105,10 +59,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-  },
-  rightButtons: {
-    flexDirection: 'row',
-    gap: 12,
   },
   iconButton: {
     width: 44,

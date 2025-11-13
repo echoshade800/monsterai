@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { BarChart3, MessageCircle, Store } from 'lucide-react-native';
+import { MessageCircle, Home, Store, Users } from 'lucide-react-native';
 import { View, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 
@@ -9,7 +9,7 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#FFFFFF',
+        tabBarActiveTintColor: '#000000',
         tabBarInactiveTintColor: '#999999',
         tabBarBackground: () => (
           <BlurView intensity={80} style={StyleSheet.absoluteFill} tint="light" />
@@ -17,15 +17,6 @@ export default function TabLayout() {
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarItemStyle: styles.tabBarItem,
       }}>
-      <Tabs.Screen
-        name="insights"
-        options={{
-          title: 'Insights',
-          tabBarIcon: ({ size, color }) => (
-            <BarChart3 size={size} color={color} strokeWidth={2} />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="index"
         options={{
@@ -36,11 +27,29 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="home"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ size, color }) => (
+            <Home size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="market"
         options={{
-          title: 'Market',
+          title: 'Store',
           tabBarIcon: ({ size, color }) => (
             <Store size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="social"
+        options={{
+          title: 'Social',
+          tabBarIcon: ({ size, color }) => (
+            <Users size={size} color={color} strokeWidth={2} />
           ),
         }}
       />

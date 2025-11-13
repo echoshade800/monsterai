@@ -1,6 +1,6 @@
 import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Send } from 'lucide-react-native';
+import { Camera } from 'lucide-react-native';
 import { useState } from 'react';
 
 export function InputField() {
@@ -21,11 +21,9 @@ export function InputField() {
           onBlur={() => setIsFocused(false)}
           multiline
         />
-        {text.length > 0 && (
-          <TouchableOpacity style={styles.sendButton}>
-            <Send size={20} color="#FFFFFF" strokeWidth={2} />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity style={styles.cameraButton}>
+          <Camera size={22} color="#000000" strokeWidth={2} />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -58,13 +56,17 @@ const styles = StyleSheet.create({
     color: '#000000',
     maxHeight: 100,
   },
-  sendButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#000000',
+  cameraButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
 });
