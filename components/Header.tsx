@@ -88,6 +88,36 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
     };
   });
 
+  const monsterImageStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      animatedCollapse.value,
+      [0, 0.4, 1],
+      [1, 0, 0],
+      Extrapolate.CLAMP
+    );
+
+    const height = interpolate(
+      animatedCollapse.value,
+      [0, 1],
+      [180, 0],
+      Extrapolate.CLAMP
+    );
+
+    const translateY = interpolate(
+      animatedCollapse.value,
+      [0, 1],
+      [0, -50],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      opacity,
+      height,
+      transform: [{ translateY }],
+      marginBottom: interpolate(animatedCollapse.value, [0, 1], [12, 0], Extrapolate.CLAMP),
+    };
+  });
+
   const breakfastBannerStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       animatedCollapse.value,
@@ -145,6 +175,14 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
             </View>
 
             <View style={styles.bannersContainer}>
+              <Animated.View style={[styles.monsterImageContainer, monsterImageStyle]}>
+                <Image
+                  source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T163424.817.png' }}
+                  style={styles.monsterImage}
+                  resizeMode="cover"
+                />
+              </Animated.View>
+
               <Animated.View style={[styles.breakfastBanner, breakfastBannerStyle]}>
                 <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
                 <View style={styles.breakfastContent}>
@@ -346,6 +384,15 @@ const styles = StyleSheet.create({
   bannersContainer: {
     paddingHorizontal: 15,
     paddingBottom: 12,
+  },
+  monsterImageContainer: {
+    width: '100%',
+    overflow: 'hidden',
+    borderRadius: 24,
+  },
+  monsterImage: {
+    width: '100%',
+    height: '100%',
   },
   breakfastBanner: {
     borderRadius: 24,
