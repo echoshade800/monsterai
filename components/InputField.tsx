@@ -1,17 +1,20 @@
-import { View, TextInput, StyleSheet, TouchableOpacity, Keyboard, Modal, Text, FlatList } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Camera, AtSign, Mic } from 'lucide-react-native';
-import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { AtSign, Camera, Mic, Send } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { FlatList, Keyboard, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, {
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  interpolate,
 } from 'react-native-reanimated';
 
 interface InputFieldProps {
   onFocus?: () => void;
+  onSend?: (message: string) => void;
+  isSending?: boolean;
+  disabled?: boolean;
 }
 
 interface Monster {
@@ -29,12 +32,19 @@ const MONSTERS: Monster[] = [
   { id: 'feces', name: 'Feces', icon: '💩' },
 ];
 
-export function InputField({ onFocus }: InputFieldProps) {
+export function InputField({ onFocus, onSend, isSending = false, disabled = false }: InputFieldProps) {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [showMonsterPicker, setShowMonsterPicker] = useState(false);
   const keyboardHeight = useSharedValue(0);
   const router = useRouter();
+
+  const handleSend = () => {
+    if (text.trim() && onSend && !isSending && !disabled) {
+      onSend(text);
+      setText('');
+    }
+  };
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener('keyboardWillShow', (e) => {
@@ -134,17 +144,36 @@ export function InputField({ onFocus }: InputFieldProps) {
             onFocus={handleFocus}
             onBlur={() => setIsFocused(false)}
             multiline
+            editable={!disabled && !isSending}
+            onSubmitEditing={handleSend}
+            returnKeyType="send"
           />
 
-          <Animated.View style={[styles.voiceButtonWrapper, voiceButtonAnimatedStyle]}>
-            <TouchableOpacity style={styles.voiceButton}>
-              <Mic size={20} color="#666666" strokeWidth={2} />
+          {text.trim() ? (
+            <TouchableOpacity 
+              style={[styles.sendButton, (isSending || disabled) && styles.sendButtonDisabled]} 
+              onPress={handleSend}
+              disabled={isSending || disabled}
+            >
+              <Send size={20} color={(isSending || disabled) ? "#999999" : "#000000"} strokeWidth={2} />
             </TouchableOpacity>
-          </Animated.View>
+          ) : (
+            <>
+              <Animated.View style={[styles.voiceButtonWrapper, voiceButtonAnimatedStyle]}>
+                <TouchableOpacity style={styles.voiceButton} disabled={disabled}>
+                  <Mic size={20} color={disabled ? "#999999" : "#666666"} strokeWidth={2} />
+                </TouchableOpacity>
+              </Animated.View>
 
-          <TouchableOpacity style={styles.cameraButton} onPress={handleCameraPress}>
-            <Camera size={22} color="#000000" strokeWidth={2} />
-          </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.cameraButton, disabled && styles.cameraButtonDisabled]} 
+                onPress={handleCameraPress}
+                disabled={disabled}
+              >
+                <Camera size={22} color={disabled ? "#999999" : "#000000"} strokeWidth={2} />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </Animated.View>
 
@@ -235,6 +264,25 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+  },
+  cameraButtonDisabled: {
+    opacity: 0.5,
+  },
+  sendButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
   },
   modalOverlay: {
     flex: 1,

@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
+import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
 import { InputField } from '../../components/InputField';
+import { getAppVersion, getDeviceId, getTimezone } from '../../src/services/api-clients/client';
+import { API_ENDPOINTS, getApiConfig, getHeadersWithPassId } from '../../src/services/api/api';
 import conversationService from '../../src/services/conversationService';
+import { executeToolFunction } from '../../src/utils/function-tools';
 
 interface Message {
   id: string;
@@ -16,6 +20,10 @@ export default function EchoTab() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [currentResponse, setCurrentResponse] = useState('');
+  const [userData, setUserData] = useState<any>(null);
+  const apiConfig = getApiConfig();
 
   // 将 API 返回的数据转换为 Message 格式
   const convertToMessages = (data: any): Message[] => {
@@ -106,10 +114,387 @@ export default function EchoTab() {
     }
   }, []);
 
+  // 初始化用户数据（使用假数据模拟）
+  useEffect(() => {
+    const initUserData = async () => {
+      try {
+        // 模拟假数据
+        const mockUserData = {
+          uid: "95890526477221924",
+          id: "95890526477221924",
+          userName: "USER6VPTIXFW8",
+          avatar: "",
+          vipLevel: 0,
+          passId: "z1tRob7TfjD2Hx3bdqmBYqHptyoWvEVTBete0Jc28U4=",
+          availableAmount: 0.0,
+          country: "United States/US",
+          city: "Los Angeles",
+          canSetPassword: false,
+          age: "",
+          gender: "",
+          height: "120",
+          weight: "100",
+          goal: "计算机视觉",
+          timezone: "+800",
+          email: "hello6@hello.com",
+          created_at: "2025-11-04T10:52:53",
+          updated_at: "2025-11-12T08:38:56"
+        };
+        
+        setUserData(mockUserData);
+        
+        // 如果需要从 storage 获取真实数据，可以取消下面的注释
+        // const data = await storageManager.getUserData();
+        // if (data) {
+        //   setUserData(data);
+        // } else {
+        //   setUserData(mockUserData);
+        // }
+      } catch (error) {
+        console.error('获取用户数据失败:', error);
+      }
+    };
+    initUserData();
+  }, []);
+
   // 组件挂载时获取对话历史
   useEffect(() => {
     fetchConversationHistory();
   }, [fetchConversationHistory]);
+
+  // 生成唯一ID
+  const generateTraceId = () => {
+    return Math.random().toString(36).substring(2, 11) + "_" + Date.now().toString();
+  };
+
+  // 生成消息ID
+  const generateMsgId = () => {
+    return Date.now().toString();
+  };
+
+  // 通用的流式响应处理函数
+  const handleStreamRequest = useCallback(async (config: {
+    requestBody: any;
+    tempMessageId: string;
+    logPrefix: string;
+    onComplete?: (responseData: any, eventSource?: any) => boolean | void;
+    errorMessage: string;
+    silent?: boolean;
+    extraHeaders?: Record<string, string>;
+  }) => {
+    const { requestBody, tempMessageId, logPrefix, onComplete, errorMessage, silent = false, extraHeaders = {} } = config;
+    let eventSource: any = null;
+    let accumulatedText = '';
+
+    try {
+      console.log(`${logPrefix}请求体:`, requestBody);
+
+      // 合并 headers
+      const baseHeaders = await getHeadersWithPassId();
+      const deviceId = await getDeviceId();
+      const version = getAppVersion();
+      const timezone = getTimezone();
+
+      const headers = {
+        ...baseHeaders,
+        'device': deviceId,
+        'timezone': timezone,
+        'version': version,
+        ...extraHeaders,
+      };
+
+      // 创建 EventSource 实例
+      eventSource = new EventSource(
+        `${apiConfig.BASE_URL}${API_ENDPOINTS.CONVERSATION.STREAM}`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(requestBody),
+          pollingInterval: 0,
+        }
+      );
+
+      // 监听消息事件
+      eventSource.addEventListener('message', (event: any) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log(`${logPrefix}流式数据:`, data);
+
+          if (data.type === 'text_chunk') {
+            accumulatedText += data.word;
+            setCurrentResponse(accumulatedText);
+
+            // 更新临时消息
+            setMessages(prev => {
+              const filtered = prev.filter(msg => msg.id !== tempMessageId);
+              return [...filtered, {
+                id: tempMessageId,
+                type: 'assistant' as const,
+                content: accumulatedText,
+              }];
+            });
+          } else if (data.type === 'complete') {
+            console.log(`${logPrefix}完成:`, JSON.stringify(data, null, 2));
+
+            if (data.data?.code === 0 && data.data?.data?.[0]) {
+              const responseData = data.data.data[0];
+
+              // 调用回调处理 complete 事件
+              if (onComplete) {
+                const shouldContinue = onComplete(responseData, eventSource);
+                if (shouldContinue === false) {
+                  accumulatedText = '';
+                  setCurrentResponse('');
+                  return;
+                }
+              }
+
+              // 默认文本消息处理
+              if (responseData.msg_type === 'text') {
+                setMessages(prev => {
+                  const filtered = prev.filter(msg => msg.id !== tempMessageId);
+                  return [...filtered, {
+                    id: responseData._id || Date.now().toString(),
+                    type: 'assistant' as const,
+                    content: responseData.text || accumulatedText,
+                  }];
+                });
+              }
+            }
+
+            // 清理
+            accumulatedText = '';
+            setCurrentResponse('');
+
+            if (eventSource) {
+              eventSource.close();
+              eventSource = null;
+            }
+          }
+        } catch (parseError) {
+          console.error(`${logPrefix}解析错误:`, parseError, '原始数据:', event.data);
+        }
+      });
+
+      // 错误事件
+      eventSource.addEventListener('error', (event: any) => {
+        console.error(`${logPrefix}SSE 错误:`, event);
+
+        if (event.type === 'error') {
+          if (accumulatedText) {
+            setMessages(prev => {
+              const filtered = prev.filter(msg => msg.id !== tempMessageId);
+              return [...filtered, {
+                id: Date.now().toString(),
+                type: 'assistant' as const,
+                content: accumulatedText,
+              }];
+            });
+          }
+
+          if (!silent) {
+            Alert.alert('错误', errorMessage);
+          }
+
+          accumulatedText = '';
+          setCurrentResponse('');
+
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+        }
+      });
+
+      // 连接打开
+      eventSource.addEventListener('open', () => {
+        console.log(`${logPrefix}SSE 连接已建立`);
+      });
+
+    } catch (error) {
+      console.error(`${logPrefix}失败:`, error);
+      if (!silent) {
+        Alert.alert('错误', errorMessage);
+      }
+
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+    }
+  }, [apiConfig]);
+
+  // 处理流式响应
+  const handleStreamResponse = useCallback(async (userMessage: string) => {
+    try {
+      if (!userData) {
+        Alert.alert('错误', '用户信息未加载，请重试');
+        return;
+      }
+
+      setIsSending(true);
+      setCurrentResponse('');
+
+      const messageTimestamp = Date.now().toString();
+
+      // 添加用户消息
+      const userMsg: Message = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: userMessage,
+      };
+
+      setMessages(prev => [...prev, userMsg]);
+
+      // 构建请求体
+      const requestBody = {
+        uid: String(userData.uid || userData.id),
+        msg_id: generateMsgId(),
+        trace_id: generateTraceId(),
+        timestamp: messageTimestamp,
+        text: userMessage,
+        system_prompt: ["you are a helpful AI assistant"],
+        msg_type: "text"
+      };
+
+      // 调用通用处理函数
+      await handleStreamRequest({
+        requestBody,
+        tempMessageId: 'temp_ai_response',
+        logPrefix: '普通消息',
+        onComplete: (responseData, eventSource) => {
+          // 检查 Function Call
+          if (responseData.msg_type === 'fun_call' && responseData.call_res) {
+            console.log('检测到 Function Call:', responseData.call_res);
+
+            setMessages(prev => {
+              const filtered = prev.filter(msg => msg.id !== 'temp_ai_response');
+              return [...filtered, {
+                id: Date.now().toString(),
+                type: 'assistant' as const,
+                content: `正在执行功能: ${responseData.call_res.name}...`,
+              }];
+            });
+
+            if (eventSource) {
+              eventSource.close();
+            }
+
+            setIsSending(false);
+
+            handleFunctionCall(responseData.call_res).catch(error => {
+              console.error('Function call 执行失败:', error);
+              Alert.alert('错误', '执行功能调用时发生错误');
+            });
+
+            return false; // 停止默认处理
+          }
+          return true; // 继续默认处理
+        },
+        errorMessage: '连接中断，请重试'
+      });
+
+      setIsSending(false);
+
+    } catch (error) {
+      console.error('发送消息错误:', error);
+      Alert.alert('错误', '发送消息失败，请重试');
+      setIsSending(false);
+    }
+  }, [userData, handleStreamRequest]);
+
+  // 将 function call 结果发送回服务器
+  const sendFunctionCallResult = useCallback(async (callId: string, functionName: string, result: any) => {
+    try {
+      if (!userData) {
+        Alert.alert('错误', '用户信息未加载，请重试');
+        return;
+      }
+
+      console.log('发送 Function Call 结果给服务器:', { callId, functionName, result });
+      const messageText = typeof result === 'string' ? result : JSON.stringify(result);
+
+      const messageTimestamp = Date.now().toString();
+
+      // 添加执行结果消息
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        type: 'assistant' as const,
+        content: messageText,
+      }]);
+
+      // 构建请求体
+      const requestBody = {
+        uid: String(userData.uid || userData.id),
+        msg_id: generateMsgId(),
+        trace_id: generateTraceId(),
+        timestamp: messageTimestamp,
+        text: messageText,
+        system_prompt: ["you are a helpful AI assistant"],
+        msg_type: "function_call_output",
+        fun_res: {
+          call_id: callId,
+          name: functionName,
+          output: messageText
+        }
+      };
+
+      // 调用通用处理函数
+      await handleStreamRequest({
+        requestBody,
+        tempMessageId: 'temp_function_ai_response',
+        logPrefix: 'Function Call 响应',
+        onComplete: () => {
+          console.log('Function Call 后的 AI 回复已显示');
+          return true;
+        },
+        errorMessage: 'Function Call 响应连接中断'
+      });
+
+    } catch (error) {
+      console.error('发送 Function Call 结果失败:', error);
+      Alert.alert('错误', '发送功能调用结果失败，请重试');
+    }
+  }, [userData, handleStreamRequest]);
+
+  // 处理 function call
+  const handleFunctionCall = useCallback(async (functionCallData: any) => {
+    console.log('处理 function call:', functionCallData);
+
+    const { name, arguments: argsString, call_id } = functionCallData;
+    let args;
+
+    // 解析参数
+    try {
+      args = JSON.parse(argsString);
+    } catch (parseError) {
+      console.error('解析参数失败:', parseError);
+      const errorMessage = `参数格式错误: ${(parseError as Error).message}`;
+      await sendFunctionCallResult(call_id, name, errorMessage);
+      return;
+    }
+
+    console.log(`执行函数: ${name}, 参数:`, args);
+
+    // 使用统一的工具执行器
+    const executionResult = await executeToolFunction(name, args);
+
+    console.log(`函数执行结果:`, executionResult);
+
+    // 检查执行结果
+    if (executionResult.success) {
+      await sendFunctionCallResult(call_id, name, executionResult.result);
+    } else {
+      const errorMessage = executionResult.error || `执行函数 ${name} 时发生未知错误`;
+      await sendFunctionCallResult(call_id, name, errorMessage);
+    }
+  }, [sendFunctionCallResult]);
+
+  // 发送消息
+  const sendMessage = useCallback((message: string) => {
+    if (!message.trim() || isSending || !userData) return;
+    handleStreamResponse(message.trim());
+  }, [isSending, userData, handleStreamResponse]);
 
   const handleInputFocus = useCallback(() => {
     setIsCollapsed(true);
@@ -128,7 +513,12 @@ export default function EchoTab() {
 
       <ConversationSection messages={messages} isLoading={isLoading} />
 
-      <InputField onFocus={handleInputFocus} />
+      <InputField 
+        onFocus={handleInputFocus} 
+        onSend={sendMessage}
+        isSending={isSending}
+        disabled={!userData}
+      />
     </View>
   );
 }
