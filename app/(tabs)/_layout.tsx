@@ -1,28 +1,34 @@
 import { Tabs } from 'expo-router';
 import { MessageCircle, Home, Store, Users } from 'lucide-react-native';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 
 export default function TabLayout() {
   return (
     <Tabs
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: '#000000',
-        tabBarInactiveTintColor: '#999999',
+        tabBarInactiveTintColor: '#666666',
         tabBarBackground: () => (
-          <BlurView intensity={80} style={StyleSheet.absoluteFill} tint="light" />
+          <BlurView intensity={90} style={StyleSheet.absoluteFill} tint="light" />
         ),
         tabBarLabelStyle: styles.tabBarLabel,
-        tabBarItemStyle: styles.tabBarItem,
-      }}>
+        tabBarItemStyle: [
+          styles.tabBarItem,
+          route.name === 'index' && styles.tabBarItemActive
+        ],
+        tabBarIconStyle: styles.tabBarIcon,
+      })}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Echo',
-          tabBarIcon: ({ size, color }) => (
-            <MessageCircle size={size} color={color} strokeWidth={2} />
+          tabBarIcon: ({ size, color, focused }) => (
+            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+              <MessageCircle size={size} color={color} strokeWidth={2.5} />
+            </View>
           ),
         }}
       />
@@ -60,25 +66,49 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    height: 70,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    bottom: 25,
+    left: '50%',
+    marginLeft: -180,
+    width: 360,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderWidth: 0,
     elevation: 0,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    paddingBottom: Platform.OS === 'ios' ? 8 : 0,
   },
   tabBarLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 4,
+    marginTop: -2,
   },
   tabBarItem: {
-    paddingVertical: 8,
+    paddingVertical: 6,
+  },
+  tabBarItemActive: {
+    borderRadius: 30,
+  },
+  tabBarIcon: {
+    marginTop: 4,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconContainerActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
 });
