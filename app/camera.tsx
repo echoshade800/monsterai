@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Alert, ActivityIndicator } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef } from 'react';
-import { Camera, X, RotateCw } from 'lucide-react-native';
+import { Camera, X, RotateCw, Image as ImageIcon } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import { messageService, supabase } from '@/services/messageService';
@@ -39,6 +40,50 @@ export default function CameraScreen() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
+  async function uploadPhoto(photoUri: string) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert('Error', 'You must be logged in to send photos');
+        return false;
+      }
+
+      const base64 = await FileSystem.readAsStringAsync(photoUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const fileName = `${user.id}/${Date.now()}.jpg`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(fileName, decode(base64), {
+          contentType: 'image/jpeg',
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        Alert.alert('Error', 'Failed to upload photo');
+        return false;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('photos')
+        .getPublicUrl(fileName);
+
+      await messageService.sendMessage(
+        user.id,
+        'user',
+        'Sent a photo',
+        publicUrl
+      );
+
+      return true;
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      Alert.alert('Error', 'Failed to process photo');
+      return false;
+    }
+  }
+
   async function takePicture() {
     if (cameraRef.current && !isUploading) {
       try {
@@ -48,49 +93,52 @@ export default function CameraScreen() {
           quality: 0.8,
         });
 
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          Alert.alert('Error', 'You must be logged in to send photos');
-          setIsUploading(false);
-          return;
+        const success = await uploadPhoto(photo.uri);
+        if (success) {
+          router.back();
         }
-
-        const base64 = await FileSystem.readAsStringAsync(photo.uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        const fileName = `${user.id}/${Date.now()}.jpg`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('photos')
-          .upload(fileName, decode(base64), {
-            contentType: 'image/jpeg',
-          });
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          Alert.alert('Error', 'Failed to upload photo');
-          setIsUploading(false);
-          return;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('photos')
-          .getPublicUrl(fileName);
-
-        await messageService.sendMessage(
-          user.id,
-          'user',
-          'Sent a photo',
-          publicUrl
-        );
-
-        router.back();
       } catch (error) {
         console.error('Error taking picture:', error);
         Alert.alert('Error', 'Failed to process photo');
       } finally {
         setIsUploading(false);
       }
+    }
+  }
+
+  async function pickImageFromLibrary() {
+    if (isUploading) return;
+
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required',
+          'Please grant access to your photo library to select images.'
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setIsUploading(true);
+        const success = await uploadPhoto(result.assets[0].uri);
+        if (success) {
+          router.back();
+        }
+        setIsUploading(false);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to select image');
+      setIsUploading(false);
     }
   }
 
@@ -124,7 +172,14 @@ export default function CameraScreen() {
                 )}
               </TouchableOpacity>
 
-              <View style={styles.placeholder} />
+              <TouchableOpacity
+                style={styles.libraryButton}
+                onPress={pickImageFromLibrary}
+                disabled={isUploading}
+              >
+                <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
+                <ImageIcon size={28} color="#FFFFFF" strokeWidth={2} />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -197,9 +252,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
-  placeholder: {
+  libraryButton: {
     width: 56,
     height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   permissionContainer: {
     flex: 1,
