@@ -19,8 +19,8 @@ interface HeaderProps {
   onCollapse?: (collapsed: boolean) => void;
 }
 
-const EXPANDED_HEIGHT = 520;
-const COLLAPSED_HEIGHT = 280;
+const EXPANDED_HEIGHT = 600;
+const COLLAPSED_HEIGHT = 320;
 const COLLAPSE_THRESHOLD = 100;
 
 export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps) {
@@ -297,9 +297,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
 
 const styles = StyleSheet.create({
   header: {
-    overflow: 'hidden',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    overflow: 'visible',
     marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
   },
 
@@ -310,6 +308,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
   topExtension: {
     position: 'absolute',
@@ -449,6 +455,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
   collapsedTopExtension: {
     position: 'absolute',
