@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
   bannersContainer: {
     paddingHorizontal: 15,
-    paddingBottom: 20,
+    paddingBottom: 12,
   },
   breakfastBanner: {
     borderRadius: 24,
