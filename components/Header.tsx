@@ -244,11 +244,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
             </View>
 
             <View style={styles.collapsedBannerContainer}>
-              <ImageBackground
-                source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084.png' }}
-                style={styles.collapsedZappedBanner}
-                resizeMode="cover"
-              >
+              <View style={styles.collapsedZappedBanner}>
                 <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
                 <View style={styles.zappedContent}>
                   <View style={styles.zappedLeft}>
@@ -290,7 +286,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
                     </TouchableOpacity>
                   </View>
                 </View>
-              </ImageBackground>
+              </View>
             </View>
           </ImageBackground>
         </Animated.View>
