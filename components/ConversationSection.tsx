@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#999999',
     fontWeight: '500',
+    fontFamily: 'SF Compact Rounded',
   },
   assistantMessageContainer: {
     flexDirection: 'column',
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
   },
   assistantText: {
     fontSize: 15,
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
     lineHeight: 22,
   },
@@ -123,6 +125,7 @@ const styles = StyleSheet.create({
   },
   userText: {
     fontSize: 15,
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
     lineHeight: 22,
   },

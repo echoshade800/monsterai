@@ -115,12 +115,14 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'SF Compact Rounded',
     color: '#666666',
     marginBottom: 2,
   },
   taskText: {
     fontSize: 20,
     fontWeight: '600',
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
   button: {
@@ -143,6 +145,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
 });

@@ -431,12 +431,14 @@ const styles = StyleSheet.create({
   timeRange: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'SF Compact Rounded',
     color: '#666666',
     marginBottom: 2,
   },
   taskTitle: {
     fontSize: 20,
     fontWeight: '700',
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
   doneButton: {
@@ -458,6 +460,7 @@ const styles = StyleSheet.create({
   doneButtonText: {
     fontSize: 15,
     fontWeight: '600',
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
   zappedBanner: {
@@ -553,6 +556,7 @@ const styles = StyleSheet.create({
   zappedTitle: {
     fontSize: 26,
     fontWeight: '700',
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
   stressRow: {
@@ -561,12 +565,14 @@ const styles = StyleSheet.create({
   },
   stressLabel: {
     fontSize: 14,
+    fontFamily: 'SF Compact Rounded',
     color: '#666666',
     marginRight: 6,
   },
   stressValue: {
     fontSize: 26,
     fontWeight: '700',
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
   graphContainer: {

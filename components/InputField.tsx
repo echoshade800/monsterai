@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
     maxHeight: 100,
   },

@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
   tabBarLabel: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'SF Compact Rounded',
     marginBottom: 8,
   },
   tabBarItem: {

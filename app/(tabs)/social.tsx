@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 24,
     fontWeight: '600',
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
 });
