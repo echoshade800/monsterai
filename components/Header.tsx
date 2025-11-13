@@ -20,7 +20,7 @@ interface HeaderProps {
 }
 
 const EXPANDED_HEIGHT = 520;
-const COLLAPSED_HEIGHT = 250;
+const COLLAPSED_HEIGHT = 280;
 const COLLAPSE_THRESHOLD = 100;
 
 export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps) {
@@ -491,10 +491,10 @@ const styles = StyleSheet.create({
   },
   collapsedBannerContainer: {
     paddingHorizontal: 15,
-    marginTop: -28,
+    marginTop: -18,
   },
   collapsedZappedBanner: {
-    height: 150,
+    height: 130,
     borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
