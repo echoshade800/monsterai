@@ -1,17 +1,17 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ImageBackground, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { User, Check, Camera } from 'lucide-react-native';
-import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
-import { useState, useEffect } from 'react';
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-  interpolate,
-  Extrapolate,
-  useSharedValue,
-  runOnJS,
-} from 'react-native-reanimated';
+import { Camera, Check, User } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { Image, ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  Extrapolate,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Defs, Path, Stop, LinearGradient as SvgLinearGradient } from 'react-native-svg';
 
 interface HeaderProps {
   scrollY?: Animated.SharedValue<number>;
@@ -33,29 +33,17 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
     });
   }, [isCollapsed]);
 
-  useEffect(() => {
-    if (!scrollY) return;
-
-    const checkScroll = () => {
+  const swipeGesture = Gesture.Pan()
+    .onEnd((event) => {
       'worklet';
-      if (scrollY.value > COLLAPSE_THRESHOLD && !isCollapsed) {
+      if (event.velocityY < -500 || event.translationY < -50) {
         if (onCollapse) {
           runOnJS(onCollapse)(true);
         }
-      } else if (scrollY.value < 20 && isCollapsed) {
+      } else if (event.velocityY > 500 || event.translationY > 50) {
         if (onCollapse) {
           runOnJS(onCollapse)(false);
         }
-      }
-    };
-  }, [scrollY, isCollapsed, onCollapse]);
-
-  const swipeGesture = Gesture.Pan()
-    .onEnd((event) => {
-      if (event.velocityY < -500 || event.translationY < -50) {
-        onCollapse?.(true);
-      } else if (event.velocityY > 500 || event.translationY > 50) {
-        onCollapse?.(false);
       }
     });
 
