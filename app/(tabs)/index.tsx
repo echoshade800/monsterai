@@ -1,14 +1,24 @@
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+} from 'react-native-reanimated';
 import { useState } from 'react';
 import { Header } from '../../components/Header';
 import { ActionCard } from '../../components/ActionCard';
 import { StatusCard } from '../../components/StatusCard';
 import { ConversationSection } from '../../components/ConversationSection';
-import { InputField } from '../../components/InputField';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function EchoTab() {
   const [showActionCard, setShowActionCard] = useState(true);
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -17,11 +27,13 @@ export default function EchoTab() {
         style={StyleSheet.absoluteFill}
       />
 
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <Header />
+        <Header scrollY={scrollY} />
 
         {showActionCard && (
           <ActionCard onDismiss={() => setShowActionCard(false)} />
@@ -30,9 +42,7 @@ export default function EchoTab() {
         <StatusCard />
 
         <ConversationSection />
-      </ScrollView>
-
-      <InputField />
+      </Animated.ScrollView>
     </View>
   );
 }
