@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 120,
+    paddingBottom: 200,
   },
   timestampContainer: {
     alignItems: 'center',
