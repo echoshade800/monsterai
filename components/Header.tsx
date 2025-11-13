@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ImageBackground, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { User, Check, Camera } from 'lucide-react-native';
+import { User, Check } from 'lucide-react-native';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { useState, useEffect } from 'react';
 import Animated, {
@@ -12,6 +12,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { CameraBox } from './CameraBox';
 
 interface HeaderProps {
   isCollapsed?: boolean;
@@ -240,16 +241,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                       </Svg>
                     </View>
                   </View>
-                  <View style={styles.cameraBox}>
-                    <View style={styles.cameraPlaceholder}>
-                      <Text style={styles.cameraEmoji}>📸💥</Text>
-                    </View>
-                    <TouchableOpacity style={styles.cameraIconButton}>
-                      <View style={styles.cameraIconInner}>
-                        <Camera size={14} color="#FFFFFF" strokeWidth={2} />
-                      </View>
-                    </TouchableOpacity>
-                  </View>
+                  <CameraBox />
                 </View>
               </Animated.View>
             </View>
@@ -305,16 +297,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                       </Svg>
                     </View>
                   </View>
-                  <View style={styles.cameraBox}>
-                    <View style={styles.cameraPlaceholder}>
-                      <Text style={styles.cameraEmoji}>📸💥</Text>
-                    </View>
-                    <TouchableOpacity style={styles.cameraIconButton}>
-                      <View style={styles.cameraIconInner}>
-                        <Camera size={14} color="#FFFFFF" strokeWidth={2} />
-                      </View>
-                    </TouchableOpacity>
-                  </View>
+                  <CameraBox />
                 </View>
               </View>
             </View>
@@ -580,32 +563,5 @@ const styles = StyleSheet.create({
   graphContainer: {
     height: 40,
     marginTop: 2,
-  },
-  cameraBox: {
-    width: 120,
-    position: 'relative',
-  },
-  cameraPlaceholder: {
-    flex: 1,
-    backgroundColor: '#8B7355',
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cameraEmoji: {
-    fontSize: 32,
-  },
-  cameraIconButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-  },
-  cameraIconInner: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
