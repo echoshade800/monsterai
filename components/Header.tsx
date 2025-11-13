@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   brandContainer: {
     alignItems: 'center',
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 25,
   },
   logoContainer: {
     paddingHorizontal: 30,
