@@ -58,7 +58,7 @@ export function InputField({ onFocus }: InputFieldProps) {
         [0, 1],
         [110, keyboardHeight.value + 10]
       ),
-      left: interpolate(expanded, [0, 1], [180, 20]),
+      left: interpolate(expanded, [0, 1], [90, 20]),
       right: 20,
     };
   });
