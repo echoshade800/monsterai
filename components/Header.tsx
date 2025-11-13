@@ -20,7 +20,7 @@ interface HeaderProps {
 }
 
 const EXPANDED_HEIGHT = 600;
-const COLLAPSED_HEIGHT = 320;
+const COLLAPSED_HEIGHT = 352;
 const COLLAPSE_THRESHOLD = 100;
 
 export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps) {
