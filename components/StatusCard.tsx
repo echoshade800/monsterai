@@ -1,17 +1,15 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import { LiquidGlassCard } from './LiquidGlassCard';
 import { Camera } from 'lucide-react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useState } from 'react';
+import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { CameraPermissionModal } from './CameraPermissionModal';
 
 export function StatusCard() {
   const [permission, requestPermission] = useCameraPermissions();
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
-  const [typingText, setTypingText] = useState('');
-  const [isTypingExpanded, setIsTypingExpanded] = useState(false);
 
   const handleCameraPress = async () => {
     if (!permission) {
@@ -33,46 +31,61 @@ export function StatusCard() {
     }
   };
 
+  const stressGraphPath = "M 0 50 Q 20 30, 40 35 T 80 45 T 120 35 T 160 50 T 200 40 T 240 55 T 280 45 T 320 50";
+
   return (
     <>
       <LiquidGlassCard style={styles.card}>
         <View style={styles.content}>
-          <View style={styles.topRow}>
+          <View style={styles.leftColumn}>
             <Text style={styles.statusLabel}>Zapped</Text>
+            <View style={styles.stressRow}>
+              <Text style={styles.stressLabel}>Stress</Text>
+              <Text style={styles.stressValue}>86</Text>
+            </View>
+
+            <View style={styles.graphContainer}>
+              <Svg width="100%" height="60" viewBox="0 0 320 60">
+                <Defs>
+                  <LinearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <Stop offset="0%" stopColor="#4ADE80" stopOpacity="1" />
+                    <Stop offset="30%" stopColor="#FCD34D" stopOpacity="1" />
+                    <Stop offset="60%" stopColor="#F472B6" stopOpacity="1" />
+                    <Stop offset="100%" stopColor="#A78BFA" stopOpacity="1" />
+                  </LinearGradient>
+                </Defs>
+                <Path
+                  d={stressGraphPath}
+                  fill="none"
+                  stroke="url(#grad)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </Svg>
+            </View>
+          </View>
+
+          <View style={styles.rightColumn}>
             <View style={styles.cameraContainer}>
               {permission?.granted && !showCamera ? (
                 <CameraView style={styles.camera} facing="back">
-                  <TouchableOpacity style={styles.floatingCameraButton} onPress={handleCameraPress}>
-                    <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-                    <Camera size={20} color="#000000" strokeWidth={2} />
+                  <TouchableOpacity style={styles.cameraButton} onPress={handleCameraPress}>
+                    <View style={styles.cameraButtonInner}>
+                      <Camera size={18} color="#FFFFFF" strokeWidth={2} />
+                    </View>
                   </TouchableOpacity>
                 </CameraView>
               ) : (
                 <View style={styles.cameraPlaceholder}>
-                  <TouchableOpacity style={styles.floatingCameraButton} onPress={handleCameraPress}>
-                    <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-                    <Camera size={20} color="#000000" strokeWidth={2} />
+                  <TouchableOpacity style={styles.cameraButton} onPress={handleCameraPress}>
+                    <View style={styles.cameraButtonInner}>
+                      <Camera size={18} color="#FFFFFF" strokeWidth={2} />
+                    </View>
                   </TouchableOpacity>
                   <Text style={styles.cameraPlaceholderText}>📸</Text>
                 </View>
               )}
             </View>
-          </View>
-
-          <View style={styles.typingRow}>
-            <TextInput
-              style={styles.typingInput}
-              placeholder="Typing…"
-              placeholderTextColor="#999999"
-              value={typingText}
-              onChangeText={setTypingText}
-              onFocus={() => setIsTypingExpanded(true)}
-              onBlur={() => setIsTypingExpanded(false)}
-            />
-            <TouchableOpacity style={styles.externalCameraButton} onPress={handleCameraPress}>
-              <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
-              <Camera size={22} color="#000000" strokeWidth={2} />
-            </TouchableOpacity>
           </View>
         </View>
       </LiquidGlassCard>
@@ -89,34 +102,51 @@ export function StatusCard() {
 const styles = StyleSheet.create({
   card: {
     marginHorizontal: 20,
-    marginTop: -40,
-    minHeight: 140,
+    marginTop: 15,
+    height: 160,
   },
   content: {
     flex: 1,
+    flexDirection: 'row',
     padding: 20,
   },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 15,
+  leftColumn: {
+    flex: 1,
+    paddingRight: 15,
   },
   statusLabel: {
-    fontSize: 32,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  stressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  stressLabel: {
+    fontSize: 16,
+    color: '#666666',
+    marginRight: 8,
+  },
+  stressValue: {
+    fontSize: 28,
     fontWeight: '700',
     color: '#000000',
   },
+  graphContainer: {
+    height: 60,
+    marginTop: 5,
+  },
+  rightColumn: {
+    width: 140,
+  },
   cameraContainer: {
-    width: 220,
-    height: 80,
+    flex: 1,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: 'rgba(139, 115, 85, 0.3)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   camera: {
     flex: 1,
@@ -128,46 +158,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cameraPlaceholderText: {
-    fontSize: 32,
+    fontSize: 40,
+    marginTop: -30,
   },
-  floatingCameraButton: {
+  cameraButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
+    zIndex: 10,
+  },
+  cameraButtonInner: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-  typingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  typingInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#999999',
-    paddingVertical: 8,
-  },
-  externalCameraButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
   },
 });

@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 140,
+    paddingBottom: 120,
   },
   timestampContainer: {
     alignItems: 'center',

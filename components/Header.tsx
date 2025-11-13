@@ -2,13 +2,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ImageBac
 import { BlurView } from 'expo-blur';
 import { User } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { useAnimatedStyle, interpolate, Extrapolate } from 'react-native-reanimated';
 
 interface HeaderProps {
-  scrollY?: Animated.SharedValue<number>;
+  scrollable?: boolean;
 }
 
-export function Header({ scrollY }: HeaderProps) {
+export function Header({ scrollable = false }: HeaderProps) {
   const getCurrentTime = () => {
     const now = new Date();
     const hours = now.getHours();
@@ -16,66 +15,13 @@ export function Header({ scrollY }: HeaderProps) {
     return `${hours}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  const headerAnimatedStyle = useAnimatedStyle(() => {
-    if (!scrollY) return { height: 520 };
-
-    const height = interpolate(
-      scrollY.value,
-      [0, 200],
-      [520, 280],
-      Extrapolate.CLAMP
-    );
-
-    return { height };
-  });
-
-  const logoAnimatedStyle = useAnimatedStyle(() => {
-    if (!scrollY) return { opacity: 1, transform: [{ scale: 1 }] };
-
-    const opacity = interpolate(
-      scrollY.value,
-      [0, 100, 200],
-      [1, 0.7, 0.5],
-      Extrapolate.CLAMP
-    );
-
-    const scale = interpolate(
-      scrollY.value,
-      [0, 200],
-      [1, 0.7],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      opacity,
-      transform: [{ scale }]
-    };
-  });
-
-  const blurIntensity = useAnimatedStyle(() => {
-    if (!scrollY) return {};
-
-    const intensity = interpolate(
-      scrollY.value,
-      [0, 200],
-      [40, 80],
-      Extrapolate.CLAMP
-    );
-
-    return { opacity: intensity / 100 };
-  });
-
   return (
-    <Animated.View style={[styles.header, headerAnimatedStyle]}>
+    <View style={styles.header}>
       <ImageBackground
         source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20(92).png' }}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
-        <Animated.View style={[StyleSheet.absoluteFill, blurIntensity]}>
-          <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
-        </Animated.View>
-
         <LinearGradient
           colors={['rgba(232, 212, 184, 0)', 'rgba(232, 212, 184, 0.3)', 'rgba(232, 212, 184, 0.8)']}
           style={styles.gradient}
@@ -90,14 +36,14 @@ export function Header({ scrollY }: HeaderProps) {
           </TouchableOpacity>
         </View>
 
-        <Animated.View style={[styles.brandContainer, logoAnimatedStyle]}>
+        <View style={styles.brandContainer}>
           <View style={styles.logoContainer}>
-            <BlurView intensity={50} tint="light" style={StyleSheet.absoluteFill} />
+            <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
             <Text style={styles.logoText}>MONSTER AI</Text>
           </View>
-        </Animated.View>
+        </View>
       </ImageBackground>
-    </Animated.View>
+    </View>
   );
 }
 
