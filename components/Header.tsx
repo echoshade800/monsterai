@@ -23,6 +23,7 @@ export function Header({ scrollable = false }: HeaderProps) {
 
   return (
     <View style={styles.header}>
+      <View style={styles.topExtension} />
       <ImageBackground
         source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20(92).png' }}
         style={styles.backgroundImage}
@@ -124,10 +125,21 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
+    marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
+  },
+  topExtension: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
+    backgroundColor: '#E8D4B8',
+    zIndex: -1,
   },
   backgroundImage: {
     width: '100%',
     height: 520,
+    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
   },
   backgroundImageStyle: {
     transform: [{ translateY: 60 }],
