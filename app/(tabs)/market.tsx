@@ -11,6 +11,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
     imageSize: '300%',
+    imageOffset: 10,
   },
   {
     id: 'face',
@@ -19,7 +20,8 @@ const MONSTERS_DATA = [
     description: 'I make your skin glow with data.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
-    imageSize: '300%',
+    imageSize: '280%',
+    imageOffset: 8,
   },
   {
     id: 'posture',
@@ -29,6 +31,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
     imageSize: '400%',
+    imageOffset: 0,
   },
   {
     id: 'sleep',
@@ -38,6 +41,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
     imageSize: '200%',
+    imageOffset: 0,
   },
   {
     id: 'stress',
@@ -47,6 +51,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
     imageSize: '400%',
+    imageOffset: 10,
   },
   {
     id: 'feces',
@@ -56,6 +61,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#F5E6D3',
     imageSize: '300%',
+    imageOffset: 10,
   },
 ];
 
@@ -103,6 +109,7 @@ export default function MarketTab() {
                 onFingerprintPress={() => handleFingerprintPress(monster.id)}
                 onHirePress={() => handleHirePress(monster.id)}
                 imageSize={monster.imageSize}
+                imageOffset={monster.imageOffset}
               />
             </View>
           ))}

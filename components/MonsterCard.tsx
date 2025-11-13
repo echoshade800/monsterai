@@ -13,6 +13,7 @@ interface MonsterCardProps {
   isHired?: boolean;
   onHirePress?: () => void;
   imageSize?: string;
+  imageOffset?: number;
 }
 
 export function MonsterCard({
@@ -25,6 +26,7 @@ export function MonsterCard({
   isHired = false,
   onHirePress,
   imageSize = '400%',
+  imageOffset = 0,
 }: MonsterCardProps) {
   const [hired, setHired] = useState(isHired);
 
@@ -49,7 +51,7 @@ export function MonsterCard({
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: imageUrl }}
-          style={[styles.monsterImage, { width: imageSize, height: imageSize }]}
+          style={[styles.monsterImage, { width: imageSize, height: imageSize, marginTop: imageOffset }]}
           resizeMode="contain"
         />
       </View>
@@ -101,11 +103,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 8,
   },
   name: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
@@ -151,6 +153,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
   },
   hireButton: {
     flexDirection: 'row',
