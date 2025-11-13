@@ -7,11 +7,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function EchoTab() {
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#E8D4B8', '#DCC9AA', '#D4BC9C']}
-        style={StyleSheet.absoluteFill}
-      />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -29,6 +24,7 @@ export default function EchoTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F7F9',
   },
   scrollContent: {
     paddingTop: 0,

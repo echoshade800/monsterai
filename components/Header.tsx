@@ -27,13 +27,8 @@ export function Header({ scrollable = false }: HeaderProps) {
         source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20(92).png' }}
         style={styles.backgroundImage}
         resizeMode="cover"
+        imageStyle={styles.backgroundImageStyle}
       >
-        <LinearGradient
-          colors={['rgba(232, 212, 184, 0)', 'rgba(232, 212, 184, 0.3)', 'rgba(232, 212, 184, 0.8)']}
-          style={styles.gradient}
-          locations={[0, 0.7, 1]}
-        />
-
         <View style={styles.statusBar}>
           <Text style={styles.time}>{getCurrentTime()}</Text>
           <TouchableOpacity style={styles.iconButton}>
@@ -132,12 +127,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 520,
   },
-  gradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 200,
+  backgroundImageStyle: {
+    transform: [{ translateY: 60 }],
   },
   statusBar: {
     flexDirection: 'row',
