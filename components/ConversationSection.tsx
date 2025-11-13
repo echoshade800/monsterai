@@ -59,9 +59,7 @@ export function ConversationSection() {
                 source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
                 style={styles.avatarImage}
               />
-              <View style={styles.assistantBubble}>
-                <Text style={styles.assistantText}>{message.content}</Text>
-              </View>
+              <Text style={styles.assistantText}>{message.content}</Text>
             </View>
           );
         }
@@ -95,26 +93,17 @@ const styles = StyleSheet.create({
   },
   assistantMessageContainer: {
     flexDirection: 'row',
-    marginBottom: 15,
+    marginBottom: 20,
     alignItems: 'flex-start',
   },
   avatarImage: {
     width: 40,
     height: 40,
-    marginRight: 10,
-  },
-  assistantBubble: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    borderRadius: 18,
-    padding: 14,
-    maxWidth: '75%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    marginRight: 12,
+    marginTop: 2,
   },
   assistantText: {
+    flex: 1,
     fontSize: 15,
     color: '#000000',
     lineHeight: 22,
