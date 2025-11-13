@@ -30,7 +30,7 @@ export function Header({ scrollable = false }: HeaderProps) {
         imageStyle={styles.backgroundImageStyle}
       >
         <View style={styles.statusBar}>
-          <Text style={styles.time}>{getCurrentTime()}</Text>
+          <View />
           <TouchableOpacity style={styles.iconButton}>
             <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
             <User size={20} color="#000000" strokeWidth={2} />
@@ -74,10 +74,12 @@ export function Header({ scrollable = false }: HeaderProps) {
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
             <View style={styles.zappedContent}>
               <View style={styles.zappedLeft}>
-                <Text style={styles.zappedTitle}>Zapped</Text>
-                <View style={styles.stressRow}>
-                  <Text style={styles.stressLabel}>Stress</Text>
-                  <Text style={styles.stressValue}>86</Text>
+                <View style={styles.zappedTitleRow}>
+                  <Text style={styles.zappedTitle}>Zapped</Text>
+                  <View style={styles.stressRow}>
+                    <Text style={styles.stressLabel}>Stress</Text>
+                    <Text style={styles.stressValue}>86</Text>
+                  </View>
                 </View>
                 <View style={styles.graphContainer}>
                   <Svg width="100%" height="40" viewBox="0 0 240 40">
@@ -135,13 +137,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
     paddingBottom: 15,
-  },
-  time: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
   },
   iconButton: {
     width: 44,
@@ -268,16 +265,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 12,
   },
+  zappedTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
   zappedTitle: {
     fontSize: 26,
     fontWeight: '700',
     color: '#000000',
-    marginBottom: 4,
   },
   stressRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   stressLabel: {
     fontSize: 14,
