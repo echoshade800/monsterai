@@ -4,7 +4,6 @@ import { User, Check, Camera } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface HeaderProps {
   scrollable?: boolean;
@@ -12,7 +11,6 @@ interface HeaderProps {
 
 export function Header({ scrollable = false }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
-  const insets = useSafeAreaInsets();
 
   const getCurrentTime = () => {
     const now = new Date();
@@ -24,15 +22,15 @@ export function Header({ scrollable = false }: HeaderProps) {
   const stressGraphPath = "M 0 25 Q 15 15, 30 18 T 60 23 T 90 18 T 120 25 T 150 20 T 180 28 T 210 23 T 240 25";
 
   return (
-    <View style={[styles.header, { marginTop: -insets.top }]}>
-      <View style={[styles.topExtension, { height: insets.top }]} />
+    <View style={styles.header}>
+      <View style={styles.topExtension} />
       <ImageBackground
         source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20(92).png' }}
-        style={[styles.backgroundImage, { paddingTop: insets.top }]}
+        style={styles.backgroundImage}
         resizeMode="cover"
         imageStyle={styles.backgroundImageStyle}
       >
-        <View style={[styles.statusBar, { paddingTop: insets.top }]}>
+        <View style={styles.statusBar}>
           <View />
           <TouchableOpacity style={styles.iconButton}>
             <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
@@ -52,10 +50,9 @@ export function Header({ scrollable = false }: HeaderProps) {
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
             <View style={styles.breakfastContent}>
               <View style={styles.breakfastLeft}>
-                <ImageBackground
-                  source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
-                  style={styles.avatarImage}
-                />
+                <View style={styles.emojiCircle}>
+                  <Text style={styles.emojiText}>🦑</Text>
+                </View>
                 <View style={styles.breakfastTextContainer}>
                   <Text style={styles.timeRange}>7:00-8:00</Text>
                   <Text style={styles.taskTitle}>Eat breakfast!</Text>
@@ -128,27 +125,31 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
+    marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
   },
   topExtension: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
+    height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
     backgroundColor: '#E8D4B8',
     zIndex: -1,
   },
   backgroundImage: {
     width: '100%',
     height: 520,
+    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
   },
   backgroundImageStyle: {
-    transform: [{ translateY: 100 }],
+    transform: [{ translateY: 60 }],
   },
   statusBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
     paddingBottom: 15,
   },
   iconButton: {
@@ -210,10 +211,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  avatarImage: {
+  emojiCircle: {
     width: 50,
     height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 14,
+  },
+  emojiText: {
+    fontSize: 28,
   },
   breakfastTextContainer: {
     flex: 1,
