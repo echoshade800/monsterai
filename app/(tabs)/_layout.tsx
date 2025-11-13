@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
     bottom: 16,
-    left: 40,
-    right: 40,
+    left: 20,
+    right: 20,
     height: 68,
     borderRadius: 34,
     backgroundColor: 'transparent',
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.18,
     shadowRadius: 24,
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
     paddingBottom: Platform.OS === 'ios' ? 8 : 6,
   },
   tabBarBackgroundContainer: {
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   tabBarItem: {
     paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
     gap: 4,
   },
   tabBarIcon: {
