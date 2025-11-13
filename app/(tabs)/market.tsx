@@ -10,6 +10,7 @@ const MONSTERS_DATA = [
     description: 'Stay strong and stress-free.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
+    imageSize: '300%',
   },
   {
     id: 'face',
@@ -18,6 +19,7 @@ const MONSTERS_DATA = [
     description: 'I make your skin glow with data.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
+    imageSize: '300%',
   },
   {
     id: 'posture',
@@ -26,6 +28,7 @@ const MONSTERS_DATA = [
     description: 'I fix your posture, so you feel great all day.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
+    imageSize: '400%',
   },
   {
     id: 'sleep',
@@ -34,6 +37,7 @@ const MONSTERS_DATA = [
     description: 'I guide you to better sleep, naturally.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
+    imageSize: '200%',
   },
   {
     id: 'stress',
@@ -42,6 +46,7 @@ const MONSTERS_DATA = [
     description: 'I help you stay strong and stress-free.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
+    imageSize: '400%',
   },
   {
     id: 'feces',
@@ -50,6 +55,7 @@ const MONSTERS_DATA = [
     description: 'Game with your mind and body.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#F5E6D3',
+    imageSize: '300%',
   },
 ];
 
@@ -96,6 +102,7 @@ export default function MarketTab() {
                 backgroundColor={monster.backgroundColor}
                 onFingerprintPress={() => handleFingerprintPress(monster.id)}
                 onHirePress={() => handleHirePress(monster.id)}
+                imageSize={monster.imageSize}
               />
             </View>
           ))}
