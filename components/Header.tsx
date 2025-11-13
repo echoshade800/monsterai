@@ -559,6 +559,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     padding: 18,
+    alignItems: 'center',
   },
   zappedLeft: {
     flex: 1,
@@ -597,8 +598,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   cameraPlaceholder: {
-    width: 120,
-    height: '100%',
+    width: 140,
+    height: 94,
   },
   profilePlaceholder: {
     width: 44,
