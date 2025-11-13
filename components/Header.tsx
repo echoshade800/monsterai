@@ -50,9 +50,10 @@ export function Header({ scrollable = false }: HeaderProps) {
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
             <View style={styles.breakfastContent}>
               <View style={styles.breakfastLeft}>
-                <View style={styles.emojiCircle}>
-                  <Text style={styles.emojiText}>🦑</Text>
-                </View>
+                <ImageBackground
+                  source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
+                  style={styles.avatarImage}
+                />
                 <View style={styles.breakfastTextContainer}>
                   <Text style={styles.timeRange}>7:00-8:00</Text>
                   <Text style={styles.taskTitle}>Eat breakfast!</Text>
@@ -211,17 +212,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  emojiCircle: {
+  avatarImage: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
     marginRight: 14,
-  },
-  emojiText: {
-    fontSize: 28,
   },
   breakfastTextContainer: {
     flex: 1,
