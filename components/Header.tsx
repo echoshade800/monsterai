@@ -4,6 +4,7 @@ import { User, Check, Camera } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface HeaderProps {
   scrollable?: boolean;
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 export function Header({ scrollable = false }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const getCurrentTime = () => {
     const now = new Date();
@@ -22,15 +24,15 @@ export function Header({ scrollable = false }: HeaderProps) {
   const stressGraphPath = "M 0 25 Q 15 15, 30 18 T 60 23 T 90 18 T 120 25 T 150 20 T 180 28 T 210 23 T 240 25";
 
   return (
-    <View style={styles.header}>
-      <View style={styles.topExtension} />
+    <View style={[styles.header, { marginTop: -insets.top }]}>
+      <View style={[styles.topExtension, { height: insets.top }]} />
       <ImageBackground
         source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20(92).png' }}
-        style={styles.backgroundImage}
+        style={[styles.backgroundImage, { paddingTop: insets.top }]}
         resizeMode="cover"
         imageStyle={styles.backgroundImageStyle}
       >
-        <View style={styles.statusBar}>
+        <View style={[styles.statusBar, { paddingTop: insets.top }]}>
           <View />
           <TouchableOpacity style={styles.iconButton}>
             <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
@@ -126,21 +128,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
-    marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
   },
   topExtension: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
     backgroundColor: '#E8D4B8',
     zIndex: -1,
   },
   backgroundImage: {
     width: '100%',
     height: 520,
-    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
   },
   backgroundImageStyle: {
     transform: [{ translateY: 100 }],
@@ -150,7 +149,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
     paddingBottom: 15,
   },
   iconButton: {
