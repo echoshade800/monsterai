@@ -165,6 +165,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
             source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084%20(1).png' }}
             style={styles.backgroundImage}
             resizeMode="cover"
+            imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
           >
             <View style={styles.statusBar}>
               <View />
@@ -263,6 +264,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
             source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084%20(1).png' }}
             style={styles.collapsedBackground}
             resizeMode="cover"
+            imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
           >
             <View style={styles.collapsedHeader}>
               <View />
@@ -359,6 +361,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
+    justifyContent: 'flex-end',
   },
   statusBar: {
     flexDirection: 'row',
@@ -497,6 +500,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
+    justifyContent: 'flex-end',
   },
   collapsedHeader: {
     flexDirection: 'row',
