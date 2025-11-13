@@ -19,8 +19,8 @@ interface HeaderProps {
   onCollapse?: (collapsed: boolean) => void;
 }
 
-const EXPANDED_HEIGHT = 600;
-const COLLAPSED_HEIGHT = 320;
+const EXPANDED_HEIGHT = 520;
+const COLLAPSED_HEIGHT = 220;
 const COLLAPSE_THRESHOLD = 100;
 
 export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps) {
@@ -132,7 +132,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
         <Animated.View style={[styles.expandedContainer, backgroundContainerStyle]}>
           <View style={styles.topExtension} />
           <ImageBackground
-            source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084%20(1).png' }}
+            source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084.png' }}
             style={styles.backgroundImage}
             resizeMode="cover"
           >
@@ -229,7 +229,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
         <Animated.View style={[styles.collapsedContainer, collapsedHeaderStyle]}>
           <View style={styles.collapsedTopExtension} />
           <ImageBackground
-            source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084%20(1).png' }}
+            source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084.png' }}
             style={styles.collapsedBackground}
             resizeMode="cover"
           >
@@ -297,9 +297,10 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
 
 const styles = StyleSheet.create({
   header: {
-    overflow: 'visible',
+    overflow: 'hidden',
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
     marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
-    width: '100%',
   },
 
   // Expanded state styles
@@ -309,14 +310,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
   },
   topExtension: {
     position: 'absolute',
@@ -331,9 +324,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    overflow: 'hidden',
   },
   statusBar: {
     flexDirection: 'row',
@@ -459,14 +449,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
   },
   collapsedTopExtension: {
     position: 'absolute',
@@ -481,9 +463,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    overflow: 'hidden',
   },
   collapsedHeader: {
     flexDirection: 'row',
@@ -512,7 +491,7 @@ const styles = StyleSheet.create({
   },
   collapsedBannerContainer: {
     paddingHorizontal: 15,
-    marginTop: -18,
+    paddingTop: 10,
   },
   collapsedZappedBanner: {
     height: 130,
