@@ -170,7 +170,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
     return {
       position: 'absolute',
       right: 20,
-      top: Platform.OS === 'ios' ? 70 : (StatusBar.currentHeight || 0) + 20,
+      top: Platform.OS === 'ios' ? 98 : (StatusBar.currentHeight || 0) + 48,
       zIndex: 1001,
     };
   });
