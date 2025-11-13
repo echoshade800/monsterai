@@ -175,12 +175,26 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
     };
   });
 
+  const sharedTitleStyle = useAnimatedStyle(() => {
+    return {
+      position: 'absolute',
+      left: 20,
+      top: Platform.OS === 'ios' ? 126 : (StatusBar.currentHeight || 0) + 76,
+      zIndex: 1001,
+    };
+  });
+
   return (
     <GestureDetector gesture={swipeGesture}>
       <Animated.View style={[styles.headerContainer, headerAnimatedStyle]}>
         {/* Shared Camera Box - Always mounted */}
         <Animated.View style={sharedCameraStyle}>
           <CameraBox />
+        </Animated.View>
+
+        {/* Shared Title - Always mounted */}
+        <Animated.View style={sharedTitleStyle}>
+          <Text style={styles.titleText}>MonsterAI</Text>
         </Animated.View>
 
         {/* Shared Profile Button - Always mounted */}
@@ -589,5 +603,11 @@ const styles = StyleSheet.create({
   profilePlaceholder: {
     width: 44,
     height: 44,
+  },
+  titleText: {
+    fontSize: 20,
+    fontWeight: '700',
+    fontFamily: 'SF Compact Rounded',
+    color: '#000000',
   },
 });
