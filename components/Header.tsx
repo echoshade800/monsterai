@@ -166,12 +166,36 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
     };
   });
 
+  const sharedProfileStyle = useAnimatedStyle(() => {
+    const topPosition = interpolate(
+      collapseProgress.value,
+      [0, 1],
+      [Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10, 16],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      position: 'absolute',
+      right: 20,
+      top: topPosition,
+      zIndex: 1001,
+    };
+  });
+
   return (
     <GestureDetector gesture={swipeGesture}>
       <Animated.View style={[styles.headerContainer, headerAnimatedStyle]}>
         {/* Shared Camera Box - Always mounted */}
         <Animated.View style={sharedCameraStyle}>
           <CameraBox />
+        </Animated.View>
+
+        {/* Shared Profile Button - Always mounted */}
+        <Animated.View style={sharedProfileStyle}>
+          <TouchableOpacity style={styles.iconButton}>
+            <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
+            <User size={20} color="#000000" strokeWidth={2} />
+          </TouchableOpacity>
         </Animated.View>
 
         {/* Expanded State - Full background with cards */}
@@ -185,10 +209,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
           >
             <View style={styles.statusBar}>
               <View />
-              <TouchableOpacity style={styles.iconButton}>
-                <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
-                <User size={20} color="#000000" strokeWidth={2} />
-              </TouchableOpacity>
+              <View style={styles.profilePlaceholder} />
             </View>
 
             <View style={styles.bannersContainer}>
@@ -275,10 +296,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
           >
             <View style={styles.collapsedHeader}>
               <View />
-              <TouchableOpacity style={styles.collapsedIconButton}>
-                <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
-                <User size={20} color="#FFFFFF" strokeWidth={2} />
-              </TouchableOpacity>
+              <View style={styles.profilePlaceholder} />
             </View>
 
             <View style={styles.collapsedBannerContainer}>
@@ -513,15 +531,6 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
     paddingBottom: 15,
   },
-  collapsedIconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  },
   collapsedBannerContainer: {
     paddingHorizontal: 15,
     marginTop: -38,
@@ -583,5 +592,9 @@ const styles = StyleSheet.create({
   cameraPlaceholder: {
     width: 120,
     height: '100%',
+  },
+  profilePlaceholder: {
+    width: 44,
+    height: 44,
   },
 });
