@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
     height: 44,
   },
   titleText: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: '700',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
