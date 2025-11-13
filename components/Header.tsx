@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ImageBackground } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { User } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface HeaderProps {
   scrollable?: boolean;
@@ -16,29 +17,32 @@ export function Header({ scrollable = false }: HeaderProps) {
 
   return (
     <View style={styles.header}>
-      <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
+      <ImageBackground
+        source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20(92).png' }}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={['rgba(232, 212, 184, 0)', 'rgba(232, 212, 184, 0.3)', 'rgba(232, 212, 184, 0.8)']}
+          style={styles.gradient}
+          locations={[0, 0.7, 1]}
+        />
 
-      <View style={styles.statusBar}>
-        <Text style={styles.time}>{getCurrentTime()}</Text>
-        <TouchableOpacity style={styles.iconButton}>
-          <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
-          <User size={20} color="#000000" strokeWidth={2} />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.brandContainer}>
-        <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>MONSTER AI</Text>
+        <View style={styles.statusBar}>
+          <Text style={styles.time}>{getCurrentTime()}</Text>
+          <TouchableOpacity style={styles.iconButton}>
+            <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
+            <User size={20} color="#000000" strokeWidth={2} />
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.charactersContainer}>
-          <Text style={styles.characterEmoji}>👾</Text>
-          <Text style={styles.characterEmoji}>☁️</Text>
-          <Text style={styles.characterEmoji}>🦑</Text>
-          <Text style={styles.characterEmoji}>🥒</Text>
-          <Text style={styles.characterEmoji}>🔥</Text>
+        <View style={styles.brandContainer}>
+          <View style={styles.logoContainer}>
+            <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
+            <Text style={styles.logoText}>MONSTER AI</Text>
+          </View>
         </View>
-      </View>
+      </ImageBackground>
     </View>
   );
 }
@@ -46,6 +50,19 @@ export function Header({ scrollable = false }: HeaderProps) {
 const styles = StyleSheet.create({
   header: {
     overflow: 'hidden',
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+  },
+  backgroundImage: {
+    width: '100%',
+    height: 520,
+  },
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 200,
   },
   statusBar: {
     flexDirection: 'row',
@@ -76,30 +93,20 @@ const styles = StyleSheet.create({
   brandContainer: {
     alignItems: 'center',
     paddingTop: 20,
+    paddingBottom: 40,
   },
   logoContainer: {
-    backgroundColor: 'rgba(210, 180, 140, 0.4)',
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 16,
     borderWidth: 3,
     borderColor: 'rgba(160, 120, 80, 0.5)',
-    marginBottom: 30,
+    overflow: 'hidden',
   },
   logoText: {
     fontSize: 28,
     fontWeight: '800',
     color: '#8B6914',
     letterSpacing: 2,
-  },
-  charactersContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    gap: 15,
-    paddingHorizontal: 20,
-  },
-  characterEmoji: {
-    fontSize: 60,
   },
 });
