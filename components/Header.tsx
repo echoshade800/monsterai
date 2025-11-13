@@ -14,7 +14,6 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 interface HeaderProps {
-  scrollY?: Animated.SharedValue<number>;
   isCollapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
 }
@@ -23,7 +22,7 @@ const EXPANDED_HEIGHT = 600;
 const COLLAPSED_HEIGHT = 332;
 const COLLAPSE_THRESHOLD = 100;
 
-export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps) {
+export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
 
@@ -157,7 +156,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <Animated.View style={[styles.header, headerAnimatedStyle]}>
+      <Animated.View style={[styles.headerContainer, headerAnimatedStyle]}>
         {/* Expanded State - Full background with cards */}
         <Animated.View style={[styles.expandedContainer, backgroundContainerStyle]}>
           <View style={styles.topExtension} />
@@ -327,9 +326,11 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
 }
 
 const styles = StyleSheet.create({
-  header: {
+  headerContainer: {
+    position: 'relative',
     overflow: 'visible',
     marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
+    zIndex: 1000,
   },
 
   // Expanded state styles

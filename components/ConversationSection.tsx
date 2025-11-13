@@ -42,7 +42,11 @@ const messages: Message[] = [
 
 export function ConversationSection() {
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scrollContainer}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       {messages.map((message) => {
         if (message.type === 'timestamp') {
           return (
@@ -72,11 +76,15 @@ export function ConversationSection() {
           </View>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+    backgroundColor: '#F5F7F9',
+  },
   container: {
     paddingHorizontal: 20,
     paddingTop: 20,
