@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
   },
   backgroundImageStyle: {
-    transform: [{ translateY: 110 }],
+    transform: [{ translateY: 60 }],
   },
   statusBar: {
     flexDirection: 'row',
