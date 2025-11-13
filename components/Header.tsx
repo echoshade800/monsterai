@@ -168,7 +168,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
 
   const sharedProfileStyle = useAnimatedStyle(() => {
     const topPosition = interpolate(
-      collapseProgress.value,
+      animatedCollapse.value,
       [0, 1],
       [Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10, 16],
       Extrapolate.CLAMP
