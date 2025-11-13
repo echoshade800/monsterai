@@ -35,10 +35,15 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
 
   const swipeGesture = Gesture.Pan()
     .onEnd((event) => {
+      'worklet';
       if (event.velocityY < -500 || event.translationY < -50) {
-        onCollapse?.(true);
+        if (onCollapse) {
+          runOnJS(onCollapse)(true);
+        }
       } else if (event.velocityY > 500 || event.translationY > 50) {
-        onCollapse?.(false);
+        if (onCollapse) {
+          runOnJS(onCollapse)(false);
+        }
       }
     });
 
