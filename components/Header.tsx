@@ -144,13 +144,6 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
               </TouchableOpacity>
             </View>
 
-            <View style={styles.brandContainer}>
-              <View style={styles.logoContainer}>
-                <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-                <Text style={styles.logoText}>MONSTER AI</Text>
-              </View>
-            </View>
-
             <View style={styles.bannersContainer}>
               <Animated.View style={[styles.breakfastBanner, breakfastBannerStyle]}>
                 <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
@@ -234,9 +227,7 @@ export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps
             resizeMode="cover"
           >
             <View style={styles.collapsedHeader}>
-              <View style={styles.collapsedTitleContainer}>
-                <Text style={styles.collapsedTitle}>Monster AI</Text>
-              </View>
+              <View />
               <TouchableOpacity style={styles.collapsedIconButton}>
                 <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
                 <User size={20} color="#FFFFFF" strokeWidth={2} />
@@ -352,25 +343,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
-  brandContainer: {
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 25,
-  },
-  logoContainer: {
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 16,
-    borderWidth: 3,
-    borderColor: 'rgba(160, 120, 80, 0.5)',
-    overflow: 'hidden',
-  },
-  logoText: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#8B6914',
-    letterSpacing: 2,
-  },
   bannersContainer: {
     paddingHorizontal: 15,
     paddingBottom: 20,
@@ -485,14 +457,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
     paddingBottom: 15,
-  },
-  collapsedTitleContainer: {
-    flex: 1,
-  },
-  collapsedTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
   },
   collapsedIconButton: {
     width: 44,
