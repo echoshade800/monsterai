@@ -167,17 +167,10 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   });
 
   const sharedProfileStyle = useAnimatedStyle(() => {
-    const topPosition = interpolate(
-      animatedCollapse.value,
-      [0, 1],
-      [Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10, 16],
-      Extrapolate.CLAMP
-    );
-
     return {
       position: 'absolute',
       right: 20,
-      top: topPosition,
+      top: Platform.OS === 'ios' ? 70 : (StatusBar.currentHeight || 0) + 20,
       zIndex: 1001,
     };
   });
