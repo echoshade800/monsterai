@@ -3,9 +3,18 @@ import { BlurView } from 'expo-blur';
 import { Camera } from 'lucide-react-native';
 import { useState } from 'react';
 
-export function InputField() {
+interface InputFieldProps {
+  onFocus?: () => void;
+}
+
+export function InputField({ onFocus }: InputFieldProps) {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+
+  const handleFocus = () => {
+    setIsFocused(true);
+    onFocus?.();
+  };
 
   return (
     <View style={styles.container}>
@@ -17,7 +26,7 @@ export function InputField() {
           placeholderTextColor="#999999"
           value={text}
           onChangeText={setText}
-          onFocus={() => setIsFocused(true)}
+          onFocus={handleFocus}
           onBlur={() => setIsFocused(false)}
           multiline
         />

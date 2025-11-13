@@ -1,123 +1,282 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ImageBackground, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { User, Check, Camera } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  Extrapolate,
+  useSharedValue,
+  runOnJS,
+} from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 interface HeaderProps {
-  scrollable?: boolean;
+  scrollY?: Animated.SharedValue<number>;
+  isCollapsed?: boolean;
+  onCollapse?: (collapsed: boolean) => void;
 }
 
-export function Header({ scrollable = false }: HeaderProps) {
-  const [isDone, setIsDone] = useState(false);
+const EXPANDED_HEIGHT = 520;
+const COLLAPSED_HEIGHT = 180;
+const COLLAPSE_THRESHOLD = 100;
 
-  const getCurrentTime = () => {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    return `${hours}:${minutes.toString().padStart(2, '0')}`;
-  };
+export function Header({ scrollY, isCollapsed = false, onCollapse }: HeaderProps) {
+  const [isDone, setIsDone] = useState(false);
+  const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
+
+  useEffect(() => {
+    animatedCollapse.value = withTiming(isCollapsed ? 1 : 0, {
+      duration: 400,
+    });
+  }, [isCollapsed]);
+
+  useEffect(() => {
+    if (!scrollY) return;
+
+    const checkScroll = () => {
+      'worklet';
+      if (scrollY.value > COLLAPSE_THRESHOLD && !isCollapsed) {
+        if (onCollapse) {
+          runOnJS(onCollapse)(true);
+        }
+      } else if (scrollY.value < 20 && isCollapsed) {
+        if (onCollapse) {
+          runOnJS(onCollapse)(false);
+        }
+      }
+    };
+  }, [scrollY, isCollapsed, onCollapse]);
+
+  const swipeGesture = Gesture.Pan()
+    .onEnd((event) => {
+      if (event.velocityY < -500 || event.translationY < -50) {
+        onCollapse?.(true);
+      } else if (event.velocityY > 500 || event.translationY > 50) {
+        onCollapse?.(false);
+      }
+    });
+
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    const height = interpolate(
+      animatedCollapse.value,
+      [0, 1],
+      [EXPANDED_HEIGHT, COLLAPSED_HEIGHT],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      height,
+    };
+  });
+
+  const backgroundAnimatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      animatedCollapse.value,
+      [0, 0.3, 1],
+      [1, 0.5, 0],
+      Extrapolate.CLAMP
+    );
+
+    const translateY = interpolate(
+      animatedCollapse.value,
+      [0, 1],
+      [0, -100],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      opacity,
+      transform: [{ translateY }],
+    };
+  });
+
+  const logoAnimatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      animatedCollapse.value,
+      [0, 0.5, 1],
+      [1, 0, 0],
+      Extrapolate.CLAMP
+    );
+
+    const scale = interpolate(
+      animatedCollapse.value,
+      [0, 1],
+      [1, 0.5],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      opacity,
+      transform: [{ scale }],
+    };
+  });
+
+  const collapsedTitleStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      animatedCollapse.value,
+      [0, 0.5, 1],
+      [0, 0, 1],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      opacity,
+    };
+  });
+
+  const breakfastBannerStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      animatedCollapse.value,
+      [0, 0.4, 1],
+      [1, 0, 0],
+      Extrapolate.CLAMP
+    );
+
+    const translateY = interpolate(
+      animatedCollapse.value,
+      [0, 1],
+      [0, -30],
+      Extrapolate.CLAMP
+    );
+
+    const height = interpolate(
+      animatedCollapse.value,
+      [0, 1],
+      [80, 0],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      opacity,
+      height,
+      transform: [{ translateY }],
+      marginBottom: interpolate(animatedCollapse.value, [0, 1], [12, 0], Extrapolate.CLAMP),
+    };
+  });
+
+  const zappedBannerStyle = useAnimatedStyle(() => {
+    const translateY = interpolate(
+      animatedCollapse.value,
+      [0, 1],
+      [0, -20],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ translateY }],
+    };
+  });
 
   const stressGraphPath = "M 0 25 Q 15 15, 30 18 T 60 23 T 90 18 T 120 25 T 150 20 T 180 28 T 210 23 T 240 25";
 
   return (
-    <View style={styles.header}>
-      <View style={styles.topExtension} />
-      <ImageBackground
-        source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084.png' }}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-        imageStyle={styles.backgroundImageStyle}
-      >
-        <View style={styles.statusBar}>
-          <View />
-          <TouchableOpacity style={styles.iconButton}>
-            <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
-            <User size={20} color="#000000" strokeWidth={2} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.brandContainer}>
-          <View style={styles.logoContainer}>
-            <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-            <Text style={styles.logoText}>MONSTER AI</Text>
-          </View>
-        </View>
-
-        <View style={styles.bannersContainer}>
-          <View style={styles.breakfastBanner}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-            <View style={styles.breakfastContent}>
-              <View style={styles.breakfastLeft}>
-                <Image
-                  source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
-                  style={styles.avatarImage}
-                />
-                <View style={styles.breakfastTextContainer}>
-                  <Text style={styles.timeRange}>7:00-8:00</Text>
-                  <Text style={styles.taskTitle}>Eat breakfast!</Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                style={[styles.doneButton, isDone && styles.doneButtonChecked]}
-                onPress={() => setIsDone(!isDone)}
-              >
-                {isDone ? (
-                  <Check size={18} color="#FFFFFF" strokeWidth={3} />
-                ) : (
-                  <Text style={styles.doneButtonText}>Done</Text>
-                )}
+    <GestureDetector gesture={swipeGesture}>
+      <Animated.View style={[styles.header, headerAnimatedStyle]}>
+        <View style={styles.topExtension} />
+        <ImageBackground
+          source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084.png' }}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+          imageStyle={styles.backgroundImageStyle}
+        >
+          <Animated.View style={backgroundAnimatedStyle}>
+            <View style={styles.statusBar}>
+              <View />
+              <TouchableOpacity style={styles.iconButton}>
+                <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
+                <User size={20} color="#000000" strokeWidth={2} />
               </TouchableOpacity>
             </View>
-          </View>
 
-          <View style={styles.zappedBanner}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-            <View style={styles.zappedContent}>
-              <View style={styles.zappedLeft}>
-                <View style={styles.zappedTitleRow}>
-                  <Text style={styles.zappedTitle}>Zapped</Text>
-                  <View style={styles.stressRow}>
-                    <Text style={styles.stressLabel}>Stress</Text>
-                    <Text style={styles.stressValue}>86</Text>
-                  </View>
-                </View>
-                <View style={styles.graphContainer}>
-                  <Svg width="100%" height="40" viewBox="0 0 240 40">
-                    <Defs>
-                      <SvgLinearGradient id="stressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <Stop offset="0%" stopColor="#4ADE80" stopOpacity="1" />
-                        <Stop offset="30%" stopColor="#FCD34D" stopOpacity="1" />
-                        <Stop offset="60%" stopColor="#F472B6" stopOpacity="1" />
-                        <Stop offset="100%" stopColor="#A78BFA" stopOpacity="1" />
-                      </SvgLinearGradient>
-                    </Defs>
-                    <Path
-                      d={stressGraphPath}
-                      fill="none"
-                      stroke="url(#stressGrad)"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                    />
-                  </Svg>
-                </View>
+            <Animated.View style={[styles.brandContainer, logoAnimatedStyle]}>
+              <View style={styles.logoContainer}>
+                <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
+                <Text style={styles.logoText}>MONSTER AI</Text>
               </View>
-              <View style={styles.cameraBox}>
-                <View style={styles.cameraPlaceholder}>
-                  <Text style={styles.cameraEmoji}>📸💥</Text>
-                </View>
-                <TouchableOpacity style={styles.cameraIconButton}>
-                  <View style={styles.cameraIconInner}>
-                    <Camera size={14} color="#FFFFFF" strokeWidth={2} />
+            </Animated.View>
+          </Animated.View>
+
+          <Animated.Text style={[styles.collapsedTitle, collapsedTitleStyle]}>
+            Monster AI
+          </Animated.Text>
+
+          <View style={styles.bannersContainer}>
+            <Animated.View style={[styles.breakfastBanner, breakfastBannerStyle]}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+              <View style={styles.breakfastContent}>
+                <View style={styles.breakfastLeft}>
+                  <Image
+                    source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
+                    style={styles.avatarImage}
+                  />
+                  <View style={styles.breakfastTextContainer}>
+                    <Text style={styles.timeRange}>7:00-8:00</Text>
+                    <Text style={styles.taskTitle}>Eat breakfast!</Text>
                   </View>
+                </View>
+                <TouchableOpacity
+                  style={[styles.doneButton, isDone && styles.doneButtonChecked]}
+                  onPress={() => setIsDone(!isDone)}
+                >
+                  {isDone ? (
+                    <Check size={18} color="#FFFFFF" strokeWidth={3} />
+                  ) : (
+                    <Text style={styles.doneButtonText}>Done</Text>
+                  )}
                 </TouchableOpacity>
               </View>
-            </View>
+            </Animated.View>
+
+            <Animated.View style={[styles.zappedBanner, zappedBannerStyle]}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+              <View style={styles.zappedContent}>
+                <View style={styles.zappedLeft}>
+                  <View style={styles.zappedTitleRow}>
+                    <Text style={styles.zappedTitle}>Zapped</Text>
+                    <View style={styles.stressRow}>
+                      <Text style={styles.stressLabel}>Stress</Text>
+                      <Text style={styles.stressValue}>86</Text>
+                    </View>
+                  </View>
+                  <View style={styles.graphContainer}>
+                    <Svg width="100%" height="40" viewBox="0 0 240 40">
+                      <Defs>
+                        <SvgLinearGradient id="stressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <Stop offset="0%" stopColor="#4ADE80" stopOpacity="1" />
+                          <Stop offset="30%" stopColor="#FCD34D" stopOpacity="1" />
+                          <Stop offset="60%" stopColor="#F472B6" stopOpacity="1" />
+                          <Stop offset="100%" stopColor="#A78BFA" stopOpacity="1" />
+                        </SvgLinearGradient>
+                      </Defs>
+                      <Path
+                        d={stressGraphPath}
+                        fill="none"
+                        stroke="url(#stressGrad)"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      />
+                    </Svg>
+                  </View>
+                </View>
+                <View style={styles.cameraBox}>
+                  <View style={styles.cameraPlaceholder}>
+                    <Text style={styles.cameraEmoji}>📸💥</Text>
+                  </View>
+                  <TouchableOpacity style={styles.cameraIconButton}>
+                    <View style={styles.cameraIconInner}>
+                      <Camera size={14} color="#FFFFFF" strokeWidth={2} />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Animated.View>
           </View>
-        </View>
-      </ImageBackground>
-    </View>
+        </ImageBackground>
+      </Animated.View>
+    </GestureDetector>
   );
 }
 
@@ -139,7 +298,7 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     width: '100%',
-    height: 520,
+    height: '100%',
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
   },
   backgroundImageStyle: {
@@ -185,13 +344,19 @@ const styles = StyleSheet.create({
     color: '#8B6914',
     letterSpacing: 2,
   },
+  collapsedTitle: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 130 : (StatusBar.currentHeight || 0) + 80,
+    left: 20,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
   bannersContainer: {
     paddingHorizontal: 15,
     paddingBottom: 20,
-    gap: 12,
   },
   breakfastBanner: {
-    height: 80,
     borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -206,6 +371,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 18,
+    paddingVertical: 15,
   },
   breakfastLeft: {
     flexDirection: 'row',
