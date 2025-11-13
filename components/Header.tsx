@@ -36,6 +36,18 @@ export function Header({ scrollable = false }: HeaderProps) {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.bannersContainer}>
+          <View style={styles.banner}>
+            <BlurView intensity={50} tint="light" style={StyleSheet.absoluteFill} />
+            <Text style={styles.bannerText}>Eat breakfast!</Text>
+          </View>
+
+          <View style={[styles.banner, styles.zappedBanner]}>
+            <BlurView intensity={50} tint="light" style={StyleSheet.absoluteFill} />
+            <Text style={styles.bannerText}>Zapped</Text>
+          </View>
+        </View>
+
         <View style={styles.brandContainer}>
           <View style={styles.logoContainer}>
             <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
@@ -108,5 +120,33 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#8B6914',
     letterSpacing: 2,
+  },
+  bannersContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    gap: 12,
+  },
+  banner: {
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  zappedBanner: {
+    backgroundColor: 'rgba(139, 105, 20, 0.15)',
+    borderColor: 'rgba(139, 105, 20, 0.3)',
+  },
+  bannerText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000000',
+    textAlign: 'center',
   },
 });
