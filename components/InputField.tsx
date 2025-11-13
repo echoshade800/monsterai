@@ -2,6 +2,7 @@ import { View, TextInput, StyleSheet, TouchableOpacity, Keyboard, Modal, Text, F
 import { BlurView } from 'expo-blur';
 import { Camera, AtSign, Mic } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -33,6 +34,7 @@ export function InputField({ onFocus }: InputFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [showMonsterPicker, setShowMonsterPicker] = useState(false);
   const keyboardHeight = useSharedValue(0);
+  const router = useRouter();
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener('keyboardWillShow', (e) => {
@@ -95,6 +97,10 @@ export function InputField({ onFocus }: InputFieldProps) {
     setShowMonsterPicker(false);
   };
 
+  const handleCameraPress = () => {
+    router.push('/camera');
+  };
+
   const renderMonsterItem = ({ item }: { item: Monster }) => (
     <TouchableOpacity
       style={styles.monsterItem}
@@ -136,7 +142,7 @@ export function InputField({ onFocus }: InputFieldProps) {
             </TouchableOpacity>
           </Animated.View>
 
-          <TouchableOpacity style={styles.cameraButton}>
+          <TouchableOpacity style={styles.cameraButton} onPress={handleCameraPress}>
             <Camera size={22} color="#000000" strokeWidth={2} />
           </TouchableOpacity>
         </View>
