@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
@@ -145,6 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 8,
+    overflow: 'hidden',
   },
   monsterImage: {
     width: '100%',
