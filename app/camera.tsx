@@ -146,6 +146,7 @@ export default function CameraScreen() {
           filename,
           mimeType,
         });
+<<<<<<< HEAD
         console.log('照片上传成功，结果:', uploadResult);
       } catch (uploadError) {
         console.error('=== 上传照片到S3失败 ===');
@@ -160,11 +161,19 @@ export default function CameraScreen() {
           `图片上传失败，将使用本地图片。\n\n错误信息:\n${(uploadError as Error).message || '未知错误'}\n\n请检查网络连接或联系技术支持。`,
           [{ text: '确定' }]
         );
+=======
+        console.log('照片上传成功:', uploadResult);
+      } catch (uploadError) {
+        console.error('上传照片到S3失败:', uploadError);
+        // 上传失败时，仍然使用本地URI
+        Alert.alert('上传失败', '图片上传失败，将使用本地图片。错误: ' + (uploadError as Error).message);
+>>>>>>> eef4e52 (fix)
       }
 
       // 获取图片URI（优先使用S3 URL，失败则使用本地URI）
       const imageUri = uploadResult?.presigned_url || uploadResult?.s3_uri || photo.uri;
 
+<<<<<<< HEAD
       // 获取选中 agent 的 image_detection_type
       const selectedAgentData = AGENTS.find(a => a.id === selectedAgent);
       const imageDetectionType = selectedAgentData?.image_detection_type || 'full';
@@ -176,25 +185,35 @@ export default function CameraScreen() {
         mode
       });
 
+=======
+>>>>>>> eef4e52 (fix)
       // 导航到相应页面
       if (mode === 'photo-text') {
         router.push({
           pathname: '/photo-text',
+<<<<<<< HEAD
           params: { 
             photoUri: imageUri, 
             agentId: selectedAgent,
             imageDetectionType
           }
+=======
+          params: { photoUri: imageUri, agentId: selectedAgent }
+>>>>>>> eef4e52 (fix)
         });
       } else {
         router.push({
           pathname: '/(tabs)',
+<<<<<<< HEAD
           params: { 
             photoUri: imageUri, 
             agentId: selectedAgent, 
             imageDetectionType,
             mode: 'photo' 
           }
+=======
+          params: { photoUri: imageUri, agentId: selectedAgent, mode: 'photo' }
+>>>>>>> eef4e52 (fix)
         });
       }
     } catch (error) {

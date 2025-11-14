@@ -1,3 +1,4 @@
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -449,8 +450,8 @@ export default function EchoTab() {
 
       const userMsg: Message = {
         id: Date.now().toString(),
-        type: 'user',
-        content: mode === 'photo-text' ? (description || '') : '',
+        type: 'user', 
+        content: mode === 'photo-text' ? description || '' : '',
         photoUri: photoUri,
       };
 
