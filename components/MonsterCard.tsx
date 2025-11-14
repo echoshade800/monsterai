@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   descriptionOverlay: {
     position: 'absolute',
-    top: 8,
+    top: -10,
     left: 0,
     right: 0,
     alignItems: 'flex-start',
