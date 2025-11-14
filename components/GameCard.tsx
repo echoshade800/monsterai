@@ -87,6 +87,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 12,
+    position: 'relative',
+    minHeight: 140,
   },
   gameName: {
     fontSize: 18,
@@ -124,6 +126,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   playButton: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: '#000000',
     paddingVertical: 10,
     borderRadius: 20,
