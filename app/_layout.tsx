@@ -1,8 +1,12 @@
 import { Stack } from 'expo-router/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useFonts, FiraCode_400Regular, FiraCode_600SemiBold } from '@expo-google-fonts/fira-code';
+import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
+import {
+  FiraCode_400Regular,
+  FiraCode_600SemiBold
+} from '@expo-google-fonts/fira-code';
 
 SplashScreen.preventAutoHideAsync();
 
