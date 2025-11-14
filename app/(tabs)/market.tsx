@@ -31,7 +31,7 @@ const MONSTERS_DATA = [
     description: 'I fix your posture, so you feel great all day.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
-    imageSize: '900%',
+    imageSize: '1800%',
     imageOffset: 10,
   },
   {
@@ -41,7 +41,7 @@ const MONSTERS_DATA = [
     description: 'I guide you to better sleep, naturally.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
-    imageSize: '500%',
+    imageSize: '1000%',
     imageOffset: 10,
   },
   {
@@ -51,7 +51,7 @@ const MONSTERS_DATA = [
     description: 'I help you stay strong and stress-free.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
-    imageSize: '900%',
+    imageSize: '1800%',
     imageOffset: 20,
   },
   {
