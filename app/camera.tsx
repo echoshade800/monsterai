@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 4,
     backdropFilter: 'blur(20px)',
+    marginRight: -8,
   },
   modeButton: {
     paddingHorizontal: 20,
