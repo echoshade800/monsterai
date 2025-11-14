@@ -218,10 +218,10 @@ export default function CameraScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.agentList}
             >
-              {AGENTS.map((agent) => (
+              {AGENTS.map((agent, index) => (
                 <TouchableOpacity
                   key={agent.id}
-                  style={styles.agentButton}
+                  style={[styles.agentButton, index > 0 && styles.agentButtonSpacing]}
                   onPress={() => setSelectedAgent(agent.id)}
                 >
                   <Image
@@ -391,12 +391,14 @@ const styles = StyleSheet.create({
   },
   agentList: {
     paddingHorizontal: 20,
-    gap: -110,
   },
   agentButton: {
     width: 140,
     height: 140,
     position: 'relative',
+  },
+  agentButtonSpacing: {
+    marginLeft: -100,
   },
   agentImage: {
     width: '100%',
