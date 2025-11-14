@@ -256,12 +256,13 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   gamesSection: {
-    marginTop: 32,
+    marginTop: 16,
     paddingBottom: 20,
   },
   gamesSectionTitle: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: 'SF Compact Rounded',
     color: '#000000',
     paddingHorizontal: 20,
     marginBottom: 16,
