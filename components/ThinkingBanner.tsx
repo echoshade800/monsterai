@@ -28,6 +28,7 @@ export function ThinkingBanner() {
   const [displayedText, setDisplayedText] = useState('');
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
   const [completedEntries, setCompletedEntries] = useState<LogEntry[]>([]);
+  const [contentHeight, setContentHeight] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -73,21 +74,18 @@ export function ThinkingBanner() {
     };
   }, [currentEntryIndex, isPaused]);
 
-  // 滚动效果：当完成的条目超过3条时，向上滚动
+  // 滚动效果：当内容高度超过容器高度时，向上滚动
   useEffect(() => {
-    const lineHeight = 24;
-    const visibleLines = 3;
-    const maxVisibleHeight = lineHeight * visibleLines;
-
-    if (completedEntries.length > visibleLines) {
-      const scrollAmount = (completedEntries.length - visibleLines) * lineHeight;
+    const containerHeight = 72;
+    if (contentHeight > containerHeight) {
+      const scrollAmount = contentHeight - containerHeight;
       Animated.timing(scrollY, {
         toValue: scrollAmount,
         duration: 300,
         useNativeDriver: true,
       }).start();
     }
-  }, [completedEntries.length]);
+  }, [contentHeight]);
 
   const handleCameraPress = async () => {
     if (!permission) {
@@ -150,6 +148,10 @@ export function ThinkingBanner() {
                     transform: [{ translateY: Animated.multiply(scrollY, -1) }],
                   },
                 ]}
+                onLayout={(event) => {
+                  const { height } = event.nativeEvent.layout;
+                  setContentHeight(height);
+                }}
               >
                 {completedEntries.map((entry, index) => (
                   <View key={index} style={styles.logEntry}>
@@ -241,8 +243,8 @@ const styles = StyleSheet.create({
   },
   logEntry: {
     flexDirection: 'row',
-    marginBottom: 4,
-    minHeight: 20,
+    marginBottom: 6,
+    flexWrap: 'wrap',
   },
   logTime: {
     fontFamily: 'Courier New',
@@ -257,7 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#333333',
     lineHeight: 16,
-    flexShrink: 1,
+    flex: 1,
   },
   fadeTop: {
     position: 'absolute',
