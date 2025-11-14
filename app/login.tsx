@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useState, useCallback } from 'react';
 import { InviteCodeModal } from '../components/InviteCodeModal';
 
 export default function LoginScreen() {
@@ -8,13 +8,11 @@ export default function LoginScreen() {
   const [showInviteModal, setShowInviteModal] = useState(true);
   const [hasValidCode, setHasValidCode] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = router.addListener('focus', () => {
+  useFocusEffect(
+    useCallback(() => {
       setShowInviteModal(true);
-    });
-
-    return unsubscribe;
-  }, []);
+    }, [])
+  );
 
   const handleValidCode = () => {
     setShowInviteModal(false);
