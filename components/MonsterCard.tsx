@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     alignSelf: 'flex-start',
-    maxWidth: '92%',
+    maxWidth: '98%',
   },
   description: {
     fontSize: 12,
