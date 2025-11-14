@@ -6,6 +6,8 @@ export default function Layout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="camera" options={{ headerShown: false }} />
+        <Stack.Screen name="photo-text" options={{ headerShown: false }} />
       </Stack>
     </GestureHandlerRootView>
   );
