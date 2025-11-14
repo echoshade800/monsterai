@@ -319,16 +319,14 @@ const styles = StyleSheet.create({
   captureButton: {
     width: 140,
     height: 140,
-    borderRadius: 70,
-    overflow: 'hidden',
     position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   captureImage: {
-    width: '200%',
-    height: '200%',
-    position: 'absolute',
-    left: '-50%',
-    top: '-50%',
+    width: 280,
+    height: 280,
+    resizeMode: 'contain',
   },
   captureOverlay: {
     ...StyleSheet.absoluteFillObject,
