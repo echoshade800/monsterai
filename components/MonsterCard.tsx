@@ -44,16 +44,17 @@ export function MonsterCard({
         </View>
       </View>
 
-      <View style={styles.descriptionContainer}>
-        <Text style={styles.description}>{description}</Text>
-      </View>
-
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: imageUrl }}
           style={[styles.monsterImage, { width: imageSize, height: imageSize, marginTop: imageOffset }]}
           resizeMode="contain"
         />
+        <View style={styles.descriptionOverlay}>
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.description}>{description}</Text>
+          </View>
+        </View>
       </View>
 
       <View style={styles.footer}>
@@ -125,13 +126,26 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
+  imageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 8,
+    position: 'relative',
+  },
+  descriptionOverlay: {
+    position: 'absolute',
+    top: 8,
+    left: 0,
+    right: 0,
+    alignItems: 'flex-start',
+    paddingHorizontal: 4,
+  },
   descriptionContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
-    alignSelf: 'flex-start',
-    marginBottom: 4,
   },
   description: {
     fontSize: 12,
@@ -139,12 +153,6 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
     lineHeight: 14,
-  },
-  imageContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 8,
   },
   monsterImage: {
     width: '100%',
