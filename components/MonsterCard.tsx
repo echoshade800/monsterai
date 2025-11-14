@@ -44,15 +44,16 @@ export function MonsterCard({
         </View>
       </View>
 
+      <View style={styles.descriptionContainer}>
+        <Text style={styles.description}>{description}</Text>
+      </View>
+
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: imageUrl }}
           style={[styles.monsterImage, { width: imageSize, height: imageSize, marginTop: imageOffset }]}
           resizeMode="contain"
         />
-        <View style={styles.descriptionContainer}>
-          <Text style={styles.description}>{description}</Text>
-        </View>
       </View>
 
       <View style={styles.footer}>
@@ -125,18 +126,12 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   descriptionContainer: {
-    position: 'absolute',
-    bottom: 60,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
     alignSelf: 'flex-start',
-    marginLeft: 8,
-    maxWidth: '90%',
-    zIndex: 10,
+    marginBottom: 4,
   },
   description: {
     fontSize: 12,
@@ -150,7 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 8,
-    position: 'relative',
   },
   monsterImage: {
     width: '100%',
