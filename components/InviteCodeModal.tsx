@@ -33,6 +33,8 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet }: InviteCodeMo
           resizeMode="cover"
         />
 
+        <View style={styles.middleLayer} />
+
         <View style={styles.card}>
           <View style={styles.cardContent}>
             <Text style={styles.title}>Enter Your Invite Code</Text>
@@ -88,6 +90,16 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     height: '100%',
+  },
+  middleLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   card: {
     width: '90%',
