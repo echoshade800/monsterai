@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   logContainer: {
-    flex: 1,
+    height: 72,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   logEntry: {
     flexDirection: 'row',
     marginBottom: 4,
-    height: 36,
+    minHeight: 20,
   },
   logTime: {
     fontFamily: 'Courier New',
@@ -204,13 +204,14 @@ const styles = StyleSheet.create({
     color: '#E91E63',
     marginRight: 4,
     fontWeight: '600',
+    flexShrink: 0,
   },
   logMessage: {
     fontFamily: 'Courier New',
     fontSize: 11,
     color: '#333333',
-    flex: 1,
     lineHeight: 16,
+    flexShrink: 1,
   },
   fadeTop: {
     position: 'absolute',
