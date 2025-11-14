@@ -147,6 +147,8 @@ export default function CameraScreen() {
               <ChevronLeft size={28} color="#000" strokeWidth={2.5} />
             </TouchableOpacity>
 
+            <View style={styles.spacer} />
+
             <View style={styles.modeToggle}>
               <TouchableOpacity
                 style={[styles.modeButton, mode === 'photo' && styles.modeButtonActive]}
@@ -165,7 +167,9 @@ export default function CameraScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
 
+          <View style={styles.secondRow}>
             <View style={styles.rightButtons}>
               <TouchableOpacity style={styles.iconButton} onPress={openGallery}>
                 <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
@@ -245,7 +249,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+  },
+  spacer: {
+    flex: 1,
+  },
+  secondRow: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   backButton: {
     width: 44,
