@@ -70,8 +70,8 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
         [0, 1],
         [110, keyboardHeight.value + 10]
       ),
-      left: interpolate(expanded, [0, 1], [90, 20]),
-      right: 20,
+      left: interpolate(expanded, [0, 1], [120, 20]),
+      right: interpolate(expanded, [0, 1], [50, 20]),
     };
   });
 
