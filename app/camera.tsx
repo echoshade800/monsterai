@@ -8,6 +8,13 @@ import * as ImagePicker from 'expo-image-picker';
 
 const AGENTS = [
   {
+    id: 'steward',
+    name: 'Steward',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontsteward.png',
+    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backsteward.png',
+    prompt: 'Take any picture you want!',
+  },
+  {
     id: 'energy',
     name: 'Energy',
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontenergy.png',
@@ -49,13 +56,6 @@ const AGENTS = [
     backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backfeces.png',
     prompt: 'Did you poop today?',
   },
-  {
-    id: 'steward',
-    name: 'Steward',
-    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontsteward.png',
-    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backsteward.png',
-    prompt: 'Take any picture you want!',
-  },
 ];
 
 export default function CameraScreen() {
@@ -64,7 +64,7 @@ export default function CameraScreen() {
   const [torchEnabled, setTorchEnabled] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [mode, setMode] = useState<'photo' | 'photo-text'>('photo');
-  const [selectedAgent, setSelectedAgent] = useState<string>('energy');
+  const [selectedAgent, setSelectedAgent] = useState<string>('steward');
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
 
