@@ -227,14 +227,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: '700',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
     fontFamily: 'SF Compact Rounded',
     color: '#666666',

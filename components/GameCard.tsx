@@ -50,7 +50,7 @@ export function GameCard({ id, name, imageUrl, isHot = false, rating, onPlayPres
 
 const styles = StyleSheet.create({
   container: {
-    width: 180,
+    width: 220,
     marginRight: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 140,
+    height: 160,
     position: 'relative',
   },
   image: {
