@@ -609,8 +609,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   cameraPlaceholder: {
-    width: 130,
-    height: 94,
+    width: 140,
+    height: 110,
     borderRadius: 16,
     overflow: 'hidden',
   },
