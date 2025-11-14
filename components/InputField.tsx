@@ -231,12 +231,12 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    minHeight: 50,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    minHeight: 44,
   },
   atButtonWrapper: {
-    marginRight: 8,
+    marginRight: 4,
   },
   atButton: {
     width: 32,
@@ -252,12 +252,13 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
     maxHeight: 100,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+    paddingHorizontal: 4,
+    paddingVertical: 0,
     textAlignVertical: 'center',
+    lineHeight: 20,
   },
   voiceButtonWrapper: {
-    marginLeft: 8,
+    marginLeft: 4,
   },
   voiceButton: {
     width: 32,
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -285,7 +286,6 @@ const styles = StyleSheet.create({
   },
   cameraButtonDisabled: {
     opacity: 0.4,
-    backgroundColor: '#666666',
   },
   sendButton: {
     width: 40,
