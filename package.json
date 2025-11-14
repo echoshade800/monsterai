@@ -9,7 +9,6 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@expo-google-fonts/fira-code": "^0.4.1",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-firebase/analytics": "^23.5.0",

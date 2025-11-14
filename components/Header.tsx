@@ -632,13 +632,13 @@ const styles = StyleSheet.create({
     height: 22,
   },
   logTime: {
-    fontFamily: 'Fira Code',
+    fontFamily: 'Courier New',
     fontSize: 14,
     color: '#E91E63',
     fontWeight: '600',
   },
   logText: {
-    fontFamily: 'Fira Code',
+    fontFamily: 'Courier New',
     fontSize: 14,
     color: '#000000',
     lineHeight: 18,
