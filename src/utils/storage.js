@@ -86,13 +86,35 @@ class StorageManager {
    */
   async getUserData() {
     try {
-      await AsyncStorage.initializeManifestFromFile();
+      // await AsyncStorage.initializeManifestFromFile();
       const userDataString = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (userDataString) {
         const userData = JSON.parse(userDataString);
         return UserData.fromJSON(userData);
       }
-      return null;
+      // 模拟假数据
+      const mockUserData = {
+        uid: "95890526477221924",
+        id: "95890526477221924",
+        userName: "USER6VPTIXFW8",
+        avatar: "",
+        vipLevel: 0,
+        passId: "z1tRob7TfjD2Hx3bdqmBYqHptyoWvEVTBete0Jc28U4=",
+        availableAmount: 0.0,
+        country: "United States/US",
+        city: "Los Angeles",
+        canSetPassword: false,
+        age: "",
+        gender: "",
+        height: "120",
+        weight: "100",
+        goal: "计算机视觉",
+        timezone: "+800",
+        email: "hello6@hello.com",
+        created_at: "2025-11-04T10:52:53",
+        updated_at: "2025-11-12T08:38:56"
+      };
+      return new UserData(mockUserData);
     } catch (error) {
       console.error('获取用户数据失败:', error);
       return null;
@@ -106,7 +128,7 @@ class StorageManager {
    */
   async getMiniAppData(miniAppName) { 
     try {
-      await AsyncStorage.initializeManifestFromFile();
+      // await AsyncStorage.initializeManifestFromFile();
       console.log('getMiniAppData', miniAppName);
       const infoData = await AsyncStorage.getItem(`${miniAppName}info`);
       console.log('getMiniAppData' , `${miniAppName}info`, 'from local storage:', infoData);
@@ -125,7 +147,7 @@ class StorageManager {
    */
   async setMiniAppData(miniAppName, data) {
     try {
-      await AsyncStorage.initializeManifestFromFile();
+      // await AsyncStorage.initializeManifestFromFile();
       await AsyncStorage.setItem(`${miniAppName}info`, JSON.stringify(data));
       console.log('setMiniAppData' , `${miniAppName}info`, 'to local storage:', data);
       return true;

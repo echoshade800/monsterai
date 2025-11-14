@@ -1,10 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, ScrollView } from 'react-native';
-import { CameraView, CameraType, useCameraPermissions, FlashMode } from 'expo-camera';
-import { useState, useRef } from 'react';
-import { ChevronLeft, Image as ImageIcon, Flashlight, SwitchCamera, Check } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
+import { CameraType, CameraView, FlashMode, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import { Check, ChevronLeft, Flashlight, Image as ImageIcon, SwitchCamera } from 'lucide-react-native';
+import { useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { uploadImageToS3 } from '../src/utils/function-tools';
+import storageManager from '../src/utils/storage';
 
 const AGENTS = [
   {
@@ -65,6 +67,7 @@ export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [mode, setMode] = useState<'photo' | 'photo-text'>('photo');
   const [selectedAgent, setSelectedAgent] = useState<string>('steward');
+  const [isUploading, setIsUploading] = useState(false);
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
 
@@ -89,22 +92,80 @@ export default function CameraScreen() {
   }
 
   async function takePicture() {
-    if (cameraRef.current) {
+    if (!cameraRef.current || isUploading) {
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      
+      // 拍照
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.8,
       });
 
+      if (!photo?.uri) {
+        Alert.alert('错误', '拍照失败，请重试');
+        setIsUploading(false);
+        return;
+      }
+
+      // 获取用户ID
+      let uid = 'anonymous';
+      try {
+        const userData = await storageManager.getUserData();
+        if (userData) {
+          const info = userData.toJSON ? userData.toJSON() : userData;
+          if (info && (info.uid || info.id)) {
+            uid = String(info.uid || info.id);
+          }
+        }
+      } catch (e) {
+        console.warn('获取用户ID失败，使用匿名:', e);
+      }
+
+      // 准备上传参数
+      const filename = `photo_${Date.now()}.jpg`;
+      const mimeType = 'image/jpeg';
+
+      console.log('开始上传照片到S3:', { uid, filename, mimeType });
+
+      // 上传到S3
+      let uploadResult;
+      try {
+        uploadResult = await uploadImageToS3({
+          uid,
+          uri: photo.uri,
+          filename,
+          mimeType,
+        });
+        console.log('照片上传成功:', uploadResult);
+      } catch (uploadError) {
+        console.error('上传照片到S3失败:', uploadError);
+        // 上传失败时，仍然使用本地URI
+        Alert.alert('上传失败', '图片上传失败，将使用本地图片。错误: ' + (uploadError as Error).message);
+      }
+
+      // 获取图片URI（优先使用S3 URL，失败则使用本地URI）
+      const imageUri = uploadResult?.presigned_url || uploadResult?.s3_uri || photo.uri;
+
+      // 导航到相应页面
       if (mode === 'photo-text') {
         router.push({
           pathname: '/photo-text',
-          params: { photoUri: photo?.uri, agentId: selectedAgent }
+          params: { photoUri: imageUri, agentId: selectedAgent }
         });
       } else {
         router.push({
           pathname: '/(tabs)',
-          params: { photoUri: photo?.uri, agentId: selectedAgent, mode: 'photo' }
+          params: { photoUri: imageUri, agentId: selectedAgent, mode: 'photo' }
         });
       }
+    } catch (error) {
+      console.error('拍照失败:', error);
+      Alert.alert('错误', '拍照失败: ' + (error as Error).message);
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -201,16 +262,24 @@ export default function CameraScreen() {
               <Text style={styles.promptText}>{selectedAgentData.prompt}</Text>
             </View>
 
-            <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+            <TouchableOpacity 
+              style={styles.captureButton} 
+              onPress={takePicture}
+              disabled={isUploading}
+            >
               <Image
                 source={{ uri: selectedAgentData.backImage }}
                 style={styles.captureImage}
               />
               <View style={styles.captureOverlay}>
                 <View style={styles.cameraIconContainer}>
-                  <View style={styles.cameraIconOuter}>
-                    <View style={styles.cameraIconInner} />
-                  </View>
+                  {isUploading ? (
+                    <ActivityIndicator size="large" color="#FFFFFF" />
+                  ) : (
+                    <View style={styles.cameraIconOuter}>
+                      <View style={styles.cameraIconInner} />
+                    </View>
+                  )}
                 </View>
               </View>
             </TouchableOpacity>
@@ -304,7 +373,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: 25,
     padding: 4,
-    backdropFilter: 'blur(20px)',
   },
   modeButton: {
     paddingHorizontal: 20,

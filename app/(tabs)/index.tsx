@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
@@ -167,33 +167,6 @@ export default function EchoTab() {
     fetchConversationHistory();
   }, [fetchConversationHistory]);
 
-  // 处理来自相机的照片
-  useEffect(() => {
-    if (params.photoUri && params.mode && userData) {
-      const photoUri = params.photoUri as string;
-      const mode = params.mode as string;
-      const description = params.description as string;
-
-      // 避免重复处理同一张照片
-      if (processedPhotoRef.current === photoUri) {
-        return;
-      }
-      processedPhotoRef.current = photoUri;
-
-      const userMsg: Message = {
-        id: Date.now().toString(),
-        type: 'user',
-        content: mode === 'photo-text' ? description || '' : '',
-        photoUri: photoUri,
-      };
-
-      setMessages(prev => [...prev, userMsg]);
-
-      const messageText = mode === 'photo-text' && description ? description : 'Here is a photo';
-      handleStreamResponse(messageText);
-    }
-  }, [params.photoUri, params.mode, params.description, userData, handleStreamResponse]);
-
   // 生成唯一ID
   const generateTraceId = () => {
     return Math.random().toString(36).substring(2, 11) + "_" + Date.now().toString();
@@ -357,7 +330,7 @@ export default function EchoTab() {
   }, [apiConfig]);
 
   // 处理流式响应
-  const handleStreamResponse = useCallback(async (userMessage: string) => {
+  const handleStreamResponse = useCallback(async (userMessage: string, photoUri?: string) => {
     try {
       if (!userData) {
         Alert.alert('错误', '用户信息未加载，请重试');
@@ -369,26 +342,32 @@ export default function EchoTab() {
 
       const messageTimestamp = Date.now().toString();
 
-      // 添加用户消息
-      const userMsg: Message = {
-        id: Date.now().toString(),
-        type: 'user',
-        content: userMessage,
-      };
-
-      setMessages(prev => [...prev, userMsg]);
+      // 添加用户消息（如果还没有添加的话，比如照片消息已经在useEffect中添加了）
+      if (!photoUri) {
+        const userMsg: Message = {
+          id: Date.now().toString(),
+          type: 'user',
+          content: userMessage,
+        };
+        setMessages(prev => [...prev, userMsg]);
+      }
 
       // 构建请求体
-      const requestBody = {
+      const requestBody: any = {
         uid: String(userData.uid || userData.id),
         msg_id: generateMsgId(),
         trace_id: generateTraceId(),
         timestamp: messageTimestamp,
         text: userMessage,
         system_prompt: ["you are a helpful AI assistant"],
-        msg_type: "text"
+        msg_type: photoUri ? "image" : "text"
       };
 
+      // 如果有图片URL，添加到请求体中
+      if (photoUri) {
+        requestBody.image_url = photoUri;
+      }
+      
       // 调用通用处理函数
       await handleStreamRequest({
         requestBody,
@@ -434,6 +413,34 @@ export default function EchoTab() {
       setIsSending(false);
     }
   }, [userData, handleStreamRequest]);
+
+  // 处理来自相机的照片
+  useEffect(() => {
+    if (params.photoUri && params.mode && userData) {
+      const photoUri = params.photoUri as string;
+      const mode = params.mode as string;
+      const description = params.description as string;
+
+      // 避免重复处理同一张照片
+      if (processedPhotoRef.current === photoUri) {
+        return;
+      }
+      processedPhotoRef.current = photoUri;
+
+      const userMsg: Message = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: mode === 'photo-text' ? description || '' : '',
+        photoUri: photoUri,
+      };
+
+      setMessages(prev => [...prev, userMsg]);
+
+      const messageText = mode === 'photo-text' && description ? description : 'Here is a photo';
+      // 传递图片URL给 handleStreamResponse
+      handleStreamResponse(messageText, photoUri);
+    }
+  }, [params.photoUri, params.mode, params.description, userData, handleStreamResponse]);
 
   // 将 function call 结果发送回服务器
   const sendFunctionCallResult = useCallback(async (callId: string, functionName: string, result: any) => {

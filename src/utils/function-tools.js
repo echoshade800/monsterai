@@ -2,14 +2,15 @@
  * AI Function Tools 定义和实现
  * 用于AI对话中的函数调用功能
  */
+import * as Calendar from 'expo-calendar';
+import * as ImagePicker from 'expo-image-picker';
 import {
   NativeModules,
 } from 'react-native';
+import BrokenHealthKit from "react-native-health";
+import { getHeadersWithPassId } from '../services/api/api.js';
+import healthDataManager, { TimePeriod } from './health-data-manager.js';
 import storageManager from './storage.js';
-import * as ImagePicker from 'expo-image-picker';
-import * as Calendar from 'expo-calendar';
-import healthDataManager, { HealthDataType, TimePeriod } from './health-data-manager.js';
-import BrokenHealthKit, { HealthKitPermissions } from "react-native-health";
 const AppleHealthKit = NativeModules.AppleHealthKit;
 
 // Only set Constants if AppleHealthKit is available
@@ -29,15 +30,19 @@ if (AppleHealthKit && BrokenHealthKit.Constants) {
  * @param {string} params.mimeType - MIME类型
  * @returns {Promise<Object>} 上传结果，包含 bucket, key, presigned_url, s3_uri
  */
-const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
+export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
   const form = new FormData();
   form.append('uid', uid);
   form.append('file', { uri, name: filename || 'upload.jpg', type: mimeType || 'image/jpeg' });
+  
+  // 获取包含 passId 的 headers
+  const headersWithPassId = await getHeadersWithPassId();
   
   const resp = await fetch('http://23.20.151.253:8999/upload/image', {
     method: 'POST',
     headers: {
       Accept: 'application/json',
+      passId: headersWithPassId.passId,
       // 不要手动设置 Content-Type，交给 fetch 处理 multipart 边界
     },
     body: form,
