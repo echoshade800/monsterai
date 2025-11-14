@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, ScrollView } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions, FlashMode } from 'expo-camera';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { ChevronLeft, Image as ImageIcon, Flashlight, SwitchCamera, Check } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
@@ -65,19 +65,8 @@ export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [mode, setMode] = useState<'photo' | 'photo-text'>('photo');
   const [selectedAgent, setSelectedAgent] = useState<string>('steward');
-  const [isCameraReady, setIsCameraReady] = useState(false);
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      Alert.alert(
-        'Camera Not Supported',
-        'Camera is not available on web platform. Please use the image picker instead.',
-        [{ text: 'OK' }]
-      );
-    }
-  }, []);
 
   if (!permission) {
     return <View style={styles.container} />;
@@ -100,38 +89,21 @@ export default function CameraScreen() {
   }
 
   async function takePicture() {
-    if (Platform.OS === 'web') {
-      Alert.alert('Not Supported', 'Please use the gallery button to select a photo.');
-      return;
-    }
-
-    if (!isCameraReady) {
-      Alert.alert('Camera Not Ready', 'Please wait for the camera to initialize.');
-      return;
-    }
-
     if (cameraRef.current) {
-      try {
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.8,
-        });
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.8,
+      });
 
-        if (photo && photo.uri) {
-          if (mode === 'photo-text') {
-            router.push({
-              pathname: '/photo-text',
-              params: { photoUri: photo.uri, agentId: selectedAgent }
-            });
-          } else {
-            router.push({
-              pathname: '/(tabs)',
-              params: { photoUri: photo.uri, agentId: selectedAgent, mode: 'photo' }
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error taking picture:', error);
-        Alert.alert('Error', 'Failed to take picture. Please try again.');
+      if (mode === 'photo-text') {
+        router.push({
+          pathname: '/photo-text',
+          params: { photoUri: photo?.uri, agentId: selectedAgent }
+        });
+      } else {
+        router.push({
+          pathname: '/(tabs)',
+          params: { photoUri: photo?.uri, agentId: selectedAgent, mode: 'photo' }
+        });
       }
     }
   }
@@ -175,21 +147,7 @@ export default function CameraScreen() {
         ref={cameraRef}
         flash={flash}
         enableTorch={torchEnabled}
-        onCameraReady={() => {
-          console.log('Camera is ready');
-          setIsCameraReady(true);
-        }}
-        onMountError={(error) => {
-          console.error('Camera mount error:', error);
-          Alert.alert('Camera Error', 'Failed to initialize camera. Please try using the gallery instead.');
-        }}
       >
-        {!isCameraReady && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFFFFF" />
-            <Text style={styles.loadingText}>Loading camera...</Text>
-          </View>
-        )}
         <View style={styles.overlay}>
           <View style={styles.topBar}>
             <TouchableOpacity
@@ -507,22 +465,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    zIndex: 1000,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
   },
 });
