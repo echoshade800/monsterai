@@ -63,8 +63,8 @@ export default function EchoTab() {
       // 优先使用 _id 字段作为唯一标识
       const messageId = item._id || item.id || item.trace_id || `msg-${index}-${Date.now()}`;
       
-      // 提取图片URL（支持 image, imageUrl, image_url, photoUri 等字段）
-      const photoUri = item.image || item.imageUrl || item.image_url || item.photoUri || undefined;
+      // 提取图片URL（支持多个字段，包括 photoUri_preview）
+      const photoUri = item.image || item.imageUrl || item.image_url || item.photoUri || item.photoUri_preview || undefined;
       
       // 如果消息包含图片，记录日志
       if (photoUri) {
@@ -72,7 +72,7 @@ export default function EchoTab() {
           msg_type: item.msg_type,
           has_image: !!photoUri,
           content: getMessageContent(item),
-          photoUri_preview: photoUri.substring(0, 80) + '...'
+          photoUri_preview: photoUri.length > 80 ? photoUri.substring(0, 80) + '...' : photoUri
         });
       }
       

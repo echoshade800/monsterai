@@ -20,21 +20,76 @@ function MessageImage({ uri }: { uri: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
+  // 处理图片URI，确保格式正确
+  const getImageSource = () => {
+    if (!uri) {
+      return { uri: '' };
+    }
+
+    // 对于本地文件路径，确保格式正确
+    // iOS 上 file:// 路径需要正确编码
+    let processedUri = uri.trim();
+    
+    // 如果是本地文件路径且没有 file:// 前缀，添加它
+    if (processedUri.startsWith('/') && !processedUri.startsWith('file://')) {
+      processedUri = `file://${processedUri}`;
+    }
+
+    // 对于 file:// 路径，确保路径中的特殊字符被正确编码
+    // 但不要重复编码已经编码过的路径
+    if (processedUri.startsWith('file://')) {
+      try {
+        // 分离 file:// 前缀和路径部分
+        const pathPart = processedUri.substring(7); // 去掉 'file://'
+        // 如果路径包含空格或特殊字符，需要编码
+        // 但 React Native 的 Image 组件通常能处理未编码的 file:// 路径
+        // 所以这里只做基本处理
+        if (pathPart.includes(' ')) {
+          // 对于包含空格的路径，尝试编码
+          const encodedPath = encodeURI(pathPart);
+          processedUri = `file://${encodedPath}`;
+        }
+      } catch (e) {
+        console.warn('处理文件路径时出错:', e);
+      }
+    }
+
+    // 记录图片加载信息
+    console.log('加载图片:', {
+      originalUri: uri.length > 100 ? uri.substring(0, 100) + '...' : uri,
+      processedUri: processedUri.length > 100 ? processedUri.substring(0, 100) + '...' : processedUri,
+      isLocalFile: processedUri.startsWith('file://'),
+      isHttp: processedUri.startsWith('http://') || processedUri.startsWith('https://')
+    });
+
+    return { uri: processedUri };
+  };
+
+  const handleLoadError = (error: any) => {
+    console.error('图片加载失败:', {
+      uri: uri.substring(0, 100),
+      error: error?.nativeEvent?.error || error
+    });
+    setIsLoading(false);
+    setHasError(true);
+  };
+
   return (
     <View style={styles.imageContainer}>
       <Image
-        source={{ uri }}
+        source={getImageSource()}
         style={styles.messageImage}
         resizeMode="cover"
         onLoadStart={() => {
+          console.log('开始加载图片:', uri.substring(0, 100));
           setIsLoading(true);
           setHasError(false);
         }}
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
+        onLoad={() => {
+          console.log('图片加载成功:', uri.substring(0, 100));
           setIsLoading(false);
-          setHasError(true);
         }}
+        onError={handleLoadError}
       />
       {isLoading && (
         <View style={styles.imageLoadingContainer}>
