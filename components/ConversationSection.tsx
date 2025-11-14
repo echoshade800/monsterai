@@ -73,7 +73,7 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
               />
               <Pressable
                 onLongPress={() => handleCopyMessage(message.content)}
-                style={styles.assistantBubble}
+                style={styles.assistantTextWrapper}
               >
                 <Text style={styles.assistantText}>{message.content}</Text>
               </Pressable>
@@ -128,26 +128,18 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
   },
   assistantMessageContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'flex-start',
     marginBottom: 15,
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   assistantAvatar: {
     width: 36,
     height: 36,
-    borderRadius: 18,
-    marginRight: 8,
+    marginBottom: 8,
   },
-  assistantBubble: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 18,
-    padding: 14,
-    maxWidth: '75%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+  assistantTextWrapper: {
+    width: '100%',
   },
   assistantText: {
     fontSize: 15,
