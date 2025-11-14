@@ -241,6 +241,7 @@ const styles = StyleSheet.create({
     maxHeight: 100,
     paddingHorizontal: 8,
     paddingVertical: 0,
+    textAlignVertical: 'center',
   },
   voiceButtonWrapper: {
     marginLeft: 8,
