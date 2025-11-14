@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   agentButtonSpacing: {
-    marginLeft: -100,
+    marginLeft: -40,
   },
   agentImage: {
     width: '100%',
