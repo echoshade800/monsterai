@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, ScrollView } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions, FlashMode } from 'expo-camera';
 import { useState, useRef } from 'react';
-import { ChevronLeft, Image as ImageIcon, Flashlight } from 'lucide-react-native';
+import { ChevronLeft, Image as ImageIcon, Flashlight, SwitchCamera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
@@ -129,6 +129,10 @@ export default function CameraScreen() {
     setTorchEnabled(current => !current);
   }
 
+  function toggleCameraFacing() {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
+  }
+
   const selectedAgentData = AGENTS.find(a => a.id === selectedAgent) || AGENTS[6];
 
   return (
@@ -227,6 +231,11 @@ export default function CameraScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
+
+            <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+              <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
+              <SwitchCamera size={28} color="#FFF" strokeWidth={2} />
+            </TouchableOpacity>
           </View>
         </View>
       </CameraView>
@@ -372,6 +381,7 @@ const styles = StyleSheet.create({
   bottomBar: {
     paddingBottom: Platform.OS === 'ios' ? 40 : 30,
     paddingTop: 20,
+    position: 'relative',
   },
   agentList: {
     paddingHorizontal: 20,
@@ -416,5 +426,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
+  },
+  flipButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: Platform.OS === 'ios' ? 80 : 70,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
 });
