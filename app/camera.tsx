@@ -8,53 +8,53 @@ import * as ImagePicker from 'expo-image-picker';
 
 const AGENTS = [
   {
-    id: 'steward',
-    name: 'Steward',
-    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/steward.png',
-    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20steward.png',
-    prompt: 'Take any picture you want!',
-  },
-  {
     id: 'energy',
     name: 'Energy',
-    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
-    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20energy.png',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontenergy.png',
+    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backenergy.png',
     prompt: 'Show me your food!',
   },
   {
     id: 'face',
     name: 'Face',
-    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
-    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20face.png',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontface.png',
+    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backface.png',
     prompt: 'Show me your face!',
   },
   {
     id: 'posture',
     name: 'Posture',
-    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
-    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20posture.png',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontposture.png',
+    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backposture.png',
     prompt: 'Check your posture!',
   },
   {
     id: 'sleep',
     name: 'Sleep',
-    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
-    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20sleep.png',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontsleep.png',
+    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backsleep.png',
     prompt: 'How did you sleep? Show me!',
   },
   {
     id: 'stress',
     name: 'Stress',
-    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
-    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20stress.png',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontstress.png',
+    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backstress.png',
     prompt: 'How stressed are you? Show me!',
   },
   {
     id: 'feces',
     name: 'Feces',
-    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
-    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20feces.png',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontfeces.png',
+    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backfeces.png',
     prompt: 'Did you poop today?',
+  },
+  {
+    id: 'steward',
+    name: 'Steward',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontsteward.png',
+    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backsteward.png',
+    prompt: 'Take any picture you want!',
   },
 ];
 
@@ -64,7 +64,7 @@ export default function CameraScreen() {
   const [torchEnabled, setTorchEnabled] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [mode, setMode] = useState<'photo' | 'photo-text'>('photo');
-  const [selectedAgent, setSelectedAgent] = useState<string>('steward');
+  const [selectedAgent, setSelectedAgent] = useState<string>('energy');
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
 
@@ -137,7 +137,7 @@ export default function CameraScreen() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
-  const selectedAgentData = AGENTS.find(a => a.id === selectedAgent) || AGENTS[6];
+  const selectedAgentData = AGENTS.find(a => a.id === selectedAgent) || AGENTS[0];
 
   return (
     <View style={styles.container}>
