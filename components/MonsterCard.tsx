@@ -126,20 +126,18 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     alignSelf: 'flex-start',
-    maxWidth: '85%',
-    borderWidth: 2,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
+    maxWidth: '92%',
   },
   description: {
     fontSize: 12,
     fontWeight: '500',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
-    lineHeight: 16,
+    lineHeight: 14,
   },
   imageContainer: {
     flex: 1,
