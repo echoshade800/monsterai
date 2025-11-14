@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, ScrollView } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions, FlashMode } from 'expo-camera';
 import { useState, useRef } from 'react';
-import { ChevronLeft, Image as ImageIcon, Flashlight, SwitchCamera } from 'lucide-react-native';
+import { ChevronLeft, Image as ImageIcon, Flashlight, SwitchCamera, Check } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
@@ -228,6 +228,12 @@ export default function CameraScreen() {
                     source={{ uri: selectedAgent === agent.id ? agent.backImage : agent.frontImage }}
                     style={styles.agentImage}
                   />
+                  {selectedAgent === agent.id && (
+                    <View style={styles.checkmarkContainer}>
+                      <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+                      <Check size={20} color="#000" strokeWidth={3} />
+                    </View>
+                  )}
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -390,6 +396,7 @@ const styles = StyleSheet.create({
   agentButton: {
     width: 140,
     height: 140,
+    position: 'relative',
   },
   agentImage: {
     width: '100%',
@@ -426,6 +433,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
+  },
+  checkmarkContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: 2,
+    borderColor: '#000',
   },
   flipButton: {
     position: 'absolute',
