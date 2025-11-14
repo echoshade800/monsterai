@@ -10,7 +10,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: '#000000',
-        tabBarInactiveTintColor: '#8E8E93'},
+        tabBarInactiveTintColor: '#8E8E93',
         tabBarBackground: () => (
           <View style={styles.tabBarBackgroundContainer}>
             <BlurView intensity={90} style={StyleSheet.absoluteFill} tint="light" />
