@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   },
   agentList: {
     paddingHorizontal: 20,
-    gap: -90,
+    gap: -110,
   },
   agentButton: {
     width: 140,
