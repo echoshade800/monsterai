@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 24,
     padding: 16,
-    paddingBottom: 12,
+    paddingBottom: 6,
     height: 200,
     justifyContent: 'space-between',
     shadowColor: '#000',
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 16,
-    marginTop: 12,
+    marginTop: 4,
     marginLeft: -8,
   },
   hireButton: {
