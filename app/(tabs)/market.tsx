@@ -11,7 +11,7 @@ const MONSTERS_DATA = [
     description: 'Stay strong and stress-free.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
-    imageSize: '350%',
+    imageSize: '700%',
     imageOffset: 10,
   },
   {
@@ -21,7 +21,7 @@ const MONSTERS_DATA = [
     description: 'I make your skin glow with data.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
-    imageSize: '330%',
+    imageSize: '660%',
     imageOffset: 8,
   },
   {
@@ -31,7 +31,7 @@ const MONSTERS_DATA = [
     description: 'I fix your posture, so you feel great all day.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
-    imageSize: '450%',
+    imageSize: '900%',
     imageOffset: 0,
   },
   {
@@ -41,7 +41,7 @@ const MONSTERS_DATA = [
     description: 'I guide you to better sleep, naturally.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
-    imageSize: '250%',
+    imageSize: '500%',
     imageOffset: 0,
   },
   {
@@ -51,7 +51,7 @@ const MONSTERS_DATA = [
     description: 'I help you stay strong and stress-free.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
-    imageSize: '450%',
+    imageSize: '900%',
     imageOffset: 10,
   },
   {
@@ -61,7 +61,7 @@ const MONSTERS_DATA = [
     description: 'Game with your mind and body.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#F5E6D3',
-    imageSize: '350%',
+    imageSize: '700%',
     imageOffset: 10,
   },
 ];
