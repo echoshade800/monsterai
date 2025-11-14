@@ -61,6 +61,7 @@ const AGENTS = [
 export default function CameraScreen() {
   const [facing, setFacing] = useState<CameraType>('back');
   const [flash, setFlash] = useState<FlashMode>('off');
+  const [torchEnabled, setTorchEnabled] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [mode, setMode] = useState<'photo' | 'photo-text'>('photo');
   const [selectedAgent, setSelectedAgent] = useState<string>('steward');
@@ -125,7 +126,7 @@ export default function CameraScreen() {
   }
 
   function toggleFlash() {
-    setFlash(current => current === 'off' ? 'on' : 'off');
+    setTorchEnabled(current => !current);
   }
 
   const selectedAgentData = AGENTS.find(a => a.id === selectedAgent) || AGENTS[6];
@@ -137,6 +138,7 @@ export default function CameraScreen() {
         facing={facing}
         ref={cameraRef}
         flash={flash}
+        enableTorch={torchEnabled}
       >
         <View style={styles.overlay}>
           <View style={styles.topBar}>
@@ -176,7 +178,7 @@ export default function CameraScreen() {
                 <ImageIcon size={24} color="#FFF" strokeWidth={2} />
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.iconButton, flash === 'on' && styles.iconButtonActive]}
+                style={[styles.iconButton, torchEnabled && styles.iconButtonActive]}
                 onPress={toggleFlash}
               >
                 <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
