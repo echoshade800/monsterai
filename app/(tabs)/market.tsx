@@ -130,7 +130,7 @@ export default function MarketTab() {
 
   const handleFingerprintPress = (monsterId: string) => {
     router.push({
-      pathname: '/monster-detail',
+      pathname: '/agent-detail',
       params: { id: monsterId },
     });
   };
