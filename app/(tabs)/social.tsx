@@ -1,9 +1,13 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 
 export default function SocialTab() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Social</Text>
+      <Image
+        source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/comingsoon.png' }}
+        style={styles.image}
+        resizeMode="cover"
+      />
     </View>
   );
 }
@@ -11,14 +15,10 @@ export default function SocialTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#000000',
   },
-  text: {
-    fontSize: 24,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
-    color: '#000000',
+  image: {
+    width: '100%',
+    height: '100%',
   },
 });
