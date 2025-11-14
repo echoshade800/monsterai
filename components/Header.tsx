@@ -327,7 +327,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                   <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
                     <View style={styles.thinkingHeader}>
                       <Text style={styles.brainEmoji}>🧠</Text>
-                      <Text style={styles.thinkingTitle}>In My Mind</Text>
+                      <Text style={styles.thinkingTitle}>Thinking Log</Text>
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
@@ -376,7 +376,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                   <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
                     <View style={styles.thinkingHeader}>
                       <Text style={styles.brainEmoji}>🧠</Text>
-                      <Text style={styles.thinkingTitle}>In My Mind</Text>
+                      <Text style={styles.thinkingTitle}>Thinking Log</Text>
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
