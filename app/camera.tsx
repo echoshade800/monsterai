@@ -299,6 +299,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
+    marginTop: 60,
   },
   promptContainer: {
     paddingHorizontal: 24,
@@ -316,15 +317,18 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   captureButton: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     overflow: 'hidden',
     position: 'relative',
   },
   captureImage: {
-    width: '100%',
-    height: '100%',
+    width: '200%',
+    height: '200%',
+    position: 'absolute',
+    left: '-50%',
+    top: '-50%',
   },
   captureOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -363,8 +367,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   agentButton: {
-    width: 80,
-    height: 80,
+    width: 240,
+    height: 240,
   },
   agentImage: {
     width: '100%',
