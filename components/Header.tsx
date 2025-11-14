@@ -219,10 +219,10 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const sharedCameraStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
-      right: 42,
+      right: 32,
       bottom: 18,
-      width: 120,
-      height: 94,
+      width: 160,
+      height: 125,
       zIndex: 1000,
     };
   });
@@ -661,8 +661,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cameraPlaceholder: {
-    width: 140,
-    height: 110,
+    width: 180,
+    height: 125,
     borderRadius: 16,
     overflow: 'hidden',
   },
