@@ -12,7 +12,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
     imageSize: '350%',
-    imageOffset: 20,
+    imageOffset: 32,
   },
   {
     id: 'face',
@@ -22,7 +22,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
     imageSize: '330%',
-    imageOffset: 18,
+    imageOffset: 30,
   },
   {
     id: 'posture',
@@ -32,7 +32,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
     imageSize: '450%',
-    imageOffset: 10,
+    imageOffset: 22,
   },
   {
     id: 'sleep',
@@ -42,7 +42,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
     imageSize: '250%',
-    imageOffset: 10,
+    imageOffset: 22,
   },
   {
     id: 'stress',
@@ -52,7 +52,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
     imageSize: '450%',
-    imageOffset: 20,
+    imageOffset: 32,
   },
   {
     id: 'feces',
@@ -62,7 +62,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#F5E6D3',
     imageSize: '350%',
-    imageOffset: 20,
+    imageOffset: 32,
   },
 ];
 
