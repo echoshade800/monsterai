@@ -594,7 +594,8 @@ const styles = StyleSheet.create({
   },
   logLine: {
     marginBottom: 2,
-    height: 23,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   logTime: {
     fontFamily: 'Courier New',
@@ -606,7 +607,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Courier New',
     fontSize: 14,
     color: '#000000',
-    lineHeight: 18,
+    lineHeight: 20,
+    flex: 1,
   },
   cameraPlaceholder: {
     width: 140,
