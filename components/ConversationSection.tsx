@@ -67,6 +67,10 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
         if (message.type === 'assistant') {
           return (
             <View key={message.id} style={styles.assistantMessageContainer}>
+              <Image
+                source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatposture.png' }}
+                style={styles.assistantAvatar}
+              />
               <Pressable
                 onLongPress={() => handleCopyMessage(message.content)}
                 style={styles.assistantBubble}
@@ -127,6 +131,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     marginBottom: 15,
+    alignItems: 'flex-end',
+  },
+  assistantAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 8,
   },
   assistantBubble: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',

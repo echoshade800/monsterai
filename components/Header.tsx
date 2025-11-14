@@ -233,7 +233,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                 <View style={styles.breakfastContent}>
                   <View style={styles.breakfastLeft}>
                     <Image
-                      source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
+                      source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatposture.png' }}
                       style={styles.avatarImage}
                     />
                     <View style={styles.breakfastTextContainer}>
