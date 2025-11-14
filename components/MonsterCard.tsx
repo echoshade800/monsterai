@@ -155,7 +155,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 16,
-    marginTop: 4,
+    marginTop: 12,
+    marginLeft: -8,
   },
   hireButton: {
     flexDirection: 'row',
