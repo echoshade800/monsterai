@@ -140,7 +140,8 @@ export default function MarketTab() {
   };
 
   const handlePlayPress = (gameId: string) => {
-    console.log('Playing game:', gameId);
+    const game = GAMES_DATA.find(g => g.id === gameId);
+    console.log('Playing game:', gameId, 'URL:', game?.imageUrl);
   };
 
   const renderGameRow = (games: typeof GAMES_DATA) => (

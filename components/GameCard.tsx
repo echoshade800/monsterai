@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Play } from 'lucide-react-native';
+import { useState } from 'react';
 
 interface GameCardProps {
   id: string;
@@ -11,6 +12,9 @@ interface GameCardProps {
 }
 
 export function GameCard({ id, name, imageUrl, isHot = false, rating, onPlayPress }: GameCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
@@ -19,7 +23,26 @@ export function GameCard({ id, name, imageUrl, isHot = false, rating, onPlayPres
             <Text style={styles.hotText}>🔥 Hot</Text>
           </View>
         )}
-        <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
+        {imageLoading && !imageError && (
+          <View style={styles.imagePlaceholder}>
+            <Text style={styles.placeholderText}>Loading...</Text>
+          </View>
+        )}
+        {imageError && (
+          <View style={styles.imagePlaceholder}>
+            <Text style={styles.placeholderText}>🎮</Text>
+          </View>
+        )}
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+          onLoad={() => setImageLoading(false)}
+          onError={() => {
+            setImageError(true);
+            setImageLoading(false);
+          }}
+        />
       </View>
 
       <View style={styles.contentContainer}>
@@ -144,5 +167,20 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  imagePlaceholder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
+  },
+  placeholderText: {
+    fontSize: 32,
+    color: '#CCCCCC',
   },
 });
