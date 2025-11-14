@@ -324,15 +324,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   captureImage: {
-    width: 280,
-    height: 280,
+    width: 560,
+    height: 560,
     resizeMode: 'contain',
   },
   captureOverlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
   },
   cameraIconContainer: {
     width: 80,
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   cameraIconInner: {
     width: 50,
