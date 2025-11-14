@@ -435,7 +435,7 @@ export default function EchoTab() {
       };
 
       setMessages(prev => [...prev, userMsg]);
-
+      
       const messageText = mode === 'photo-text' && description ? description : 'Here is a photo';
       // 传递图片URL给 handleStreamResponse
       handleStreamResponse(messageText, photoUri);
