@@ -81,7 +81,7 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
           <View key={message.id} style={styles.userMessageContainer}>
             <Pressable
               onLongPress={() => handleCopyMessage(message.content)}
-              style={styles.userBubble}
+              style={[styles.userBubble, message.photoUri && styles.userBubbleWithPhoto]}
             >
               {message.photoUri && (
                 <Image
@@ -90,11 +90,11 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
                   resizeMode="cover"
                 />
               )}
-              {message.content ? (
+              {message.content && (
                 <Text style={[styles.userText, message.photoUri && styles.textWithImage]}>
                   {message.content}
                 </Text>
-              ) : null}
+              )}
             </Pressable>
           </View>
         );
@@ -159,6 +159,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
+  userBubbleWithPhoto: {
+    maxWidth: '85%',
+  },
   userText: {
     fontSize: 15,
     fontFamily: 'SF Compact Rounded',
@@ -166,13 +169,13 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   messageImage: {
-    width: 200,
-    height: 200,
+    width: 220,
+    height: 220,
     borderRadius: 12,
     marginBottom: 8,
   },
   textWithImage: {
-    marginTop: 4,
+    marginTop: 0,
   },
   loadingContainer: {
     justifyContent: 'center',
