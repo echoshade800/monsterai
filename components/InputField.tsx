@@ -70,8 +70,21 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
         [0, 1],
         [110, keyboardHeight.value + 10]
       ),
-      left: interpolate(expanded, [0, 1], [120, 20]),
-      right: interpolate(expanded, [0, 1], [50, 20]),
+      left: interpolate(expanded, [0, 1], [140, 20]),
+      right: interpolate(expanded, [0, 1], [90, 20]),
+    };
+  });
+
+  const cameraButtonAnimatedStyle = useAnimatedStyle(() => {
+    const expanded = keyboardHeight.value > 0 ? 1 : 0;
+
+    return {
+      bottom: interpolate(
+        expanded,
+        [0, 1],
+        [110, keyboardHeight.value + 10]
+      ),
+      opacity: interpolate(expanded, [0, 1], [1, 0]),
     };
   });
 
@@ -150,31 +163,31 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
           />
 
           {text.trim() ? (
-            <TouchableOpacity 
-              style={[styles.sendButton, (isSending || disabled) && styles.sendButtonDisabled]} 
+            <TouchableOpacity
+              style={[styles.sendButton, (isSending || disabled) && styles.sendButtonDisabled]}
               onPress={handleSend}
               disabled={isSending || disabled}
             >
               <Send size={20} color={(isSending || disabled) ? "#999999" : "#000000"} strokeWidth={2} />
             </TouchableOpacity>
           ) : (
-            <>
-              <Animated.View style={[styles.voiceButtonWrapper, voiceButtonAnimatedStyle]}>
-                <TouchableOpacity style={styles.voiceButton} disabled={disabled}>
-                  <Mic size={20} color={disabled ? "#999999" : "#666666"} strokeWidth={2} />
-                </TouchableOpacity>
-              </Animated.View>
-
-              <TouchableOpacity 
-                style={[styles.cameraButton, disabled && styles.cameraButtonDisabled]} 
-                onPress={handleCameraPress}
-                disabled={disabled}
-              >
-                <Camera size={22} color={disabled ? "#999999" : "#000000"} strokeWidth={2} />
+            <Animated.View style={[styles.voiceButtonWrapper, voiceButtonAnimatedStyle]}>
+              <TouchableOpacity style={styles.voiceButton} disabled={disabled}>
+                <Mic size={20} color={disabled ? "#999999" : "#666666"} strokeWidth={2} />
               </TouchableOpacity>
-            </>
+            </Animated.View>
           )}
         </View>
+      </Animated.View>
+
+      <Animated.View style={[styles.floatingCameraButton, cameraButtonAnimatedStyle]}>
+        <TouchableOpacity
+          style={[styles.cameraButton, disabled && styles.cameraButtonDisabled]}
+          onPress={handleCameraPress}
+          disabled={disabled}
+        >
+          <Camera size={24} color={disabled ? "#999999" : "#000000"} strokeWidth={2.5} />
+        </TouchableOpacity>
       </Animated.View>
 
       <Modal
@@ -207,20 +220,20 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    borderRadius: 25,
+    borderRadius: 30,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    minHeight: 44,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    minHeight: 50,
   },
   atButtonWrapper: {
     marginRight: 8,
@@ -235,12 +248,12 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
     maxHeight: 100,
     paddingHorizontal: 8,
-    paddingVertical: 0,
+    paddingVertical: 8,
     textAlignVertical: 'center',
   },
   voiceButtonWrapper: {
@@ -254,21 +267,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  floatingCameraButton: {
+    position: 'absolute',
+    right: 20,
+  },
   cameraButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
   },
   cameraButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.4,
+    backgroundColor: '#666666',
   },
   sendButton: {
     width: 40,
