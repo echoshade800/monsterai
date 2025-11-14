@@ -42,6 +42,10 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
     router.push('/(tabs)/home');
   };
 
+  const handleProfilePress = () => {
+    router.push('/profile');
+  };
+
   useEffect(() => {
     const lineHeight = 23;
     const totalHeight = LOG_ENTRIES.length * lineHeight;
@@ -231,7 +235,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
 
         {/* Shared Profile Button - Always mounted */}
         <Animated.View style={sharedProfileStyle}>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleProfilePress}>
             <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
             <User size={20} color="#000000" strokeWidth={2} />
           </TouchableOpacity>
