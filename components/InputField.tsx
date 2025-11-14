@@ -68,7 +68,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
       bottom: interpolate(
         expanded,
         [0, 1],
-        [110, keyboardHeight.value + 10]
+        [90, keyboardHeight.value + 10]
       ),
       left: interpolate(expanded, [0, 1], [140, 20]),
       right: interpolate(expanded, [0, 1], [90, 20]),
@@ -82,7 +82,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
       bottom: interpolate(
         expanded,
         [0, 1],
-        [110, keyboardHeight.value + 10]
+        [90, keyboardHeight.value + 10]
       ),
       opacity: interpolate(expanded, [0, 1], [1, 0]),
     };
