@@ -30,17 +30,8 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet }: InviteCodeMo
         <Image
           source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
           style={styles.backgroundImage}
-          blurRadius={0}
+          resizeMode="cover"
         />
-
-        <View style={styles.logoContainer}>
-          <Image
-            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/icon.png' }}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
-          <Text style={styles.logoTitle}>MonsterLinker AI</Text>
-        </View>
 
         <View style={styles.card}>
           <View style={styles.cardContent}>
@@ -88,29 +79,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#B8A892',
   },
   backgroundImage: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     width: '100%',
     height: '100%',
-  },
-  logoContainer: {
-    position: 'absolute',
-    top: 150,
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  logoImage: {
-    width: 140,
-    height: 140,
-    marginBottom: 16,
-  },
-  logoTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    letterSpacing: 0.5,
   },
   card: {
     width: '90%',
@@ -122,8 +99,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 24,
     elevation: 10,
-    zIndex: 5,
-    marginTop: 200,
   },
   cardContent: {
     padding: 36,
