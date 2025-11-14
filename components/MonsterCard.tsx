@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 24,
     padding: 16,
-    height: 280,
+    height: 220,
     justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
