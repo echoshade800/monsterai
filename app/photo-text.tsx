@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, TextInput, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, TextInput, KeyboardAvoidingView, ScrollView, Keyboard } from 'react-native';
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function PhotoTextScreen() {
@@ -43,15 +44,13 @@ export default function PhotoTextScreen() {
         </View>
 
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardView}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            bounces={false}
           >
             <View style={styles.imageContainer}>
               <Image
@@ -160,7 +159,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingBottom: 20,
   },
   imageContainer: {
     width: '100%',
@@ -180,7 +178,8 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   formContainer: {
-    paddingBottom: 20,
+    flex: 1,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 30,
   },
   labelContainer: {
     flexDirection: 'row',
