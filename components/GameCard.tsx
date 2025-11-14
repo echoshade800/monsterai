@@ -98,9 +98,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   tagsContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     gap: 6,
     marginBottom: 12,
+    flexWrap: 'wrap',
   },
   creatorsBadge: {
     backgroundColor: '#000000',
