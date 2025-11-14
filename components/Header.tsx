@@ -222,7 +222,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
             <View style={styles.bannersContainer}>
               <Animated.View style={[styles.monsterImageContainer, monsterImageStyle]}>
                 <Image
-                  source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T163424.817.png' }}
+                  source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatteam.png' }}
                   style={styles.monsterImage}
                   resizeMode="cover"
                 />
