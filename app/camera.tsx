@@ -222,24 +222,35 @@ export default function CameraScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.agentList}
             >
-              {AGENTS.map((agent, index) => (
-                <TouchableOpacity
-                  key={agent.id}
-                  style={[styles.agentButton, index > 0 && styles.agentButtonSpacing]}
-                  onPress={() => setSelectedAgent(agent.id)}
-                >
-                  <Image
-                    source={{ uri: selectedAgent === agent.id ? agent.backImage : agent.frontImage }}
-                    style={styles.agentImage}
-                  />
-                  {selectedAgent === agent.id && (
-                    <View style={styles.checkmarkContainer}>
-                      <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-                      <Check size={20} color="#000" strokeWidth={3} />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
+              {AGENTS.map((agent, index) => {
+                const imageStyle = [styles.agentImage];
+                if (agent.id === 'sleep' || agent.id === 'feces') {
+                  imageStyle.push(styles.agentImageSmall);
+                } else if (agent.id === 'stress') {
+                  imageStyle.push(styles.agentImageUp);
+                } else if (agent.id === 'posture') {
+                  imageStyle.push(styles.agentImageDown);
+                }
+
+                return (
+                  <TouchableOpacity
+                    key={agent.id}
+                    style={[styles.agentButton, index > 0 && styles.agentButtonSpacing]}
+                    onPress={() => setSelectedAgent(agent.id)}
+                  >
+                    <Image
+                      source={{ uri: selectedAgent === agent.id ? agent.backImage : agent.frontImage }}
+                      style={imageStyle}
+                    />
+                    {selectedAgent === agent.id && (
+                      <View style={styles.checkmarkContainer}>
+                        <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+                        <Check size={20} color="#000" strokeWidth={3} />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
 
             <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
@@ -408,6 +419,18 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'contain',
+  },
+  agentImageSmall: {
+    width: '85%',
+    height: '85%',
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  agentImageUp: {
+    marginTop: -15,
+  },
+  agentImageDown: {
+    marginTop: 15,
   },
   permissionContainer: {
     flex: 1,
