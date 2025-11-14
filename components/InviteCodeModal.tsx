@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#B8A892',
   },
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,
@@ -96,8 +97,9 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     position: 'absolute',
-    top: 200,
+    top: 150,
     alignItems: 'center',
+    zIndex: 10,
   },
   logoImage: {
     width: 140,
@@ -120,6 +122,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 24,
     elevation: 10,
+    zIndex: 5,
+    marginTop: 200,
   },
   cardContent: {
     padding: 36,
