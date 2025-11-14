@@ -6,9 +6,10 @@ interface InviteCodeModalProps {
   visible: boolean;
   onValidCode: () => void;
   onNotYet: () => void;
+  onSkip: () => void;
 }
 
-export function InviteCodeModal({ visible, onValidCode, onNotYet }: InviteCodeModalProps) {
+export function InviteCodeModal({ visible, onValidCode, onNotYet, onSkip }: InviteCodeModalProps) {
   const [code, setCode] = useState('');
 
   const handleSubmit = () => {
@@ -27,6 +28,10 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet }: InviteCodeMo
       statusBarTranslucent
     >
       <View style={styles.backdrop}>
+        <TouchableOpacity style={styles.skipButton} onPress={onSkip}>
+          <Text style={styles.skipButtonText}>Skip</Text>
+        </TouchableOpacity>
+
         <Image
           source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
           style={styles.backgroundImage}
@@ -154,5 +159,18 @@ const styles = StyleSheet.create({
     color: '#888888',
     textAlign: 'center',
     lineHeight: 20,
+  },
+  skipButton: {
+    position: 'absolute',
+    top: 60,
+    right: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    zIndex: 10,
+  },
+  skipButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A1A',
   },
 });

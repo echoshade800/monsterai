@@ -44,6 +44,7 @@ export default function LoginScreen() {
         visible={showInviteModal}
         onValidCode={handleValidCode}
         onNotYet={handleNotYet}
+        onSkip={handleSkip}
       />
     <View style={styles.container}>
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
