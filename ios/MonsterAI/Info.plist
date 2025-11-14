@@ -25,9 +25,23 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string></string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.fanthus.monsterai.debug</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Google</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.44453409571-np85lcdtm45e57ulbqo1tg49pmbak699</string>
 			</array>
 		</dict>
 	</array>
@@ -93,7 +107,7 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>MonsterAI 请求你的相册数据</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>MonsterAI 访问你的提醒数据</string>
+	<string>MonsterAI 访问你的提醒数据23.20.151.253</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIBackgroundModes</key>
