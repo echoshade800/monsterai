@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Image } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { useState } from 'react';
+import { ActivityIndicator, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { getBaseUrl, getHeadersWithPassId } from '../src/services/api/api';
 
 interface InviteCodeModalProps {
   visible: boolean;
@@ -11,12 +11,44 @@ interface InviteCodeModalProps {
 
 export function InviteCodeModal({ visible, onValidCode, onNotYet, onSkip }: InviteCodeModalProps) {
   const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    if (code.trim().toLowerCase() === 'monsterai') {
-      onValidCode();
-    } else {
-      alert('Invalid invite code. Please try again.');
+  const handleSubmit = async () => {
+    if (!code.trim()) {
+      alert('Please enter an invite code.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 获取包含 passId 的 headers
+      const headersWithPassId = await getHeadersWithPassId();
+      
+      // 构建请求 URL
+      const baseUrl = getBaseUrl('default');
+      const inviteUrl = `${baseUrl}/invite-code/use?code=${encodeURIComponent(code.trim())}`;
+      console.log('邀请码验证地址:', inviteUrl);
+      
+      const response = await fetch(inviteUrl, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      console.log('邀请码验证响应:', data);
+      // 当 code 为 0 时表示验证成功
+      if (data.code === 0) {
+        onValidCode();
+      } else {
+        alert(data.msg || 'Invalid invite code. Please try again.');
+      }
+    } catch (error) {
+      console.error('Invite code request error:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,10 +93,15 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet, onSkip }: Invi
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.button, styles.submitButton]}
+                style={[styles.button, styles.submitButton, loading && styles.submitButtonDisabled]}
                 onPress={handleSubmit}
+                disabled={loading}
               >
-                <Text style={styles.submitButtonText}>Submit</Text>
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.submitButtonText}>Submit</Text>
+                )}
               </TouchableOpacity>
             </View>
 
@@ -153,6 +190,9 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
   },
   helperText: {
     fontSize: 14,
