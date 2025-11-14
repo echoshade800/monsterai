@@ -100,10 +100,8 @@ export default function CameraScreen() {
           params: { photoUri: photo?.uri, agentId: selectedAgent }
         });
       } else {
-        router.push({
-          pathname: '/(tabs)',
-          params: { photoUri: photo?.uri, agentId: selectedAgent, mode: 'photo' }
-        });
+        console.log('Photo taken:', photo);
+        router.back();
       }
     }
   }
@@ -121,10 +119,8 @@ export default function CameraScreen() {
           params: { photoUri: result.assets[0].uri, agentId: selectedAgent }
         });
       } else {
-        router.push({
-          pathname: '/(tabs)',
-          params: { photoUri: result.assets[0].uri, agentId: selectedAgent, mode: 'photo' }
-        });
+        console.log('Image selected:', result.assets[0]);
+        router.back();
       }
     }
   }

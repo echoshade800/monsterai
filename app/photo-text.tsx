@@ -12,10 +12,9 @@ export default function PhotoTextScreen() {
   const photoUri = params.photoUri as string;
 
   function handleSubmit() {
-    router.push({
-      pathname: '/(tabs)',
-      params: { photoUri, description, agentId: params.agentId, mode: 'photo-text' }
-    });
+    console.log('Submitting photo with description:', { photoUri, description });
+    router.back();
+    router.back();
   }
 
   return (
