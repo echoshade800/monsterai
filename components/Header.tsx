@@ -34,9 +34,6 @@ const LOG_ENTRIES = [
 
 export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
-  const [displayedLogs, setDisplayedLogs] = useState<Array<{ time: string; message: string; isComplete: boolean }>>([]);
-  const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const [currentLogIndex, setCurrentLogIndex] = useState(0);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
   const scrollY = useSharedValue(0);
   const router = useRouter();
@@ -46,49 +43,17 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   };
 
   useEffect(() => {
-    const allLogs = [...LOG_ENTRIES, ...LOG_ENTRIES];
-    const interval = setInterval(() => {
-      setCurrentCharIndex((prevChar) => {
-        const currentLog = allLogs[currentLogIndex % allLogs.length];
-        const fullText = `[${currentLog.time}] ${currentLog.message}`;
+    const lineHeight = 23;
+    const totalHeight = LOG_ENTRIES.length * lineHeight;
 
-        if (prevChar < fullText.length - 1) {
-          return prevChar + 1;
-        } else {
-          setDisplayedLogs((prev) => {
-            const updated = [...prev];
-            if (updated.length > 0) {
-              updated[updated.length - 1] = { ...currentLog, isComplete: true };
-            }
-            return updated;
-          });
-
-          setCurrentLogIndex((prevIndex) => {
-            const nextIndex = prevIndex + 1;
-            if (nextIndex < allLogs.length) {
-              setDisplayedLogs((prev) => [...prev, { ...allLogs[nextIndex], isComplete: false }]);
-            }
-            return nextIndex;
-          });
-
-          return 0;
-        }
-      });
-    }, 50);
-
-    setDisplayedLogs([{ ...allLogs[0], isComplete: false }]);
-
-    return () => clearInterval(interval);
+    scrollY.value = withRepeat(
+      withTiming(totalHeight, {
+        duration: 15000,
+      }),
+      -1,
+      false
+    );
   }, []);
-
-  useEffect(() => {
-    if (displayedLogs.length > 4) {
-      const lineHeight = 24;
-      scrollY.value = withTiming((displayedLogs.length - 4) * lineHeight, {
-        duration: 300,
-      });
-    }
-  }, [displayedLogs.length]);
 
   useEffect(() => {
     animatedCollapse.value = withTiming(isCollapsed ? 1 : 0, {
@@ -219,10 +184,10 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const sharedCameraStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
-      right: 12,
+      right: 42,
       bottom: 18,
-      width: 240,
-      height: 110,
+      width: 120,
+      height: 94,
       zIndex: 1000,
     };
   });
@@ -327,24 +292,16 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                   <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
                     <View style={styles.thinkingHeader}>
                       <Text style={styles.brainEmoji}>🧠</Text>
-                      <Text style={styles.thinkingTitle}>Thinking Log</Text>
+                      <Text style={styles.thinkingTitle}>In My Mind</Text>
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
-                        {displayedLogs.map((entry, index) => {
-                          const isLastLine = index === displayedLogs.length - 1;
-                          const fullText = `[${entry.time}] ${entry.message}`;
-                          const displayText = isLastLine && !entry.isComplete
-                            ? fullText.substring(0, currentCharIndex + 1)
-                            : fullText;
-
-                          return (
-                            <Text key={index} style={styles.logLine}>
-                              <Text style={styles.logTime}>[{entry.time}]</Text>
-                              <Text style={styles.logText}> {isLastLine && !entry.isComplete ? displayText.substring(displayText.indexOf(']') + 2) : entry.message}</Text>
-                            </Text>
-                          );
-                        })}
+                        {[...LOG_ENTRIES, ...LOG_ENTRIES].map((entry, index) => (
+                          <Text key={index} style={styles.logLine}>
+                            <Text style={styles.logTime}>[{entry.time}]</Text>
+                            <Text style={styles.logText}> {entry.message}</Text>
+                          </Text>
+                        ))}
                       </Animated.View>
                     </View>
                   </TouchableOpacity>
@@ -376,24 +333,16 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                   <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
                     <View style={styles.thinkingHeader}>
                       <Text style={styles.brainEmoji}>🧠</Text>
-                      <Text style={styles.thinkingTitle}>Thinking Log</Text>
+                      <Text style={styles.thinkingTitle}>In My Mind</Text>
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
-                        {displayedLogs.map((entry, index) => {
-                          const isLastLine = index === displayedLogs.length - 1;
-                          const fullText = `[${entry.time}] ${entry.message}`;
-                          const displayText = isLastLine && !entry.isComplete
-                            ? fullText.substring(0, currentCharIndex + 1)
-                            : fullText;
-
-                          return (
-                            <Text key={index} style={styles.logLine}>
-                              <Text style={styles.logTime}>[{entry.time}]</Text>
-                              <Text style={styles.logText}> {isLastLine && !entry.isComplete ? displayText.substring(displayText.indexOf(']') + 2) : entry.message}</Text>
-                            </Text>
-                          );
-                        })}
+                        {[...LOG_ENTRIES, ...LOG_ENTRIES].map((entry, index) => (
+                          <Text key={index} style={styles.logLine}>
+                            <Text style={styles.logTime}>[{entry.time}]</Text>
+                            <Text style={styles.logText}> {entry.message}</Text>
+                          </Text>
+                        ))}
                       </Animated.View>
                     </View>
                   </TouchableOpacity>
@@ -645,7 +594,8 @@ const styles = StyleSheet.create({
   },
   logLine: {
     marginBottom: 2,
-    height: 24,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   logTime: {
     fontFamily: 'Courier New',
@@ -661,7 +611,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cameraPlaceholder: {
-    width: 240,
+    width: 140,
     height: 110,
     borderRadius: 16,
     overflow: 'hidden',
