@@ -186,6 +186,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
           onPress={handleCameraPress}
           disabled={disabled}
         >
+          <BlurView intensity={70} tint="light" style={StyleSheet.absoluteFill} />
           <Camera size={24} color={disabled ? "#999999" : "#000000"} strokeWidth={2.5} />
         </TouchableOpacity>
       </Animated.View>
@@ -220,7 +221,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    borderRadius: 30,
+    borderRadius: 25,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     shadowColor: '#000',
@@ -231,9 +232,9 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    minHeight: 44,
+    paddingHorizontal: 14,
+    paddingVertical: 0,
+    height: 50,
   },
   atButtonWrapper: {
     marginRight: 4,
@@ -276,13 +277,14 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   cameraButtonDisabled: {
     opacity: 0.4,
