@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
-    marginTop: 140,
+    marginTop: 200,
   },
   promptContainer: {
     paddingHorizontal: 24,
