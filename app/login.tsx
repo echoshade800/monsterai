@@ -34,6 +34,10 @@ export default function LoginScreen() {
     Linking.openURL('https://example.com/privacy');
   };
 
+  const handleSkip = () => {
+    router.push('/(tabs)');
+  };
+
   return (
     <>
       <InviteCodeModal
@@ -42,6 +46,9 @@ export default function LoginScreen() {
         onNotYet={handleNotYet}
       />
     <View style={styles.container}>
+      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+        <Text style={styles.skipButtonText}>Skip</Text>
+      </TouchableOpacity>
       <Image
         source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
         style={styles.background}
@@ -176,6 +183,19 @@ const styles = StyleSheet.create({
   },
   link: {
     textDecorationLine: 'underline',
+    color: '#1A1A1A',
+  },
+  skipButton: {
+    position: 'absolute',
+    top: 60,
+    right: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    zIndex: 10,
+  },
+  skipButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#1A1A1A',
   },
 });
