@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InviteCodeModal } from '../components/InviteCodeModal';
 
 export default function LoginScreen() {
@@ -8,13 +8,20 @@ export default function LoginScreen() {
   const [showInviteModal, setShowInviteModal] = useState(true);
   const [hasValidCode, setHasValidCode] = useState(false);
 
+  useEffect(() => {
+    const unsubscribe = router.addListener('focus', () => {
+      setShowInviteModal(true);
+    });
+
+    return unsubscribe;
+  }, []);
+
   const handleValidCode = () => {
     setShowInviteModal(false);
     setHasValidCode(true);
   };
 
   const handleNotYet = () => {
-    setShowInviteModal(false);
     router.push('/under-construction');
   };
 
