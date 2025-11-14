@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
     padding: 16,
     height: 200,
     position: 'relative',
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
