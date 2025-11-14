@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ImageBackground, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { User, Check } from 'lucide-react-native';
-import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { useState, useEffect } from 'react';
 import Animated, {
   useAnimatedStyle,
@@ -13,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { CameraBox } from './CameraBox';
+import { useRouter } from 'expo-router';
 
 interface HeaderProps {
   isCollapsed?: boolean;
@@ -26,6 +26,11 @@ const COLLAPSE_THRESHOLD = 100;
 export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
+  const router = useRouter();
+
+  const handleThinkingPress = () => {
+    router.push('/(tabs)/home');
+  };
 
   useEffect(() => {
     animatedCollapse.value = withTiming(isCollapsed ? 1 : 0, {
@@ -153,8 +158,6 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
     };
   });
 
-  const stressGraphPath = "M 0 25 Q 15 15, 30 18 T 60 23 T 90 18 T 120 25 T 150 20 T 180 28 T 210 23 T 240 25";
-
   const sharedCameraStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
@@ -254,37 +257,29 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                 </View>
               </Animated.View>
 
-              <Animated.View style={[styles.zappedBanner, zappedBannerStyle]}>
+              <Animated.View style={[styles.thinkingBanner, zappedBannerStyle]}>
                 <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-                <View style={styles.zappedContent}>
-                  <View style={styles.zappedLeft}>
-                    <View style={styles.zappedTitleRow}>
-                      <Text style={styles.zappedTitle}>Zapped</Text>
-                      <View style={styles.stressRow}>
-                        <Text style={styles.stressLabel}>Stress</Text>
-                        <Text style={styles.stressValue}>86</Text>
-                      </View>
+                <View style={styles.thinkingContent}>
+                  <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
+                    <View style={styles.thinkingHeader}>
+                      <Text style={styles.brainEmoji}>🧠</Text>
+                      <Text style={styles.thinkingTitle}>In My Head</Text>
                     </View>
-                    <View style={styles.graphContainer}>
-                      <Svg width="100%" height="40" viewBox="0 0 240 40">
-                        <Defs>
-                          <SvgLinearGradient id="stressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <Stop offset="0%" stopColor="#4ADE80" stopOpacity="1" />
-                            <Stop offset="30%" stopColor="#FCD34D" stopOpacity="1" />
-                            <Stop offset="60%" stopColor="#F472B6" stopOpacity="1" />
-                            <Stop offset="100%" stopColor="#A78BFA" stopOpacity="1" />
-                          </SvgLinearGradient>
-                        </Defs>
-                        <Path
-                          d={stressGraphPath}
-                          fill="none"
-                          stroke="url(#stressGrad)"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                        />
-                      </Svg>
+                    <View style={styles.thinkingLogContainer}>
+                      <Text style={styles.logLine}>
+                        <Text style={styles.logTime}>[07:42]</Text>
+                        <Text style={styles.logText}> User's facial energy dropped 12% vs baseline.</Text>
+                      </Text>
+                      <Text style={styles.logLine}>
+                        <Text style={styles.logTime}>[07:45]</Text>
+                        <Text style={styles.logText}> Tag: Low energy morning, possible poor sleep.</Text>
+                      </Text>
+                      <Text style={styles.logLine}>
+                        <Text style={styles.logTime}>[08:02]</Text>
+                        <Text style={styles.logText}> Suggest: Protein breakfast + 5-min stretch.</Text>
+                      </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                   <View style={styles.cameraPlaceholder} />
                 </View>
               </Animated.View>
@@ -307,37 +302,29 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
             </View>
 
             <View style={styles.collapsedBannerContainer}>
-              <View style={styles.collapsedZappedBanner}>
+              <View style={styles.collapsedThinkingBanner}>
                 <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-                <View style={styles.zappedContent}>
-                  <View style={styles.zappedLeft}>
-                    <View style={styles.zappedTitleRow}>
-                      <Text style={styles.zappedTitle}>Zapped</Text>
-                      <View style={styles.stressRow}>
-                        <Text style={styles.stressLabel}>Stress</Text>
-                        <Text style={styles.stressValue}>86</Text>
-                      </View>
+                <View style={styles.thinkingContent}>
+                  <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
+                    <View style={styles.thinkingHeader}>
+                      <Text style={styles.brainEmoji}>🧠</Text>
+                      <Text style={styles.thinkingTitle}>In My Head</Text>
                     </View>
-                    <View style={styles.graphContainer}>
-                      <Svg width="100%" height="40" viewBox="0 0 240 40">
-                        <Defs>
-                          <SvgLinearGradient id="stressGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <Stop offset="0%" stopColor="#4ADE80" stopOpacity="1" />
-                            <Stop offset="30%" stopColor="#FCD34D" stopOpacity="1" />
-                            <Stop offset="60%" stopColor="#F472B6" stopOpacity="1" />
-                            <Stop offset="100%" stopColor="#A78BFA" stopOpacity="1" />
-                          </SvgLinearGradient>
-                        </Defs>
-                        <Path
-                          d={stressGraphPath}
-                          fill="none"
-                          stroke="url(#stressGrad2)"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                        />
-                      </Svg>
+                    <View style={styles.thinkingLogContainer}>
+                      <Text style={styles.logLine}>
+                        <Text style={styles.logTime}>[07:42]</Text>
+                        <Text style={styles.logText}> User's facial energy dropped 12% vs baseline.</Text>
+                      </Text>
+                      <Text style={styles.logLine}>
+                        <Text style={styles.logTime}>[07:45]</Text>
+                        <Text style={styles.logText}> Tag: Low energy morning, possible poor sleep.</Text>
+                      </Text>
+                      <Text style={styles.logLine}>
+                        <Text style={styles.logTime}>[08:02]</Text>
+                        <Text style={styles.logText}> Suggest: Protein breakfast + 5-min stretch.</Text>
+                      </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                   <View style={styles.cameraPlaceholder} />
                 </View>
               </View>
@@ -488,7 +475,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
-  zappedBanner: {
+  thinkingBanner: {
     height: 130,
     borderRadius: 24,
     overflow: 'hidden',
@@ -543,7 +530,7 @@ const styles = StyleSheet.create({
     marginTop: -38,
     marginBottom: 12,
   },
-  collapsedZappedBanner: {
+  collapsedThinkingBanner: {
     height: 130,
     borderRadius: 24,
     overflow: 'hidden',
@@ -554,48 +541,49 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
 
-  // Shared zapped banner content styles
-  zappedContent: {
+  // Thinking banner content styles
+  thinkingContent: {
     flex: 1,
     flexDirection: 'row',
     padding: 18,
     alignItems: 'center',
   },
-  zappedLeft: {
+  thinkingLeft: {
     flex: 1,
     paddingRight: 12,
   },
-  zappedTitleRow: {
+  thinkingHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-    gap: 8,
+    marginBottom: 10,
   },
-  zappedTitle: {
-    fontSize: 26,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
-    color: '#000000',
-  },
-  stressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  stressLabel: {
-    fontSize: 14,
-    fontFamily: 'SF Compact Rounded',
-    color: '#666666',
+  brainEmoji: {
+    fontSize: 18,
     marginRight: 6,
   },
-  stressValue: {
-    fontSize: 26,
+  thinkingTitle: {
+    fontSize: 18,
     fontWeight: '700',
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
   },
-  graphContainer: {
-    height: 40,
-    marginTop: 2,
+  thinkingLogContainer: {
+    flex: 1,
+  },
+  logLine: {
+    marginBottom: 2,
+  },
+  logTime: {
+    fontFamily: 'Courier New',
+    fontSize: 10,
+    color: '#E91E63',
+    fontWeight: '600',
+  },
+  logText: {
+    fontFamily: 'Courier New',
+    fontSize: 10,
+    color: '#333333',
+    lineHeight: 14,
   },
   cameraPlaceholder: {
     width: 130,
