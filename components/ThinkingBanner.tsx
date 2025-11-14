@@ -25,36 +25,69 @@ export function ThinkingBanner() {
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [displayedText, setDisplayedText] = useState('');
+  const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
+  const [completedEntries, setCompletedEntries] = useState<LogEntry[]>([]);
   const scrollY = useRef(new Animated.Value(0)).current;
-  const scrollViewRef = useRef<ScrollView>(null);
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 打字机效果
   useEffect(() => {
-    if (!isPaused) {
-      // 每条消息约24px (20px minHeight + 4px marginBottom)
-      // 容器高度72px可以显示3行
-      // 只有当内容超过72px时才滚动
-      const itemHeight = 24;
-      const containerHeight = 72;
-      const totalHeight = DEFAULT_LOG_ENTRIES.length * itemHeight * 2; // *2 because we duplicate entries
-      const scrollDistance = Math.max(0, totalHeight - containerHeight);
-
-      if (scrollDistance > 0) {
-        const animation = Animated.loop(
-          Animated.timing(scrollY, {
-            toValue: scrollDistance,
-            duration: 20000,
-            useNativeDriver: true,
-          })
-        );
-        animation.start();
-
-        return () => {
-          animation.stop();
-        };
+    if (isPaused) {
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
       }
+      return;
     }
-  }, [isPaused]);
+
+    const allEntries = [...DEFAULT_LOG_ENTRIES, ...DEFAULT_LOG_ENTRIES];
+    const currentEntry = allEntries[currentEntryIndex % allEntries.length];
+    const fullText = `[${currentEntry.time}] ${currentEntry.message}`;
+    let charIndex = 0;
+
+    typingIntervalRef.current = setInterval(() => {
+      if (charIndex < fullText.length) {
+        setDisplayedText(fullText.slice(0, charIndex + 1));
+        charIndex++;
+      } else {
+        // 当前条目打完，添加到已完成列表
+        if (typingIntervalRef.current) {
+          clearInterval(typingIntervalRef.current);
+        }
+
+        setCompletedEntries(prev => [...prev, currentEntry]);
+        setDisplayedText('');
+
+        // 延迟后开始下一条
+        setTimeout(() => {
+          setCurrentEntryIndex(prev => prev + 1);
+        }, 300);
+      }
+    }, 50);
+
+    return () => {
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+      }
+    };
+  }, [currentEntryIndex, isPaused]);
+
+  // 滚动效果：当完成的条目超过3条时，向上滚动
+  useEffect(() => {
+    const lineHeight = 24;
+    const visibleLines = 3;
+    const maxVisibleHeight = lineHeight * visibleLines;
+
+    if (completedEntries.length > visibleLines) {
+      const scrollAmount = (completedEntries.length - visibleLines) * lineHeight;
+      Animated.timing(scrollY, {
+        toValue: scrollAmount,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [completedEntries.length]);
 
   const handleCameraPress = async () => {
     if (!permission) {
@@ -118,15 +151,18 @@ export function ThinkingBanner() {
                   },
                 ]}
               >
-                {[...DEFAULT_LOG_ENTRIES, ...DEFAULT_LOG_ENTRIES].map((entry, index) => (
+                {completedEntries.map((entry, index) => (
                   <View key={index} style={styles.logEntry}>
                     <Text style={styles.logTime}>[{entry.time}]</Text>
                     <Text style={styles.logMessage}>{entry.message}</Text>
                   </View>
                 ))}
+                {displayedText && (
+                  <View style={styles.logEntry}>
+                    <Text style={[styles.logTime, styles.logMessage]}>{displayedText}</Text>
+                  </View>
+                )}
               </Animated.View>
-              <View style={styles.fadeTop} />
-              <View style={styles.fadeBottom} />
             </View>
           </TouchableOpacity>
 
