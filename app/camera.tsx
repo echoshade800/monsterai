@@ -337,8 +337,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   captureImage: {
-    width: 420,
-    height: 420,
+    width: 320,
+    height: 320,
     resizeMode: 'contain',
   },
   captureOverlay: {
@@ -377,8 +377,8 @@ const styles = StyleSheet.create({
     gap: -80,
   },
   agentButton: {
-    width: 180,
-    height: 180,
+    width: 140,
+    height: 140,
   },
   agentImage: {
     width: '100%',
