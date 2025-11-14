@@ -25,67 +25,26 @@ export function ThinkingBanner() {
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [displayedText, setDisplayedText] = useState('');
-  const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
-  const [completedEntries, setCompletedEntries] = useState<LogEntry[]>([]);
-  const [contentHeight, setContentHeight] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollViewRef = useRef<ScrollView>(null);
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 打字机效果
   useEffect(() => {
-    if (isPaused) {
-      if (typingIntervalRef.current) {
-        clearInterval(typingIntervalRef.current);
-      }
-      return;
+    if (!isPaused) {
+      const animation = Animated.loop(
+        Animated.timing(scrollY, {
+          toValue: DEFAULT_LOG_ENTRIES.length * 40,
+          duration: 15000,
+          useNativeDriver: true,
+        })
+      );
+      animation.start();
+
+      return () => {
+        animation.stop();
+      };
     }
-
-    const allEntries = [...DEFAULT_LOG_ENTRIES, ...DEFAULT_LOG_ENTRIES];
-    const currentEntry = allEntries[currentEntryIndex % allEntries.length];
-    const fullText = `[${currentEntry.time}] ${currentEntry.message}`;
-    let charIndex = 0;
-
-    typingIntervalRef.current = setInterval(() => {
-      if (charIndex < fullText.length) {
-        setDisplayedText(fullText.slice(0, charIndex + 1));
-        charIndex++;
-      } else {
-        // 当前条目打完，添加到已完成列表
-        if (typingIntervalRef.current) {
-          clearInterval(typingIntervalRef.current);
-        }
-
-        setCompletedEntries(prev => [...prev, currentEntry]);
-        setDisplayedText('');
-
-        // 延迟后开始下一条
-        setTimeout(() => {
-          setCurrentEntryIndex(prev => prev + 1);
-        }, 300);
-      }
-    }, 50);
-
-    return () => {
-      if (typingIntervalRef.current) {
-        clearInterval(typingIntervalRef.current);
-      }
-    };
-  }, [currentEntryIndex, isPaused]);
-
-  // 滚动效果：当内容高度超过容器高度时，向上滚动
-  useEffect(() => {
-    const containerHeight = 72;
-    if (contentHeight > containerHeight) {
-      const scrollAmount = contentHeight - containerHeight;
-      Animated.timing(scrollY, {
-        toValue: scrollAmount,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [contentHeight]);
+  }, [isPaused]);
 
   const handleCameraPress = async () => {
     if (!permission) {
@@ -148,23 +107,16 @@ export function ThinkingBanner() {
                     transform: [{ translateY: Animated.multiply(scrollY, -1) }],
                   },
                 ]}
-                onLayout={(event) => {
-                  const { height } = event.nativeEvent.layout;
-                  setContentHeight(height);
-                }}
               >
-                {completedEntries.map((entry, index) => (
+                {[...DEFAULT_LOG_ENTRIES, ...DEFAULT_LOG_ENTRIES].map((entry, index) => (
                   <View key={index} style={styles.logEntry}>
                     <Text style={styles.logTime}>[{entry.time}]</Text>
                     <Text style={styles.logMessage}>{entry.message}</Text>
                   </View>
                 ))}
-                {displayedText && (
-                  <View style={styles.logEntry}>
-                    <Text style={[styles.logTime, styles.logMessage]}>{displayedText}</Text>
-                  </View>
-                )}
               </Animated.View>
+              <View style={styles.fadeTop} />
+              <View style={styles.fadeBottom} />
             </View>
           </TouchableOpacity>
 
@@ -233,7 +185,7 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   logContainer: {
-    height: 72,
+    flex: 1,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -243,8 +195,8 @@ const styles = StyleSheet.create({
   },
   logEntry: {
     flexDirection: 'row',
-    marginBottom: 6,
-    flexWrap: 'wrap',
+    marginBottom: 4,
+    height: 36,
   },
   logTime: {
     fontFamily: 'Courier New',
@@ -252,14 +204,13 @@ const styles = StyleSheet.create({
     color: '#E91E63',
     marginRight: 4,
     fontWeight: '600',
-    flexShrink: 0,
   },
   logMessage: {
     fontFamily: 'Courier New',
     fontSize: 11,
     color: '#333333',
-    lineHeight: 16,
     flex: 1,
+    lineHeight: 16,
   },
   fadeTop: {
     position: 'absolute',

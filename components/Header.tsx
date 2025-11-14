@@ -34,7 +34,6 @@ const LOG_ENTRIES = [
 
 export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
-  const [displayedLogs, setDisplayedLogs] = useState<Array<{ time: string; message: string; charIndex: number }>>([]);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
   const scrollY = useSharedValue(0);
   const router = useRouter();
@@ -44,50 +43,16 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   };
 
   useEffect(() => {
-    let currentLogIndex = 0;
-    let charIndex = 0;
+    const lineHeight = 23;
+    const totalHeight = LOG_ENTRIES.length * lineHeight;
 
-    const typewriterInterval = setInterval(() => {
-      if (currentLogIndex < LOG_ENTRIES.length) {
-        const currentLog = LOG_ENTRIES[currentLogIndex];
-        const fullMessage = currentLog.message;
-
-        if (charIndex <= fullMessage.length) {
-          setDisplayedLogs(prev => {
-            const newLogs = [...prev];
-            if (newLogs.length <= currentLogIndex) {
-              newLogs.push({ ...currentLog, message: '', charIndex: 0 });
-            }
-            newLogs[currentLogIndex] = {
-              ...currentLog,
-              message: fullMessage.substring(0, charIndex),
-              charIndex
-            };
-            return newLogs;
-          });
-          charIndex++;
-        } else {
-          currentLogIndex++;
-          charIndex = 0;
-
-          // Scroll down slowly after each line is complete
-          const lineHeight = 22;
-          scrollY.value = withTiming(currentLogIndex * lineHeight, {
-            duration: 800,
-          });
-        }
-      } else {
-        // Reset after all logs are displayed
-        setTimeout(() => {
-          setDisplayedLogs([]);
-          currentLogIndex = 0;
-          charIndex = 0;
-          scrollY.value = 0;
-        }, 2000);
-      }
-    }, 50); // Type one character every 50ms
-
-    return () => clearInterval(typewriterInterval);
+    scrollY.value = withRepeat(
+      withTiming(totalHeight, {
+        duration: 15000,
+      }),
+      -1,
+      false
+    );
   }, []);
 
   useEffect(() => {
@@ -331,7 +296,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
-                        {displayedLogs.map((entry, index) => (
+                        {[...LOG_ENTRIES, ...LOG_ENTRIES].map((entry, index) => (
                           <Text key={index} style={styles.logLine}>
                             <Text style={styles.logTime}>[{entry.time}]</Text>
                             <Text style={styles.logText}> {entry.message}</Text>
@@ -372,7 +337,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
-                        {displayedLogs.map((entry, index) => (
+                        {[...LOG_ENTRIES, ...LOG_ENTRIES].map((entry, index) => (
                           <Text key={index} style={styles.logLine}>
                             <Text style={styles.logTime}>[{entry.time}]</Text>
                             <Text style={styles.logText}> {entry.message}</Text>
@@ -628,18 +593,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   logLine: {
-    marginBottom: 2,
-    height: 22,
+    marginBottom: 5,
+    height: 23,
   },
   logTime: {
     fontFamily: 'Courier New',
-    fontSize: 14,
+    fontSize: 12,
     color: '#E91E63',
     fontWeight: '600',
   },
   logText: {
     fontFamily: 'Courier New',
-    fontSize: 14,
+    fontSize: 12,
     color: '#000000',
     lineHeight: 18,
   },
