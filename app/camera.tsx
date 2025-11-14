@@ -8,6 +8,13 @@ import * as ImagePicker from 'expo-image-picker';
 
 const AGENTS = [
   {
+    id: 'steward',
+    name: 'Steward',
+    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/steward.png',
+    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20steward.png',
+    prompt: 'Take any pictures you want',
+  },
+  {
     id: 'energy',
     name: 'Energy',
     frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
@@ -48,13 +55,6 @@ const AGENTS = [
     frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20feces.png',
     prompt: "Let's see your health from another angle—snap a pic and track your gut health.",
-  },
-  {
-    id: 'steward',
-    name: 'Steward',
-    frontImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/steward.png',
-    backImage: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/back%20steward.png',
-    prompt: 'Take any pictures you want',
   },
 ];
 
