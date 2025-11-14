@@ -31,18 +31,28 @@ export function ThinkingBanner() {
 
   useEffect(() => {
     if (!isPaused) {
-      const animation = Animated.loop(
-        Animated.timing(scrollY, {
-          toValue: DEFAULT_LOG_ENTRIES.length * 40,
-          duration: 15000,
-          useNativeDriver: true,
-        })
-      );
-      animation.start();
+      // 每条消息约24px (20px minHeight + 4px marginBottom)
+      // 容器高度72px可以显示3行
+      // 只有当内容超过72px时才滚动
+      const itemHeight = 24;
+      const containerHeight = 72;
+      const totalHeight = DEFAULT_LOG_ENTRIES.length * itemHeight * 2; // *2 because we duplicate entries
+      const scrollDistance = Math.max(0, totalHeight - containerHeight);
 
-      return () => {
-        animation.stop();
-      };
+      if (scrollDistance > 0) {
+        const animation = Animated.loop(
+          Animated.timing(scrollY, {
+            toValue: scrollDistance,
+            duration: 20000,
+            useNativeDriver: true,
+          })
+        );
+        animation.start();
+
+        return () => {
+          animation.stop();
+        };
+      }
     }
   }, [isPaused]);
 
