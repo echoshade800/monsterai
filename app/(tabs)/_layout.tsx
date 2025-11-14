@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   },
   tabBarItem: {
     paddingVertical: 8,
-    paddingHorizontal: 0,
+    paddingHorizontal: 4,
     gap: 2,
   },
   tabBarIcon: {
