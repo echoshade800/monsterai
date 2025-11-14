@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   floatingCameraButton: {
     position: 'absolute',
-    right: 20,
+    right: 32,
   },
   cameraButton: {
     width: 50,
