@@ -52,14 +52,6 @@ export default function PhotoTextScreen() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.imageContainer}>
-              <Image
-                source={{ uri: photoUri }}
-                style={styles.previewImage}
-                resizeMode="cover"
-              />
-            </View>
-
             <View style={styles.formContainer}>
               <View style={styles.labelContainer}>
                 <Text style={styles.label}>Description</Text>
@@ -86,6 +78,14 @@ export default function PhotoTextScreen() {
               >
                 <Text style={styles.submitButtonText}>Begin AI Analysis</Text>
               </TouchableOpacity>
+            </View>
+
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ uri: photoUri }}
+                style={styles.previewImage}
+                resizeMode="cover"
+              />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -159,13 +159,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 30,
   },
   imageContainer: {
     width: '100%',
     aspectRatio: 1,
     borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: 24,
     backgroundColor: '#FFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -178,8 +178,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   formContainer: {
-    flex: 1,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 30,
+    marginBottom: 24,
   },
   labelContainer: {
     flexDirection: 'row',
