@@ -13,8 +13,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: '#8E8E93',
         tabBarBackground: () => (
           <View style={styles.tabBarBackgroundContainer}>
-            <BlurView intensity={90} style={StyleSheet.absoluteFill} tint="light" />
-            <View style={styles.tabBarBackgroundOverlay} />
+            <BlurView intensity={70} style={StyleSheet.absoluteFill} tint="light" />
           </View>
         ),
         tabBarLabelStyle: styles.tabBarLabel,
@@ -91,11 +90,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 35,
     overflow: 'hidden',
-    backgroundColor: 'rgba(240, 240, 245, 0.85)',
-  },
-  tabBarBackgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   tabBarLabel: {
     fontSize: 12,
