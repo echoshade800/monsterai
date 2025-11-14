@@ -32,7 +32,7 @@ const MONSTERS_DATA = [
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
     imageSize: '275%',
-    imageOffset: 72,
+    imageOffset: 112,
   },
   {
     id: 'sleep',
