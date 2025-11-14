@@ -347,7 +347,7 @@ export default function EchoTab() {
 
   
   // 处理流式响应
-  const handleStreamResponse = useCallback(async (userMessage: string, photoUri?: string) => {
+  const handleStreamResponse = useCallback(async (userMessage: string, photoUri?: string, imageDetectionType?: string) => {
     try {
       if (!userData) {
         Alert.alert('错误', '用户信息未加载，请重试');
@@ -378,7 +378,7 @@ export default function EchoTab() {
         text: userMessage,
         system_prompt: ["you are a helpful AI assistant"],
         msg_type: photoUri ? "image" : "text",
-        image_detection_type: "face"
+        image_detection_type: imageDetectionType || "full"
       };
       // 如果有图片URL，添加到请求体中
       if (photoUri) {
@@ -438,6 +438,8 @@ export default function EchoTab() {
       const photoUri = params.photoUri as string;
       const mode = params.mode as string;
       const description = params.description as string;
+      const imageDetectionType = (params.imageDetectionType as string) || 'full';
+      const agentId = params.agentId as string;
 
       // 避免重复处理同一张照片
       if (processedPhotoRef.current === photoUri) {
@@ -459,12 +461,19 @@ export default function EchoTab() {
         ? description 
         : 'Please analyze this photo';
       
-      console.log('发送图片消息:', { mode, description, messageText, photoUri });
+      console.log('发送图片消息:', { 
+        mode, 
+        description, 
+        messageText, 
+        photoUri, 
+        imageDetectionType,
+        agentId 
+      });
       
-      // 传递图片URL给 handleStreamResponse
-      handleStreamResponse(messageText, photoUri);
+      // 传递图片URL和imageDetectionType给 handleStreamResponse
+      handleStreamResponse(messageText, photoUri, imageDetectionType);
     }
-  }, [params.photoUri, params.mode, params.description, userData, handleStreamResponse]);
+  }, [params.photoUri, params.mode, params.description, params.imageDetectionType, params.agentId, userData, handleStreamResponse]);
 
   // 将 function call 结果发送回服务器
   const sendFunctionCallResult = useCallback(async (callId: string, functionName: string, result: any) => {

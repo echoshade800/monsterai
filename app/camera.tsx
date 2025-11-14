@@ -15,6 +15,7 @@ const AGENTS = [
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontsteward.png',
     backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backsteward.png',
     prompt: 'Take any picture you want!',
+    image_detection_type: 'full',
   },
   {
     id: 'energy',
@@ -22,6 +23,7 @@ const AGENTS = [
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontenergy.png',
     backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backenergy.png',
     prompt: 'Show me your food!',
+    image_detection_type: 'food_calorie',
   },
   {
     id: 'face',
@@ -29,6 +31,7 @@ const AGENTS = [
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontface.png',
     backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backface.png',
     prompt: 'Show me your face!',
+    image_detection_type: 'face',
   },
   {
     id: 'posture',
@@ -36,6 +39,7 @@ const AGENTS = [
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontposture.png',
     backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backposture.png',
     prompt: 'Check your posture!',
+    image_detection_type: 'posture',
   },
   {
     id: 'sleep',
@@ -43,6 +47,7 @@ const AGENTS = [
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontsleep.png',
     backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backsleep.png',
     prompt: 'How did you sleep? Show me!',
+    image_detection_type: 'sleep',
   },
   {
     id: 'stress',
@@ -50,6 +55,7 @@ const AGENTS = [
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontstress.png',
     backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backstress.png',
     prompt: 'How stressed are you? Show me!',
+    image_detection_type: 'stress',
   },
   {
     id: 'feces',
@@ -57,6 +63,7 @@ const AGENTS = [
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontfeces.png',
     backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backfeces.png',
     prompt: 'Did you poop today?',
+    image_detection_type: 'feces',
   },
 ];
 
@@ -158,16 +165,36 @@ export default function CameraScreen() {
       // 获取图片URI（优先使用S3 URL，失败则使用本地URI）
       const imageUri = uploadResult?.presigned_url || uploadResult?.s3_uri || photo.uri;
 
+      // 获取选中 agent 的 image_detection_type
+      const selectedAgentData = AGENTS.find(a => a.id === selectedAgent);
+      const imageDetectionType = selectedAgentData?.image_detection_type || 'full';
+      
+      console.log('导航参数:', {
+        photoUri: imageUri,
+        agentId: selectedAgent,
+        imageDetectionType,
+        mode
+      });
+
       // 导航到相应页面
       if (mode === 'photo-text') {
         router.push({
           pathname: '/photo-text',
-          params: { photoUri: imageUri, agentId: selectedAgent }
+          params: { 
+            photoUri: imageUri, 
+            agentId: selectedAgent,
+            imageDetectionType
+          }
         });
       } else {
         router.push({
           pathname: '/(tabs)',
-          params: { photoUri: imageUri, agentId: selectedAgent, mode: 'photo' }
+          params: { 
+            photoUri: imageUri, 
+            agentId: selectedAgent, 
+            imageDetectionType,
+            mode: 'photo' 
+          }
         });
       }
     } catch (error) {
@@ -185,15 +212,35 @@ export default function CameraScreen() {
     });
 
     if (!result.canceled && result.assets[0]) {
+      // 获取选中 agent 的 image_detection_type
+      const selectedAgentData = AGENTS.find(a => a.id === selectedAgent);
+      const imageDetectionType = selectedAgentData?.image_detection_type || 'full';
+      
+      console.log('相册选择导航参数:', {
+        photoUri: result.assets[0].uri,
+        agentId: selectedAgent,
+        imageDetectionType,
+        mode
+      });
+      
       if (mode === 'photo-text') {
         router.push({
           pathname: '/photo-text',
-          params: { photoUri: result.assets[0].uri, agentId: selectedAgent }
+          params: { 
+            photoUri: result.assets[0].uri, 
+            agentId: selectedAgent,
+            imageDetectionType
+          }
         });
       } else {
         router.push({
           pathname: '/(tabs)',
-          params: { photoUri: result.assets[0].uri, agentId: selectedAgent, mode: 'photo' }
+          params: { 
+            photoUri: result.assets[0].uri, 
+            agentId: selectedAgent,
+            imageDetectionType,
+            mode: 'photo' 
+          }
         });
       }
     }
