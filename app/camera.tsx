@@ -465,8 +465,8 @@ const styles = StyleSheet.create({
   },
   checkmarkContainer: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 28,
+    right: 28,
     width: 32,
     height: 32,
     borderRadius: 16,
