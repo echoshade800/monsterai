@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Alert, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
@@ -19,6 +19,7 @@ interface Message {
 }
 
 export default function EchoTab() {
+  const router = useRouter();
   const params = useLocalSearchParams();
   const processedPhotoRef = useRef<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -544,8 +545,15 @@ export default function EchoTab() {
 
       <ConversationSection messages={messages} isLoading={isLoading} />
 
-      <InputField 
-        onFocus={handleInputFocus} 
+      <TouchableOpacity
+        style={styles.testButton}
+        onPress={() => router.push('/login')}
+      >
+        <Text style={styles.testButtonText}>Test Login</Text>
+      </TouchableOpacity>
+
+      <InputField
+        onFocus={handleInputFocus}
         onSend={sendMessage}
         isSending={isSending}
         disabled={!userData}
@@ -558,5 +566,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#E8D4B8',
+  },
+  testButton: {
+    position: 'absolute',
+    top: 100,
+    right: 20,
+    backgroundColor: '#1A1A1A',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 999,
+  },
+  testButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
