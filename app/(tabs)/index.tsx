@@ -61,11 +61,26 @@ export default function EchoTab() {
       const type = getMessageType(item);
       // 优先使用 _id 字段作为唯一标识
       const messageId = item._id || item.id || item.trace_id || `msg-${index}-${Date.now()}`;
+      
+      // 提取图片URL（支持 image, imageUrl, image_url, photoUri 等字段）
+      const photoUri = item.image || item.imageUrl || item.image_url || item.photoUri || undefined;
+      
+      // 如果消息包含图片，记录日志
+      if (photoUri) {
+        console.log('转换图片消息:', {
+          msg_type: item.msg_type,
+          has_image: !!photoUri,
+          content: getMessageContent(item),
+          photoUri_preview: photoUri.substring(0, 80) + '...'
+        });
+      }
+      
       return {
         id: messageId,
         type,
         content: getMessageContent(item),
         avatar: type === 'assistant' ? '🦑' : undefined,
+        photoUri,
       };
     };
     
@@ -367,7 +382,7 @@ export default function EchoTab() {
       };
       // 如果有图片URL，添加到请求体中
       if (photoUri) {
-        requestBody.image_url = photoUri;
+        requestBody.image = photoUri;
       }
       console.log('requestBody', requestBody);
       
@@ -433,13 +448,19 @@ export default function EchoTab() {
       const userMsg: Message = {
         id: Date.now().toString(),
         type: 'user',
-        content: mode === 'photo-text' ? description || '' : '',
+        content: mode === 'photo-text' ? (description || '') : '',
         photoUri: photoUri,
       };
 
       setMessages(prev => [...prev, userMsg]);
       
-      const messageText = mode === 'photo-text' && description ? description : 'Here is a photo';
+      // 根据模式设置消息文本
+      const messageText = mode === 'photo-text' && description 
+        ? description 
+        : 'Please analyze this photo';
+      
+      console.log('发送图片消息:', { mode, description, messageText, photoUri });
+      
       // 传递图片URL给 handleStreamResponse
       handleStreamResponse(messageText, photoUri);
     }

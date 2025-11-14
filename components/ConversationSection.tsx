@@ -1,5 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Message {
@@ -13,6 +13,41 @@ interface Message {
 interface ConversationSectionProps {
   messages?: Message[];
   isLoading?: boolean;
+}
+
+// 图片组件，带加载和错误处理
+function MessageImage({ uri }: { uri: string }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <View style={styles.imageContainer}>
+      <Image
+        source={{ uri }}
+        style={styles.messageImage}
+        resizeMode="cover"
+        onLoadStart={() => {
+          setIsLoading(true);
+          setHasError(false);
+        }}
+        onLoad={() => setIsLoading(false)}
+        onError={() => {
+          setIsLoading(false);
+          setHasError(true);
+        }}
+      />
+      {isLoading && (
+        <View style={styles.imageLoadingContainer}>
+          <ActivityIndicator size="small" color="#666666" />
+        </View>
+      )}
+      {hasError && (
+        <View style={styles.imageErrorContainer}>
+          <Text style={styles.imageErrorText}>图片加载失败</Text>
+        </View>
+      )}
+    </View>
+  );
 }
 
 export function ConversationSection({ messages = [], isLoading = false }: ConversationSectionProps) {
@@ -84,21 +119,19 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
         return (
           <View key={message.id} style={styles.userMessageContainer}>
             <Pressable
-              onLongPress={() => handleCopyMessage(message.content)}
+              onLongPress={() => handleCopyMessage(message.content || '图片消息')}
               style={[styles.userBubble, message.photoUri && styles.userBubbleWithPhoto]}
             >
               {message.photoUri && (
-                <Image
-                  source={{ uri: message.photoUri }}
-                  style={styles.messageImage}
-                  resizeMode="cover"
-                />
+                <MessageImage uri={message.photoUri} />
               )}
-              {message.content && (
+              {message.content ? (
                 <Text style={[styles.userText, message.photoUri && styles.textWithImage]}>
                   {message.content}
                 </Text>
-              )}
+              ) : message.photoUri && !message.content ? (
+                <Text style={styles.photoOnlyText}>📷 图片</Text>
+              ) : null}
             </Pressable>
           </View>
         );
@@ -164,6 +197,7 @@ const styles = StyleSheet.create({
   },
   userBubbleWithPhoto: {
     maxWidth: '85%',
+    padding: 8,
   },
   userText: {
     fontSize: 15,
@@ -171,14 +205,52 @@ const styles = StyleSheet.create({
     color: '#000000',
     lineHeight: 22,
   },
-  messageImage: {
+  imageContainer: {
+    position: 'relative',
     width: 220,
     height: 220,
     borderRadius: 12,
+    overflow: 'hidden',
     marginBottom: 8,
+  },
+  messageImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+  },
+  imageLoadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageErrorContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageErrorText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontFamily: 'SF Compact Rounded',
+  },
+  photoOnlyText: {
+    fontSize: 13,
+    fontFamily: 'SF Compact Rounded',
+    color: '#666666',
   },
   textWithImage: {
     marginTop: 0,
+    paddingHorizontal: 6,
   },
   loadingContainer: {
     justifyContent: 'center',
