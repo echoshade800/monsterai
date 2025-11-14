@@ -569,8 +569,8 @@ const styles = StyleSheet.create({
   },
   testButton: {
     position: 'absolute',
-    top: 100,
-    right: 20,
+    bottom: 120,
+    left: 20,
     backgroundColor: '#1A1A1A',
     paddingHorizontal: 20,
     paddingVertical: 12,
