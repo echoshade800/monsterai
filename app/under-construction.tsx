@@ -25,7 +25,7 @@ export default function UnderConstructionScreen() {
 
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.replace('/login')}
         >
           <Text style={styles.backButtonText}>Back to start</Text>
         </TouchableOpacity>
