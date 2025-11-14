@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   flipButton: {
     position: 'absolute',
     right: 20,
-    bottom: Platform.OS === 'ios' ? 120 : 110,
+    bottom: Platform.OS === 'ios' ? 160 : 150,
     width: 56,
     height: 56,
     borderRadius: 28,
