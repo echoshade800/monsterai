@@ -10,7 +10,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: '#000000',
-        tabBarInactiveTintColor: '#999999',
+        tabBarInactiveTintColor: '#8E8E93'},
         tabBarBackground: () => (
           <View style={styles.tabBarBackgroundContainer}>
             <BlurView intensity={90} style={StyleSheet.absoluteFill} tint="light" />
@@ -27,7 +27,7 @@ export default function TabLayout() {
           title: 'Echo',
           tabBarIcon: ({ size, color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <MessageCircle size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <MessageCircle size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
         }}
@@ -38,7 +38,7 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ size, color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <Home size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <Home size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
         }}
@@ -49,7 +49,7 @@ export default function TabLayout() {
           title: 'Store',
           tabBarIcon: ({ size, color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <Store size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <Store size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
         }}
@@ -60,7 +60,7 @@ export default function TabLayout() {
           title: 'Social',
           tabBarIcon: ({ size, color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <Users size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <Users size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
         }}
@@ -72,55 +72,59 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
-    bottom: 20,
-    left: 32,
-    right: 32,
-    height: 65,
-    borderRadius: 32,
+    bottom: 16,
+    left: 20,
+    right: 20,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: 'transparent',
     borderWidth: 0,
     elevation: 0,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.18,
-    shadowRadius: 24,
-    paddingHorizontal: 6,
-    paddingBottom: Platform.OS === 'ios' ? 8 : 6,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    paddingHorizontal: 0,
+    paddingBottom: 0,
   },
   tabBarBackgroundContainer: {
     flex: 1,
-    borderRadius: 32,
+    borderRadius: 35,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: 'rgba(240, 240, 245, 0.85)',
   },
   tabBarBackgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(248, 248, 250, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
   tabBarLabel: {
-    fontSize: 11,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '400',
     fontFamily: 'SF Compact Rounded',
-    marginTop: 2,
-    marginBottom: 0,
+    marginTop: -2,
+    marginBottom: 4,
   },
   tabBarItem: {
-    paddingVertical: 6,
-    paddingHorizontal: 2,
-    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 0,
+    gap: 2,
   },
   tabBarIcon: {
-    marginTop: 4,
+    marginTop: 6,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
   iconContainerActive: {
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
 });
