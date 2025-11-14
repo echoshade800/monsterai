@@ -12,7 +12,7 @@ const CURRENT_ENV = __DEV__ ? ENV.DEVELOPMENT : ENV.PRODUCTION;
 // API配置
 const API_CONFIGS = {
   [ENV.DEVELOPMENT]: {
-    BASE_URL: 'http://23.20.151.253:8997',
+    BASE_URL: 'http://23.20.151.253:8998',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
     TIMEOUT: 10000,
     HEADERS: {
@@ -20,7 +20,7 @@ const API_CONFIGS = {
     },
   },
   [ENV.STAGING]: {
-    BASE_URL: 'http://23.20.151.253:8997',
+    BASE_URL: 'http://23.20.151.253:8998',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
     TIMEOUT: 10000,
     HEADERS: {
@@ -28,7 +28,7 @@ const API_CONFIGS = {
     },
   },
   [ENV.PRODUCTION]: {
-    BASE_URL: 'http://23.20.151.253:8997',
+    BASE_URL: 'http://23.20.151.253:8998',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
     TIMEOUT: 10000,
     HEADERS: {

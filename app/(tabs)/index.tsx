@@ -329,6 +329,8 @@ export default function EchoTab() {
     }
   }, [apiConfig]);
 
+
+  
   // 处理流式响应
   const handleStreamResponse = useCallback(async (userMessage: string, photoUri?: string) => {
     try {
@@ -360,13 +362,14 @@ export default function EchoTab() {
         timestamp: messageTimestamp,
         text: userMessage,
         system_prompt: ["you are a helpful AI assistant"],
-        msg_type: photoUri ? "image" : "text"
+        msg_type: photoUri ? "image" : "text",
+        image_detection_type: "face"
       };
-
       // 如果有图片URL，添加到请求体中
       if (photoUri) {
         requestBody.image_url = photoUri;
       }
+      console.log('requestBody', requestBody);
       
       // 调用通用处理函数
       await handleStreamRequest({

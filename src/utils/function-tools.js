@@ -8,7 +8,7 @@ import {
   NativeModules,
 } from 'react-native';
 import BrokenHealthKit from "react-native-health";
-import { getHeadersWithPassId } from '../services/api/api.js';
+import { getBaseUrl, getHeadersWithPassId } from '../services/api/api.js';
 import healthDataManager, { TimePeriod } from './health-data-manager.js';
 import storageManager from './storage.js';
 const AppleHealthKit = NativeModules.AppleHealthKit;
@@ -31,31 +31,60 @@ if (AppleHealthKit && BrokenHealthKit.Constants) {
  * @returns {Promise<Object>} 上传结果，包含 bucket, key, presigned_url, s3_uri
  */
 export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
+  console.log('=== uploadImageToS3 开始 ===');
+  console.log('参数:', { uid, uri, filename, mimeType });
+  
   const form = new FormData();
   form.append('uid', uid);
-  form.append('file', { uri, name: filename || 'upload.jpg', type: mimeType || 'image/jpeg' });
+  form.append('file', { 
+    uri, 
+    name: filename || 'upload.jpg', 
+    type: mimeType || 'image/jpeg' 
+  });
+  
+  console.log('FormData 已创建');
   
   // 获取包含 passId 的 headers
   const headersWithPassId = await getHeadersWithPassId();
+  console.log('获取到的 headers:', headersWithPassId);
   
-  const resp = await fetch('http://23.20.151.253:8999/upload/image', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      passId: headersWithPassId.passId,
-      // 不要手动设置 Content-Type，交给 fetch 处理 multipart 边界
-    },
-    body: form,
-  });
+  // 使用 API 配置中的 BASE_URL
+  const baseUrl = getBaseUrl('default');
+  const uploadUrl = `${baseUrl}/upload/image`;
+  console.log('上传地址:', uploadUrl);
+  
+  try {
+    console.log('开始发送请求...');
+    const resp = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        passId: headersWithPassId.passId,
+        // 不要手动设置 Content-Type，交给 fetch 处理 multipart 边界
+      },
+      body: form,
+    });
 
-  const json = await resp.json();
-  console.log('upload image to s3 response', JSON.stringify(json, null, 2));
-  
-  if (!resp.ok) {
-    throw new Error(json?.detail || 'Upload failed');
+    console.log('请求响应状态:', resp.status, resp.statusText);
+    console.log('响应 headers:', resp.headers);
+
+    const json = await resp.json();
+    console.log('upload image to s3 response:', JSON.stringify(json, null, 2));
+    
+    if (!resp.ok) {
+      console.error('上传失败，响应内容:', json);
+      throw new Error(json?.detail || json?.message || 'Upload failed');
+    }
+    
+    console.log('=== uploadImageToS3 成功 ===');
+    return json.data;
+  } catch (error) {
+    console.error('=== uploadImageToS3 失败 ===');
+    console.error('错误类型:', error.name);
+    console.error('错误信息:', error.message);
+    console.error('错误堆栈:', error.stack);
+    throw error;
   }
-  
-  return json.data;
 };
 
 /**
@@ -649,11 +678,11 @@ export const FUNCTION_TOOLS = [
  * 将工具名称映射到具体的实现函数
  */
 export const TOOL_HANDLERS = {
-  'take_photo': takePhoto,
   'select_from_gallery': selectFromGallery,
   'get_step_count': getStepCount,
   'create_calendar_event': createCalendarEvent,
   // 后续添加更多工具的映射
+  // 'take_photo': takePhoto,
   // 'get_location_info': getLocationInfo,
 };
 

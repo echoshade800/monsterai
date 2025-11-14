@@ -128,7 +128,7 @@ export default function CameraScreen() {
       const filename = `photo_${Date.now()}.jpg`;
       const mimeType = 'image/jpeg';
 
-      console.log('开始上传照片到S3:', { uid, filename, mimeType });
+      console.log('开始上传照片到S3:', { uid, filename, mimeType, photoUri: photo.uri });
 
       // 上传到S3
       let uploadResult;
@@ -139,11 +139,20 @@ export default function CameraScreen() {
           filename,
           mimeType,
         });
-        console.log('照片上传成功:', uploadResult);
+        console.log('照片上传成功，结果:', uploadResult);
       } catch (uploadError) {
-        console.error('上传照片到S3失败:', uploadError);
+        console.error('=== 上传照片到S3失败 ===');
+        console.error('错误对象:', uploadError);
+        console.error('错误名称:', (uploadError as Error).name);
+        console.error('错误消息:', (uploadError as Error).message);
+        console.error('错误堆栈:', (uploadError as Error).stack);
+        
         // 上传失败时，仍然使用本地URI
-        Alert.alert('上传失败', '图片上传失败，将使用本地图片。错误: ' + (uploadError as Error).message);
+        Alert.alert(
+          '上传失败', 
+          `图片上传失败，将使用本地图片。\n\n错误信息:\n${(uploadError as Error).message || '未知错误'}\n\n请检查网络连接或联系技术支持。`,
+          [{ text: '确定' }]
+        );
       }
 
       // 获取图片URI（优先使用S3 URL，失败则使用本地URI）
