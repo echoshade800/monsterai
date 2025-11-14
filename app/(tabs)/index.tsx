@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import EventSource from 'react-native-sse';
@@ -20,6 +20,7 @@ interface Message {
 
 export default function EchoTab() {
   const params = useLocalSearchParams();
+  const processedPhotoRef = useRef<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -167,10 +168,16 @@ export default function EchoTab() {
 
   // 处理来自相机的照片
   useEffect(() => {
-    if (params.photoUri && params.mode) {
+    if (params.photoUri && params.mode && userData) {
       const photoUri = params.photoUri as string;
       const mode = params.mode as string;
       const description = params.description as string;
+
+      // 避免重复处理同一张照片
+      if (processedPhotoRef.current === photoUri) {
+        return;
+      }
+      processedPhotoRef.current = photoUri;
 
       const userMsg: Message = {
         id: Date.now().toString(),
@@ -181,12 +188,10 @@ export default function EchoTab() {
 
       setMessages(prev => [...prev, userMsg]);
 
-      if (userData) {
-        const messageText = mode === 'photo-text' && description ? description : 'Here is a photo';
-        handleStreamResponse(messageText);
-      }
+      const messageText = mode === 'photo-text' && description ? description : 'Here is a photo';
+      handleStreamResponse(messageText);
     }
-  }, [params.photoUri, params.mode, params.description, userData]);
+  }, [params.photoUri, params.mode, params.description, userData, handleStreamResponse]);
 
   // 生成唯一ID
   const generateTraceId = () => {
