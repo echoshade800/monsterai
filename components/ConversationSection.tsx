@@ -1,12 +1,13 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useEffect, useRef } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Message {
   id: string;
   type: 'user' | 'assistant' | 'timestamp';
   content: string;
   avatar?: string;
+  photoUri?: string;
 }
 
 interface ConversationSectionProps {
@@ -80,9 +81,20 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
           <View key={message.id} style={styles.userMessageContainer}>
             <Pressable
               onLongPress={() => handleCopyMessage(message.content)}
-              style={styles.userBubble}
+              style={[styles.userBubble, message.photoUri && styles.userBubbleWithPhoto]}
             >
-              <Text style={styles.userText}>{message.content}</Text>
+              {message.photoUri && (
+                <Image
+                  source={{ uri: message.photoUri }}
+                  style={styles.messageImage}
+                  resizeMode="cover"
+                />
+              )}
+              {message.content && (
+                <Text style={[styles.userText, message.photoUri && styles.textWithImage]}>
+                  {message.content}
+                </Text>
+              )}
             </Pressable>
           </View>
         );
@@ -147,11 +159,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
+  userBubbleWithPhoto: {
+    maxWidth: '85%',
+  },
   userText: {
     fontSize: 15,
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
     lineHeight: 22,
+  },
+  messageImage: {
+    width: 220,
+    height: 220,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  textWithImage: {
+    marginTop: 0,
   },
   loadingContainer: {
     justifyContent: 'center',
