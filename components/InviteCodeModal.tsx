@@ -22,7 +22,7 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet }: InviteCodeMo
   return (
     <Modal
       visible={visible}
-      transparent={false}
+      transparent
       animationType="fade"
       statusBarTranslucent
     >
@@ -32,6 +32,7 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet }: InviteCodeMo
           style={styles.backgroundImage}
           resizeMode="cover"
         />
+
         <View style={styles.card}>
           <View style={styles.cardContent}>
             <Text style={styles.title}>Enter Your Invite Code</Text>

@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { useState, useCallback } from 'react';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { InviteCodeModal } from '../components/InviteCodeModal';
 
 export default function LoginScreen() {
@@ -8,18 +8,13 @@ export default function LoginScreen() {
   const [showInviteModal, setShowInviteModal] = useState(true);
   const [hasValidCode, setHasValidCode] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      setShowInviteModal(true);
-    }, [])
-  );
-
   const handleValidCode = () => {
     setShowInviteModal(false);
     setHasValidCode(true);
   };
 
   const handleNotYet = () => {
+    setShowInviteModal(false);
     router.push('/under-construction');
   };
 
