@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { MessageCircle, Home, Store, Users } from 'lucide-react-native';
+import { MessageCircle, BookText, Store, Users } from 'lucide-react-native';
 import { View, StyleSheet, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 
@@ -34,10 +34,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
+          title: 'Life Log',
           tabBarIcon: ({ size, color, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <Home size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <BookText size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
         }}
