@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
@@ -14,9 +15,11 @@ interface Message {
   type: 'user' | 'assistant' | 'timestamp';
   content: string;
   avatar?: string;
+  photoUri?: string;
 }
 
 export default function EchoTab() {
+  const params = useLocalSearchParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -161,6 +164,29 @@ export default function EchoTab() {
   useEffect(() => {
     fetchConversationHistory();
   }, [fetchConversationHistory]);
+
+  // 处理来自相机的照片
+  useEffect(() => {
+    if (params.photoUri && params.mode) {
+      const photoUri = params.photoUri as string;
+      const mode = params.mode as string;
+      const description = params.description as string;
+
+      const userMsg: Message = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: mode === 'photo-text' ? description || '' : '',
+        photoUri: photoUri,
+      };
+
+      setMessages(prev => [...prev, userMsg]);
+
+      if (userData) {
+        const messageText = mode === 'photo-text' && description ? description : 'Here is a photo';
+        handleStreamResponse(messageText);
+      }
+    }
+  }, [params.photoUri, params.mode, params.description, userData]);
 
   // 生成唯一ID
   const generateTraceId = () => {

@@ -1,12 +1,13 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useEffect, useRef } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Message {
   id: string;
   type: 'user' | 'assistant' | 'timestamp';
   content: string;
   avatar?: string;
+  photoUri?: string;
 }
 
 interface ConversationSectionProps {
@@ -82,7 +83,18 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
               onLongPress={() => handleCopyMessage(message.content)}
               style={styles.userBubble}
             >
-              <Text style={styles.userText}>{message.content}</Text>
+              {message.photoUri && (
+                <Image
+                  source={{ uri: message.photoUri }}
+                  style={styles.messageImage}
+                  resizeMode="cover"
+                />
+              )}
+              {message.content ? (
+                <Text style={[styles.userText, message.photoUri && styles.textWithImage]}>
+                  {message.content}
+                </Text>
+              ) : null}
             </Pressable>
           </View>
         );
@@ -152,6 +164,15 @@ const styles = StyleSheet.create({
     fontFamily: 'SF Compact Rounded',
     color: '#000000',
     lineHeight: 22,
+  },
+  messageImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  textWithImage: {
+    marginTop: 4,
   },
   loadingContainer: {
     justifyContent: 'center',
