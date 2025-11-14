@@ -209,7 +209,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
         <Animated.View style={[styles.expandedContainer, backgroundContainerStyle]}>
           <View style={styles.topExtension} />
           <ImageBackground
-            source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084%20(1).png' }}
+            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatbackground.png' }}
             style={styles.backgroundImage}
             resizeMode="cover"
             imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
@@ -296,7 +296,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
         <Animated.View style={[styles.collapsedContainer, collapsedHeaderStyle]}>
           <View style={styles.collapsedTopExtension} />
           <ImageBackground
-            source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/image%20-%202025-11-13T155705.084%20(1).png' }}
+            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatbackground.png' }}
             style={styles.collapsedBackground}
             resizeMode="cover"
             imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
