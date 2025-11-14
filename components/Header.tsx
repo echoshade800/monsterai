@@ -593,18 +593,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   logLine: {
-    marginBottom: 5,
+    marginBottom: 2,
     height: 23,
   },
   logTime: {
     fontFamily: 'Courier New',
-    fontSize: 12,
+    fontSize: 14,
     color: '#E91E63',
     fontWeight: '600',
   },
   logText: {
     fontFamily: 'Courier New',
-    fontSize: 12,
+    fontSize: 14,
     color: '#000000',
     lineHeight: 18,
   },
