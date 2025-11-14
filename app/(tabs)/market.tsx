@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, Platform, StatusBar } from 'react-native';
 import { MonsterCard } from '../../components/MonsterCard';
+import { GameCard } from '../../components/GameCard';
 import { useRouter } from 'expo-router';
 
 const MONSTERS_DATA = [
@@ -65,6 +66,65 @@ const MONSTERS_DATA = [
   },
 ];
 
+const GAMES_DATA = [
+  {
+    id: 'linker',
+    name: 'Linker',
+    imageUrl: 'https://images.pexels.com/photos/6168061/pexels-photo-6168061.jpeg?auto=compress&cs=tinysrgb&w=400',
+    isHot: true,
+    rating: 96,
+  },
+  {
+    id: '2048',
+    name: '2048',
+    imageUrl: 'https://images.pexels.com/photos/4466494/pexels-photo-4466494.jpeg?auto=compress&cs=tinysrgb&w=400',
+    isHot: false,
+    rating: 94,
+  },
+  {
+    id: 'photopuzzle',
+    name: 'Photopuzzle',
+    imageUrl: 'https://images.pexels.com/photos/1111371/pexels-photo-1111371.jpeg?auto=compress&cs=tinysrgb&w=400',
+    isHot: false,
+    rating: 88,
+  },
+  {
+    id: 'flipmatch',
+    name: 'FlipMatch',
+    imageUrl: 'https://images.pexels.com/photos/4792285/pexels-photo-4792285.jpeg?auto=compress&cs=tinysrgb&w=400',
+    isHot: true,
+    rating: 92,
+  },
+  {
+    id: 'kidercrush',
+    name: 'Kidercrush',
+    imageUrl: 'https://images.pexels.com/photos/3661193/pexels-photo-3661193.jpeg?auto=compress&cs=tinysrgb&w=400',
+    isHot: true,
+    rating: 90,
+  },
+  {
+    id: 'qblock',
+    name: 'QBlock',
+    imageUrl: 'https://images.pexels.com/photos/4792286/pexels-photo-4792286.jpeg?auto=compress&cs=tinysrgb&w=400',
+    isHot: false,
+    rating: 87,
+  },
+  {
+    id: 'sudoku',
+    name: '数独',
+    imageUrl: 'https://images.pexels.com/photos/220057/pexels-photo-220057.jpeg?auto=compress&cs=tinysrgb&w=400',
+    isHot: false,
+    rating: 93,
+  },
+  {
+    id: 'wordle',
+    name: 'Wordle',
+    imageUrl: 'https://images.pexels.com/photos/5711855/pexels-photo-5711855.jpeg?auto=compress&cs=tinysrgb&w=400',
+    isHot: true,
+    rating: 95,
+  },
+];
+
 export default function MarketTab() {
   const router = useRouter();
 
@@ -78,6 +138,31 @@ export default function MarketTab() {
   const handleHirePress = (monsterId: string) => {
     console.log('Hired monster:', monsterId);
   };
+
+  const handlePlayPress = (gameId: string) => {
+    console.log('Playing game:', gameId);
+  };
+
+  const renderGameRow = (games: typeof GAMES_DATA) => (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.gamesRow}
+      contentContainerStyle={styles.gamesRowContent}
+    >
+      {games.map((game) => (
+        <GameCard
+          key={game.id}
+          id={game.id}
+          name={game.name}
+          imageUrl={game.imageUrl}
+          isHot={game.isHot}
+          rating={game.rating}
+          onPlayPress={handlePlayPress}
+        />
+      ))}
+    </ScrollView>
+  );
 
   return (
     <View style={styles.container}>
@@ -113,6 +198,12 @@ export default function MarketTab() {
               />
             </View>
           ))}
+        </View>
+
+        <View style={styles.gamesSection}>
+          <Text style={styles.gamesSectionTitle}>Game Store</Text>
+          {renderGameRow(GAMES_DATA.slice(0, 4))}
+          {renderGameRow(GAMES_DATA.slice(4, 8))}
         </View>
       </ScrollView>
     </View>
@@ -163,5 +254,22 @@ const styles = StyleSheet.create({
   },
   cardRight: {
     paddingLeft: 8,
+  },
+  gamesSection: {
+    marginTop: 32,
+    paddingBottom: 20,
+  },
+  gamesSectionTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#000000',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  gamesRow: {
+    marginBottom: 16,
+  },
+  gamesRowContent: {
+    paddingHorizontal: 20,
   },
 });
