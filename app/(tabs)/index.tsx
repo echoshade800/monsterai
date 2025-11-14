@@ -122,14 +122,39 @@ export default function EchoTab() {
       if (result.success && result.data) {
         const convertedMessages = convertToMessages(result.data);
         // 反转消息数组，使最旧的消息在前，最新的在后
-        setMessages(convertedMessages.reverse());
+        const historyMessages = convertedMessages.reverse();
+        
+        // 合并历史消息和当前消息，确保新消息在最后
+        setMessages(prev => {
+          // 如果已经有消息，合并而不是替换
+          if (prev.length > 0) {
+            // 创建一个消息ID集合，用于去重
+            const existingIds = new Set(prev.map(msg => msg.id));
+            // 只添加不存在的历史消息
+            const newHistoryMessages = historyMessages.filter(msg => !existingIds.has(msg.id));
+            // 历史消息在前（最旧在前，最新在后），新消息在后（确保最新消息在最后）
+            const merged = [...newHistoryMessages, ...prev];
+            console.log('合并消息:', { 
+              prevCount: prev.length, 
+              historyCount: historyMessages.length, 
+              newCount: newHistoryMessages.length,
+              mergedCount: merged.length,
+              note: '历史消息在前，新消息在后，确保最新消息在最后'
+            });
+            return merged;
+          }
+          // 如果没有现有消息，直接使用历史消息
+          return historyMessages;
+        });
       } else {
         console.error('获取对话历史失败:', result.message);
-        setMessages([]);
+        // 只有在没有现有消息时才清空
+        setMessages(prev => prev.length > 0 ? prev : []);
       }
     } catch (error) {
       console.error('获取对话历史异常:', error);
-      setMessages([]);
+      // 只有在没有现有消息时才清空
+      setMessages(prev => prev.length > 0 ? prev : []);
     } finally {
       setIsLoading(false);
     }
@@ -239,8 +264,6 @@ export default function EchoTab() {
       eventSource.addEventListener('message', (event: any) => {
         try {
           const data = JSON.parse(event.data);
-          console.log(`${logPrefix}流式数据:`, data);
-
           if (data.type === 'text_chunk') {
             accumulatedText += data.word;
             setCurrentResponse(accumulatedText);
@@ -435,6 +458,12 @@ export default function EchoTab() {
 
   // 处理来自相机的照片
   useEffect(() => {
+    console.log('检查照片参数:', { 
+      photoUri: params.photoUri, 
+      mode: params.mode, 
+      hasUserData: !!userData 
+    });
+    
     if (params.photoUri && params.mode && userData) {
       const photoUri = params.photoUri as string;
       const mode = params.mode as string;
@@ -444,18 +473,41 @@ export default function EchoTab() {
 
       // 避免重复处理同一张照片
       if (processedPhotoRef.current === photoUri) {
+        console.log('照片已处理过，跳过:', photoUri);
         return;
       }
       processedPhotoRef.current = photoUri;
 
+      const messageId = `photo_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const userMsg: Message = {
-        id: Date.now().toString(),
+        id: messageId,
         type: 'user', 
-        content: mode === 'photo-text' ? description || '' : '',
+        content: mode === 'photo-text' ? (description || '') : 'Please analyze this photo',
         photoUri: photoUri,
       };
 
-      setMessages(prev => [...prev, userMsg]);
+      console.log('准备添加用户图片消息到界面:', {
+        id: userMsg.id,
+        type: userMsg.type,
+        hasPhotoUri: !!userMsg.photoUri,
+        photoUriPreview: userMsg.photoUri?.substring(0, 80),
+        content: userMsg.content
+      });
+      
+      // 使用函数式更新确保消息被正确添加
+      setMessages(prev => {
+        console.log('当前消息列表长度:', prev.length);
+        // 检查是否已经存在相同的消息（避免重复）
+        const exists = prev.some(msg => msg.id === messageId || (msg.photoUri === photoUri && msg.type === 'user'));
+        if (exists) {
+          console.log('消息已存在，跳过添加');
+          return prev;
+        }
+        const newMessages = [...prev, userMsg];
+        console.log('✅ 成功添加消息，更新后的消息列表长度:', newMessages.length);
+        console.log('最新消息:', newMessages[newMessages.length - 1]);
+        return newMessages;
+      });
       
       // 根据模式设置消息文本
       const messageText = mode === 'photo-text' && description 
@@ -471,10 +523,19 @@ export default function EchoTab() {
         agentId 
       });
       
-      // 传递图片URL和imageDetectionType给 handleStreamResponse
-      handleStreamResponse(messageText, photoUri, imageDetectionType);
+      // 延迟清除 params，确保消息已经添加到状态中
+      setTimeout(() => {
+        // 传递图片URL和imageDetectionType给 handleStreamResponse
+        handleStreamResponse(messageText, photoUri, imageDetectionType);
+        
+        // 处理完成后，清除 params 避免重复处理
+        // 使用 router.replace 清除参数，但延迟执行确保状态已更新
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 100);
+      }, 50);
     }
-  }, [params.photoUri, params.mode, params.description, params.imageDetectionType, params.agentId, userData, handleStreamResponse]);
+  }, [params.photoUri, params.mode, params.description, params.imageDetectionType, params.agentId, userData, handleStreamResponse, router]);
 
   // 将 function call 结果发送回服务器
   const sendFunctionCallResult = useCallback(async (callId: string, functionName: string, result: any) => {

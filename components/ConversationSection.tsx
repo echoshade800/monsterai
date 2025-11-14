@@ -110,12 +110,21 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
 
   // 当消息更新时，滚动到底部
   useEffect(() => {
+    console.log('ConversationSection 消息更新:', {
+      messagesCount: messages.length,
+      hasImageMessages: messages.filter(msg => msg.photoUri).length,
+      imageMessages: messages.filter(msg => msg.photoUri).map(msg => ({
+        id: msg.id,
+        photoUri: msg.photoUri?.substring(0, 80)
+      }))
+    });
+    
     if (messages.length > 0 && scrollViewRef.current) {
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
     }
-  }, [messages.length]);
+  }, [messages.length, messages]);
 
   // 复制消息到剪贴板
   const handleCopyMessage = (content: string) => {
