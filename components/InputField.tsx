@@ -240,6 +240,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     maxHeight: 100,
     paddingHorizontal: 8,
+    paddingVertical: 0,
   },
   voiceButtonWrapper: {
     marginLeft: 8,
