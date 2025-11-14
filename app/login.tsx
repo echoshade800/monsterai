@@ -35,6 +35,7 @@ export default function LoginScreen() {
   };
 
   const handleSkip = () => {
+    setShowInviteModal(false);
     router.push('/(tabs)');
   };
 
