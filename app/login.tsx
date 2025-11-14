@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { InviteCodeModal } from '../components/InviteCodeModal';
+import { Apple } from 'lucide-react-native';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -70,7 +71,7 @@ export default function LoginScreen() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.loginButton} onPress={handleAppleLogin}>
             <View style={styles.buttonContent}>
-              <Text style={styles.iconText}></Text>
+              <Apple size={24} color="#000000" fill="#000000" />
               <Text style={styles.buttonText}>Continue with Apple</Text>
             </View>
           </TouchableOpacity>
@@ -158,11 +159,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
     gap: 12,
-  },
-  iconText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000000',
   },
   googleIcon: {
     fontSize: 24,
