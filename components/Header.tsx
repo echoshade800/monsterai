@@ -9,6 +9,7 @@ import Animated, {
   Extrapolate,
   useSharedValue,
   runOnJS,
+  withRepeat,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { CameraBox } from './CameraBox';
@@ -23,14 +24,36 @@ const EXPANDED_HEIGHT = 600;
 const COLLAPSED_HEIGHT = 332;
 const COLLAPSE_THRESHOLD = 100;
 
+const LOG_ENTRIES = [
+  { time: '07:42', message: "User's facial energy dropped 12% vs baseline." },
+  { time: '07:45', message: 'Tag: Low energy morning, possible poor sleep.' },
+  { time: '08:02', message: 'Suggest: Protein breakfast + 5-min stretch.' },
+  { time: '08:15', message: 'Mood signal improving by 6%.' },
+  { time: '08:40', message: 'Saved to Life Log → Breakfast check-in.' },
+];
+
 export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
+  const scrollY = useSharedValue(0);
   const router = useRouter();
 
   const handleThinkingPress = () => {
     router.push('/(tabs)/home');
   };
+
+  useEffect(() => {
+    const lineHeight = 23;
+    const totalHeight = LOG_ENTRIES.length * lineHeight;
+
+    scrollY.value = withRepeat(
+      withTiming(totalHeight, {
+        duration: 15000,
+      }),
+      -1,
+      false
+    );
+  }, []);
 
   useEffect(() => {
     animatedCollapse.value = withTiming(isCollapsed ? 1 : 0, {
@@ -187,6 +210,12 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
     };
   });
 
+  const logScrollStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: -scrollY.value }],
+    };
+  });
+
   return (
     <GestureDetector gesture={swipeGesture}>
       <Animated.View style={[styles.headerContainer, headerAnimatedStyle]}>
@@ -266,18 +295,14 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                       <Text style={styles.thinkingTitle}>In My Mind</Text>
                     </View>
                     <View style={styles.thinkingLogContainer}>
-                      <Text style={styles.logLine}>
-                        <Text style={styles.logTime}>[07:42]</Text>
-                        <Text style={styles.logText}> User's facial energy dropped 12% vs baseline.</Text>
-                      </Text>
-                      <Text style={styles.logLine}>
-                        <Text style={styles.logTime}>[07:45]</Text>
-                        <Text style={styles.logText}> Tag: Low energy morning, possible poor sleep.</Text>
-                      </Text>
-                      <Text style={styles.logLine}>
-                        <Text style={styles.logTime}>[08:02]</Text>
-                        <Text style={styles.logText}> Suggest: Protein breakfast + 5-min stretch.</Text>
-                      </Text>
+                      <Animated.View style={logScrollStyle}>
+                        {[...LOG_ENTRIES, ...LOG_ENTRIES].map((entry, index) => (
+                          <Text key={index} style={styles.logLine}>
+                            <Text style={styles.logTime}>[{entry.time}]</Text>
+                            <Text style={styles.logText}> {entry.message}</Text>
+                          </Text>
+                        ))}
+                      </Animated.View>
                     </View>
                   </TouchableOpacity>
                   <View style={styles.cameraPlaceholder} />
@@ -311,18 +336,14 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                       <Text style={styles.thinkingTitle}>In My Mind</Text>
                     </View>
                     <View style={styles.thinkingLogContainer}>
-                      <Text style={styles.logLine}>
-                        <Text style={styles.logTime}>[07:42]</Text>
-                        <Text style={styles.logText}> User's facial energy dropped 12% vs baseline.</Text>
-                      </Text>
-                      <Text style={styles.logLine}>
-                        <Text style={styles.logTime}>[07:45]</Text>
-                        <Text style={styles.logText}> Tag: Low energy morning, possible poor sleep.</Text>
-                      </Text>
-                      <Text style={styles.logLine}>
-                        <Text style={styles.logTime}>[08:02]</Text>
-                        <Text style={styles.logText}> Suggest: Protein breakfast + 5-min stretch.</Text>
-                      </Text>
+                      <Animated.View style={logScrollStyle}>
+                        {[...LOG_ENTRIES, ...LOG_ENTRIES].map((entry, index) => (
+                          <Text key={index} style={styles.logLine}>
+                            <Text style={styles.logTime}>[{entry.time}]</Text>
+                            <Text style={styles.logText}> {entry.message}</Text>
+                          </Text>
+                        ))}
+                      </Animated.View>
                     </View>
                   </TouchableOpacity>
                   <View style={styles.cameraPlaceholder} />
@@ -569,21 +590,23 @@ const styles = StyleSheet.create({
   },
   thinkingLogContainer: {
     flex: 1,
+    overflow: 'hidden',
   },
   logLine: {
-    marginBottom: 2,
+    marginBottom: 5,
+    height: 23,
   },
   logTime: {
     fontFamily: 'Courier New',
-    fontSize: 10,
+    fontSize: 12,
     color: '#E91E63',
     fontWeight: '600',
   },
   logText: {
     fontFamily: 'Courier New',
-    fontSize: 10,
-    color: '#333333',
-    lineHeight: 14,
+    fontSize: 12,
+    color: '#000000',
+    lineHeight: 18,
   },
   cameraPlaceholder: {
     width: 130,
