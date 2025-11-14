@@ -49,12 +49,10 @@ export default function LoginScreen() {
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
         <Text style={styles.skipButtonText}>Skip</Text>
       </TouchableOpacity>
-      {!showInviteModal && (
-        <Image
-          source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
-          style={styles.background}
-        />
-      )}
+      <Image
+        source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
+        style={styles.background}
+      />
 
       <View style={styles.content}>
         <View style={styles.header}>

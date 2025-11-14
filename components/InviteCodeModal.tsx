@@ -27,12 +27,6 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet }: InviteCodeMo
       statusBarTranslucent
     >
       <View style={styles.backdrop}>
-        <Image
-          source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
-          style={styles.backgroundImage}
-          resizeMode="cover"
-        />
-
         <View style={styles.card}>
           <View style={styles.cardContent}>
             <Text style={styles.title}>Enter Your Invite Code</Text>
@@ -79,15 +73,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-  },
-  backgroundImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
+    backgroundColor: 'transparent',
   },
   card: {
     width: '90%',
