@@ -148,9 +148,9 @@ export default function CameraScreen() {
             >
               <ChevronLeft size={28} color="#000" strokeWidth={2.5} />
             </TouchableOpacity>
+          </View>
 
-            <View style={styles.spacer} />
-
+          <View style={styles.modeToggleContainer}>
             <View style={styles.modeToggle}>
               <TouchableOpacity
                 style={[styles.modeButton, mode === 'photo' && styles.modeButtonActive]}
@@ -252,8 +252,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  spacer: {
-    flex: 1,
+  modeToggleContainer: {
+    alignItems: 'center',
+    paddingTop: 12,
   },
   secondRow: {
     paddingHorizontal: 20,
@@ -275,6 +276,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 4,
     backdropFilter: 'blur(20px)',
+    alignSelf: 'center',
   },
   modeButton: {
     paddingHorizontal: 20,
