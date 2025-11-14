@@ -1,8 +1,22 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { InviteCodeModal } from '../components/InviteCodeModal';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const [showInviteModal, setShowInviteModal] = useState(true);
+  const [hasValidCode, setHasValidCode] = useState(false);
+
+  const handleValidCode = () => {
+    setShowInviteModal(false);
+    setHasValidCode(true);
+  };
+
+  const handleNotYet = () => {
+    setShowInviteModal(false);
+    router.push('/under-construction');
+  };
 
   const handleAppleLogin = () => {
     console.log('Apple login pressed');
@@ -21,6 +35,12 @@ export default function LoginScreen() {
   };
 
   return (
+    <>
+      <InviteCodeModal
+        visible={showInviteModal}
+        onValidCode={handleValidCode}
+        onNotYet={handleNotYet}
+      />
     <View style={styles.container}>
       <Image
         source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
@@ -68,6 +88,7 @@ export default function LoginScreen() {
         </View>
       </View>
     </View>
+    </>
   );
 }
 
