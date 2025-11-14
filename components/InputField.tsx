@@ -219,8 +219,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    minHeight: 50,
+    paddingVertical: 8,
+    minHeight: 44,
   },
   atButtonWrapper: {
     marginRight: 8,
