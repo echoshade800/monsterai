@@ -227,38 +227,58 @@ const AGENTS_DATA: Record<string, AgentData> = {
 };
 
 const ScrollingMindBanner = ({ logs }: { logs: string[] }) => {
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [contentHeight, setContentHeight] = useState(0);
 
   useEffect(() => {
-    const animate = () => {
+    if (contentHeight > 0) {
       Animated.loop(
-        Animated.timing(scrollX, {
-          toValue: 1,
-          duration: 30000,
-          useNativeDriver: true,
-        })
+        Animated.sequence([
+          Animated.timing(scrollY, {
+            toValue: -contentHeight / 2,
+            duration: logs.length * 3000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scrollY, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
       ).start();
-    };
-    animate();
-  }, []);
+    }
+  }, [contentHeight]);
 
   return (
-    <View style={styles.scrollingBannerContainer}>
-      <Text style={styles.mindTitle}>Inside My Mind</Text>
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollingBanner}
-        contentContainerStyle={styles.scrollingBannerContent}
-      >
-        {[...logs, ...logs].map((log, index) => (
-          <View key={index} style={styles.mindLogCard}>
-            <Text style={styles.mindLogText}>{log}</Text>
-          </View>
-        ))}
-      </ScrollView>
+    <View style={styles.mindBannerCard}>
+      <Text style={styles.mindBannerTitle}>Inside My Mind</Text>
+      <View style={styles.mindBannerContent}>
+        <Animated.View
+          style={[
+            styles.mindBannerScrollContainer,
+            { transform: [{ translateY: scrollY }] },
+          ]}
+          onLayout={(e) => {
+            const height = e.nativeEvent.layout.height;
+            if (contentHeight === 0) {
+              setContentHeight(height);
+            }
+          }}
+        >
+          {[...logs, ...logs].map((log, index) => {
+            const timeMatch = log.match(/\[(.*?)\]/);
+            const time = timeMatch ? timeMatch[1] : '';
+            const content = log.replace(/\[(.*?)\]\s*/, '');
+
+            return (
+              <View key={index} style={styles.mindBannerLogRow}>
+                {time && <Text style={styles.mindBannerTime}>[{time}]</Text>}
+                <Text style={styles.mindBannerLogText}>{content}</Text>
+              </View>
+            );
+          })}
+        </Animated.View>
+      </View>
     </View>
   );
 };
@@ -707,29 +727,49 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontStyle: 'italic',
   },
-  scrollingBannerContainer: {
+  mindBannerCard: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 24,
+    padding: 24,
     marginBottom: 16,
+    minHeight: 280,
+    overflow: 'hidden',
   },
-  scrollingBanner: {
-    marginTop: 12,
+  mindBannerTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    fontFamily: 'SF Compact Rounded',
+    color: '#FFFFFF',
+    marginBottom: 24,
+    lineHeight: 38,
   },
-  scrollingBannerContent: {
-    paddingRight: 16,
+  mindBannerContent: {
+    flex: 1,
+    overflow: 'hidden',
   },
-  mindLogCard: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginRight: 12,
-    minWidth: 280,
+  mindBannerScrollContainer: {
+    paddingBottom: 200,
   },
-  mindLogText: {
-    fontSize: 13,
+  mindBannerLogRow: {
+    marginBottom: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  mindBannerTime: {
+    fontSize: 18,
     fontWeight: '400',
     fontFamily: 'Menlo',
-    color: '#00FF00',
-    lineHeight: 18,
+    color: '#FF6B9D',
+    marginRight: 8,
+    lineHeight: 28,
+  },
+  mindBannerLogText: {
+    fontSize: 18,
+    fontWeight: '400',
+    fontFamily: 'Menlo',
+    color: '#E8E8E8',
+    flex: 1,
+    lineHeight: 28,
   },
   permissionRow: {
     flexDirection: 'row',
