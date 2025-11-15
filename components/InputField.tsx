@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { AtSign, Camera, Mic, Send } from 'lucide-react-native';
+import { AtSign, Camera, Send } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, {
@@ -88,17 +88,6 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
     };
   });
 
-  const voiceButtonAnimatedStyle = useAnimatedStyle(() => {
-    const expanded = keyboardHeight.value > 0 ? 1 : 0;
-
-    return {
-      opacity: expanded,
-      transform: [
-        { scale: interpolate(expanded, [0, 1], [0.5, 1]) }
-      ],
-    };
-  });
-
   const handleFocus = () => {
     setIsFocused(true);
     onFocus?.();
@@ -167,7 +156,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             returnKeyType="send"
           />
 
-          {text.trim() ? (
+          {text.trim() && (
             <TouchableOpacity
               style={[styles.sendButton, (isSending || disabled) && styles.sendButtonDisabled]}
               onPress={handleSend}
@@ -175,12 +164,6 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             >
               <Send size={20} color={(isSending || disabled) ? "#999999" : "#000000"} strokeWidth={2} />
             </TouchableOpacity>
-          ) : (
-            <Animated.View style={[styles.voiceButtonWrapper, voiceButtonAnimatedStyle]}>
-              <TouchableOpacity style={styles.voiceButton} disabled={disabled}>
-                <Mic size={20} color={disabled ? "#999999" : "#666666"} strokeWidth={2} />
-              </TouchableOpacity>
-            </Animated.View>
           )}
         </View>
       </Animated.View>
@@ -238,17 +221,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     textAlignVertical: 'center',
     lineHeight: 20,
-  },
-  voiceButtonWrapper: {
-    marginLeft: 4,
-  },
-  voiceButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   floatingCameraButton: {
     position: 'absolute',
