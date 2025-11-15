@@ -81,10 +81,6 @@ export default function ProfileScreen() {
     console.log(`Opening ${title}`);
   };
 
-  const handleAppPermissions = () => {
-    router.push('/app-permissions');
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -148,19 +144,6 @@ export default function ProfileScreen() {
 
             <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Units')}>
               <Text style={styles.menuItemText}>Units</Text>
-              <ChevronRight size={20} color="#666" strokeWidth={2} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Permissions</Text>
-
-          <View style={styles.card}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-
-            <TouchableOpacity style={styles.menuItem} onPress={handleAppPermissions}>
-              <Text style={styles.menuItemText}>App Permissions</Text>
               <ChevronRight size={20} color="#666" strokeWidth={2} />
             </TouchableOpacity>
           </View>
