@@ -70,33 +70,39 @@ const AGENTS_DATA: Record<string, AgentData> = {
   },
   face: {
     name: 'Face Agent',
-    goal: 'My goal is to improve your facial expression and mood tracking, ensuring your emotional well-being is balanced throughout the day.',
-    mission: 'I monitor your facial expressions and alert you when emotional shifts happen, helping you stay calm and focused.',
+    goal: 'I help you improve your skin tone, glow, and facial vitality.',
+    mission: 'I track your face and help you understand what affects your glow.',
     tasks: [
-      'Track your facial energy and mood shifts.',
-      'Suggest calming actions when stress or negative emotions arise.',
-      'Help you keep a positive outlook throughout the day.',
+      'Detect dullness, redness, and uneven tone.',
+      'Score your daily glow level.',
+      'Suggest skincare steps and lifestyle improvements.',
+      'Connect sleep, stress, and diet to skin changes.',
+      'Alert you when fatigue signs appear on your face.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I message you each morning to track your mood and facial expressions.',
-      instantInsight: 'I notify you when I detect a negative shift in your expressions or energy.',
-      microChallenges: 'I suggest small tasks to help you shift your mood and expressions.',
+      dailyCheckIn: 'I evaluate your skin tone trends each day.',
+      instantInsight: 'I notify you when your glow drops or redness increases.',
+      microChallenges: 'Small tasks to help you hydrate, restore glow, or rebalance skin condition.',
     },
     insideMind: [
-      '[9:02am] User\'s smile intensity dropped by 8% compared to baseline.',
-      '[9:04am] Suggest: Take a quick break to improve mood and posture.',
+      '[8:44am] Skin brightness down 5%.',
+      '[11:10am] Eye fatigue rising.',
+      '[14:05pm] Tone uneven compared to baseline.',
+      '[16:50pm] Hydration improved after drinking water.',
+      '[18:22pm] Redness linked to stress.',
+      '[21:02pm] Skin dryness increasing.',
     ],
     permissions: [
-      'Camera Access — Facial Expression & Skin Data',
-      'Health API — Sleep & Heart Rate Monitoring',
-      'Posture Sensor — Body Motion Data',
+      'Camera Access — for skin tracking',
+      'Health API — for sleep & stress correlation',
+      'Notifications — daily glow reminders',
     ],
     outcomes: {
-      metric1: { label: 'better mood rhythm', value: '+10%' },
-      metric2: { label: 'emotional stability', value: '-20%' },
-      metric3: { label: 'micro actions', value: '4 per day' },
+      metric1: { label: 'Brighter Skin', value: '' },
+      metric2: { label: 'More Even Tone', value: '' },
+      metric3: { label: 'Improved Daily Glow', value: '' },
     },
-    motivation: 'A happy face leads to a happy day!',
+    motivation: 'Glow better every day—your face deserves me.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
   },
@@ -331,6 +337,7 @@ export default function AgentDetailPage() {
 
   const isStressAgent = agentId === 'stress';
   const isEnergyAgent = agentId === 'energy';
+  const isFaceAgent = agentId === 'face';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -407,7 +414,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {isStressAgent || isEnergyAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -418,7 +425,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent || isEnergyAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -440,7 +447,7 @@ export default function AgentDetailPage() {
                     subtitle="Body tension patterns"
                   />
                 </>
-              ) : (
+              ) : isEnergyAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
@@ -463,6 +470,24 @@ export default function AgentDetailPage() {
                     subtitle="meal reminders & alerts"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera Access"
+                    subtitle="for skin tracking"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API"
+                    subtitle="for sleep & stress correlation"
+                  />
+                  <PermissionToggle
+                    icon={<Bell size={24} color="#000000" strokeWidth={2} />}
+                    title="Notifications"
+                    subtitle="daily glow reminders"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -475,7 +500,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent || isEnergyAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
