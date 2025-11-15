@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Switch, Alert, ImageBackground, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Switch, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronRight, User } from 'lucide-react-native';
@@ -68,24 +68,19 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatbackground.png' }}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Text style={styles.backButtonText}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <View style={styles.backButton} />
-        </View>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Text style={styles.backButtonText}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Profile</Text>
+        <View style={styles.backButton} />
+      </View>
 
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
           <View style={styles.profileCard}>
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
             <View style={styles.avatarContainer}>
@@ -246,8 +241,7 @@ export default function ProfileScreen() {
           <View style={styles.footer}>
             <Text style={styles.versionText}>MonsterAI v1.0.0 (Beta)</Text>
           </View>
-        </ScrollView>
-      </ImageBackground>
+      </ScrollView>
     </View>
   );
 }
@@ -255,12 +249,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8D4B8',
-  },
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
