@@ -13,7 +13,7 @@ import {
   Mic,
   X,
 } from 'lucide-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
@@ -27,6 +27,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import api from '../../src/services/api-clients/client';
+import { getHeadersWithPassId } from '../../src/services/api/api';
 import calendarManager from '../../src/utils/calendar-manager';
 import healthDataManager, { HealthDataType } from '../../src/utils/health-data-manager';
 import locationManager from '../../src/utils/location-manager';
@@ -45,6 +47,10 @@ export default function HomeTab() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [calendarViewDate, setCalendarViewDate] = useState(new Date());
+  const [allTimelineData, setAllTimelineData] = useState<Record<string, Array<{ time: string; category: string; description: string }>>>({});
+  const [loadingTimeline, setLoadingTimeline] = useState(false);
+  const fetchingDatesRef = useRef<Set<string>>(new Set());
+  const timelineDataCacheRef = useRef<Record<string, Array<{ time: string; category: string; description: string }>>>({});
 
   useEffect(() => {
     Animated.loop(
@@ -292,38 +298,120 @@ export default function HomeTab() {
     },
   ];
 
-  const allTimelineData: Record<string, Array<{ time: string; category: string; description: string }>> = {
-    [new Date().toDateString()]: [
-      { time: '07:58 AM', category: 'Sleep', description: 'Sleep cycle: 7h 12m, Deep: 2h 08m' },
-      { time: '09:14 AM', category: 'Energy', description: 'Breakfast logged: Yogurt + Berries' },
-      { time: '12:18 PM', category: 'Energy', description: 'Lunch logged: Noodles + Vegetables' },
-      { time: '14:25 PM', category: 'Posture', description: 'Forward head posture detected briefly' },
-      { time: '15:07 PM', category: 'Face', description: 'Eye fatigue detected from photo' },
-      { time: '16:10 PM', category: 'Energy', description: 'Snack logged: Protein bar' },
-      { time: '17:33 PM', category: 'Feces', description: 'Digestive pattern consistent with baseline' },
-      { time: '19:02 PM', category: 'Stress', description: 'Evening stress stabilized' },
-      { time: '23:18 PM', category: 'Sleep', description: 'Wind-down pattern detected before sleep' },
-    ],
-    [(() => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      return yesterday.toDateString();
-    })()]: [
-      { time: '08:15 AM', category: 'Sleep', description: 'Sleep cycle: 6h 45m, Deep: 1h 52m' },
-      { time: '09:30 AM', category: 'Energy', description: 'Breakfast logged: Oatmeal + Banana' },
-      { time: '13:20 PM', category: 'Energy', description: 'Lunch logged: Salad + Chicken' },
-      { time: '18:45 PM', category: 'Stress', description: 'Elevated stress levels detected' },
-    ],
-    [(() => {
-      const twoDaysAgo = new Date();
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      return twoDaysAgo.toDateString();
-    })()]: [
-      { time: '07:30 AM', category: 'Sleep', description: 'Sleep cycle: 7h 30m, Deep: 2h 15m' },
-      { time: '10:00 AM', category: 'Energy', description: 'Breakfast logged: Smoothie' },
-      { time: '14:15 PM', category: 'Face', description: 'Good energy levels detected' },
-    ],
+  // 计算日期相对于今天的天数差（day 参数）
+  // 0 = 今天，1 = 昨天，2 = 前天，以此类推
+  const calculateDayOffset = (date: Date): number => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    // 计算今天减去目标日期的天数差
+    // 如果目标日期是今天，结果为 0
+    // 如果目标日期是昨天，结果为 1
+    // 如果目标日期是前天，结果为 2
+    const diffTime = today.getTime() - targetDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
+
+  // 从 API 获取 timeline 数据
+  const fetchTimelineData = useCallback(async (date: Date) => {
+    const dateKey = date.toDateString();
+    
+    // 检查是否正在请求该日期
+    if (fetchingDatesRef.current.has(dateKey)) {
+      return;
+    }
+
+    // 检查是否已经缓存了该日期的数据（使用 ref 同步检查）
+    if (timelineDataCacheRef.current[dateKey]) {
+      return;
+    }
+
+    // 标记该日期正在请求中
+    fetchingDatesRef.current.add(dateKey);
+
+    try {
+      setLoadingTimeline(true);
+      const day = calculateDayOffset(date);
+      
+      console.log('[HomeTab] 获取 timeline 数据:', { date: dateKey, day });
+      
+      // 获取 passId 并确保使用小写的 passid header（API 要求）
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      const response = await api.get(`/image-detection/list?day=${day}`, {
+        headers: {
+          'accept': 'application/json',
+          // 确保使用小写的 passid（API 要求）
+          'passid': passIdValue,
+        },
+      });
+
+      if (response.isSuccess() && response.data) {
+        // 将 API 返回的数据转换为 timeline 格式
+        // 假设 API 返回的数据格式为数组，每个元素包含 time, category, description
+        const timelineEntries = Array.isArray(response.data) 
+          ? response.data.map((item: any) => ({
+              time: item.time || item.timestamp || '',
+              category: item.category || item.type || 'Unknown',
+              description: item.description || item.content || item.detail || '',
+            }))
+          : [];
+
+        // 更新对应日期的数据
+        setAllTimelineData((prev) => {
+          // 再次检查是否已缓存（防止重复设置）
+          if (prev[dateKey]) {
+            return prev;
+          }
+          const newData = {
+            ...prev,
+            [dateKey]: timelineEntries,
+          };
+          // 同步更新 ref 缓存
+          timelineDataCacheRef.current = newData;
+          return newData;
+        });
+
+        console.log('[HomeTab] Timeline 数据获取成功:', { date: dateKey, count: timelineEntries.length });
+      } else {
+        console.warn('[HomeTab] Timeline 数据为空或格式不正确:', response);
+        // 如果数据为空，设置为空数组
+        setAllTimelineData((prev) => {
+          const newData = {
+            ...prev,
+            [dateKey]: [],
+          };
+          // 同步更新 ref 缓存
+          timelineDataCacheRef.current = newData;
+          return newData;
+        });
+      }
+    } catch (error) {
+      console.error('[HomeTab] 获取 timeline 数据失败:', error);
+      // 出错时设置为空数组
+      setAllTimelineData((prev) => {
+        const newData = {
+          ...prev,
+          [dateKey]: [],
+        };
+        // 同步更新 ref 缓存
+        timelineDataCacheRef.current = newData;
+        return newData;
+      });
+    } finally {
+      setLoadingTimeline(false);
+      // 移除请求标记
+      fetchingDatesRef.current.delete(dateKey);
+    }
+  }, []);
+
+  // 当 selectedDate 变化时，获取对应日期的 timeline 数据
+  useEffect(() => {
+    fetchTimelineData(selectedDate);
+  }, [selectedDate, fetchTimelineData]);
 
   const timelineEntries = allTimelineData[selectedDate.toDateString()] || [];
 
@@ -896,7 +984,11 @@ export default function HomeTab() {
           </View>
 
           <View style={styles.timelineContainer}>
-            {timelineEntries.length > 0 ? (
+            {loadingTimeline ? (
+              <View style={styles.noLogsContainer}>
+                <Text style={styles.noLogsText}>Loading...</Text>
+              </View>
+            ) : timelineEntries.length > 0 ? (
               timelineEntries.map((entry, index) => (
                 <View key={index} style={styles.timelineEntry}>
                   <View style={styles.timelineLeft}>
