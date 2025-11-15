@@ -235,8 +235,9 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
 
         {/* Shared Profile Button - Always mounted */}
         <Animated.View style={sharedProfileStyle}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleProfilePress}>
-            <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
+          <TouchableOpacity style={styles.iconButton} onPress={handleProfilePress} activeOpacity={0.7}>
+            <BlurView intensity={100} tint="extraLight" style={StyleSheet.absoluteFill} />
+            <View style={styles.iconButtonBorder} />
             <User size={20} color="#000000" strokeWidth={2} />
           </TouchableOpacity>
         </Animated.View>
@@ -415,11 +416,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  iconButtonBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    pointerEvents: 'none',
   },
   bannersContainer: {
     paddingHorizontal: 15,
