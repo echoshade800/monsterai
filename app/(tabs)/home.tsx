@@ -1,3 +1,5 @@
+import { Audio } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import {
   Calendar,
@@ -15,6 +17,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
+  AppState,
   Linking,
   Modal,
   ScrollView,
@@ -109,7 +112,8 @@ export default function HomeTab() {
     }
   };
 
-  useEffect(() => {
+  // 同步所有权限状态的函数
+  const syncAllPermissions = async () => {
     const syncLocationPermission = async () => {
       try {
         const result = await locationManager.checkLocationPermission('foreground');
@@ -147,9 +151,65 @@ export default function HomeTab() {
       }
     };
 
+    const syncPhotosPermission = async () => {
+      try {
+        const permissionResult = await ImagePicker.getMediaLibraryPermissionsAsync();
+        setPermissions((prev) => ({
+          ...prev,
+          photos: permissionResult.granted,
+        }));
+      } catch (error) {
+        console.error('[HomeTab] 检查相册权限失败:', error);
+      }
+    };
+
+    const syncCameraPermission = async () => {
+      try {
+        const permissionResult = await ImagePicker.getCameraPermissionsAsync();
+        setPermissions((prev) => ({
+          ...prev,
+          camera: permissionResult.granted,
+        }));
+      } catch (error) {
+        console.error('[HomeTab] 检查相机权限失败:', error);
+      }
+    };
+
+    const syncMicrophonePermission = async () => {
+      try {
+        const permissionResult = await Audio.getPermissionsAsync();
+        setPermissions((prev) => ({
+          ...prev,
+          microphone: permissionResult.granted,
+        }));
+      } catch (error) {
+        console.error('[HomeTab] 检查麦克风权限失败:', error);
+      }
+    };
+
     syncLocationPermission();
     syncCalendarPermission();
     syncHealthKitPermission();
+    syncPhotosPermission();
+    syncCameraPermission();
+    syncMicrophonePermission();
+  };
+
+  useEffect(() => {
+    // 初始同步权限状态
+    syncAllPermissions();
+
+    // 监听应用状态变化，当应用从后台返回前台时同步权限状态
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        // 应用重新获得焦点时同步权限状态
+        syncAllPermissions();
+      }
+    });
+
+    return () => {
+      subscription?.remove();
+    };
   }, []);
 
   const thinkingLogs = [
@@ -520,12 +580,176 @@ export default function HomeTab() {
       return;
     }
 
-    // 其他权限（photos, camera, microphone）开启时直接切换状态
-    // 关闭时已经在上面统一处理，会跳转到系统设置
-    setPermissions((prev) => ({
-      ...prev,
-      [id]: !prev[id as keyof typeof prev],
-    }));
+    if (id === 'photos') {
+      try {
+        // 请求相册权限
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        console.log('[HomeTab] 请求相册权限结果:', permissionResult);
+        
+        if (permissionResult.granted) {
+          setPermissions((prev) => ({
+            ...prev,
+            photos: true,
+          }));
+        } else {
+          setPermissions((prev) => ({
+            ...prev,
+            photos: false,
+          }));
+          Alert.alert(
+            '相册权限被拒绝',
+            '需要相册权限才能访问照片。请在设置中开启相册权限。',
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '去设置',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('打开设置失败:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('[HomeTab] 请求相册权限失败:', error);
+        Alert.alert(
+          '请求权限失败',
+          '无法请求相册权限，请稍后重试。您也可以在设置中手动开启相册权限。',
+          [
+            { text: '取消', style: 'cancel' },
+            {
+              text: '去设置',
+              onPress: async () => {
+                try {
+                  await Linking.openSettings();
+                } catch (error) {
+                  console.error('打开设置失败:', error);
+                }
+              },
+            },
+          ],
+        );
+      }
+      return;
+    }
+
+    if (id === 'camera') {
+      try {
+        // 请求相机权限
+        const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+        console.log('[HomeTab] 请求相机权限结果:', permissionResult);
+        
+        if (permissionResult.granted) {
+          setPermissions((prev) => ({
+            ...prev,
+            camera: true,
+          }));
+        } else {
+          setPermissions((prev) => ({
+            ...prev,
+            camera: false,
+          }));
+          Alert.alert(
+            '相机权限被拒绝',
+            '需要相机权限才能使用相机功能。请在设置中开启相机权限。',
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '去设置',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('打开设置失败:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('[HomeTab] 请求相机权限失败:', error);
+        Alert.alert(
+          '请求权限失败',
+          '无法请求相机权限，请稍后重试。您也可以在设置中手动开启相机权限。',
+          [
+            { text: '取消', style: 'cancel' },
+            {
+              text: '去设置',
+              onPress: async () => {
+                try {
+                  await Linking.openSettings();
+                } catch (error) {
+                  console.error('打开设置失败:', error);
+                }
+              },
+            },
+          ],
+        );
+      }
+      return;
+    }
+
+    if (id === 'microphone') {
+      try {
+        // 请求麦克风权限
+        const permissionResult = await Audio.requestPermissionsAsync();
+        console.log('[HomeTab] 请求麦克风权限结果:', permissionResult);
+        
+        if (permissionResult.granted) {
+          setPermissions((prev) => ({
+            ...prev,
+            microphone: true,
+          }));
+        } else {
+          setPermissions((prev) => ({
+            ...prev,
+            microphone: false,
+          }));
+          Alert.alert(
+            '麦克风权限被拒绝',
+            '需要麦克风权限才能使用录音功能。请在设置中开启麦克风权限。',
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '去设置',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('打开设置失败:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('[HomeTab] 请求麦克风权限失败:', error);
+        Alert.alert(
+          '请求权限失败',
+          '无法请求麦克风权限，请稍后重试。您也可以在设置中手动开启麦克风权限。',
+          [
+            { text: '取消', style: 'cancel' },
+            {
+              text: '去设置',
+              onPress: async () => {
+                try {
+                  await Linking.openSettings();
+                } catch (error) {
+                  console.error('打开设置失败:', error);
+                }
+              },
+            },
+          ],
+        );
+      }
+      return;
+    }
   };
 
   const formatDate = (date: Date) => {
