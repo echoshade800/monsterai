@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Switch, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Target, TrendingUp, Camera, Heart, Activity, ImageIcon, Bell, Waves } from 'lucide-react-native';
+import { ArrowLeft, Target, TrendingUp, Camera, Heart, Activity, ImageIcon, Bell, Waves, Utensils } from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
 
 interface AgentData {
@@ -222,30 +222,41 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#FFE0B2',
   },
   feces: {
-    name: 'Feces',
-    goal: 'My goal is to keep your gut rhythm steady, so your digestion stays smooth and predictable.',
-    mission: 'Support a consistent bowel rhythm. Help you stay light, regular, and comfortable every day.',
-    tasks: [],
+    name: 'Feces Agent',
+    goal: 'I help your gut stay smooth, regular, and healthy.',
+    mission: 'I analyze bowel patterns to understand your digestive health.',
+    tasks: [
+      'Track bowel rhythm.',
+      'Detect constipation and diarrhea patterns.',
+      'Predict gut issues from lifestyle.',
+      'Recommend diet fixes.',
+      'Build long-term digestive reports.',
+    ],
     whatIDo: {
-      dailyCheckIn: 'I message you each morning to check your gut status.',
-      instantInsight: 'When irregularity shows up, I suggest what helps.',
-      microChallenges: 'Mini missions to improve digestion gently.',
+      dailyCheckIn: 'I ask about your gut activity and highlight important changes.',
+      instantInsight: 'I detect irregularity and suggest targeted fixes.',
+      microChallenges: 'Small routines to improve digestion gently and consistently.',
     },
     insideMind: [
-      '[7:18am] No bowel activity detected for 2 days.',
-      '[7:20am] Suggest: Warm lemon water + fiber snack.',
+      '[7:18am] No bowel movement for 2 days.',
+      '[7:22am] Fiber intake too low.',
+      '[10:14am] Water intake insufficient.',
+      '[12:30pm] Digestion slower today.',
+      '[17:40pm] Gut activity improving.',
+      '[21:05pm] Pattern stable.',
     ],
     permissions: [
-      'Digestive Log — Stool timing & regularity',
-      'Health API — Sleep, hydration, heart rate',
-      'Nutrition Agent — Fiber + meal rhythm',
+      'Photos Access — stool tracking',
+      'Health API Access — hydration & sleep correlation',
+      'Food Logs Access — digestion pattern analysis',
+      'Notifications — daily gut check & alerts',
     ],
     outcomes: {
-      metric1: { label: 'digestion smoothness', value: 'improved' },
-      metric2: { label: 'regularity', value: 'consistent' },
-      metric3: { label: 'comfort level', value: 'high' },
+      metric1: { label: 'More Regular', value: '' },
+      metric2: { label: 'More Comfortable', value: '' },
+      metric3: { label: 'Healthier Gut', value: '' },
     },
-    motivation: 'My digestion feels smoother in just a few days!',
+    motivation: 'Your gut may be shy, but I\'m not—I\'ll fix it quietly.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#F5E6D3',
   },
@@ -354,6 +365,7 @@ export default function AgentDetailPage() {
   const isFaceAgent = agentId === 'face';
   const isPostureAgent = agentId === 'posture';
   const isSleepAgent = agentId === 'sleep';
+  const isFecesAgent = agentId === 'feces';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -430,7 +442,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -441,7 +453,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -522,7 +534,7 @@ export default function AgentDetailPage() {
                     subtitle="alignment reminders"
                   />
                 </>
-              ) : (
+              ) : isSleepAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Heart size={24} color="#000000" strokeWidth={2} />}
@@ -540,6 +552,29 @@ export default function AgentDetailPage() {
                     subtitle="bedtime reminders & morning insights"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<ImageIcon size={24} color="#000000" strokeWidth={2} />}
+                    title="Photos Access"
+                    subtitle="stool tracking"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API Access"
+                    subtitle="hydration & sleep correlation"
+                  />
+                  <PermissionToggle
+                    icon={<Utensils size={24} color="#000000" strokeWidth={2} />}
+                    title="Food Logs Access"
+                    subtitle="digestion pattern analysis"
+                  />
+                  <PermissionToggle
+                    icon={<Bell size={24} color="#000000" strokeWidth={2} />}
+                    title="Notifications"
+                    subtitle="daily gut check & alerts"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -552,7 +587,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
