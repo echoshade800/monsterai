@@ -1,10 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Alert, Modal, TextInput, FlatList } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
-import storageManager from '../src/utils/storage';
-import userService from '../src/services/userService';
 
 export default function AccountSettingsScreen() {
   const router = useRouter();
@@ -64,42 +61,6 @@ export default function AccountSettingsScreen() {
     setEditingField(null);
   };
 
-  const handleReset = () => {
-    Alert.alert('Reset Password', 'Reset password functionality coming soon');
-  };
-
-  const handleLogout = () => {
-    Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // 调用后端登出API（可选，即使失败也继续清空本地数据）
-              await userService.logout().catch(error => {
-                console.warn('后端登出失败，继续清空本地数据:', error);
-              });
-              
-              // 清空本地用户数据和 accessToken
-              await storageManager.clearAuthData();
-              
-              // 重置导航栈并跳转到登录页面
-              // 使用 dismissAll 清除所有路由，然后 replace 到登录页面
-              router.dismissAll();
-              router.replace('/login');
-            } catch (error) {
-              console.error('登出失败:', error);
-              Alert.alert('错误', '登出时发生错误，请重试');
-            }
-          },
-        },
-      ]
-    );
-  };
 
   const years = Array.from({ length: 100 }, (_, i) => (2024 - i).toString());
   const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
@@ -187,42 +148,6 @@ export default function AccountSettingsScreen() {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Security</Text>
-
-          <View style={styles.card}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-
-            <View style={styles.menuItem}>
-              <View style={styles.menuItemLeft}>
-                <Text style={styles.menuItemLabel}>Email</Text>
-                <Text style={styles.menuItemValue}>hello6@hello.com</Text>
-              </View>
-              <TouchableOpacity style={styles.editButton} onPress={() => Alert.alert('Edit Email', 'Email editing coming soon')}>
-                <Text style={styles.editButtonText}>Edit</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.menuItem}>
-              <View style={styles.menuItemLeft}>
-                <Text style={styles.menuItemLabel}>Password</Text>
-                <Text style={styles.menuItemValue}>No password</Text>
-              </View>
-              <TouchableOpacity style={styles.editButton} onPress={handleReset}>
-                <Text style={styles.editButtonText}>Reset</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.divider} />
-
-            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-              <Text style={styles.menuItemText}>Log Out</Text>
-              <ChevronRight size={20} color="#666" strokeWidth={2} />
-            </TouchableOpacity>
-          </View>
-        </View>
       </ScrollView>
 
       <Modal
