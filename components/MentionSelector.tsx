@@ -72,14 +72,16 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'transparent',
-    zIndex: 998,
+    zIndex: 9998,
+    elevation: 998,
   },
   container: {
     position: 'absolute',
     left: 20,
     flexDirection: 'column-reverse',
     gap: 10,
-    zIndex: 999,
+    zIndex: 9999,
+    elevation: 999,
   },
   agentChip: {
     flexDirection: 'row',
