@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Switch, Alert } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronRight, User } from 'lucide-react-native';
 import { useState } from 'react';
@@ -6,6 +7,9 @@ import { useState } from 'react';
 export default function ProfileScreen() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [cameraAccess, setCameraAccess] = useState(true);
+  const [healthAccess, setHealthAccess] = useState(true);
+  const [motionAccess, setMotionAccess] = useState(false);
 
   const handleBack = () => {
     router.back();
@@ -58,12 +62,8 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleNavigation = (screen: string) => {
-    if (screen === 'account') {
-      router.push('/account-settings');
-    } else {
-      console.log(`Opening ${screen}`);
-    }
+  const handleOpenLink = (title: string) => {
+    console.log(`Opening ${title}`);
   };
 
   return (
@@ -81,126 +81,166 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.userHeader}>
-          <View style={styles.avatar}>
-            <User size={32} color="#666666" strokeWidth={2} />
-          </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>USER6VPTIXFW8</Text>
-            <Text style={styles.memberSince}>Member since January 15, 2024</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          <View style={styles.groupedList}>
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => handleNavigation('account')}
-            >
-              <Text style={styles.rowText}>Account</Text>
-              <ChevronRight size={20} color="#C7C7CC" strokeWidth={2} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          <View style={styles.groupedList}>
-            <View style={styles.row}>
-              <Text style={styles.rowText}>Notification Preferences</Text>
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
-                trackColor={{ false: '#D1D1D6', true: '#34C759' }}
-                thumbColor="#FFFFFF"
-              />
+          <View style={styles.profileCard}>
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarEmoji}>🦑</Text>
+              </View>
             </View>
-
-            <View style={styles.separator} />
-
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => handleNavigation('language')}
-            >
-              <Text style={styles.rowText}>Language / Region</Text>
-              <ChevronRight size={20} color="#C7C7CC" strokeWidth={2} />
-            </TouchableOpacity>
-
-            <View style={styles.separator} />
-
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => handleNavigation('units')}
-            >
-              <Text style={styles.rowText}>Units</Text>
-              <ChevronRight size={20} color="#C7C7CC" strokeWidth={2} />
-            </TouchableOpacity>
+            <Text style={styles.username}>USER6VPTIXFW8</Text>
+            <Text style={styles.email}>hello6@hello.com</Text>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Permissions</Text>
-          <View style={styles.groupedList}>
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => handleNavigation('permissions')}
-            >
-              <Text style={styles.rowText}>App Permissions</Text>
-              <ChevronRight size={20} color="#C7C7CC" strokeWidth={2} />
-            </TouchableOpacity>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Account</Text>
+
+            <View style={styles.card}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+
+              <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/account-settings')}>
+                <Text style={styles.menuItemText}>Account</Text>
+                <ChevronRight size={20} color="#666" strokeWidth={2} />
+              </TouchableOpacity>
+
+              <View style={styles.divider} />
+
+              <View style={styles.menuItem}>
+                <Text style={styles.menuItemText}>Notification Preferences</Text>
+                <Switch
+                  value={notificationsEnabled}
+                  onValueChange={setNotificationsEnabled}
+                  trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+
+              <View style={styles.divider} />
+
+              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Language')}>
+                <View style={styles.menuItemLeft}>
+                  <Text style={styles.menuItemText}>Language / Region</Text>
+                  <Text style={styles.menuItemSubtext}>System Default</Text>
+                </View>
+                <ChevronRight size={20} color="#666" strokeWidth={2} />
+              </TouchableOpacity>
+
+              <View style={styles.divider} />
+
+              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Connected Accounts')}>
+                <View style={styles.menuItemLeft}>
+                  <Text style={styles.menuItemText}>Connected Accounts</Text>
+                  <View style={styles.accountBadges}>
+                    <Text style={styles.accountBadge}>Apple</Text>
+                    <Text style={styles.accountBadge}>Google</Text>
+                  </View>
+                </View>
+                <ChevronRight size={20} color="#666" strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Legal</Text>
-          <View style={styles.groupedList}>
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => handleNavigation('terms')}
-            >
-              <Text style={styles.rowText}>Terms of Service</Text>
-              <ChevronRight size={20} color="#C7C7CC" strokeWidth={2} />
-            </TouchableOpacity>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>App Permissions</Text>
 
-            <View style={styles.separator} />
+            <View style={styles.card}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => handleNavigation('privacy')}
-            >
-              <Text style={styles.rowText}>Privacy Policy</Text>
-              <ChevronRight size={20} color="#C7C7CC" strokeWidth={2} />
-            </TouchableOpacity>
+              <View style={styles.menuItem}>
+                <Text style={styles.menuItemText}>Camera Access</Text>
+                <Switch
+                  value={cameraAccess}
+                  onValueChange={setCameraAccess}
+                  trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.menuItem}>
+                <Text style={styles.menuItemText}>Health API Access</Text>
+                <Switch
+                  value={healthAccess}
+                  onValueChange={setHealthAccess}
+                  trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.menuItem}>
+                <Text style={styles.menuItemText}>Motion / Posture Sensor</Text>
+                <Switch
+                  value={motionAccess}
+                  onValueChange={setMotionAccess}
+                  trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.menuItem}>
+                <View style={styles.menuItemLeft}>
+                  <Text style={styles.menuItemText}>Data Sync Status</Text>
+                  <Text style={styles.syncedText}>Synced 2 min ago</Text>
+                </View>
+              </View>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, styles.dangerTitle]}>Danger Zone</Text>
-          <View style={styles.groupedList}>
-            <TouchableOpacity
-              style={styles.row}
-              onPress={handleLogout}
-            >
-              <Text style={styles.dangerText}>Log Out</Text>
-              <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
-            </TouchableOpacity>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Legal</Text>
 
-            <View style={styles.separator} />
+            <View style={styles.card}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
-            <TouchableOpacity
-              style={styles.row}
-              onPress={handleDeleteAccount}
-            >
-              <Text style={styles.dangerText}>Delete Account</Text>
-              <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Terms of Service')}>
+                <Text style={styles.menuItemText}>Terms of Service</Text>
+                <ChevronRight size={20} color="#666" strokeWidth={2} />
+              </TouchableOpacity>
+
+              <View style={styles.divider} />
+
+              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Privacy Policy')}>
+                <Text style={styles.menuItemText}>Privacy Policy</Text>
+                <ChevronRight size={20} color="#666" strokeWidth={2} />
+              </TouchableOpacity>
+
+              <View style={styles.divider} />
+
+              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Data Usage')}>
+                <Text style={styles.menuItemText}>Data Usage Explanation</Text>
+                <ChevronRight size={20} color="#666" strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.versionText}>MonsterAI v1.0.0 (Beta)</Text>
-        </View>
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, styles.dangerTitle]}>Danger Zone</Text>
+
+            <View style={styles.card}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+
+              <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+                <Text style={styles.dangerText}>Log Out</Text>
+                <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
+              </TouchableOpacity>
+
+              <View style={styles.divider} />
+
+              <TouchableOpacity style={styles.menuItem} onPress={handleDeleteAccount}>
+                <Text style={styles.dangerText}>Delete Account</Text>
+                <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.versionText}>MonsterAI v1.0.0 (Beta)</Text>
+          </View>
       </ScrollView>
     </View>
   );
@@ -209,16 +249,15 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 20,
-    paddingBottom: 16,
-    backgroundColor: '#F2F2F7',
+    paddingBottom: 20,
   },
   backButton: {
     width: 44,
@@ -227,102 +266,139 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backButtonText: {
-    fontSize: 28,
-    color: '#007AFF',
-    fontWeight: '400',
+    fontSize: 32,
+    color: '#000000',
+    fontWeight: '300',
   },
   headerTitle: {
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: '700',
     color: '#000000',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
-  userHeader: {
-    flexDirection: 'row',
+  profileCard: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 32,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    marginBottom: 35,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#C6C6C8',
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  avatarContainer: {
+    marginBottom: 16,
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#E5E5EA',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  userInfo: {
-    flex: 1,
+  avatarEmoji: {
+    fontSize: 40,
   },
-  userName: {
-    fontSize: 17,
-    fontWeight: '600',
+  username: {
+    fontSize: 20,
+    fontWeight: '700',
     color: '#000000',
-    marginBottom: 2,
+    marginBottom: 4,
   },
-  memberSince: {
+  email: {
     fontSize: 15,
-    color: '#8E8E93',
+    color: '#666666',
   },
   section: {
-    marginBottom: 35,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '400',
-    color: '#6D6D72',
-    textTransform: 'uppercase',
-    marginBottom: 8,
-    paddingHorizontal: 16,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000000',
+    marginBottom: 12,
+    paddingLeft: 4,
   },
   dangerTitle: {
     color: '#FF3B30',
   },
-  groupedList: {
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#C6C6C8',
+  card: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
-  row: {
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-    minHeight: 44,
-    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    minHeight: 56,
   },
-  rowText: {
-    fontSize: 17,
+  menuItemLeft: {
+    flex: 1,
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#000000',
   },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#C6C6C8',
-    marginLeft: 16,
+  menuItemSubtext: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 2,
+  },
+  accountBadges: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+  },
+  accountBadge: {
+    fontSize: 12,
+    color: '#34C759',
+    fontWeight: '600',
+  },
+  syncedText: {
+    fontSize: 13,
+    color: '#34C759',
+    marginTop: 2,
+    fontWeight: '500',
   },
   dangerText: {
-    fontSize: 17,
+    fontSize: 16,
+    fontWeight: '600',
     color: '#FF3B30',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    marginLeft: 18,
   },
   footer: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 24,
   },
   versionText: {
     fontSize: 13,
-    color: '#8E8E93',
+    color: '#999999',
+    fontWeight: '500',
   },
 });
