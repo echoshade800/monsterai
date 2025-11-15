@@ -3,6 +3,8 @@ import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Platform, ScrollView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import api from '../src/services/api-clients/client';
+import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
 
@@ -65,8 +67,27 @@ export default function ProfileScreen() {
                 {
                   text: 'Delete Forever',
                   style: 'destructive',
-                  onPress: () => {
-                    console.log('Account deleted');
+                  onPress: async () => {
+                    try {
+                      console.log('[Profile] 开始删除账户...');
+                      
+                      // 调用删除账户API
+                      const response = await api.delete(API_ENDPOINTS.USER.DELETE_ACCOUNT);
+                      console.log('[Profile] 删除账户API响应:', response);
+                      
+                      // 清空本地用户数据和 accessToken
+                      await storageManager.clearAuthData();
+                      
+                      // 重置导航栈并跳转到登录页面
+                      router.dismissAll();
+                      router.replace('/login');
+                    } catch (error) {
+                      console.error('[Profile] 删除账户失败:', error);
+                      Alert.alert(
+                        '删除账户失败',
+                        error.message || '删除账户时发生错误，请重试'
+                      );
+                    }
                   },
                 },
               ]

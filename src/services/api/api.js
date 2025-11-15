@@ -107,6 +107,7 @@ export const API_ENDPOINTS = {
     INFO: '/user/get/user/info',
     UPDATE_INFO: '/user/info',
     CHANGE_PASSWORD: '/user/password',
+    DELETE_ACCOUNT: '/user-info/account',
   },
   
   LIFE_HISTORY: {
