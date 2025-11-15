@@ -254,7 +254,7 @@ export default function LifeLogScreen() {
         <View style={styles.bottomButtonContainer}>
           <TouchableOpacity
             style={styles.bottomButton}
-            onPress={() => router.push('/(tabs)/home')}
+            onPress={() => router.push('/(tabs)')}
           >
             <Text style={styles.bottomButtonText}>Log your day</Text>
             <ArrowRight size={20} color="#000" />
