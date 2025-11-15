@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Alert, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronRight, User } from 'lucide-react-native';
@@ -37,12 +37,7 @@ export default function AccountSettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatbackground.png' }}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
-        <View style={styles.header}>
+      <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
@@ -157,7 +152,6 @@ export default function AccountSettingsScreen() {
             </View>
           </View>
         </ScrollView>
-      </ImageBackground>
     </View>
   );
 }
@@ -165,12 +159,7 @@ export default function AccountSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8D4B8',
-  },
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
