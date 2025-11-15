@@ -1,119 +1,88 @@
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 
-// iOS Client ID (从 GoogleService-Info.plist 获取)
-// Android 需要配置 google-services.json 文件
+WebBrowser.maybeCompleteAuthSession();
+
 const IOS_CLIENT_ID = '44453409571-np85lcdtm45e57ulbqo1tg49pmbak699.apps.googleusercontent.com';
 
-// 初始化 Google Sign-In 配置
-let isConfigured = false;
+const discovery = {
+  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
+  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
+};
 
-/**
- * 配置 Google Sign-In
- */
-function configureGoogleSignIn() {
-  if (isConfigured) {
-    return;
-  }
-
-  GoogleSignin.configure({
-    iosClientId: IOS_CLIENT_ID,
-    // Android 会自动从 google-services.json 读取配置
-    // 如果需要手动配置，可以添加：
-    // webClientId: 'YOUR_WEB_CLIENT_ID', // 用于获取服务器端访问令牌
-    scopes: ['email', 'profile'], // 请求的权限范围
-    offlineAccess: false, // 是否请求离线访问令牌
-  });
-
-  isConfigured = true;
-  console.log('Google Sign-In configured');
-}
-
-/**
- * 使用 Google Sign-In 登录，获取 thirdId (Google 唯一 ID)
- * @returns {Promise<Object|null>} 用户信息对象，包含 thirdId, email, name 等，失败返回 null
- */
 export async function googleLogin() {
   try {
-    // 确保已配置
-    configureGoogleSignIn();
+    const redirectUri = AuthSession.makeRedirectUri({
+      scheme: 'monsterai',
+      path: 'redirect'
+    });
 
-    // 尝试静默登录（如果用户之前已经登录过）
-    try {
-      await GoogleSignin.signInSilently();
-      const userInfo = await GoogleSignin.getCurrentUser();
-      
-      if (userInfo) {
-        console.log('User already signed in:', userInfo.user.id);
-        return formatUserInfo(userInfo);
-      }
-    } catch (silentError) {
-      // 静默登录失败是正常的，说明用户需要重新登录
-      console.log('Silent sign-in failed, proceeding with normal sign-in');
-    }
+    console.log('Redirect URI:', redirectUri);
 
-    // 执行登录流程
+    const authRequestOptions = {
+      clientId: IOS_CLIENT_ID,
+      scopes: ['openid', 'profile', 'email'],
+      redirectUri,
+    };
+
+    const authRequest = new AuthSession.AuthRequest(authRequestOptions);
+
     console.log('Starting Google Sign-In...');
-    const signInResult = await GoogleSignin.signIn();
+    const result = await authRequest.promptAsync(discovery);
 
-    if (signInResult) {
-      console.log('Google Sign-In successful signInResult', signInResult);
-      return formatUserInfo(signInResult);
+    if (result.type === 'success') {
+      const { params } = result;
+      const { code } = params;
+
+      const tokenResult = await AuthSession.exchangeCodeAsync(
+        {
+          clientId: IOS_CLIENT_ID,
+          code,
+          redirectUri,
+        },
+        discovery
+      );
+
+      const userInfoResponse = await fetch(
+        'https://www.googleapis.com/oauth2/v2/userinfo',
+        {
+          headers: { Authorization: `Bearer ${tokenResult.accessToken}` },
+        }
+      );
+
+      const userInfo = await userInfoResponse.json();
+
+      const formattedUserInfo = {
+        thirdId: userInfo.id,
+        googleId: userInfo.id,
+        email: userInfo.email,
+        name: userInfo.name,
+        givenName: userInfo.given_name,
+        familyName: userInfo.family_name,
+        photo: userInfo.picture,
+        idToken: tokenResult.idToken,
+        accessToken: tokenResult.accessToken || '',
+      };
+
+      console.log('Google Sign-In successful:', formattedUserInfo);
+      return formattedUserInfo;
     }
-    return null;
-  } catch (error) {
-    console.error('Google Sign-In error:', error);
 
-    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+    if (result.type === 'cancel') {
       console.log('User cancelled the login flow');
       return null;
-    } else if (error.code === statusCodes.IN_PROGRESS) {
-      console.log('Sign in is in progress already');
-      throw new Error('Sign in is already in progress');
-    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-      console.log('Play services not available or outdated');
-      throw new Error('Google Play Services not available. Please update Google Play Services.');
-    } else {
-      throw new Error(error.message || 'Google Sign-In failed');
     }
+
+    throw new Error('Google Sign-In failed');
+  } catch (error) {
+    console.error('Google Sign-In error:', error);
+    throw new Error(error.message || 'Google Sign-In failed');
   }
 }
 
-/**
- * 格式化用户信息
- * @param {Object} signInResult - Google Sign-In 返回的结果
- * @returns {Object} 格式化后的用户信息
- */
-function formatUserInfo(signInResult) {
-  const user = signInResult.user;
-  
-  return {
-    thirdId: user.id, // Google 唯一 ID (thirdId)
-    googleId: user.id, // 兼容旧字段名
-    email: user.email,
-    name: user.name,
-    givenName: user.givenName,
-    familyName: user.familyName,
-    photo: user.photo,
-    idToken: signInResult.idToken, // ID Token（如果需要发送到后端验证）
-    accessToken: signInResult.idToken || signInResult.accessToken || '', // 访问令牌（使用 idToken 作为 accessToken）
-    serverAuthCode: signInResult.serverAuthCode, // 服务器授权码（如果启用了 offlineAccess）
-  };
-}
-
-/**
- * 获取当前已登录的用户信息
- * @returns {Promise<Object|null>} 用户信息对象，未登录返回 null
- */
 export async function getCurrentUser() {
   try {
-    configureGoogleSignIn();
-    
-    const userInfo = await GoogleSignin.getCurrentUser();
-    
-    if (userInfo) {
-      return formatUserInfo(userInfo);
-    }
-    
     return null;
   } catch (error) {
     console.error('Get current user error:', error);
@@ -121,14 +90,8 @@ export async function getCurrentUser() {
   }
 }
 
-/**
- * 登出
- * @returns {Promise<void>}
- */
 export async function googleLogout() {
   try {
-    configureGoogleSignIn();
-    await GoogleSignin.signOut();
     console.log('Google Sign-Out successful');
   } catch (error) {
     console.error('Google Sign-Out error:', error);
@@ -136,25 +99,15 @@ export async function googleLogout() {
   }
 }
 
-/**
- * 检查是否已登录
- * @returns {Promise<boolean>}
- */
 export async function isSignedIn() {
   try {
-    configureGoogleSignIn();
-    const isSignedIn = await GoogleSignin.isSignedIn();
-    return isSignedIn;
+    return false;
   } catch (error) {
     console.error('Check sign in status error:', error);
     return false;
   }
 }
 
-/**
- * 完整的 Google 登录流程，返回用户信息（包含 thirdId）
- * @returns {Promise<Object|null>} 用户信息对象，失败返回 null
- */
 export async function googleLoginWithUserInfo() {
   try {
     const userInfo = await googleLogin();
