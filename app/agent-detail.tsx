@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Switch, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Target, TrendingUp, Camera, Heart, Activity, ImageIcon, Bell } from 'lucide-react-native';
+import { ArrowLeft, Target, TrendingUp, Camera, Heart, Activity, ImageIcon, Bell, Waves } from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
 
 interface AgentData {
@@ -108,32 +108,39 @@ const AGENTS_DATA: Record<string, AgentData> = {
   },
   posture: {
     name: 'Posture Agent',
-    goal: 'My goal is to help you maintain proper posture, so you can feel strong and comfortable throughout the day.',
-    mission: 'I monitor your posture and provide gentle reminders, keeping you aligned and at your best.',
+    goal: 'I help you stand taller, look better, and move with confidence.',
+    mission: 'I detect posture problems you can\'t see and correct them.',
     tasks: [
-      'Track your posture throughout the day.',
-      'Send reminders when you\'re slouching.',
-      'Help you improve with easy exercises.',
+      'Detect forward head, hunching, and pelvic tilt.',
+      'Alert you when you sit too long.',
+      'Propose small daily exercises.',
+      'Suggest outfits that match your body shape.',
+      'Track long-term posture trend.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I check your posture and remind you if adjustments are needed.',
-      instantInsight: 'I notify you when your posture drops below optimal.',
-      microChallenges: 'Small tasks to improve your posture throughout the day.',
+      dailyCheckIn: 'I scan your posture and remind you when alignment slips.',
+      instantInsight: 'I notify you when tension rises or tilt increases.',
+      microChallenges: 'Mini tasks to improve alignment and reduce discomfort.',
     },
     insideMind: [
-      '[9:02am] User\'s posture dropped by 10% since morning.',
-      '[9:04am] Suggest: Adjust your chair and straighten your back.',
+      '[9:05am] Morning alignment stable.',
+      '[11:22am] Head tilt increased 3°.',
+      '[13:40pm] Shoulder tension rising.',
+      '[15:05pm] Spine curvature up.',
+      '[17:18pm] Sitting too long detected.',
+      '[19:40pm] Posture improved after break.',
     ],
     permissions: [
-      'Posture Sensor — Body Motion Data',
-      'Camera Access — Face + Body Tracking (optional)',
+      'Camera Access — posture scan',
+      'Motion Access — sitting & movement detection',
+      'Notifications — alignment reminders',
     ],
     outcomes: {
-      metric1: { label: 'better posture', value: '+10%' },
-      metric2: { label: 'back pain reduction', value: '-20%' },
-      metric3: { label: 'micro actions', value: '5 exercises per day' },
+      metric1: { label: 'Better Posture', value: '' },
+      metric2: { label: 'Better Presence', value: '' },
+      metric3: { label: 'Better Confidence', value: '' },
     },
-    motivation: 'Straighten up, power on.',
+    motivation: 'Look better instantly—body alignment changes everything.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
   },
@@ -338,6 +345,7 @@ export default function AgentDetailPage() {
   const isStressAgent = agentId === 'stress';
   const isEnergyAgent = agentId === 'energy';
   const isFaceAgent = agentId === 'face';
+  const isPostureAgent = agentId === 'posture';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -414,7 +422,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {isStressAgent || isEnergyAgent || isFaceAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -425,7 +433,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent || isEnergyAgent || isFaceAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -470,7 +478,7 @@ export default function AgentDetailPage() {
                     subtitle="meal reminders & alerts"
                   />
                 </>
-              ) : (
+              ) : isFaceAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
@@ -488,6 +496,24 @@ export default function AgentDetailPage() {
                     subtitle="daily glow reminders"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera Access"
+                    subtitle="posture scan"
+                  />
+                  <PermissionToggle
+                    icon={<Waves size={24} color="#000000" strokeWidth={2} />}
+                    title="Motion Access"
+                    subtitle="sitting & movement detection"
+                  />
+                  <PermissionToggle
+                    icon={<Bell size={24} color="#000000" strokeWidth={2} />}
+                    title="Notifications"
+                    subtitle="alignment reminders"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -500,7 +526,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent || isEnergyAgent || isFaceAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
