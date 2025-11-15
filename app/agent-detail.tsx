@@ -29,147 +29,131 @@ interface AgentData {
 
 const AGENTS_DATA: Record<string, AgentData> = {
   energy: {
-    name: 'Energy Agent',
-    goal: 'My goal is to track your daily energy and help you maintain stable, healthy vitality.',
-    mission: 'I watch your energy patterns and help you stay steady throughout the day.',
+    name: 'Energy',
+    goal: 'I optimize your energy flow, so you can stay vibrant all day long. I help balance your body\'s energy, ensuring peak performance.',
+    mission: 'My mission is to ensure your energy stays steady, giving you power to tackle the day.',
     tasks: [
-      'Analyze facial energy signals.',
-      'Detect drops in alertness.',
-      'Give quick boosting suggestions.',
+      'Optimize your energy cycles to prevent midday fatigue',
+      'Align your body\'s rhythm with natural peaks and troughs',
+      'Keep your energy steady.',
+      'Help you avoid crashes.',
+      'Balance your body and brain.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I message you each morning to check your energy baseline.',
-      instantInsight: 'If your energy dips, I notify you with quick tips.',
-      microChallenges: 'Small missions to help boost alertness.',
+      dailyCheckIn: 'I\'ll check in each morning to gauge your mood and energy.',
+      instantInsight: 'I catch low energy and guide your recovery.',
+      microChallenges: 'Mini missions to help you adjust your energy rhythms or take breaks.',
     },
     insideMind: [
-      '[9:12am] Energy dropped 8% after breakfast.',
-      '[9:14am] Suggest: Light movement for 2 min.',
-      '[11:05am] Morning alertness steady.',
-      '[12:20pm] Noticed mild fatigue.',
-      '[14:18pm] Energy spike after fresh air exposure.',
-      '[16:02pm] Afternoon dip detected.',
+      '[11:42am] Your energy dropped 10% since morning.',
+      '[11:45am] Suggest: Take a 5-min break and stretch to recover your energy levels.',
+      '[12:30pm] Energy stabilized after snack break. Your energy will peak again after 2 hours.',
     ],
     permissions: [
-      'Camera Access — Facial Energy Scan',
-      'Photos — Photo-based Energy Input',
-      'Health API — Heart rate & activity influence',
-      'Motion Sensor — Movement & fatigue detection',
+      'Camera Access — Facial Expression & Skin Data',
+      'Health API — Sleep & Heart Rate Monitoring',
+      'Posture Sensor — Track Motion and Activity',
     ],
     outcomes: {
-      metric1: { label: 'More stable daily energy', value: '' },
-      metric2: { label: 'Fewer afternoon crashes', value: '' },
-      metric3: { label: 'Better morning alertness', value: '' },
+      metric1: { label: 'better energy rhythm', value: '+15%' },
+      metric2: { label: 'daily stress fluctuation', value: '-25%' },
+      metric3: { label: 'micro-actions per day', value: '5 personalized' },
     },
-    motivation: 'Keep your energy steady and your day powerful.',
+    motivation: 'Stronger rhythm, better you.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
   },
   face: {
     name: 'Face Agent',
-    goal: 'My goal is to help you track expressions and understand your emotional signals.',
-    mission: 'I read your micro-expressions to help you understand your emotional patterns.',
+    goal: 'My goal is to improve your facial expression and mood tracking, ensuring your emotional well-being is balanced throughout the day.',
+    mission: 'I monitor your facial expressions and alert you when emotional shifts happen, helping you stay calm and focused.',
     tasks: [
-      'Analyze facial expression trends.',
-      'Detect mood shifts early.',
-      'Give gentle feedback when needed.',
+      'Track your facial energy and mood shifts.',
+      'Suggest calming actions when stress or negative emotions arise.',
+      'Help you keep a positive outlook throughout the day.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I ask for a quick face scan to learn your mood.',
-      instantInsight: 'If your expression changes noticeably, I tell you why it matters.',
-      microChallenges: 'Simple mood-boosting actions.',
+      dailyCheckIn: 'I message you each morning to track your mood and facial expressions.',
+      instantInsight: 'I notify you when I detect a negative shift in your expressions or energy.',
+      microChallenges: 'I suggest small tasks to help you shift your mood and expressions.',
     },
     insideMind: [
-      '[8:44am] Smile activity decreased slightly.',
-      '[9:10am] Eye fatigue detected.',
-      '[11:22am] Neutral expression longer than usual.',
-      '[13:40pm] Positive expression returned.',
-      '[15:05pm] Stress micro-signals noticed.',
-      '[17:18pm] Mood stabilized.',
+      '[9:02am] User\'s smile intensity dropped by 8% compared to baseline.',
+      '[9:04am] Suggest: Take a quick break to improve mood and posture.',
     ],
     permissions: [
-      'Camera — Facial Expression Scan',
-      'Photos — Optional upload',
-      'Health API — Emotion-related biometrics',
+      'Camera Access — Facial Expression & Skin Data',
+      'Health API — Sleep & Heart Rate Monitoring',
+      'Posture Sensor — Body Motion Data',
     ],
     outcomes: {
-      metric1: { label: 'Better mood awareness', value: '' },
-      metric2: { label: 'Early emotional-shift detection', value: '' },
-      metric3: { label: 'More expressive balance', value: '' },
+      metric1: { label: 'better mood rhythm', value: '+10%' },
+      metric2: { label: 'emotional stability', value: '-20%' },
+      metric3: { label: 'micro actions', value: '4 per day' },
     },
-    motivation: 'Notice your emotions, shape your day.',
+    motivation: 'A happy face leads to a happy day!',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
   },
   posture: {
     name: 'Posture Agent',
-    goal: 'My goal is to keep your posture aligned and prevent daily strain.',
-    mission: 'I detect posture patterns to help reduce tension and discomfort.',
+    goal: 'My goal is to help you maintain proper posture, so you can feel strong and comfortable throughout the day.',
+    mission: 'I monitor your posture and provide gentle reminders, keeping you aligned and at your best.',
     tasks: [
-      'Identify slouching or forward head posture.',
-      'Alert you when tension patterns rise.',
-      'Guide you through quick posture resets.',
+      'Track your posture throughout the day.',
+      'Send reminders when you\'re slouching.',
+      'Help you improve with easy exercises.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I check your posture baseline daily.',
-      instantInsight: 'I notify you when unhealthy posture is detected.',
-      microChallenges: 'Mini movement missions to reset alignment.',
+      dailyCheckIn: 'I check your posture and remind you if adjustments are needed.',
+      instantInsight: 'I notify you when your posture drops below optimal.',
+      microChallenges: 'Small tasks to improve your posture throughout the day.',
     },
     insideMind: [
-      '[9:05am] Good morning alignment detected.',
-      '[11:20am] Slight forward head posture.',
-      '[12:30pm] Shoulder tension increasing.',
-      '[14:05pm] Posture improved after stretch.',
-      '[15:40pm] Noted slouching while seated.',
-      '[17:10pm] Evening alignment stabilized.',
+      '[9:02am] User\'s posture dropped by 10% since morning.',
+      '[9:04am] Suggest: Adjust your chair and straighten your back.',
     ],
     permissions: [
-      'Motion Sensor — Posture & movement tracking',
-      'Camera — Posture scan',
-      'Health API — Activity & tension patterns',
+      'Posture Sensor — Body Motion Data',
+      'Camera Access — Face + Body Tracking (optional)',
     ],
     outcomes: {
-      metric1: { label: 'Less daily tension', value: '' },
-      metric2: { label: 'Better spinal alignment', value: '' },
-      metric3: { label: 'Healthier work habits', value: '' },
+      metric1: { label: 'better posture', value: '+10%' },
+      metric2: { label: 'back pain reduction', value: '-20%' },
+      metric3: { label: 'micro actions', value: '5 exercises per day' },
     },
-    motivation: 'Stand tall, move freely.',
+    motivation: 'Straighten up, power on.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
   },
   sleep: {
-    name: 'Sleep Agent',
-    goal: 'My goal is to help you sleep deeper, fall asleep easier, and recover better.',
-    mission: 'I analyze your sleep rhythm and help you build healthy nighttime patterns.',
+    name: 'Sleep',
+    goal: 'My goal is to keep your daily stress below 35%, so your sleep improves naturally.',
+    mission: 'I help you balance work and rest so you can wake up refreshed and energized.',
     tasks: [
-      'Monitor sleep timing and quality.',
-      'Alert you to irregular patterns.',
-      'Guide better wind-down routines.',
+      'Restore balance between work and rest',
+      'Help you start days with energy, not fatigue',
     ],
     whatIDo: {
-      dailyCheckIn: 'A morning summary of your sleep pattern.',
-      instantInsight: 'I notify you when sleep debt builds.',
-      microChallenges: 'Small night routine improvements.',
+      dailyCheckIn: 'I message you each morning with your mood trend.',
+      instantInsight: 'When your posture drops, I notify you.',
+      microChallenges: 'Join mini missions to optimize your rest cycles.',
     },
     insideMind: [
-      '[7:18am] Deep sleep duration shorter than usual.',
-      '[10:12am] Morning grogginess detected.',
-      '[14:40pm] Afternoon dip suggests sleep debt.',
-      '[20:05pm] Consistent wind-down routine detected.',
-      '[23:12pm] Late bedtime trend noticed.',
-      '[23:40pm] Suggest: Reduce screen time.',
+      '[11:42am] User\'s facial energy dropped 12% compared to baseline.',
+      '[11:44am] Suggest: Stretch & breathe.',
     ],
     permissions: [
-      'Health API — Sleep data',
-      'Motion Sensor — Night movement',
-      'Calendar — Routine timing',
+      'Camera Access — Facial Expression & Skin Data',
+      'Health API — Sleep & Heart Rate',
+      'Posture Sensor — Phone Motion Data',
     ],
     outcomes: {
-      metric1: { label: 'Better sleep quality', value: '' },
-      metric2: { label: 'More consistent rhythm', value: '' },
-      metric3: { label: 'Reduced sleep debt', value: '' },
+      metric1: { label: 'better sleep rhythm', value: '+15%' },
+      metric2: { label: 'daily stress fluctuation', value: '-25%' },
+      metric3: { label: 'micro-actions per day', value: '5 personalized' },
     },
-    motivation: 'Rest deeper, wake brighter.',
+    motivation: 'Rest easy, rise energized.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
   },
@@ -213,80 +197,32 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#FFE0B2',
   },
   feces: {
-    name: 'Feces Agent',
-    goal: 'My goal is to help you stay regular and support a smooth digestive rhythm.',
-    mission: 'I track your bowel rhythm and help maintain healthy digestion.',
-    tasks: [
-      'Monitor timing & regularity.',
-      'Detect irregular patterns early.',
-      'Suggest easy digestive helpers.',
-    ],
+    name: 'Feces',
+    goal: 'My goal is to keep your gut rhythm steady, so your digestion stays smooth and predictable.',
+    mission: 'Support a consistent bowel rhythm. Help you stay light, regular, and comfortable every day.',
+    tasks: [],
     whatIDo: {
-      dailyCheckIn: 'I check in each morning about your gut status.',
-      instantInsight: 'If irregularity appears, I send helpful suggestions.',
-      microChallenges: 'Gentle habits to support digestion.',
+      dailyCheckIn: 'I message you each morning to check your gut status.',
+      instantInsight: 'When irregularity shows up, I suggest what helps.',
+      microChallenges: 'Mini missions to improve digestion gently.',
     },
     insideMind: [
-      '[7:18am] No bowel activity for 2 days.',
-      '[7:22am] Suggest: Warm lemon water.',
-      '[10:14am] Fiber intake lower than usual.',
-      '[12:30pm] Hydration below baseline.',
-      '[17:40pm] Digestive rhythm stabilizing.',
-      '[21:05pm] Consistent pattern detected.',
+      '[7:18am] No bowel activity detected for 2 days.',
+      '[7:20am] Suggest: Warm lemon water + fiber snack.',
     ],
     permissions: [
-      'Digestive Log — Stool timing',
-      'Health API — Sleep, hydration, HR',
-      'Photos — Optional log',
+      'Digestive Log — Stool timing & regularity',
+      'Health API — Sleep, hydration, heart rate',
+      'Nutrition Agent — Fiber + meal rhythm',
     ],
     outcomes: {
-      metric1: { label: 'More regular rhythm', value: '' },
-      metric2: { label: 'Reduced discomfort', value: '' },
-      metric3: { label: 'Better gut awareness', value: '' },
+      metric1: { label: 'digestion smoothness', value: 'improved' },
+      metric2: { label: 'regularity', value: 'consistent' },
+      metric3: { label: 'comfort level', value: 'high' },
     },
-    motivation: 'Stay light, stay regular.',
+    motivation: 'My digestion feels smoother in just a few days!',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
-    backgroundColor: '#FFF8DC',
-  },
-  food: {
-    name: 'Food Agent',
-    goal: 'My goal is to help you eat better, keep your weight steady, and maintain stable daily energy.',
-    mission: 'I serve as your personal food analyst and nutrition strategist.',
-    tasks: [
-      'Identify food quality through photos: calories, protein, fats, sugar balance.',
-      'Advise before you eat — ask me: eat it? skip it? how much?',
-      'Build consistent meal rhythm for your day.',
-      'Warn you when meals are too oily, sugary, or salty.',
-      'Predict your 7-day weight trend based on food + activity.',
-    ],
-    whatIDo: {
-      dailyCheckIn: 'I review your meals and give instant feedback on balance & nutrition.',
-      instantInsight: 'I flag high-risk foods and help you avoid overeating.',
-      microChallenges: 'Small missions to improve protein distribution, reduce sugar spikes, or balance daily calories.',
-    },
-    insideMind: [
-      '[9:14am] Breakfast protein too low — add half a cup of milk.',
-      '[12:20pm] Lunch carbs are high — afternoon sleepiness likely.',
-      '[18:05pm] Daily calories near limit — keep dinner light.',
-      '[20:14pm] Sugar intake +23% above usual — reduce for better sleep.',
-      '[21:40pm] Predicted weight +0.3kg tomorrow based on today\'s meals.',
-      '[22:10pm] Evening snack risk high — water recommended instead.',
-    ],
-    permissions: [
-      'Camera Access — analyze your food',
-      'Photos — scan meal history',
-      'Health API Access — weight trend & activity',
-      'Notifications — meal reminders & alerts',
-    ],
-    outcomes: {
-      metric1: { label: 'Healthier Meals', value: '' },
-      metric2: { label: 'Steadier Weight', value: '' },
-      metric3: { label: 'Cleaner Nutrition Structure', value: '' },
-      metric4: { label: 'Smarter Food Decisions', value: '' },
-    },
-    motivation: 'Want to eat healthy without rebound? Leave your plate to me.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/food.png',
-    backgroundColor: '#FFF4E6',
+    backgroundColor: '#F5E6D3',
   },
 };
 
@@ -389,12 +325,6 @@ export default function AgentDetailPage() {
   };
 
   const isStressAgent = agentId === 'stress';
-  const isEnergyAgent = agentId === 'energy';
-  const isFaceAgent = agentId === 'face';
-  const isPostureAgent = agentId === 'posture';
-  const isSleepAgent = agentId === 'sleep';
-  const isFecesAgent = agentId === 'feces';
-  const isFoodAgent = agentId === 'food';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -471,7 +401,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent || isFoodAgent) ? (
+          {isStressAgent ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -482,147 +412,25 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent || isFoodAgent) ? (
+          {isStressAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
-              {isStressAgent ? (
-                <>
-                  <PermissionToggle
-                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                    title="Camera Access"
-                    subtitle="Facial expression signals"
-                  />
-                  <PermissionToggle
-                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                    title="Health API Access"
-                    subtitle="Stress & heart-rate data"
-                  />
-                  <PermissionToggle
-                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                    title="Motion / Posture Sensor"
-                    subtitle="Body tension patterns"
-                  />
-                </>
-              ) : isEnergyAgent ? (
-                <>
-                  <PermissionToggle
-                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                    title="Camera Access"
-                    subtitle="Facial Energy Scan"
-                  />
-                  <PermissionToggle
-                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                    title="Photos"
-                    subtitle="Photo-based Energy Input"
-                  />
-                  <PermissionToggle
-                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                    title="Health API"
-                    subtitle="Heart rate & activity influence"
-                  />
-                  <PermissionToggle
-                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                    title="Motion Sensor"
-                    subtitle="Movement & fatigue detection"
-                  />
-                </>
-              ) : isFaceAgent ? (
-                <>
-                  <PermissionToggle
-                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                    title="Camera"
-                    subtitle="Facial Expression Scan"
-                  />
-                  <PermissionToggle
-                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                    title="Photos"
-                    subtitle="Optional upload"
-                  />
-                  <PermissionToggle
-                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                    title="Health API"
-                    subtitle="Emotion-related biometrics"
-                  />
-                </>
-              ) : isPostureAgent ? (
-                <>
-                  <PermissionToggle
-                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                    title="Motion Sensor"
-                    subtitle="Posture & movement tracking"
-                  />
-                  <PermissionToggle
-                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                    title="Camera"
-                    subtitle="Posture scan"
-                  />
-                  <PermissionToggle
-                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                    title="Health API"
-                    subtitle="Activity & tension patterns"
-                  />
-                </>
-              ) : isSleepAgent ? (
-                <>
-                  <PermissionToggle
-                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                    title="Health API"
-                    subtitle="Sleep data"
-                  />
-                  <PermissionToggle
-                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                    title="Motion Sensor"
-                    subtitle="Night movement"
-                  />
-                  <PermissionToggle
-                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                    title="Calendar"
-                    subtitle="Routine timing"
-                  />
-                </>
-              ) : isFecesAgent ? (
-                <>
-                  <PermissionToggle
-                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                    title="Digestive Log"
-                    subtitle="Stool timing"
-                  />
-                  <PermissionToggle
-                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                    title="Health API"
-                    subtitle="Sleep, hydration, HR"
-                  />
-                  <PermissionToggle
-                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                    title="Photos"
-                    subtitle="Optional log"
-                  />
-                </>
-              ) : (
-                <>
-                  <PermissionToggle
-                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                    title="Camera Access"
-                    subtitle="analyze your food"
-                  />
-                  <PermissionToggle
-                    icon={<ImageIcon size={24} color="#000000" strokeWidth={2} />}
-                    title="Photos"
-                    subtitle="scan meal history"
-                  />
-                  <PermissionToggle
-                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                    title="Health API Access"
-                    subtitle="weight trend & activity"
-                  />
-                  <PermissionToggle
-                    icon={<Bell size={24} color="#000000" strokeWidth={2} />}
-                    title="Notifications"
-                    subtitle="meal reminders & alerts"
-                  />
-                </>
-              )}
+              <PermissionToggle
+                icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                title="Camera Access"
+                subtitle="Facial expression signals"
+              />
+              <PermissionToggle
+                icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                title="Health API Access"
+                subtitle="Stress & heart-rate data"
+              />
+              <PermissionToggle
+                icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                title="Motion / Posture Sensor"
+                subtitle="Body tension patterns"
+              />
             </View>
           ) : (
             <View style={styles.sectionCard}>
@@ -634,7 +442,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent || isFoodAgent) ? (
+          {isStressAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
