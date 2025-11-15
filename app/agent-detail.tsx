@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Switch, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Target, TrendingUp, Camera, Heart, Activity } from 'lucide-react-native';
+import { ArrowLeft, Target, TrendingUp, Camera, Heart, Activity, ImageIcon, Bell } from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
 
 interface AgentData {
@@ -29,37 +29,42 @@ interface AgentData {
 
 const AGENTS_DATA: Record<string, AgentData> = {
   energy: {
-    name: 'Energy',
-    goal: 'I optimize your energy flow, so you can stay vibrant all day long. I help balance your body\'s energy, ensuring peak performance.',
-    mission: 'My mission is to ensure your energy stays steady, giving you power to tackle the day.',
+    name: 'Energy Agent',
+    goal: 'My goal is to help you eat better, keep your weight steady, and maintain stable daily energy.',
+    mission: 'I serve as your personal food analyst and nutrition strategist.',
     tasks: [
-      'Optimize your energy cycles to prevent midday fatigue',
-      'Align your body\'s rhythm with natural peaks and troughs',
-      'Keep your energy steady.',
-      'Help you avoid crashes.',
-      'Balance your body and brain.',
+      'Identify food quality through photos: calories, protein, fats, sugar balance.',
+      'Advise before you eat — ask me: eat it? skip it? how much?',
+      'Build consistent meal rhythm for your day.',
+      'Warn you when meals are too oily, sugary, or salty.',
+      'Predict your 7-day weight trend based on food + activity.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I\'ll check in each morning to gauge your mood and energy.',
-      instantInsight: 'I catch low energy and guide your recovery.',
-      microChallenges: 'Mini missions to help you adjust your energy rhythms or take breaks.',
+      dailyCheckIn: 'I review your meals and give instant feedback on balance & nutrition.',
+      instantInsight: 'I flag high-risk foods and help you avoid overeating.',
+      microChallenges: 'Small missions to improve protein distribution, reduce sugar spikes, or balance daily calories.',
     },
     insideMind: [
-      '[11:42am] Your energy dropped 10% since morning.',
-      '[11:45am] Suggest: Take a 5-min break and stretch to recover your energy levels.',
-      '[12:30pm] Energy stabilized after snack break. Your energy will peak again after 2 hours.',
+      '[9:14am] Breakfast protein too low — add half a cup of milk.',
+      '[12:20pm] Lunch carbs are high — afternoon sleepiness likely.',
+      '[18:05pm] Daily calories near limit — keep dinner light.',
+      '[20:14pm] Sugar intake +23% above usual — reduce for better sleep.',
+      '[21:40pm] Predicted weight +0.3kg tomorrow based on today\'s meals.',
+      '[22:10pm] Evening snack risk high — water recommended instead.',
     ],
     permissions: [
-      'Camera Access — Facial Expression & Skin Data',
-      'Health API — Sleep & Heart Rate Monitoring',
-      'Posture Sensor — Track Motion and Activity',
+      'Camera Access — analyze your food',
+      'Photos — scan meal history',
+      'Health API Access — weight trend & activity',
+      'Notifications — meal reminders & alerts',
     ],
     outcomes: {
-      metric1: { label: 'better energy rhythm', value: '+15%' },
-      metric2: { label: 'daily stress fluctuation', value: '-25%' },
-      metric3: { label: 'micro-actions per day', value: '5 personalized' },
+      metric1: { label: 'Healthier Meals', value: '' },
+      metric2: { label: 'Steadier Weight', value: '' },
+      metric3: { label: 'Cleaner Nutrition Structure', value: '' },
+      metric4: { label: 'Smarter Food Decisions', value: '' },
     },
-    motivation: 'Stronger rhythm, better you.',
+    motivation: 'Want to eat healthy without rebound? Leave your plate to me.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
   },
@@ -325,6 +330,7 @@ export default function AgentDetailPage() {
   };
 
   const isStressAgent = agentId === 'stress';
+  const isEnergyAgent = agentId === 'energy';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -401,7 +407,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {isStressAgent ? (
+          {isStressAgent || isEnergyAgent ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -412,25 +418,52 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent ? (
+          {isStressAgent || isEnergyAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
-              <PermissionToggle
-                icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                title="Camera Access"
-                subtitle="Facial expression signals"
-              />
-              <PermissionToggle
-                icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                title="Health API Access"
-                subtitle="Stress & heart-rate data"
-              />
-              <PermissionToggle
-                icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                title="Motion / Posture Sensor"
-                subtitle="Body tension patterns"
-              />
+              {isStressAgent ? (
+                <>
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera Access"
+                    subtitle="Facial expression signals"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API Access"
+                    subtitle="Stress & heart-rate data"
+                  />
+                  <PermissionToggle
+                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                    title="Motion / Posture Sensor"
+                    subtitle="Body tension patterns"
+                  />
+                </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera Access"
+                    subtitle="analyze your food"
+                  />
+                  <PermissionToggle
+                    icon={<ImageIcon size={24} color="#000000" strokeWidth={2} />}
+                    title="Photos"
+                    subtitle="scan meal history"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API Access"
+                    subtitle="weight trend & activity"
+                  />
+                  <PermissionToggle
+                    icon={<Bell size={24} color="#000000" strokeWidth={2} />}
+                    title="Notifications"
+                    subtitle="meal reminders & alerts"
+                  />
+                </>
+              )}
             </View>
           ) : (
             <View style={styles.sectionCard}>
@@ -442,7 +475,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent ? (
+          {isStressAgent || isEnergyAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
