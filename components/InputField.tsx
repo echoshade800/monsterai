@@ -1,14 +1,15 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { AtSign, Camera, Mic, Send } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
-import { FlatList, Keyboard, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { MentionSelector } from './MentionSelector';
 
 interface InputFieldProps {
   onFocus?: () => void;
@@ -17,27 +18,14 @@ interface InputFieldProps {
   disabled?: boolean;
 }
 
-interface Monster {
-  id: string;
-  name: string;
-  icon: string;
-}
-
-const MONSTERS: Monster[] = [
-  { id: 'energy', name: 'Energy', icon: '⚡' },
-  { id: 'face', name: 'Face', icon: '😊' },
-  { id: 'posture', name: 'Posture', icon: '🧍' },
-  { id: 'sleep', name: 'Sleep', icon: '😴' },
-  { id: 'stress', name: 'Stress', icon: '😰' },
-  { id: 'feces', name: 'Feces', icon: '💩' },
-];
-
 export function InputField({ onFocus, onSend, isSending = false, disabled = false }: InputFieldProps) {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [showMonsterPicker, setShowMonsterPicker] = useState(false);
+  const [showMentionSelector, setShowMentionSelector] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(0);
   const keyboardHeight = useSharedValue(0);
   const router = useRouter();
+  const textInputRef = useRef<TextInput>(null);
 
   const handleSend = () => {
     if (text.trim() && onSend && !isSending && !disabled) {
@@ -53,6 +41,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
 
     const keyboardWillHide = Keyboard.addListener('keyboardWillHide', () => {
       keyboardHeight.value = withTiming(0, { duration: 250 });
+      setShowMentionSelector(false);
     });
 
     return () => {
@@ -115,40 +104,55 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
     onFocus?.();
   };
 
-  const handleMonsterSelect = (monster: Monster) => {
-    setText(text + `@${monster.name.toLowerCase()} `);
-    setShowMonsterPicker(false);
+  const handleMentionSelect = (agentName: string) => {
+    const mentionText = `@${agentName} `;
+    const before = text.substring(0, cursorPosition);
+    const after = text.substring(cursorPosition);
+    const newText = before + mentionText + after;
+    const newCursorPosition = cursorPosition + mentionText.length;
+
+    setText(newText);
+    setShowMentionSelector(false);
+
+    setTimeout(() => {
+      textInputRef.current?.focus();
+      textInputRef.current?.setNativeProps({
+        selection: { start: newCursorPosition, end: newCursorPosition },
+      });
+    }, 100);
   };
 
   const handleCameraPress = () => {
     router.push('/camera');
   };
 
-  const renderMonsterItem = ({ item }: { item: Monster }) => (
-    <TouchableOpacity
-      style={styles.monsterItem}
-      onPress={() => handleMonsterSelect(item)}
-    >
-      <Text style={styles.monsterIcon}>{item.icon}</Text>
-      <Text style={styles.monsterName}>{item.name}</Text>
-    </TouchableOpacity>
-  );
+  const handleSelectionChange = (event: any) => {
+    setCursorPosition(event.nativeEvent.selection.start);
+  };
 
   return (
     <>
+      <MentionSelector
+        visible={showMentionSelector}
+        onSelect={handleMentionSelect}
+        onDismiss={() => setShowMentionSelector(false)}
+        inputBarBottom={keyboardHeight.value}
+      />
+
       <Animated.View style={[styles.container, containerAnimatedStyle]}>
         <BlurView intensity={70} tint="light" style={StyleSheet.absoluteFill} />
         <View style={styles.inputContainer}>
           <Animated.View style={[styles.atButtonWrapper, atButtonAnimatedStyle]}>
             <TouchableOpacity
               style={styles.atButton}
-              onPress={() => setShowMonsterPicker(true)}
+              onPress={() => setShowMentionSelector(!showMentionSelector)}
             >
               <AtSign size={20} color="#666666" strokeWidth={2} />
             </TouchableOpacity>
           </Animated.View>
 
           <TextInput
+            ref={textInputRef}
             style={styles.input}
             placeholder="Typing…"
             placeholderTextColor="#999999"
@@ -156,6 +160,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             onChangeText={setText}
             onFocus={handleFocus}
             onBlur={() => setIsFocused(false)}
+            onSelectionChange={handleSelectionChange}
             multiline
             editable={!disabled && !isSending}
             onSubmitEditing={handleSend}
@@ -190,30 +195,6 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
           <Camera size={24} color={disabled ? "#999999" : "#000000"} strokeWidth={2.5} />
         </TouchableOpacity>
       </Animated.View>
-
-      <Modal
-        visible={showMonsterPicker}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowMonsterPicker(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowMonsterPicker(false)}
-        >
-          <View style={styles.monsterPickerContainer}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-            <FlatList
-              data={MONSTERS}
-              renderItem={renderMonsterItem}
-              keyExtractor={(item) => item.id}
-              numColumns={3}
-              contentContainerStyle={styles.monsterList}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
     </>
   );
 }
@@ -304,45 +285,5 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     opacity: 0.5,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  monsterPickerContainer: {
-    width: '85%',
-    maxWidth: 360,
-    borderRadius: 20,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-  },
-  monsterList: {
-    padding: 20,
-  },
-  monsterItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    margin: 5,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-  },
-  monsterIcon: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  monsterName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333333',
-    textAlign: 'center',
   },
 });
