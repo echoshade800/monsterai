@@ -213,32 +213,40 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#FFE0B2',
   },
   feces: {
-    name: 'Feces',
-    goal: 'My goal is to keep your gut rhythm steady, so your digestion stays smooth and predictable.',
-    mission: 'Support a consistent bowel rhythm. Help you stay light, regular, and comfortable every day.',
-    tasks: [],
+    name: 'Feces Agent',
+    goal: 'My goal is to help you stay regular and support a smooth digestive rhythm.',
+    mission: 'I track your bowel rhythm and help maintain healthy digestion.',
+    tasks: [
+      'Monitor timing & regularity.',
+      'Detect irregular patterns early.',
+      'Suggest easy digestive helpers.',
+    ],
     whatIDo: {
-      dailyCheckIn: 'I message you each morning to check your gut status.',
-      instantInsight: 'When irregularity shows up, I suggest what helps.',
-      microChallenges: 'Mini missions to improve digestion gently.',
+      dailyCheckIn: 'I check in each morning about your gut status.',
+      instantInsight: 'If irregularity appears, I send helpful suggestions.',
+      microChallenges: 'Gentle habits to support digestion.',
     },
     insideMind: [
-      '[7:18am] No bowel activity detected for 2 days.',
-      '[7:20am] Suggest: Warm lemon water + fiber snack.',
+      '[7:18am] No bowel activity for 2 days.',
+      '[7:22am] Suggest: Warm lemon water.',
+      '[10:14am] Fiber intake lower than usual.',
+      '[12:30pm] Hydration below baseline.',
+      '[17:40pm] Digestive rhythm stabilizing.',
+      '[21:05pm] Consistent pattern detected.',
     ],
     permissions: [
-      'Digestive Log — Stool timing & regularity',
-      'Health API — Sleep, hydration, heart rate',
-      'Nutrition Agent — Fiber + meal rhythm',
+      'Digestive Log — Stool timing',
+      'Health API — Sleep, hydration, HR',
+      'Photos — Optional log',
     ],
     outcomes: {
-      metric1: { label: 'digestion smoothness', value: 'improved' },
-      metric2: { label: 'regularity', value: 'consistent' },
-      metric3: { label: 'comfort level', value: 'high' },
+      metric1: { label: 'More regular rhythm', value: '' },
+      metric2: { label: 'Reduced discomfort', value: '' },
+      metric3: { label: 'Better gut awareness', value: '' },
     },
-    motivation: 'My digestion feels smoother in just a few days!',
+    motivation: 'Stay light, stay regular.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
-    backgroundColor: '#F5E6D3',
+    backgroundColor: '#FFF8DC',
   },
 };
 
@@ -345,6 +353,7 @@ export default function AgentDetailPage() {
   const isFaceAgent = agentId === 'face';
   const isPostureAgent = agentId === 'posture';
   const isSleepAgent = agentId === 'sleep';
+  const isFecesAgent = agentId === 'feces';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -421,7 +430,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent) ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -432,7 +441,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -513,7 +522,7 @@ export default function AgentDetailPage() {
                     subtitle="Activity & tension patterns"
                   />
                 </>
-              ) : (
+              ) : isSleepAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Heart size={24} color="#000000" strokeWidth={2} />}
@@ -531,6 +540,24 @@ export default function AgentDetailPage() {
                     subtitle="Routine timing"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                    title="Digestive Log"
+                    subtitle="Stool timing"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API"
+                    subtitle="Sleep, hydration, HR"
+                  />
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Photos"
+                    subtitle="Optional log"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -543,7 +570,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
