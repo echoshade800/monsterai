@@ -13,8 +13,8 @@ const AGENTS: Agent[] = [
   { id: 'stress', name: 'Stress', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png' },
   { id: 'sleep', name: 'Sleep', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png' },
   { id: 'posture', name: 'Posture', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png' },
-  { id: 'face', name: 'Face', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileleface.png' },
-  { id: 'energy', name: 'Energy', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileprofileenergy.png' },
+  { id: 'face', name: 'Face', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png' },
+  { id: 'energy', name: 'Energy', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png' },
 ];
 
 interface MentionSelectorProps {
