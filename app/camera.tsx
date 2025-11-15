@@ -197,44 +197,105 @@ export default function CameraScreen() {
   }
 
   async function openGallery() {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    });
+    if (isUploading) {
+      return;
+    }
 
-    if (!result.canceled && result.assets[0]) {
-      // 获取选中 agent 的 image_detection_type
-      const selectedAgentData = AGENTS.find(a => a.id === selectedAgent);
-      const imageDetectionType = selectedAgentData?.image_detection_type || 'full';
-      
-      console.log('相册选择导航参数:', {
-        photoUri: result.assets[0].uri,
-        agentId: selectedAgent,
-        imageDetectionType,
-        mode
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
       });
-      
-      if (mode === 'photo-text') {
-        router.replace({
-          pathname: '/photo-text',
-          params: { 
-            photoUri: result.assets[0].uri, 
-            agentId: selectedAgent,
-            imageDetectionType
+
+      if (!result.canceled && result.assets[0]) {
+        setIsUploading(true);
+
+        const selectedImage = result.assets[0];
+
+        if (!selectedImage?.uri) {
+          Alert.alert('错误', '选择图片失败，请重试');
+          setIsUploading(false);
+          return;
+        }
+
+        // 获取用户ID
+        let uid = 'anonymous';
+        try {
+          const userData = await storageManager.getUserData();
+          if (userData) {
+            const info = userData.toJSON ? userData.toJSON() : userData;
+            if (info && (info.uid || info.id)) {
+              uid = String(info.uid || info.id);
+            }
           }
+        } catch (e) {
+          console.warn('获取用户ID失败，使用匿名:', e);
+        }
+
+        // 准备上传参数
+        const filename = `photo_${Date.now()}.jpg`;
+        const mimeType = 'image/jpeg';
+
+        console.log('开始上传相册图片到S3:', { uid, filename, mimeType, photoUri: selectedImage.uri });
+
+        // 上传到S3
+        let uploadResult;
+        try {
+          uploadResult = await uploadImageToS3({
+            uid,
+            uri: selectedImage.uri,
+            filename,
+            mimeType,
+          });
+          console.log('相册图片上传成功:', uploadResult);
+        } catch (uploadError) {
+          console.error('上传相册图片到S3失败:', uploadError);
+          // 上传失败时，仍然使用本地URI
+          Alert.alert('上传失败', '图片上传失败，将使用本地图片。错误: ' + (uploadError as Error).message);
+        }
+
+        // 获取图片URI（优先使用S3响应中的url字段（CloudFront CDN URL），失败则使用本地URI）
+        const imageUri = uploadResult?.url || uploadResult?.presigned_url || uploadResult?.s3_uri || selectedImage.uri;
+
+        // 获取选中 agent 的 image_detection_type
+        const selectedAgentData = AGENTS.find(a => a.id === selectedAgent);
+        const imageDetectionType = selectedAgentData?.image_detection_type || 'full';
+        
+        console.log('相册选择导航参数:', {
+          photoUri: imageUri,
+          agentId: selectedAgent,
+          imageDetectionType,
+          mode
         });
-      } else {
-        // 返回聊天页面，使用 replace 替换当前相机页面
-        router.replace({
-          pathname: '/(tabs)',
-          params: { 
-            photoUri: result.assets[0].uri, 
-            agentId: selectedAgent,
-            imageDetectionType,
-            mode: 'photo' 
-          }
-        });
+
+        // 导航到相应页面（使用 replace 避免路由栈增长）
+        if (mode === 'photo-text') {
+          router.replace({
+            pathname: '/photo-text',
+            params: { 
+              photoUri: imageUri, 
+              agentId: selectedAgent,
+              imageDetectionType
+            }
+          });
+        } else {
+          // 返回聊天页面，使用 replace 替换当前相机页面
+          router.replace({
+            pathname: '/(tabs)',
+            params: { 
+              photoUri: imageUri, 
+              agentId: selectedAgent,
+              imageDetectionType,
+              mode: 'photo' 
+            }
+          });
+        }
       }
+    } catch (error) {
+      console.error('选择图片失败:', error);
+      Alert.alert('错误', '选择图片失败: ' + (error as Error).message);
+    } finally {
+      setIsUploading(false);
     }
   }
 
