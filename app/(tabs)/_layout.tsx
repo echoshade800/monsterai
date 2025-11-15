@@ -1,33 +1,33 @@
 import { Tabs } from 'expo-router';
 import { MessageCircle, BookText, Store, Users } from 'lucide-react-native';
-import { View, StyleSheet, Platform } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#000000',
+        tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#8E8E93',
-        tabBarBackground: () => (
-          <View style={styles.tabBarBackgroundContainer}>
-            <BlurView intensity={70} style={StyleSheet.absoluteFill} tint="light" />
-          </View>
-        ),
-        tabBarLabelStyle: styles.tabBarLabel,
-        tabBarItemStyle: styles.tabBarItem,
-        tabBarIconStyle: styles.tabBarIcon,
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 0.5,
+          borderTopColor: 'rgba(0, 0, 0, 0.1)',
+          height: Platform.OS === 'ios' ? 88 : 60,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '500',
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Echo',
-          tabBarIcon: ({ size, color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <MessageCircle size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+          tabBarIcon: ({ color, focused }) => (
+            <MessageCircle size={26} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
@@ -35,10 +35,8 @@ export default function TabLayout() {
         name="home"
         options={{
           title: 'Life Log',
-          tabBarIcon: ({ size, color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <BookText size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+          tabBarIcon: ({ color, focused }) => (
+            <BookText size={26} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
@@ -46,10 +44,8 @@ export default function TabLayout() {
         name="market"
         options={{
           title: 'Store',
-          tabBarIcon: ({ size, color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <Store size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+          tabBarIcon: ({ color, focused }) => (
+            <Store size={26} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
@@ -57,71 +53,11 @@ export default function TabLayout() {
         name="social"
         options={{
           title: 'Social',
-          tabBarIcon: ({ size, color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <Users size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-            </View>
+          tabBarIcon: ({ color, focused }) => (
+            <Users size={26} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBar: {
-    position: 'absolute',
-    bottom: 10,
-    left: 24,
-    right: 24,
-    height: 70,
-    borderRadius: 40,
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    elevation: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    paddingHorizontal: 0,
-    paddingBottom: 0,
-    maxWidth: 500,
-    alignSelf: 'center',
-  },
-  tabBarBackgroundContainer: {
-    flex: 1,
-    borderRadius: 40,
-    overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
-  },
-  tabBarLabel: {
-    fontSize: 12,
-    fontWeight: '400',
-    fontFamily: 'SF Compact Rounded',
-    marginTop: -2,
-    marginBottom: 4,
-  },
-  tabBarItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    gap: 2,
-  },
-  tabBarIcon: {
-    marginTop: 6,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  iconContainerActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-  },
-});
