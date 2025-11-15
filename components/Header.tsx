@@ -265,7 +265,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
               </Animated.View>
 
               <Animated.View style={[styles.breakfastBanner, breakfastBannerStyle]}>
-                <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+                <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
                 <View style={styles.breakfastContent}>
                   <View style={styles.breakfastLeft}>
                     <Image
@@ -291,7 +291,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
               </Animated.View>
 
               <Animated.View style={[styles.thinkingBanner, zappedBannerStyle]}>
-                <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+                <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
                 <View style={styles.thinkingContent}>
                   <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
                     <View style={styles.thinkingHeader}>
@@ -332,7 +332,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
 
             <View style={styles.collapsedBannerContainer}>
               <View style={styles.collapsedThinkingBanner}>
-                <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+                <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
                 <View style={styles.thinkingContent}>
                   <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
                     <View style={styles.thinkingHeader}>
@@ -438,11 +438,13 @@ const styles = StyleSheet.create({
   breakfastBanner: {
     borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
   },
   breakfastContent: {
     flex: 1,
@@ -504,11 +506,13 @@ const styles = StyleSheet.create({
     height: 130,
     borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
   },
 
   // Collapsed state styles
@@ -559,11 +563,13 @@ const styles = StyleSheet.create({
     height: 130,
     borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
   },
 
   // Thinking banner content styles
