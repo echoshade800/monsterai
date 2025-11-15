@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { ChevronRight, User } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 
 export default function AccountSettingsScreen() {
   const router = useRouter();
@@ -50,17 +50,6 @@ export default function AccountSettingsScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.profileCard}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <User size={36} color="#666666" strokeWidth={2} />
-              </View>
-            </View>
-            <Text style={styles.username}>USER6VPTIXFW8</Text>
-            <Text style={styles.email}>hello6@hello.com</Text>
-          </View>
-
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Profile</Text>
 
@@ -191,44 +180,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
-  },
-  profileCard: {
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 32,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  avatarContainer: {
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  username: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000000',
-    marginBottom: 4,
-  },
-  email: {
-    fontSize: 15,
-    color: '#666666',
+    paddingTop: 20,
   },
   section: {
     marginBottom: 24,
