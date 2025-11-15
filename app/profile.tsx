@@ -111,8 +111,6 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
-
           <View style={styles.card}>
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
