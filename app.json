@@ -11,6 +11,9 @@
         "UIBackgroundModes": [
           "remote-notification"
         ]
+      },
+      "entitlements": {
+        "com.apple.developer.applesignin": ["Default"]
       }
     },
     "plugins": [

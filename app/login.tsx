@@ -2,15 +2,88 @@ import { useRouter } from 'expo-router';
 import { Apple } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { appleLoginWithUserInfo } from '../src/services/appleAuthService';
 import { googleLoginWithUserInfo } from '../src/services/googleAuthService';
 import userService from '../src/services/userService';
 
 export default function LoginScreen() {
   const router = useRouter();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
 
-  const handleAppleLogin = () => {
-    console.log('Apple login pressed');
+  /**
+   * 格式化当前时间
+   * @returns {string} 格式化的时间字符串 "YYYY-MM-DD HH:mm:ss +0800"
+   */
+  const formatDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} +0800`;
+  };
+
+  /**
+   * 调用后端 API 进行第三方登录
+   * @param {Object} userInfo - 第三方用户信息
+   * @param {string} source - 来源（google/apple）
+   */
+  const handleThirdPartyLogin = async (userInfo: any, source: string) => {
+    const dateTime = formatDateTime();
+    
+    // 构建第三方登录请求数据
+    const thirdPartyInfo = {
+      thirdId: userInfo.thirdId,
+      email: userInfo.email || '',
+      avatar: userInfo.photo || userInfo.avatar || '',
+      source: source,
+      accessToken: userInfo.accessToken || userInfo.identityToken || userInfo.idToken || '',
+      dateTime: dateTime,
+    };
+    
+    // 调用后端 API 进行业务登录
+    const loginResult: any = await userService.loginByThird(thirdPartyInfo);
+    
+    if (loginResult.success) {
+      console.log('Backend login successful:', loginResult.data);
+      // 登录成功后跳转到主页面
+      router.replace('/(tabs)');
+    } else {
+      console.error('Backend login failed:', loginResult.message);
+      Alert.alert('登录失败', loginResult.message || '后端登录失败，请重试');
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    try {
+      setIsAppleLoading(true);
+      console.log('Starting Apple login...');
+      
+      // 1. 获取 Apple 用户信息
+      const userInfo = await appleLoginWithUserInfo();
+      
+      if (!userInfo) {
+        console.log('Apple login cancelled or failed');
+        return;
+      }
+
+      console.log('Apple login successful:', userInfo);
+      console.log('Third ID (Apple ID):', userInfo.thirdId);
+      console.log('Email:', userInfo.email);
+      console.log('Name:', userInfo.name);
+      console.log('Identity Token:', userInfo.identityToken);
+      
+      // 2. 调用后端 API 进行业务登录
+      await handleThirdPartyLogin(userInfo, 'apple');
+    } catch (error) {
+      console.error('Apple login error:', error);
+      Alert.alert('登录失败', error.message || 'Apple 登录失败，请重试');
+    } finally {
+      setIsAppleLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -32,39 +105,8 @@ export default function LoginScreen() {
       console.log('Name:', userInfo.name);
       console.log('ID Token:', userInfo.idToken);
       
-      // 2. 格式化当前时间 (格式: "YYYY-MM-DD HH:mm:ss +0800")
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const dateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds} +0800`;
-      
-      // 3. 构建第三方登录请求数据
-      const thirdPartyInfo = {
-        thirdId: userInfo.thirdId,
-        email: userInfo.email,
-        avatar: userInfo.photo || '',
-        source: 'google',
-        accessToken: userInfo.accessToken || userInfo.idToken || '', // 优先使用 accessToken，否则使用 idToken
-        dateTime: dateTime,
-      };
-      
-      console.log('Calling backend login API with:', thirdPartyInfo);
-      
-      // 4. 调用后端 API 进行业务登录
-      const loginResult: any = await userService.loginByThird(thirdPartyInfo);
-      
-      if (loginResult.success) {
-        console.log('Backend login successful:', loginResult.data);
-        // 登录成功后跳转到主页面
-        router.replace('/(tabs)');
-      } else {
-        console.error('Backend login failed:', loginResult.message);
-        Alert.alert('登录失败', loginResult.message || '后端登录失败，请重试');
-      }
+      // 2. 调用后端 API 进行业务登录
+      await handleThirdPartyLogin(userInfo, 'google');
     } catch (error) {
       console.error('Google login error:', error);
       Alert.alert('登录失败', error.message || 'Google 登录失败，请重试');
@@ -100,10 +142,16 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.loginButton} onPress={handleAppleLogin}>
+          <TouchableOpacity 
+            style={[styles.loginButton, isAppleLoading && styles.loginButtonDisabled]} 
+            onPress={handleAppleLogin}
+            disabled={isAppleLoading}
+          >
             <View style={styles.buttonContent}>
               <Apple size={24} color="#000000" fill="#000000" />
-              <Text style={styles.buttonText}>Continue with Apple</Text>
+              <Text style={styles.buttonText}>
+                {isAppleLoading ? 'Loading...' : 'Continue with Apple'}
+              </Text>
             </View>
           </TouchableOpacity>
 
