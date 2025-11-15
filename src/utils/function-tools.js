@@ -3,6 +3,7 @@
  * 用于AI对话中的函数调用功能
  */
 import * as Calendar from 'expo-calendar';
+import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import {
   NativeModules,
@@ -34,12 +35,53 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
   console.log('=== uploadImageToS3 开始 ===');
   console.log('参数:', { uid, uri, filename, mimeType });
   
+  // 图片压缩配置
+  const MAX_WIDTH = 1000; // 最大宽度（保持宽高比）
+  const COMPRESS_QUALITY = 0.7; // 压缩质量（0-1，0.8 表示 80% 质量）
+  
+  let processedUri = uri;
+  let processedMimeType = mimeType || 'image/jpeg';
+  let processedFilename = filename || 'upload.jpg';
+  
+  try {
+    console.log('开始压缩图片...');
+    // 压缩图片
+    const manipResult = await ImageManipulator.manipulateAsync(
+      uri,
+      [
+        // 调整大小：如果宽度超过 MAX_WIDTH，则按比例缩小
+        { resize: { width: MAX_WIDTH } },
+      ],
+      {
+        compress: COMPRESS_QUALITY,
+        format: ImageManipulator.SaveFormat.JPEG, // 统一转换为 JPEG 格式以减小文件大小
+      }
+    );
+    console.log('图片压缩结果:', manipResult);
+    processedUri = manipResult.uri;
+    processedMimeType = 'image/jpeg';
+    // 如果原文件名不是 .jpg 或 .jpeg，则更新扩展名
+    if (processedFilename && !processedFilename.match(/\.(jpg|jpeg)$/i)) {
+      processedFilename = processedFilename.replace(/\.[^.]+$/, '.jpg');
+    }
+    
+    console.log('图片压缩完成:', {
+      原始URI: uri,
+      压缩后URI: processedUri,
+      原始大小: '未知',
+      压缩后大小: manipResult.width + 'x' + manipResult.height,
+    });
+  } catch (error) {
+    console.warn('图片压缩失败，使用原始图片:', error);
+    // 如果压缩失败，继续使用原始图片
+  }
+  
   const form = new FormData();
   form.append('uid', uid);
   form.append('file', { 
-    uri, 
-    name: filename || 'upload.jpg', 
-    type: mimeType || 'image/jpeg' 
+    uri: processedUri, 
+    name: processedFilename, 
+    type: processedMimeType
   });
   
   console.log('FormData 已创建');

@@ -1,7 +1,7 @@
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
@@ -621,12 +621,6 @@ export default function EchoTab() {
 
       <ConversationSection messages={messages} isLoading={isLoading} />
 
-      <TouchableOpacity
-        style={styles.testButton}
-        onPress={() => router.push('/login')}
-      >
-        <Text style={styles.testButtonText}>Test Login</Text>
-      </TouchableOpacity>
 
       <InputField
         onFocus={handleInputFocus}
