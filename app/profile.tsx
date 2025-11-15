@@ -9,7 +9,6 @@ import storageManager from '../src/utils/storage';
 export default function ProfileScreen() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const memberSince = 'October 2024';
 
   const handleBack = () => {
     router.back();
@@ -109,7 +108,6 @@ export default function ProfileScreen() {
             </View>
           </View>
           <Text style={styles.username}>USER6VPTIXFW8</Text>
-          <Text style={styles.memberSince}>Member since {memberSince}</Text>
         </View>
 
         <View style={styles.section}>
@@ -289,11 +287,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#000000',
-    marginBottom: 4,
-  },
-  memberSince: {
-    fontSize: 15,
-    color: '#666666',
   },
   section: {
     marginBottom: 24,
