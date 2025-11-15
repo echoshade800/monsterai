@@ -25,6 +25,7 @@ import {
   View,
 } from 'react-native';
 import calendarManager from '../../src/utils/calendar-manager';
+import healthDataManager, { HealthDataType } from '../../src/utils/health-data-manager';
 import locationManager from '../../src/utils/location-manager';
 
 export default function HomeTab() {
@@ -52,6 +53,62 @@ export default function HomeTab() {
     ).start();
   }, []);
 
+  // 检查所有健康子项权限状态
+  const checkAllHealthPermissions = async (silent = false): Promise<boolean> => {
+    try {
+      const isAvailable = await healthDataManager.isAvailable();
+      if (!isAvailable) {
+        console.log('[HomeTab] HealthKit 不可用');
+        return false;
+      }
+
+      // 定义需要检查的所有健康子项权限
+      const requiredPermissions = [
+        HealthDataType.STEP_COUNT,
+        HealthDataType.HEART_RATE,
+        HealthDataType.SLEEP_ANALYSIS,
+        HealthDataType.ACTIVE_ENERGY,
+        HealthDataType.HEIGHT,
+        HealthDataType.WEIGHT,
+        HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
+        HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+      ];
+
+      // 检查每个权限是否已授权
+      // 如果 silent 为 false，先尝试初始化权限以获取系统真实状态
+      // 如果权限已授权，initHealthKit 不会弹出对话框
+      // 如果权限未授权，initHealthKit 会弹出对话框
+      if (!silent) {
+        const initResult = await healthDataManager.initHealthKit(requiredPermissions, []);
+        if (!initResult.success) {
+          console.log('[HomeTab] HealthKit 初始化失败:', initResult.error);
+          // 初始化失败不一定意味着权限被拒绝，可能是其他原因
+          // 继续检查已授权的权限列表
+        }
+      }
+
+      // 检查已授权的权限列表
+      const authorizedPermissions = healthDataManager.getAuthorizedPermissions();
+      
+      // 检查所有必需权限是否都在已授权列表中
+      const allAuthorized = requiredPermissions.every(perm => 
+        authorizedPermissions.includes(perm)
+      );
+
+      console.log('[HomeTab] HealthKit 权限检查:', {
+        required: requiredPermissions.length,
+        authorized: authorizedPermissions.length,
+        allAuthorized,
+        authorizedList: authorizedPermissions,
+      });
+
+      return allAuthorized;
+    } catch (error) {
+      console.error('[HomeTab] 检查 HealthKit 权限失败:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const syncLocationPermission = async () => {
       try {
@@ -77,8 +134,22 @@ export default function HomeTab() {
       }
     };
 
+    const syncHealthKitPermission = async () => {
+      try {
+        // 静默检查权限状态（不弹出权限请求对话框）
+        const allAuthorized = await checkAllHealthPermissions(true);
+        setPermissions((prev) => ({
+          ...prev,
+          healthkit: allAuthorized,
+        }));
+      } catch (error) {
+        console.error('[HomeTab] 检查 HealthKit 权限失败:', error);
+      }
+    };
+
     syncLocationPermission();
     syncCalendarPermission();
+    syncHealthKitPermission();
   }, []);
 
   const thinkingLogs = [
@@ -361,7 +432,95 @@ export default function HomeTab() {
       return;
     }
 
-    // 其他权限（healthkit, photos, camera, microphone）开启时直接切换状态
+    if (id === 'healthkit') {
+      try {
+        // 检查 HealthKit 是否可用
+        const isAvailable = await healthDataManager.isAvailable();
+        if (!isAvailable) {
+          Alert.alert(
+            'HealthKit 不可用',
+            'HealthKit 仅在 iOS 设备上可用，且需要设备支持。',
+            [{ text: '确定', style: 'default' }],
+          );
+          return;
+        }
+
+        // 请求所有常用健康数据权限
+        console.log('[HomeTab] 开始请求所有 HealthKit 权限...');
+        const permissionResult = await healthDataManager.requestAllCommonPermissions();
+        console.log('[HomeTab] 请求 HealthKit 权限结果:', permissionResult);
+
+        if (permissionResult.success) {
+          // 检查所有权限是否都已授权
+          const allAuthorized = await checkAllHealthPermissions();
+          setPermissions((prev) => ({
+            ...prev,
+            healthkit: allAuthorized,
+          }));
+
+          if (!allAuthorized) {
+            Alert.alert(
+              '部分权限未授权',
+              '部分健康数据权限未授权。请在系统设置中开启所有 HealthKit 权限。',
+              [
+                { text: '取消', style: 'cancel' },
+                {
+                  text: '去设置',
+                  onPress: async () => {
+                    try {
+                      await Linking.openSettings();
+                    } catch (error) {
+                      console.error('打开设置失败:', error);
+                    }
+                  },
+                },
+              ],
+            );
+          }
+        } else {
+          Alert.alert(
+            'HealthKit 权限被拒绝',
+            permissionResult.error || '需要 HealthKit 权限才能访问健康数据。请在设置中开启 HealthKit 权限。',
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '去设置',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('打开设置失败:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('[HomeTab] 请求 HealthKit 权限失败:', error);
+        Alert.alert(
+          '请求权限失败',
+          '无法请求 HealthKit 权限，请稍后重试。您也可以在设置中手动开启 HealthKit 权限。',
+          [
+            { text: '取消', style: 'cancel' },
+            {
+              text: '去设置',
+              onPress: async () => {
+                try {
+                  await Linking.openSettings();
+                } catch (error) {
+                  console.error('打开设置失败:', error);
+                }
+              },
+            },
+          ],
+        );
+      }
+
+      return;
+    }
+
+    // 其他权限（photos, camera, microphone）开启时直接切换状态
     // 关闭时已经在上面统一处理，会跳转到系统设置
     setPermissions((prev) => ({
       ...prev,

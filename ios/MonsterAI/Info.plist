@@ -87,27 +87,29 @@
 		</dict>
 	</dict>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>MonsterAI 想要访问你的日历数据</string>
+	<string>MonsterAI 需要访问您的日历数据，用于为您创建和管理日程安排，帮助您更好地规划时间。</string>
 	<key>NSCameraUsageDescription</key>
-	<string>MonsterAI 想要访问相机</string>
+	<string>MonsterAI 需要访问相机，用于拍摄照片和视频，为您提供更丰富的交互体验。</string>
 	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
-	<string>MonsteAI 想要记录你的健康数据</string>
+	<string>MonsterAI 需要访问您的健康记录数据，用于为您提供个性化的健康分析和建议。</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>MonsterAI 需要访问您的健康数据（例如步数、心率等），用于为您提供健康统计和个性化分析。</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Monster想要更新你的健康数据</string>
+	<string>MonsterAI 会根据您的健康数据为您生成记录和提醒，不会上传隐私信息给第三方。</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>MonsterAI 想要访问你的位置</string>
+	<string>MonsterAI 需要访问您的位置信息，用于为您提供基于位置的服务和个性化体验。</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Monster想要访问你的位置</string>
+	<string>MonsterAI 需要访问您的位置信息，用于为您提供基于位置的服务和个性化体验。</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Monster想要访问你的位置</string>
+	<string>MonsterAI 需要访问您的位置信息，用于为您提供基于位置的服务和个性化体验。</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>MonsterAI 想要访问麦克风</string>
+	<string>MonsterAI 需要访问麦克风，用于语音输入和语音交互功能，为您提供更便捷的操作方式。</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Monster想要访问体能信息</string>
+	<string>MonsterAI 需要访问您的运动与体能数据，用于为您提供运动分析和健康建议。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>MonsterAI 请求你的相册数据</string>
+	<string>MonsterAI 需要访问您的相册，用于选择和分享照片，丰富您的使用体验。</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>MonsterAI 访问你的提醒数据23.20.151.253</string>
+	<string>MonsterAI 需要访问您的提醒事项数据，用于为您创建和管理提醒，帮助您更好地完成任务。</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIBackgroundModes</key>
