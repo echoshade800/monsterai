@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Switch, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Target, TrendingUp } from 'lucide-react-native';
-import { useState } from 'react';
+import { ArrowLeft, Target, TrendingUp, Camera, Heart, Activity } from 'lucide-react-native';
+import { useState, useEffect, useRef } from 'react';
 
 interface AgentData {
   name: string;
@@ -20,6 +20,7 @@ interface AgentData {
     metric1: { label: string; value: string };
     metric2: { label: string; value: string };
     metric3: { label: string; value: string };
+    metric4?: { label: string; value: string };
   };
   motivation: string;
   imageUrl: string;
@@ -157,34 +158,41 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#E3F2FD',
   },
   stress: {
-    name: 'Stress Agent',
-    goal: 'My goal is to keep your daily stress below 25%, helping you stay calm and focused throughout the day.',
-    mission: 'I monitor your stress levels and help you manage daily pressure.',
+    name: 'Stress',
+    goal: 'I help you stay calm, balanced, and emotionally steady.',
+    mission: 'I help you notice emotional tension early and guide you to relax.',
     tasks: [
-      'Track your stress throughout the day.',
-      'Alert you when stress rises.',
-      'Guide you through relief exercises.',
+      'Track mood & micro-expressions',
+      'Detect rising tension',
+      'Give quick calming suggestions',
     ],
     whatIDo: {
-      dailyCheckIn: 'I message you daily to track your stress and energy.',
-      instantInsight: 'I notify you when rising stress appears.',
-      microChallenges: 'Mini missions to maintain calm.',
+      dailyCheckIn: 'I check your emotional baseline each morning.',
+      instantInsight: 'I notify you when your stress starts rising.',
+      microChallenges: 'Small mood-reset tasks to help you stay grounded.',
     },
     insideMind: [
-      '[2:15pm] Stress level increased by 10%.',
-      '[2:17pm] Suggest: Take a 5-min meditation break.',
+      '[9:12am] Tension +8% from baseline.',
+      '[10:04am] Your smile activity dropped noticeably.',
+      '[11:18am] Eye fatigue increased — may signal rising stress.',
+      '[1:52pm] Heart rate slightly elevated above your usual.',
+      '[2:30pm] Facial stress markers increased by 12%.',
+      '[3:05pm] Detected jaw-clenching pattern.',
+      '[4:10pm] Mood stability dipped compared to morning.',
+      '[5:22pm] Suggest: 1-minute breathing reset.',
     ],
     permissions: [
-      'Camera Access — Stress Detection',
-      'Health API — Stress & Heart Rate',
-      'Posture Sensor — Tension Data',
+      'Camera Access — Facial expression signals',
+      'Health API Access — Stress & heart-rate data',
+      'Motion / Posture Sensor — Body tension patterns',
     ],
     outcomes: {
-      metric1: { label: 'stress reduction', value: '-25%' },
-      metric2: { label: 'focus boost', value: '+15%' },
-      metric3: { label: 'micro actions', value: '5 calming tasks' },
+      metric1: { label: 'Calmer Mood', value: '' },
+      metric2: { label: 'Lower Stress Peaks', value: '' },
+      metric3: { label: 'More Stability', value: '' },
+      metric4: { label: 'Better Daily Rhythm', value: '' },
     },
-    motivation: 'Stay calm, stress less, and perform at your best.',
+    motivation: 'Stay calm, stay grounded.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
   },
@@ -218,6 +226,64 @@ const AGENTS_DATA: Record<string, AgentData> = {
   },
 };
 
+const ScrollingMindBanner = ({ logs }: { logs: string[] }) => {
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const animate = () => {
+      Animated.loop(
+        Animated.timing(scrollX, {
+          toValue: 1,
+          duration: 30000,
+          useNativeDriver: true,
+        })
+      ).start();
+    };
+    animate();
+  }, []);
+
+  return (
+    <View style={styles.scrollingBannerContainer}>
+      <Text style={styles.mindTitle}>Inside My Mind</Text>
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.scrollingBanner}
+        contentContainerStyle={styles.scrollingBannerContent}
+      >
+        {[...logs, ...logs].map((log, index) => (
+          <View key={index} style={styles.mindLogCard}>
+            <Text style={styles.mindLogText}>{log}</Text>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
+const PermissionToggle = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => {
+  const [isEnabled, setIsEnabled] = useState(true);
+
+  return (
+    <View style={styles.permissionRow}>
+      <View style={styles.permissionIcon}>{icon}</View>
+      <View style={styles.permissionInfo}>
+        <Text style={styles.permissionTitle}>{title}</Text>
+        <Text style={styles.permissionSubtitle}>{subtitle}</Text>
+      </View>
+      <Switch
+        trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+        thumbColor="#FFFFFF"
+        ios_backgroundColor="#D1D1D6"
+        onValueChange={setIsEnabled}
+        value={isEnabled}
+      />
+    </View>
+  );
+};
+
 export default function AgentDetailPage() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -237,6 +303,8 @@ export default function AgentDetailPage() {
   const handleHire = () => {
     setIsHired(true);
   };
+
+  const isStressAgent = agentId === 'stress';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -313,48 +381,100 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          <View style={styles.mindCard}>
-            <Text style={styles.mindTitle}>Inside My Mind</Text>
-            {agent.insideMind.map((log, index) => (
-              <Text key={index} style={styles.mindLog}>{log}</Text>
-            ))}
-          </View>
-
-          <View style={styles.sectionCard}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-            <Text style={styles.sectionTitle}>What I need to connect with you</Text>
-            {agent.permissions.map((permission, index) => (
-              <Text key={index} style={styles.permissionText}>{permission}</Text>
-            ))}
-          </View>
-
-          <View style={styles.sectionCard}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-            <View style={styles.outcomesHeader}>
-              <TrendingUp size={24} color="#000000" strokeWidth={2} />
-              <Text style={styles.sectionTitle}>Outcomes You Get</Text>
+          {isStressAgent ? (
+            <ScrollingMindBanner logs={agent.insideMind} />
+          ) : (
+            <View style={styles.mindCard}>
+              <Text style={styles.mindTitle}>Inside My Mind</Text>
+              {agent.insideMind.map((log, index) => (
+                <Text key={index} style={styles.mindLog}>{log}</Text>
+              ))}
             </View>
+          )}
 
-            <View style={styles.metricsRow}>
-              <View style={styles.metricBox}>
-                <Text style={styles.metricLabel}>{agent.outcomes.metric1.label}</Text>
-                <View style={styles.metricGraphPlaceholder} />
-                <Text style={styles.metricValue}>{agent.outcomes.metric1.value}</Text>
+          {isStressAgent ? (
+            <View style={styles.sectionCard}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+              <Text style={styles.sectionTitle}>What I need to connect with you</Text>
+              <PermissionToggle
+                icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                title="Camera Access"
+                subtitle="Facial expression signals"
+              />
+              <PermissionToggle
+                icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                title="Health API Access"
+                subtitle="Stress & heart-rate data"
+              />
+              <PermissionToggle
+                icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                title="Motion / Posture Sensor"
+                subtitle="Body tension patterns"
+              />
+            </View>
+          ) : (
+            <View style={styles.sectionCard}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+              <Text style={styles.sectionTitle}>What I need to connect with you</Text>
+              {agent.permissions.map((permission, index) => (
+                <Text key={index} style={styles.permissionText}>{permission}</Text>
+              ))}
+            </View>
+          )}
+
+          {isStressAgent ? (
+            <View style={styles.sectionCard}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+              <View style={styles.outcomesHeader}>
+                <TrendingUp size={24} color="#000000" strokeWidth={2} />
+                <Text style={styles.sectionTitle}>Outcomes You Get</Text>
               </View>
-
-              <View style={styles.metricBox}>
-                <Text style={styles.metricLabel}>{agent.outcomes.metric2.label}</Text>
-                <View style={styles.metricGraphPlaceholder} />
-                <Text style={styles.metricValue}>{agent.outcomes.metric2.value}</Text>
-              </View>
-
-              <View style={styles.metricBox}>
-                <Text style={styles.metricLabel}>{agent.outcomes.metric3.label}</Text>
-                <View style={styles.metricGraphPlaceholder} />
-                <Text style={styles.metricValue}>{agent.outcomes.metric3.value}</Text>
+              <View style={styles.outcomeKeywordsGrid}>
+                <View style={styles.outcomeKeywordCard}>
+                  <Text style={styles.outcomeKeyword}>{agent.outcomes.metric1.label}</Text>
+                </View>
+                <View style={styles.outcomeKeywordCard}>
+                  <Text style={styles.outcomeKeyword}>{agent.outcomes.metric2.label}</Text>
+                </View>
+                <View style={styles.outcomeKeywordCard}>
+                  <Text style={styles.outcomeKeyword}>{agent.outcomes.metric3.label}</Text>
+                </View>
+                {agent.outcomes.metric4 && (
+                  <View style={styles.outcomeKeywordCard}>
+                    <Text style={styles.outcomeKeyword}>{agent.outcomes.metric4.label}</Text>
+                  </View>
+                )}
               </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.sectionCard}>
+              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+              <View style={styles.outcomesHeader}>
+                <TrendingUp size={24} color="#000000" strokeWidth={2} />
+                <Text style={styles.sectionTitle}>Outcomes You Get</Text>
+              </View>
+
+              <View style={styles.metricsRow}>
+                <View style={styles.metricBox}>
+                  <Text style={styles.metricLabel}>{agent.outcomes.metric1.label}</Text>
+                  <View style={styles.metricGraphPlaceholder} />
+                  <Text style={styles.metricValue}>{agent.outcomes.metric1.value}</Text>
+                </View>
+
+                <View style={styles.metricBox}>
+                  <Text style={styles.metricLabel}>{agent.outcomes.metric2.label}</Text>
+                  <View style={styles.metricGraphPlaceholder} />
+                  <Text style={styles.metricValue}>{agent.outcomes.metric2.value}</Text>
+                </View>
+
+                <View style={styles.metricBox}>
+                  <Text style={styles.metricLabel}>{agent.outcomes.metric3.label}</Text>
+                  <View style={styles.metricGraphPlaceholder} />
+                  <Text style={styles.metricValue}>{agent.outcomes.metric3.value}</Text>
+                </View>
+              </View>
+            </View>
+          )}
 
           <Text style={styles.motivationText}>{agent.motivation}</Text>
         </View>
@@ -586,5 +706,81 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 20,
     fontStyle: 'italic',
+  },
+  scrollingBannerContainer: {
+    marginBottom: 16,
+  },
+  scrollingBanner: {
+    marginTop: 12,
+  },
+  scrollingBannerContent: {
+    paddingRight: 16,
+  },
+  mindLogCard: {
+    backgroundColor: '#1A1A1A',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginRight: 12,
+    minWidth: 280,
+  },
+  mindLogText: {
+    fontSize: 13,
+    fontWeight: '400',
+    fontFamily: 'Menlo',
+    color: '#00FF00',
+    lineHeight: 18,
+  },
+  permissionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  permissionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  permissionInfo: {
+    flex: 1,
+  },
+  permissionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'SF Compact Rounded',
+    color: '#000000',
+    marginBottom: 2,
+  },
+  permissionSubtitle: {
+    fontSize: 13,
+    fontWeight: '400',
+    fontFamily: 'SF Compact Rounded',
+    color: '#666666',
+  },
+  outcomeKeywordsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  outcomeKeywordCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    minWidth: '45%',
+    alignItems: 'center',
+  },
+  outcomeKeyword: {
+    fontSize: 15,
+    fontWeight: '600',
+    fontFamily: 'SF Compact Rounded',
+    color: '#000000',
+    textAlign: 'center',
   },
 });
