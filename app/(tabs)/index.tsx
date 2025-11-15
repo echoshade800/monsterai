@@ -286,6 +286,7 @@ export default function EchoTab() {
                 if (shouldContinue === false) {
                   accumulatedText = '';
                   setCurrentResponse('');
+                  setIsSending(false);
                   return;
                 }
               }
@@ -306,6 +307,7 @@ export default function EchoTab() {
             // 清理
             accumulatedText = '';
             setCurrentResponse('');
+            setIsSending(false);
 
             if (eventSource) {
               eventSource.close();
@@ -339,6 +341,7 @@ export default function EchoTab() {
 
           accumulatedText = '';
           setCurrentResponse('');
+          setIsSending(false);
 
           if (eventSource) {
             eventSource.close();
@@ -443,8 +446,8 @@ export default function EchoTab() {
         },
         errorMessage: '连接中断，请重试'
       });
-
-      setIsSending(false);
+      
+      // 注意：setIsSending(false) 现在在 handleStreamRequest 的 complete 或 error 事件中处理
 
     } catch (error) {
       console.error('发送消息错误:', error);
@@ -639,7 +642,12 @@ export default function EchoTab() {
         onCollapse={handleCollapse}
       />
 
-      <ConversationSection messages={messages} isLoading={isLoading} />
+      <ConversationSection 
+        messages={messages} 
+        isLoading={isLoading}
+        isSending={isSending}
+        currentResponse={currentResponse}
+      />
 
 
       <InputField

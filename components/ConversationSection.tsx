@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Message {
   id: string;
@@ -13,6 +13,8 @@ interface Message {
 interface ConversationSectionProps {
   messages?: Message[];
   isLoading?: boolean;
+  isSending?: boolean;
+  currentResponse?: string;
 }
 
 // 图片组件，带加载和错误处理
@@ -105,17 +107,79 @@ function MessageImage({ uri }: { uri: string }) {
   );
 }
 
-export function ConversationSection({ messages = [], isLoading = false }: ConversationSectionProps) {
+export function ConversationSection({ 
+  messages = [], 
+  isLoading = false, 
+  isSending = false,
+  currentResponse = ''
+}: ConversationSectionProps) {
   const scrollViewRef = useRef<ScrollView>(null);
+  const dot1Anim = useRef(new Animated.Value(0.4)).current;
+  const dot2Anim = useRef(new Animated.Value(0.4)).current;
+  const dot3Anim = useRef(new Animated.Value(0.4)).current;
+
+  // 打字指示器动画
+  useEffect(() => {
+    if (isSending && !currentResponse) {
+      console.log('开始打字指示器动画');
+      
+      // 重置动画值
+      dot1Anim.setValue(0.4);
+      dot2Anim.setValue(0.4);
+      dot3Anim.setValue(0.4);
+      
+      const createAnimation = (animValue: Animated.Value, delay: number) => {
+        return Animated.loop(
+          Animated.sequence([
+            Animated.delay(delay),
+            Animated.timing(animValue, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.timing(animValue, {
+              toValue: 0.4,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+          ])
+        );
+      };
+
+      const anim1 = createAnimation(dot1Anim, 0);
+      const anim2 = createAnimation(dot2Anim, 200);
+      const anim3 = createAnimation(dot3Anim, 400);
+
+      // 启动动画
+      anim1.start();
+      anim2.start();
+      anim3.start();
+
+      return () => {
+        console.log('停止打字指示器动画');
+        anim1.stop();
+        anim2.stop();
+        anim3.stop();
+        dot1Anim.setValue(0.4);
+        dot2Anim.setValue(0.4);
+        dot3Anim.setValue(0.4);
+      };
+    } else {
+      // 停止动画
+      dot1Anim.setValue(0.4);
+      dot2Anim.setValue(0.4);
+      dot3Anim.setValue(0.4);
+    }
+  }, [isSending, currentResponse, dot1Anim, dot2Anim, dot3Anim]);
 
   // 当消息更新时，滚动到底部
   useEffect(() => {
-    if (messages.length > 0 && scrollViewRef.current) {
+    if ((messages.length > 0 || isSending) && scrollViewRef.current) {
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
     }
-  }, [messages.length, messages]);
+  }, [messages.length, messages, isSending, currentResponse]);
 
   // 复制消息到剪贴板
   const handleCopyMessage = (content: string) => {
@@ -191,6 +255,53 @@ export function ConversationSection({ messages = [], isLoading = false }: Conver
           </View>
         );
       })}
+      
+      {/* 显示正在响应的状态 */}
+      {isSending && !currentResponse && (
+        <View style={styles.assistantMessageContainer} key="typing-indicator">
+          <Image
+            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatposture.png' }}
+            style={styles.assistantAvatar}
+          />
+          <View style={styles.typingIndicatorWrapper}>
+            <View style={styles.typingIndicator}>
+              <Animated.View 
+                style={[
+                  styles.typingDot, 
+                  { 
+                    opacity: dot1Anim,
+                  }
+                ]} 
+              />
+              <Animated.View 
+                style={[
+                  styles.typingDot, 
+                  { 
+                    opacity: dot2Anim,
+                  }
+                ]} 
+              />
+              <Animated.View 
+                style={[
+                  styles.typingDot, 
+                  { 
+                    opacity: dot3Anim,
+                  }
+                ]} 
+              />
+            </View>
+            <Text style={styles.typingText}>正在思考...</Text>
+          </View>
+        </View>
+      )}
+      {/* 调试信息 */}
+      {__DEV__ && (
+        <View style={{ padding: 10, backgroundColor: 'rgba(0,0,0,0.1)' }}>
+          <Text style={{ fontSize: 10 }}>isSending: {String(isSending)}</Text>
+          <Text style={{ fontSize: 10 }}>currentResponse: {currentResponse ? '有内容' : '空'}</Text>
+          <Text style={{ fontSize: 10 }}>显示指示器: {String(isSending && !currentResponse)}</Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -319,5 +430,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'SF Compact Rounded',
     color: '#999999',
+  },
+  typingIndicatorWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  typingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: 18,
+  },
+  typingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#999999',
+  },
+  typingText: {
+    fontSize: 14,
+    fontFamily: 'SF Compact Rounded',
+    color: '#999999',
+    fontStyle: 'italic',
   },
 });
