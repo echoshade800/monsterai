@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { getBaseUrl, getHeadersWithPassId } from '../src/services/api/api';
+import { CURRENT_ENV, ENV, getBaseUrl, getHeadersWithPassId } from '../src/services/api/api';
 
 export default function InviteCodeScreen() {
   const router = useRouter();
@@ -14,6 +14,15 @@ export default function InviteCodeScreen() {
       return;
     }
 
+    const trimmedCode = code.trim();
+    
+    // 测试环境下，1111 为通用邀请码，方便快速登录
+    if (CURRENT_ENV === ENV.DEVELOPMENT && trimmedCode === '1111') {
+      console.log('测试环境：使用通用邀请码 1111，直接通过验证');
+      router.replace('/login');
+      return;
+    }
+
     setLoading(true);
     try {
       // 获取包含 passId 的 headers
@@ -21,7 +30,7 @@ export default function InviteCodeScreen() {
       
       // 构建请求 URL
       const baseUrl = getBaseUrl('default');
-      const inviteUrl = `${baseUrl}/invite-code/use?code=${encodeURIComponent(code.trim())}`;
+      const inviteUrl = `${baseUrl}/invite-code/use?code=${encodeURIComponent(trimmedCode)}`;
       console.log('邀请码验证地址:', inviteUrl);
       
       const response = await fetch(inviteUrl, {

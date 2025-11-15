@@ -92,6 +92,7 @@ export const API_ENDPOINTS = {
   // 认证相关
   AUTH: {
     LOGIN_BY_EMAIL: '/login/by/email',
+    LOGIN_BY_THIRD: '/login/by/third',
     REGISTER_BY_EMAIL: '/register/by/email',
     LOGOUT: '/logout',
     FORGOT_PASSWORD: '/forgot/password',

@@ -16,14 +16,14 @@
     "plugins": [
       "expo-router",
       "expo-notifications",
-      "@react-native-firebase/auth",
       "expo-build-properties",
       [
         "expo-camera",
         {
           "cameraPermission": "Allow Monster AI to access your camera to record moments."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "android": {
       "package": "com.fanthus.monsterai.debug"

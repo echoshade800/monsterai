@@ -1,4 +1,4 @@
-import api, { UserData, ApiError } from './api-clients/client';
+import api, { ApiError, UserData } from './api-clients/client';
 import { API_ENDPOINTS } from './api/api';
 
 // 用户服务类
@@ -30,6 +30,48 @@ class UserService {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
         message: error instanceof ApiError ? error.message : '登录失败',
+      };
+    }
+  }
+
+  /**
+   * 第三方登录（Google/Apple等）
+   * @param {Object} thirdPartyInfo - 第三方登录信息
+   * @param {string} thirdPartyInfo.thirdId - 第三方唯一ID
+   * @param {string} thirdPartyInfo.email - 邮箱
+   * @param {string} thirdPartyInfo.avatar - 头像URL
+   * @param {string} thirdPartyInfo.source - 来源（google/apple等）
+   * @param {string} thirdPartyInfo.accessToken - 访问令牌
+   * @returns {Promise<UserData>} 用户数据
+   */
+  async loginByThird(thirdPartyInfo) {
+    try {
+      console.log('[AuthAPI][loginByThird] thirdPartyInfo', thirdPartyInfo);
+      
+      const response = await api.auth.post(API_ENDPOINTS.AUTH.LOGIN_BY_THIRD, {
+        thirdId: thirdPartyInfo.thirdId,
+        email: thirdPartyInfo.email,
+        avatar: thirdPartyInfo.avatar,
+        source: thirdPartyInfo.source,
+        accessToken: thirdPartyInfo.accessToken,
+        dateTime: thirdPartyInfo.dateTime,
+      });
+      
+      console.log('[AuthAPI][loginByThird] response', response);
+      
+      // 将响应数据转换为UserData对象
+      const userData = new UserData(response.data);
+      
+      return {
+        success: true,
+        data: userData,
+        message: response.getMessage(),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
+        message: error instanceof ApiError ? error.message : '第三方登录失败',
       };
     }
   }

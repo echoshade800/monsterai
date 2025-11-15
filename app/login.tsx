@@ -1,16 +1,76 @@
 import { useRouter } from 'expo-router';
 import { Apple } from 'lucide-react-native';
-import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { googleLoginWithUserInfo } from '../src/services/googleAuthService';
+import userService from '../src/services/userService';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleAppleLogin = () => {
     console.log('Apple login pressed');
   };
 
-  const handleGoogleLogin = () => {
-    console.log('Google login pressed');
+  const handleGoogleLogin = async () => {
+    try {
+      setIsGoogleLoading(true);
+      console.log('Starting Google login...');
+      
+      // 1. 获取 Google 用户信息
+      const userInfo = await googleLoginWithUserInfo();
+      
+      if (!userInfo) {
+        console.log('Google login cancelled or failed');
+        return;
+      }
+
+      console.log('Google login successful:', userInfo);
+      console.log('Third ID (Google ID):', userInfo.thirdId);
+      console.log('Email:', userInfo.email);
+      console.log('Name:', userInfo.name);
+      console.log('ID Token:', userInfo.idToken);
+      
+      // 2. 格式化当前时间 (格式: "YYYY-MM-DD HH:mm:ss +0800")
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const dateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds} +0800`;
+      
+      // 3. 构建第三方登录请求数据
+      const thirdPartyInfo = {
+        thirdId: userInfo.thirdId,
+        email: userInfo.email,
+        avatar: userInfo.photo || '',
+        source: 'google',
+        accessToken: userInfo.accessToken || userInfo.idToken || '', // 优先使用 accessToken，否则使用 idToken
+        dateTime: dateTime,
+      };
+      
+      console.log('Calling backend login API with:', thirdPartyInfo);
+      
+      // 4. 调用后端 API 进行业务登录
+      const loginResult: any = await userService.loginByThird(thirdPartyInfo);
+      
+      if (loginResult.success) {
+        console.log('Backend login successful:', loginResult.data);
+        // 登录成功后跳转到主页面
+        router.replace('/(tabs)');
+      } else {
+        console.error('Backend login failed:', loginResult.message);
+        Alert.alert('登录失败', loginResult.message || '后端登录失败，请重试');
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      Alert.alert('登录失败', error.message || 'Google 登录失败，请重试');
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   const handleTermsPress = () => {
@@ -47,10 +107,16 @@ export default function LoginScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleGoogleLogin}>
+          <TouchableOpacity 
+            style={[styles.loginButton, isGoogleLoading && styles.loginButtonDisabled]} 
+            onPress={handleGoogleLogin}
+            disabled={isGoogleLoading}
+          >
             <View style={styles.buttonContent}>
               <Text style={styles.googleIcon}>G</Text>
-              <Text style={styles.buttonText}>Continue with Google</Text>
+              <Text style={styles.buttonText}>
+                {isGoogleLoading ? 'Loading...' : 'Continue with Google'}
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -152,5 +218,8 @@ const styles = StyleSheet.create({
   link: {
     textDecorationLine: 'underline',
     color: '#1A1A1A',
+  },
+  loginButtonDisabled: {
+    opacity: 0.6,
   },
 });
