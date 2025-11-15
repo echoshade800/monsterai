@@ -193,6 +193,7 @@ export default function MarketTab() {
                 imageUrl={monster.imageUrl}
                 backgroundColor={monster.backgroundColor}
                 onFingerprintPress={() => handleFingerprintPress(monster.id)}
+                onCardPress={() => handleFingerprintPress(monster.id)}
                 onHirePress={() => handleHirePress(monster.id)}
                 imageSize={monster.imageSize}
                 imageOffset={monster.imageOffset}
