@@ -7,7 +7,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom - 8, 4) }]} pointerEvents="box-none">
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom - 2, 10) }]} pointerEvents="box-none">
       <View style={styles.tabBarContainer}>
         <BlurView intensity={100} tint="extraLight" style={StyleSheet.absoluteFill} />
 
