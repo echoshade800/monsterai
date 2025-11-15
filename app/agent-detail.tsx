@@ -222,7 +222,7 @@ export default function AgentDetailPage() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const agentId = params.id as string;
-  const [isHired, setIsHired] = useState(false);
+  const [isHired, setIsHired] = useState(true);
 
   const agent = AGENTS_DATA[agentId];
 

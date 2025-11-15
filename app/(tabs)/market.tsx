@@ -197,6 +197,7 @@ export default function MarketTab() {
                 onHirePress={() => handleHirePress(monster.id)}
                 imageSize={monster.imageSize}
                 imageOffset={monster.imageOffset}
+                isHired={true}
               />
             </View>
           ))}
