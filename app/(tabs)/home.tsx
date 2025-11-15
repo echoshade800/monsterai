@@ -1,27 +1,30 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Animated,
-  Switch,
-  Modal,
-} from 'react-native';
 import { useRouter } from 'expo-router';
 import {
-  MapPin,
-  Heart,
   Calendar,
-  Image as ImageIcon,
   Camera,
-  Mic,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Heart,
+  Image as ImageIcon,
+  MapPin,
+  Mic,
   X,
 } from 'lucide-react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  Linking,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import locationManager from '../../src/utils/location-manager';
 
 export default function HomeTab() {
   const router = useRouter();
@@ -46,6 +49,22 @@ export default function HomeTab() {
         useNativeDriver: true,
       })
     ).start();
+  }, []);
+
+  useEffect(() => {
+    const syncLocationPermission = async () => {
+      try {
+        const result = await locationManager.checkLocationPermission('foreground');
+        setPermissions((prev) => ({
+          ...prev,
+          location: result.success,
+        }));
+      } catch (error) {
+        console.error('[HomeTab] 检查位置权限失败:', error);
+      }
+    };
+
+    syncLocationPermission();
   }, []);
 
   const thinkingLogs = [
@@ -163,7 +182,90 @@ export default function HomeTab() {
 
   const timelineEntries = allTimelineData[selectedDate.toDateString()] || [];
 
-  const togglePermission = (id: string) => {
+  const togglePermission = async (id: string) => {
+    if (id === 'location') {
+      const currentValue = permissions.location;
+
+      if (currentValue) {
+        setPermissions((prev) => ({
+          ...prev,
+          location: false,
+        }));
+        return;
+      }
+
+      try {
+        const isServiceAvailable = await locationManager.isLocationServiceAvailable();
+        if (!isServiceAvailable) {
+          Alert.alert(
+            '位置服务不可用',
+            '请在设备设置中启用位置服务',
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '去设置',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('打开设置失败:', error);
+                  }
+                },
+              },
+            ],
+          );
+          return;
+        }
+
+        const permissionResult = await locationManager.requestLocationPermission('foreground');
+        if (permissionResult.success) {
+          setPermissions((prev) => ({
+            ...prev,
+            location: true,
+          }));
+        } else {
+          Alert.alert(
+            '位置权限被拒绝',
+            permissionResult.error || '需要位置权限才能使用位置服务。请在设置中开启位置权限。',
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '去设置',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('打开设置失败:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('[HomeTab] 请求位置权限失败:', error);
+        Alert.alert(
+          '请求权限失败',
+          '无法请求位置权限，请稍后重试。您也可以在设置中手动开启位置权限。',
+          [
+            { text: '取消', style: 'cancel' },
+            {
+              text: '去设置',
+              onPress: async () => {
+                try {
+                  await Linking.openSettings();
+                } catch (error) {
+                  console.error('打开设置失败:', error);
+                }
+              },
+            },
+          ],
+        );
+      }
+
+      return;
+    }
+
     setPermissions((prev) => ({
       ...prev,
       [id]: !prev[id as keyof typeof prev],

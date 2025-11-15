@@ -1,26 +1,29 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Animated,
-  Switch,
-} from 'react-native';
-import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
+import { useRouter } from 'expo-router';
 import {
-  MapPin,
-  Heart,
   Calendar,
-  Image as ImageIcon,
   Camera,
-  Mic,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Heart,
+  Image as ImageIcon,
+  MapPin,
+  Mic,
 } from 'lucide-react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import locationManager from '../src/utils/location-manager';
 
 export default function LifeLogScreen() {
   const router = useRouter();
@@ -42,6 +45,23 @@ export default function LifeLogScreen() {
         useNativeDriver: true,
       })
     ).start();
+  }, []);
+
+  // 检查位置权限状态，确保开关状态和实际权限状态一致
+  useEffect(() => {
+    const checkLocationPermission = async () => {
+      try {
+        const permissionResult = await locationManager.checkLocationPermission('foreground');
+        setPermissions((prev) => ({
+          ...prev,
+          location: permissionResult.success,
+        }));
+      } catch (error) {
+        console.error('检查位置权限失败:', error);
+      }
+    };
+
+    checkLocationPermission();
   }, []);
 
   const thinkingLogs = [
@@ -136,16 +156,124 @@ export default function LifeLogScreen() {
     { time: '23:18 PM', category: 'Sleep', description: 'Wind-down pattern detected before sleep' },
   ];
 
-  const togglePermission = (id: string) => {
-    setPermissions((prev) => ({
-      ...prev,
-      [id]: !prev[id as keyof typeof prev],
-    }));
-  };
+  const togglePermission = useCallback(async (id: string) => {
+    console.log('🟢 togglePermission called', id);
+    
+    // 如果是位置权限，需要实际请求系统权限
+    if (id === 'location') {
+      setPermissions((prev) => {
+        const currentValue = prev.location;
+        console.log('📍 Location permission current value:', currentValue);
+        
+        // 如果当前是开启状态，用户要关闭，直接更新状态
+        if (currentValue) {
+          console.log('🔴 Turning off location permission');
+          return {
+            ...prev,
+            location: false,
+          };
+        }
+
+        // 如果当前是关闭状态，用户要开启，需要请求权限
+        console.log('🟡 Turning on location permission, requesting...');
+        
+        // 异步请求权限
+        (async () => {
+          try {
+            // 先检查位置服务是否可用
+            const isServiceAvailable = await locationManager.isLocationServiceAvailable();
+            console.log('📍 Location service available:', isServiceAvailable);
+            if (!isServiceAvailable) {
+              Alert.alert(
+                '位置服务不可用',
+                '请在设备设置中启用位置服务',
+                [
+                  { text: '取消', style: 'cancel' },
+                  {
+                    text: '去设置',
+                    onPress: async () => {
+                      try {
+                        await Linking.openSettings();
+                      } catch (error) {
+                        console.error('打开设置失败:', error);
+                      }
+                    },
+                  },
+                ]
+              );
+              return;
+            }
+
+            // 请求位置权限
+            console.log('📍 Requesting location permission...');
+            const permissionResult = await locationManager.requestLocationPermission('foreground');
+            console.log('📍 Permission result:', permissionResult);
+            
+            if (permissionResult.success) {
+              setPermissions((prev) => ({
+                ...prev,
+                location: true,
+              }));
+              console.log('✅ Location permission granted');
+            } else {
+              // 权限被拒绝，显示提示
+              console.log('❌ Location permission denied');
+              Alert.alert(
+                '位置权限被拒绝',
+                permissionResult.error || '需要位置权限才能使用位置服务。请在设置中开启位置权限。',
+                [
+                  { text: '取消', style: 'cancel' },
+                  {
+                    text: '去设置',
+                    onPress: async () => {
+                      try {
+                        await Linking.openSettings();
+                      } catch (error) {
+                        console.error('打开设置失败:', error);
+                      }
+                    },
+                  },
+                ]
+              );
+            }
+          } catch (error) {
+            console.error('❌ 请求位置权限失败:', error);
+            Alert.alert(
+              '请求权限失败',
+              '无法请求位置权限，请稍后重试。您也可以在设置中手动开启位置权限。',
+              [
+                { text: '取消', style: 'cancel' },
+                {
+                  text: '去设置',
+                  onPress: async () => {
+                    try {
+                      await Linking.openSettings();
+                    } catch (error) {
+                      console.error('打开设置失败:', error);
+                    }
+                  },
+                },
+              ]
+            );
+          }
+        })();
+
+        // 先不更新状态，等待权限请求结果
+        return prev;
+      });
+    } else {
+      // 其他权限直接切换状态
+      console.log('🔄 Toggling other permission:', id);
+      setPermissions((prev) => ({
+        ...prev,
+        [id]: !prev[id as keyof typeof prev],
+      }));
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
-      <BlurView intensity={20} style={StyleSheet.absoluteFill} />
+      <BlurView intensity={20} style={StyleSheet.absoluteFill} pointerEvents="none" />
 
       <ScrollView
         style={styles.scrollView}
@@ -187,12 +315,17 @@ export default function LifeLogScreen() {
         <View style={styles.section}>
           <View style={styles.permissionsCard}>
             {permissionsList.map((permission, index) => (
-              <View
+              <TouchableOpacity
                 key={permission.id}
                 style={[
                   styles.permissionRow,
                   index < permissionsList.length - 1 && styles.permissionRowBorder,
                 ]}
+                activeOpacity={0.7}
+                onPress={() => {
+                  console.log('🟡 TouchableOpacity pressed for', permission.id);
+                  togglePermission(permission.id);
+                }}
               >
                 <View style={styles.permissionIcon}>{permission.icon}</View>
                 <View style={styles.permissionText}>
@@ -203,11 +336,15 @@ export default function LifeLogScreen() {
                 </View>
                 <Switch
                   value={permission.enabled}
-                  onValueChange={() => togglePermission(permission.id)}
+                  onValueChange={(value) => {
+                    console.log('🔵 Switch onValueChange triggered', permission.id, 'new value:', value);
+                    togglePermission(permission.id);
+                  }}
                   trackColor={{ false: '#E0E0E0', true: '#34C759' }}
                   thumbColor="#FFFFFF"
+                  testID={`switch-${permission.id}`}
                 />
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
