@@ -1,8 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { useState } from 'react';
-import { Alert, Platform, ScrollView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
@@ -10,7 +9,6 @@ import storageManager from '../src/utils/storage';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const handleBack = () => {
     router.back();
@@ -129,38 +127,6 @@ export default function ProfileScreen() {
 
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/account-settings')}>
               <Text style={styles.menuItemText}>Account</Text>
-              <ChevronRight size={20} color="#666" strokeWidth={2} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-
-          <View style={styles.card}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-
-            <View style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Notification Preferences</Text>
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
-                trackColor={{ false: '#D1D1D6', true: '#34C759' }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            <View style={styles.divider} />
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => console.log('Language / Region')}>
-              <Text style={styles.menuItemText}>Language / Region</Text>
-              <ChevronRight size={20} color="#666" strokeWidth={2} />
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => console.log('Units')}>
-              <Text style={styles.menuItemText}>Units</Text>
               <ChevronRight size={20} color="#666" strokeWidth={2} />
             </TouchableOpacity>
           </View>
