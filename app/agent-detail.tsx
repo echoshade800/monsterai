@@ -103,32 +103,37 @@ const AGENTS_DATA: Record<string, AgentData> = {
   },
   posture: {
     name: 'Posture Agent',
-    goal: 'My goal is to help you maintain proper posture, so you can feel strong and comfortable throughout the day.',
-    mission: 'I monitor your posture and provide gentle reminders, keeping you aligned and at your best.',
+    goal: 'My goal is to keep your posture aligned and prevent daily strain.',
+    mission: 'I detect posture patterns to help reduce tension and discomfort.',
     tasks: [
-      'Track your posture throughout the day.',
-      'Send reminders when you\'re slouching.',
-      'Help you improve with easy exercises.',
+      'Identify slouching or forward head posture.',
+      'Alert you when tension patterns rise.',
+      'Guide you through quick posture resets.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I check your posture and remind you if adjustments are needed.',
-      instantInsight: 'I notify you when your posture drops below optimal.',
-      microChallenges: 'Small tasks to improve your posture throughout the day.',
+      dailyCheckIn: 'I check your posture baseline daily.',
+      instantInsight: 'I notify you when unhealthy posture is detected.',
+      microChallenges: 'Mini movement missions to reset alignment.',
     },
     insideMind: [
-      '[9:02am] User\'s posture dropped by 10% since morning.',
-      '[9:04am] Suggest: Adjust your chair and straighten your back.',
+      '[9:05am] Good morning alignment detected.',
+      '[11:20am] Slight forward head posture.',
+      '[12:30pm] Shoulder tension increasing.',
+      '[14:05pm] Posture improved after stretch.',
+      '[15:40pm] Noted slouching while seated.',
+      '[17:10pm] Evening alignment stabilized.',
     ],
     permissions: [
-      'Posture Sensor — Body Motion Data',
-      'Camera Access — Face + Body Tracking (optional)',
+      'Motion Sensor — Posture & movement tracking',
+      'Camera — Posture scan',
+      'Health API — Activity & tension patterns',
     ],
     outcomes: {
-      metric1: { label: 'better posture', value: '+10%' },
-      metric2: { label: 'back pain reduction', value: '-20%' },
-      metric3: { label: 'micro actions', value: '5 exercises per day' },
+      metric1: { label: 'Less daily tension', value: '' },
+      metric2: { label: 'Better spinal alignment', value: '' },
+      metric3: { label: 'Healthier work habits', value: '' },
     },
-    motivation: 'Straighten up, power on.',
+    motivation: 'Stand tall, move freely.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
   },
@@ -333,6 +338,7 @@ export default function AgentDetailPage() {
   const isStressAgent = agentId === 'stress';
   const isEnergyAgent = agentId === 'energy';
   const isFaceAgent = agentId === 'face';
+  const isPostureAgent = agentId === 'posture';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -409,7 +415,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent) ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -420,7 +426,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -465,7 +471,7 @@ export default function AgentDetailPage() {
                     subtitle="Movement & fatigue detection"
                   />
                 </>
-              ) : (
+              ) : isFaceAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
@@ -483,6 +489,24 @@ export default function AgentDetailPage() {
                     subtitle="Emotion-related biometrics"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                    title="Motion Sensor"
+                    subtitle="Posture & movement tracking"
+                  />
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera"
+                    subtitle="Posture scan"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API"
+                    subtitle="Activity & tension patterns"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -495,7 +519,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
