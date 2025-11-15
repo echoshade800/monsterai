@@ -24,6 +24,7 @@ export default function EchoTab() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const processedPhotoRef = useRef<string | null>(null);
+  const historyInitializedRef = useRef<boolean>(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -183,10 +184,26 @@ export default function EchoTab() {
     initUserData();
   }, []);
 
-  // 组件挂载时获取对话历史
+  // 组件挂载时获取对话历史（只在首次挂载且没有照片参数时获取）
   useEffect(() => {
+    // 如果有照片参数，说明是拍照返回，不需要重新获取历史消息
+    if (params.photoUri) {
+      console.log('检测到照片参数，跳过获取历史消息，直接处理照片');
+      setIsLoading(false);
+      return;
+    }
+    
+    // 如果已经初始化过，不再重复获取
+    if (historyInitializedRef.current) {
+      console.log('历史消息已初始化，跳过重复获取');
+      setIsLoading(false);
+      return;
+    }
+    
+    // 首次挂载且没有照片参数时，获取历史消息
+    historyInitializedRef.current = true;
     fetchConversationHistory();
-  }, [fetchConversationHistory]);
+  }, [fetchConversationHistory, params.photoUri]);
 
   // 生成唯一ID
   const generateTraceId = () => {
@@ -451,6 +468,9 @@ export default function EchoTab() {
         return;
       }
       processedPhotoRef.current = photoUri;
+      
+      // 确保 isLoading 为 false，因为不重新获取历史消息
+      setIsLoading(false);
 
       const messageId = `photo_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const userMsg: Message = {

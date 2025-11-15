@@ -6,6 +6,7 @@ import { Check, ChevronLeft, Flashlight, Image as ImageIcon, SwitchCamera } from
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { uploadImageToS3 } from '../src/utils/function-tools';
+import storageManager from '../src/utils/storage';
 const AGENTS = [
   {
     id: 'steward',
@@ -165,9 +166,9 @@ export default function CameraScreen() {
         mode
       });
 
-      // 导航到相应页面
+      // 导航到相应页面（使用 replace 避免路由栈增长）
       if (mode === 'photo-text') {
-        router.push({
+        router.replace({
           pathname: '/photo-text',
           params: { 
             photoUri: imageUri, 
@@ -176,7 +177,8 @@ export default function CameraScreen() {
           }
         });
       } else {
-        router.push({
+        // 返回聊天页面，使用 replace 替换当前相机页面
+        router.replace({
           pathname: '/(tabs)',
           params: { 
             photoUri: imageUri, 
@@ -213,7 +215,7 @@ export default function CameraScreen() {
       });
       
       if (mode === 'photo-text') {
-        router.push({
+        router.replace({
           pathname: '/photo-text',
           params: { 
             photoUri: result.assets[0].uri, 
@@ -222,7 +224,8 @@ export default function CameraScreen() {
           }
         });
       } else {
-        router.push({
+        // 返回聊天页面，使用 replace 替换当前相机页面
+        router.replace({
           pathname: '/(tabs)',
           params: { 
             photoUri: result.assets[0].uri, 
