@@ -248,6 +248,46 @@ const AGENTS_DATA: Record<string, AgentData> = {
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#FFF8DC',
   },
+  food: {
+    name: 'Food Agent',
+    goal: 'My goal is to help you eat better, keep your weight steady, and maintain stable daily energy.',
+    mission: 'I serve as your personal food analyst and nutrition strategist.',
+    tasks: [
+      'Identify food quality through photos: calories, protein, fats, sugar balance.',
+      'Advise before you eat — ask me: eat it? skip it? how much?',
+      'Build consistent meal rhythm for your day.',
+      'Warn you when meals are too oily, sugary, or salty.',
+      'Predict your 7-day weight trend based on food + activity.',
+    ],
+    whatIDo: {
+      dailyCheckIn: 'I review your meals and give instant feedback on balance & nutrition.',
+      instantInsight: 'I flag high-risk foods and help you avoid overeating.',
+      microChallenges: 'Small missions to improve protein distribution, reduce sugar spikes, or balance daily calories.',
+    },
+    insideMind: [
+      '[9:14am] Breakfast protein too low — add half a cup of milk.',
+      '[12:20pm] Lunch carbs are high — afternoon sleepiness likely.',
+      '[18:05pm] Daily calories near limit — keep dinner light.',
+      '[20:14pm] Sugar intake +23% above usual — reduce for better sleep.',
+      '[21:40pm] Predicted weight +0.3kg tomorrow based on today\'s meals.',
+      '[22:10pm] Evening snack risk high — water recommended instead.',
+    ],
+    permissions: [
+      'Camera Access — analyze your food',
+      'Photos — scan meal history',
+      'Health API Access — weight trend & activity',
+      'Notifications — meal reminders & alerts',
+    ],
+    outcomes: {
+      metric1: { label: 'Healthier Meals', value: '' },
+      metric2: { label: 'Steadier Weight', value: '' },
+      metric3: { label: 'Cleaner Nutrition Structure', value: '' },
+      metric4: { label: 'Smarter Food Decisions', value: '' },
+    },
+    motivation: 'Want to eat healthy without rebound? Leave your plate to me.',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/food.png',
+    backgroundColor: '#FFF4E6',
+  },
 };
 
 const ScrollingMindBanner = ({ logs }: { logs: string[] }) => {
@@ -354,6 +394,7 @@ export default function AgentDetailPage() {
   const isPostureAgent = agentId === 'posture';
   const isSleepAgent = agentId === 'sleep';
   const isFecesAgent = agentId === 'feces';
+  const isFoodAgent = agentId === 'food';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -430,7 +471,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent || isFoodAgent) ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -441,7 +482,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent || isFoodAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -540,7 +581,7 @@ export default function AgentDetailPage() {
                     subtitle="Routine timing"
                   />
                 </>
-              ) : (
+              ) : isFecesAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Activity size={24} color="#000000" strokeWidth={2} />}
@@ -558,6 +599,29 @@ export default function AgentDetailPage() {
                     subtitle="Optional log"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera Access"
+                    subtitle="analyze your food"
+                  />
+                  <PermissionToggle
+                    icon={<ImageIcon size={24} color="#000000" strokeWidth={2} />}
+                    title="Photos"
+                    subtitle="scan meal history"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API Access"
+                    subtitle="weight trend & activity"
+                  />
+                  <PermissionToggle
+                    icon={<Bell size={24} color="#000000" strokeWidth={2} />}
+                    title="Notifications"
+                    subtitle="meal reminders & alerts"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -570,7 +634,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent || isFecesAgent || isFoodAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>

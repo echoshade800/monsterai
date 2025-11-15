@@ -64,6 +64,16 @@ const MONSTERS_DATA = [
     imageSize: '225%',
     imageOffset: 52,
   },
+  {
+    id: 'food',
+    name: 'Food',
+    category: 'Nutrition',
+    description: 'Your personal food analyst and nutrition strategist.',
+    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/food.png',
+    backgroundColor: '#FFF4E6',
+    imageSize: '225%',
+    imageOffset: 52,
+  },
 ];
 
 const GAMES_DATA = [
