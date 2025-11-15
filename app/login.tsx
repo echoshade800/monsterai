@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { InviteCodeModal } from '../components/InviteCodeModal';
 import { Apple } from 'lucide-react-native';
+import { useState } from 'react';
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { InviteCodeModal } from '../components/InviteCodeModal';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -28,11 +28,11 @@ export default function LoginScreen() {
   };
 
   const handleTermsPress = () => {
-    Linking.openURL('https://example.com/terms');
+    Linking.openURL('https://www.mymonster.ai/#terms');
   };
 
   const handlePrivacyPress = () => {
-    Linking.openURL('https://example.com/privacy');
+    Linking.openURL('https://www.mymonster.ai/#privacy');
   };
 
   const handleSkip = () => {

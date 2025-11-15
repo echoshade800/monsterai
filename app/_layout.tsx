@@ -7,9 +7,15 @@ export default function Layout() {
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="camera" options={{ headerShown: false }} />
           <Stack.Screen name="photo-text" options={{ headerShown: false }} />
+          <Stack.Screen name="under-construction" options={{ headerShown: false }} />
+          <Stack.Screen name="profile" options={{ headerShown: false }} />
+          <Stack.Screen name="monster-detail" options={{ headerShown: false }} />
+          <Stack.Screen name="agent-detail" options={{ headerShown: false }} />
         </Stack>
       </GestureHandlerRootView>
     </SafeAreaProvider>
