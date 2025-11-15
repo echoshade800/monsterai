@@ -345,7 +345,7 @@ export default function HomeTab() {
         <View style={styles.bottomButtonContainer}>
           <TouchableOpacity
             style={styles.bottomButton}
-            onPress={() => router.push('/under-construction')}
+            onPress={() => router.push('/(tabs)/index')}
           >
             <Text style={styles.bottomButtonText}>Log your day</Text>
             <ArrowRight size={20} color="#000" />
