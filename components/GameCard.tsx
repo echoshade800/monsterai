@@ -111,8 +111,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 12,
+    paddingBottom: 60,
     position: 'relative',
-    minHeight: 140,
   },
   gameName: {
     fontSize: 18,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   tagsContainer: {
     flexDirection: 'row',
     gap: 6,
-    marginBottom: 12,
+    marginBottom: 14,
     flexWrap: 'wrap',
   },
   creatorsBadge: {
@@ -152,9 +152,9 @@ const styles = StyleSheet.create({
   },
   playButton: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 12,
+    left: 12,
+    right: 12,
     backgroundColor: '#000000',
     paddingVertical: 10,
     borderRadius: 20,
