@@ -1,23 +1,9 @@
 import { useRouter } from 'expo-router';
 import { Apple } from 'lucide-react-native';
-import { useState } from 'react';
 import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { InviteCodeModal } from '../components/InviteCodeModal';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [showInviteModal, setShowInviteModal] = useState(true);
-  const [hasValidCode, setHasValidCode] = useState(false);
-
-  const handleValidCode = () => {
-    setShowInviteModal(false);
-    setHasValidCode(true);
-  };
-
-  const handleNotYet = () => {
-    setShowInviteModal(false);
-    router.push('/under-construction');
-  };
 
   const handleAppleLogin = () => {
     console.log('Apple login pressed');
@@ -35,23 +21,8 @@ export default function LoginScreen() {
     Linking.openURL('https://www.mymonster.ai/#privacy');
   };
 
-  const handleSkip = () => {
-    setShowInviteModal(false);
-    router.push('/(tabs)');
-  };
-
   return (
-    <>
-      <InviteCodeModal
-        visible={showInviteModal}
-        onValidCode={handleValidCode}
-        onNotYet={handleNotYet}
-        onSkip={handleSkip}
-      />
     <View style={styles.container}>
-      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-        <Text style={styles.skipButtonText}>Skip</Text>
-      </TouchableOpacity>
       <Image
         source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
         style={styles.background}
@@ -98,7 +69,6 @@ export default function LoginScreen() {
         </View>
       </View>
     </View>
-    </>
   );
 }
 
@@ -181,19 +151,6 @@ const styles = StyleSheet.create({
   },
   link: {
     textDecorationLine: 'underline',
-    color: '#1A1A1A',
-  },
-  skipButton: {
-    position: 'absolute',
-    top: 60,
-    right: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    zIndex: 10,
-  },
-  skipButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
     color: '#1A1A1A',
   },
 });
