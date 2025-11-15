@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Alert, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Alert, Modal, TextInput, FlatList } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
-import { Picker } from '@react-native-picker/picker';
 
 export default function AccountSettingsScreen() {
   const router = useRouter();
@@ -88,6 +87,18 @@ export default function AccountSettingsScreen() {
   const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
   const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
   const heights = Array.from({ length: 121 }, (_, i) => (120 + i).toString());
+
+  const renderPickerItem = (item: string, selectedValue: string, onSelect: (value: string) => void) => (
+    <TouchableOpacity
+      key={item}
+      style={[styles.pickerItem, item === selectedValue && styles.pickerItemSelected]}
+      onPress={() => onSelect(item)}
+    >
+      <Text style={[styles.pickerItemText, item === selectedValue && styles.pickerItemTextSelected]}>
+        {item}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -228,41 +239,23 @@ export default function AccountSettingsScreen() {
 
             {editingField === 'birthday' && (
               <View style={styles.pickerRow}>
-                <View style={styles.pickerContainer}>
+                <View style={styles.pickerColumn}>
                   <Text style={styles.pickerLabel}>Year</Text>
-                  <Picker
-                    selectedValue={tempYear}
-                    onValueChange={setTempYear}
-                    style={styles.picker}
-                  >
-                    {years.map(year => (
-                      <Picker.Item key={year} label={year} value={year} />
-                    ))}
-                  </Picker>
+                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+                    {years.map(year => renderPickerItem(year, tempYear, setTempYear))}
+                  </ScrollView>
                 </View>
-                <View style={styles.pickerContainer}>
+                <View style={styles.pickerColumn}>
                   <Text style={styles.pickerLabel}>Month</Text>
-                  <Picker
-                    selectedValue={tempMonth}
-                    onValueChange={setTempMonth}
-                    style={styles.picker}
-                  >
-                    {months.map(month => (
-                      <Picker.Item key={month} label={month} value={month} />
-                    ))}
-                  </Picker>
+                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+                    {months.map(month => renderPickerItem(month, tempMonth, setTempMonth))}
+                  </ScrollView>
                 </View>
-                <View style={styles.pickerContainer}>
+                <View style={styles.pickerColumn}>
                   <Text style={styles.pickerLabel}>Day</Text>
-                  <Picker
-                    selectedValue={tempDay}
-                    onValueChange={setTempDay}
-                    style={styles.picker}
-                  >
-                    {days.map(day => (
-                      <Picker.Item key={day} label={day} value={day} />
-                    ))}
-                  </Picker>
+                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+                    {days.map(day => renderPickerItem(day, tempDay, setTempDay))}
+                  </ScrollView>
                 </View>
               </View>
             )}
@@ -291,15 +284,9 @@ export default function AccountSettingsScreen() {
             {editingField === 'height' && (
               <View style={styles.singlePickerContainer}>
                 <Text style={styles.pickerLabel}>Height (cm)</Text>
-                <Picker
-                  selectedValue={tempHeight}
-                  onValueChange={setTempHeight}
-                  style={styles.picker}
-                >
-                  {heights.map(h => (
-                    <Picker.Item key={h} label={`${h} cm`} value={h} />
-                  ))}
-                </Picker>
+                <ScrollView style={styles.singlePickerScrollView} showsVerticalScrollIndicator={false}>
+                  {heights.map(h => renderPickerItem(h, tempHeight, setTempHeight))}
+                </ScrollView>
               </View>
             )}
 
@@ -430,6 +417,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     padding: 24,
+    maxHeight: '80%',
   },
   modalTitle: {
     fontSize: 20,
@@ -453,12 +441,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     marginBottom: 24,
+    height: 200,
   },
-  pickerContainer: {
+  pickerColumn: {
     flex: 1,
-  },
-  singlePickerContainer: {
-    marginBottom: 24,
   },
   pickerLabel: {
     fontSize: 14,
@@ -467,9 +453,33 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
-  picker: {
+  pickerScrollView: {
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 12,
+    maxHeight: 160,
+  },
+  singlePickerContainer: {
+    marginBottom: 24,
+  },
+  singlePickerScrollView: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: 12,
+    maxHeight: 200,
+  },
+  pickerItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  pickerItemSelected: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: '#000000',
+  },
+  pickerItemTextSelected: {
+    fontWeight: '700',
   },
   optionsContainer: {
     flexDirection: 'row',
