@@ -162,7 +162,7 @@ export default function ProfileScreen() {
 
             <View style={styles.divider} />
 
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Privacy Policy')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/privacy-policy')}>
               <Text style={styles.menuItemText}>Privacy Policy</Text>
               <ChevronRight size={20} color="#666" strokeWidth={2} />
             </TouchableOpacity>
