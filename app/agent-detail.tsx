@@ -145,33 +145,40 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#FFE4E1',
   },
   sleep: {
-    name: 'Sleep',
-    goal: 'My goal is to keep your daily stress below 35%, so your sleep improves naturally.',
-    mission: 'I help you balance work and rest so you can wake up refreshed and energized.',
+    name: 'Sleep Agent',
+    goal: 'I help you sleep deeper and wake up more energized.',
+    mission: 'I find the root causes behind your sleep quality.',
     tasks: [
-      'Restore balance between work and rest',
-      'Help you start days with energy, not fatigue',
+      'Track deep sleep, REM, and interruptions.',
+      'Predict fatigue from sleep debt.',
+      'Build better nighttime routines.',
+      'Detect evening tiredness patterns.',
+      'Create long-term sleep trends.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I message you each morning with your mood trend.',
-      instantInsight: 'When your posture drops, I notify you.',
-      microChallenges: 'Join mini missions to optimize your rest cycles.',
+      dailyCheckIn: 'I summarize your sleep and highlight what needs attention.',
+      instantInsight: 'I notify you when your fatigue is rising or sleep debt builds up.',
+      microChallenges: 'Small tasks to improve sleep habits and night routines.',
     },
     insideMind: [
-      '[11:42am] User\'s facial energy dropped 12% compared to baseline.',
-      '[11:44am] Suggest: Stretch & breathe.',
+      '[7:18am] Deep sleep 20% below normal.',
+      '[10:12am] Morning drowsiness high.',
+      '[14:40pm] Afternoon fatigue linked to sleep debt.',
+      '[20:05pm] Evening routine unstable.',
+      '[23:12pm] Bedtime later than usual.',
+      '[23:40pm] High screen use before bed.',
     ],
     permissions: [
-      'Camera Access — Facial Expression & Skin Data',
-      'Health API — Sleep & Heart Rate',
-      'Posture Sensor — Phone Motion Data',
+      'Health API Access — sleep records',
+      'Motion Access — night movement tracking',
+      'Notifications — bedtime reminders & morning insights',
     ],
     outcomes: {
-      metric1: { label: 'better sleep rhythm', value: '+15%' },
-      metric2: { label: 'daily stress fluctuation', value: '-25%' },
-      metric3: { label: 'micro-actions per day', value: '5 personalized' },
+      metric1: { label: 'Faster Sleep', value: '' },
+      metric2: { label: 'Longer Deep Sleep', value: '' },
+      metric3: { label: 'More Daytime Energy', value: '' },
     },
-    motivation: 'Rest easy, rise energized.',
+    motivation: 'Sleep like a Sunday morning—every night.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
   },
@@ -346,6 +353,7 @@ export default function AgentDetailPage() {
   const isEnergyAgent = agentId === 'energy';
   const isFaceAgent = agentId === 'face';
   const isPostureAgent = agentId === 'posture';
+  const isSleepAgent = agentId === 'sleep';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -422,7 +430,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -433,7 +441,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -496,7 +504,7 @@ export default function AgentDetailPage() {
                     subtitle="daily glow reminders"
                   />
                 </>
-              ) : (
+              ) : isPostureAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
@@ -514,6 +522,24 @@ export default function AgentDetailPage() {
                     subtitle="alignment reminders"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API Access"
+                    subtitle="sleep records"
+                  />
+                  <PermissionToggle
+                    icon={<Waves size={24} color="#000000" strokeWidth={2} />}
+                    title="Motion Access"
+                    subtitle="night movement tracking"
+                  />
+                  <PermissionToggle
+                    icon={<Bell size={24} color="#000000" strokeWidth={2} />}
+                    title="Notifications"
+                    subtitle="bedtime reminders & morning insights"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -526,7 +552,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent ? (
+          {isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
