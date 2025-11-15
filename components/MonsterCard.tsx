@@ -14,6 +14,7 @@ interface MonsterCardProps {
   onHirePress?: () => void;
   imageSize?: string;
   imageOffset?: number;
+  onCardPress?: () => void;
 }
 
 export function MonsterCard({
@@ -27,16 +28,27 @@ export function MonsterCard({
   onHirePress,
   imageSize = '400%',
   imageOffset = 0,
+  onCardPress,
 }: MonsterCardProps) {
   const [hired, setHired] = useState(isHired);
 
-  const handleHirePress = () => {
+  const handleHirePress = (e: any) => {
+    e.stopPropagation();
     setHired(true);
     onHirePress?.();
   };
 
+  const handleFingerprintPress = (e: any) => {
+    e.stopPropagation();
+    onFingerprintPress();
+  };
+
   return (
-    <View style={[styles.card, { backgroundColor }]}>
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor }]}
+      onPress={onCardPress || onFingerprintPress}
+      activeOpacity={0.95}
+    >
       <View style={styles.header}>
         <Text style={styles.name}>{name}</Text>
         <View style={styles.categoryBadge}>
@@ -77,7 +89,7 @@ export function MonsterCard({
 
         <TouchableOpacity
           style={styles.fingerprintButton}
-          onPress={onFingerprintPress}
+          onPress={handleFingerprintPress}
           activeOpacity={0.8}
         >
           <View style={styles.fingerprintInner}>
@@ -85,7 +97,7 @@ export function MonsterCard({
           </View>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
