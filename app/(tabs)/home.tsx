@@ -37,6 +37,7 @@ export default function HomeTab() {
   });
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarViewDate, setCalendarViewDate] = useState(new Date());
 
   useEffect(() => {
     Animated.loop(
@@ -128,17 +129,40 @@ export default function HomeTab() {
     },
   ];
 
-  const timelineEntries = [
-    { time: '07:58 AM', category: 'Sleep', description: 'Sleep cycle: 7h 12m, Deep: 2h 08m' },
-    { time: '09:14 AM', category: 'Energy', description: 'Breakfast logged: Yogurt + Berries' },
-    { time: '12:18 PM', category: 'Energy', description: 'Lunch logged: Noodles + Vegetables' },
-    { time: '14:25 PM', category: 'Posture', description: 'Forward head posture detected briefly' },
-    { time: '15:07 PM', category: 'Face', description: 'Eye fatigue detected from photo' },
-    { time: '16:10 PM', category: 'Energy', description: 'Snack logged: Protein bar' },
-    { time: '17:33 PM', category: 'Feces', description: 'Digestive pattern consistent with baseline' },
-    { time: '19:02 PM', category: 'Stress', description: 'Evening stress stabilized' },
-    { time: '23:18 PM', category: 'Sleep', description: 'Wind-down pattern detected before sleep' },
-  ];
+  const allTimelineData: Record<string, Array<{ time: string; category: string; description: string }>> = {
+    [new Date().toDateString()]: [
+      { time: '07:58 AM', category: 'Sleep', description: 'Sleep cycle: 7h 12m, Deep: 2h 08m' },
+      { time: '09:14 AM', category: 'Energy', description: 'Breakfast logged: Yogurt + Berries' },
+      { time: '12:18 PM', category: 'Energy', description: 'Lunch logged: Noodles + Vegetables' },
+      { time: '14:25 PM', category: 'Posture', description: 'Forward head posture detected briefly' },
+      { time: '15:07 PM', category: 'Face', description: 'Eye fatigue detected from photo' },
+      { time: '16:10 PM', category: 'Energy', description: 'Snack logged: Protein bar' },
+      { time: '17:33 PM', category: 'Feces', description: 'Digestive pattern consistent with baseline' },
+      { time: '19:02 PM', category: 'Stress', description: 'Evening stress stabilized' },
+      { time: '23:18 PM', category: 'Sleep', description: 'Wind-down pattern detected before sleep' },
+    ],
+    [(() => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      return yesterday.toDateString();
+    })()]: [
+      { time: '08:15 AM', category: 'Sleep', description: 'Sleep cycle: 6h 45m, Deep: 1h 52m' },
+      { time: '09:30 AM', category: 'Energy', description: 'Breakfast logged: Oatmeal + Banana' },
+      { time: '13:20 PM', category: 'Energy', description: 'Lunch logged: Salad + Chicken' },
+      { time: '18:45 PM', category: 'Stress', description: 'Elevated stress levels detected' },
+    ],
+    [(() => {
+      const twoDaysAgo = new Date();
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+      return twoDaysAgo.toDateString();
+    })()]: [
+      { time: '07:30 AM', category: 'Sleep', description: 'Sleep cycle: 7h 30m, Deep: 2h 15m' },
+      { time: '10:00 AM', category: 'Energy', description: 'Breakfast logged: Smoothie' },
+      { time: '14:15 PM', category: 'Face', description: 'Good energy levels detected' },
+    ],
+  };
+
+  const timelineEntries = allTimelineData[selectedDate.toDateString()] || [];
 
   const togglePermission = (id: string) => {
     setPermissions((prev) => ({
@@ -172,8 +196,8 @@ export default function HomeTab() {
   };
 
   const generateCalendarDays = () => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
@@ -192,6 +216,17 @@ export default function HomeTab() {
   const selectCalendarDate = (date: Date) => {
     setSelectedDate(date);
     setShowCalendar(false);
+  };
+
+  const changeCalendarMonth = (months: number) => {
+    const newDate = new Date(calendarViewDate);
+    newDate.setMonth(newDate.getMonth() + months);
+    setCalendarViewDate(newDate);
+  };
+
+  const openCalendar = () => {
+    setCalendarViewDate(selectedDate);
+    setShowCalendar(true);
   };
 
   return (
@@ -265,7 +300,7 @@ export default function HomeTab() {
           <Text style={styles.sectionTitle}>Timeline</Text>
 
           <View style={styles.dateControl}>
-            <TouchableOpacity onPress={() => setShowCalendar(true)}>
+            <TouchableOpacity onPress={openCalendar}>
               <Calendar size={24} color="#666" />
             </TouchableOpacity>
             <View style={styles.dateControlCenter}>
@@ -280,24 +315,30 @@ export default function HomeTab() {
           </View>
 
           <View style={styles.timelineContainer}>
-            {timelineEntries.map((entry, index) => (
-              <View key={index} style={styles.timelineEntry}>
-                <View style={styles.timelineLeft}>
-                  <Clock size={16} color="#666" />
-                  <Text style={styles.timelineTime}>{entry.time}</Text>
+            {timelineEntries.length > 0 ? (
+              timelineEntries.map((entry, index) => (
+                <View key={index} style={styles.timelineEntry}>
+                  <View style={styles.timelineLeft}>
+                    <Clock size={16} color="#666" />
+                    <Text style={styles.timelineTime}>{entry.time}</Text>
+                  </View>
+                  <View style={styles.timelineDivider}>
+                    <View style={styles.timelineDot} />
+                    {index < timelineEntries.length - 1 && (
+                      <View style={styles.timelineLine} />
+                    )}
+                  </View>
+                  <View style={styles.timelineRight}>
+                    <Text style={styles.timelineCategory}>{entry.category}</Text>
+                    <Text style={styles.timelineDescription}>{entry.description}</Text>
+                  </View>
                 </View>
-                <View style={styles.timelineDivider}>
-                  <View style={styles.timelineDot} />
-                  {index < timelineEntries.length - 1 && (
-                    <View style={styles.timelineLine} />
-                  )}
-                </View>
-                <View style={styles.timelineRight}>
-                  <Text style={styles.timelineCategory}>{entry.category}</Text>
-                  <Text style={styles.timelineDescription}>{entry.description}</Text>
-                </View>
+              ))
+            ) : (
+              <View style={styles.noLogsContainer}>
+                <Text style={styles.noLogsText}>No logs for today.</Text>
               </View>
-            ))}
+            )}
           </View>
         </View>
 
@@ -321,10 +362,16 @@ export default function HomeTab() {
         <View style={styles.modalOverlay}>
           <View style={styles.calendarModal}>
             <View style={styles.calendarHeader}>
+              <TouchableOpacity onPress={() => changeCalendarMonth(-1)}>
+                <ChevronLeft size={24} color="#666" />
+              </TouchableOpacity>
               <Text style={styles.calendarHeaderText}>
-                {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                {calendarViewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </Text>
-              <TouchableOpacity onPress={() => setShowCalendar(false)}>
+              <TouchableOpacity onPress={() => changeCalendarMonth(1)}>
+                <ChevronRight size={24} color="#666" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowCalendar(false)} style={styles.calendarCloseButton}>
                 <X size={24} color="#666" />
               </TouchableOpacity>
             </View>
@@ -597,11 +644,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+    position: 'relative',
   },
   calendarHeaderText: {
     fontSize: 18,
     fontWeight: '700',
     color: '#000',
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 8,
+  },
+  calendarCloseButton: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   calendarWeekdays: {
     flexDirection: 'row',
@@ -641,5 +697,15 @@ const styles = StyleSheet.create({
   calendarDayTextSelected: {
     color: '#FFFFFF',
     fontWeight: '700',
+  },
+  noLogsContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noLogsText: {
+    fontSize: 16,
+    color: '#999',
+    fontStyle: 'italic',
   },
 });
