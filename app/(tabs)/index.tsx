@@ -641,7 +641,7 @@ export default function EchoTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8D4B8',
+    backgroundColor: '#F5F7F9',
   },
   testButton: {
     position: 'absolute',

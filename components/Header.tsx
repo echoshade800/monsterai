@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    backgroundColor: '#E8D4B8',
+    backgroundColor: '#F5F7F9',
     zIndex: -1,
   },
   backgroundImage: {
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    backgroundColor: '#8B7355',
+    backgroundColor: '#F5F7F9',
     zIndex: -1,
   },
   collapsedBackground: {
