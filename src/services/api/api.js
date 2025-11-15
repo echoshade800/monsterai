@@ -1,10 +1,11 @@
-
+  
 // API配置文件
 const ENV = {
   DEVELOPMENT: 'development',
   PRODUCTION: 'production',
   STAGING: 'staging',
 };
+import storageManager from '../../utils/storage';
 
 // 当前环境 - 通过 __DEV__ 变量判断
 const CURRENT_ENV = __DEV__ ? ENV.DEVELOPMENT : ENV.PRODUCTION;
@@ -57,19 +58,15 @@ export const getHeadersWithPassId = async () => {
   const config = getApiConfig();
   const headers = { ...config.HEADERS };
   
-  // 暂时写死 passId
-  headers.passId = 'z1tRob7TfjD2Hx3bdqmBYqHptyoWvEVTBete0Jc28U4=';
-  
-  // TODO: 后续从 storage 获取 passId
-  // try {
-  //   // 动态导入 storageManager 避免循环依赖
-  //   const userData = await storageManager.getUserData();
-  //   if (userData && userData.passId) {
-  //     headers.passId = userData.passId;
-  //   }
-  // } catch (error) {
-  //   console.warn('获取 passId 失败:', error);
-  // }
+  try {
+    // 动态导入 storageManager 避免循环依赖
+    const userData = await storageManager.getUserData();
+    if (userData && userData.passId) {
+      headers.passId = userData.passId;
+    }
+  } catch (error) {
+    console.warn('获取 passId 失败:', error);
+  }
   
   return headers;
 };

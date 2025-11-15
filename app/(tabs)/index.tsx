@@ -10,6 +10,7 @@ import { getAppVersion, getDeviceId, getTimezone } from '../../src/services/api-
 import { API_ENDPOINTS, getApiConfig, getHeadersWithPassId } from '../../src/services/api/api';
 import conversationService from '../../src/services/conversationService';
 import { executeToolFunction } from '../../src/utils/function-tools';
+import storageManager from '../../src/utils/storage';
 
 interface Message {
   id: string;
@@ -160,42 +161,21 @@ export default function EchoTab() {
     }
   }, []);
 
-  // 初始化用户数据（使用假数据模拟）
+  // 初始化用户数据（从本地存储获取真实数据）
   useEffect(() => {
     const initUserData = async () => {
       try {
-        // 模拟假数据
-        const mockUserData = {
-          uid: "95890526477221924",
-          id: "95890526477221924",
-          userName: "USER6VPTIXFW8",
-          avatar: "",
-          vipLevel: 0,
-          passId: "z1tRob7TfjD2Hx3bdqmBYqHptyoWvEVTBete0Jc28U4=",
-          availableAmount: 0.0,
-          country: "United States/US",
-          city: "Los Angeles",
-          canSetPassword: false,
-          age: "",
-          gender: "",
-          height: "120",
-          weight: "100",
-          goal: "计算机视觉",
-          timezone: "+800",
-          email: "hello6@hello.com",
-          created_at: "2025-11-04T10:52:53",
-          updated_at: "2025-11-12T08:38:56"
-        };
+        // 从本地存储获取用户数据
+        const data = await storageManager.getUserData();
         
-        setUserData(mockUserData);
-        
-        // 如果需要从 storage 获取真实数据，可以取消下面的注释
-        // const data = await storageManager.getUserData();
-        // if (data) {
-        //   setUserData(data);
-        // } else {
-        //   setUserData(mockUserData);
-        // }
+        if (data) {
+          console.log('从本地存储加载用户数据:', data);
+          setUserData(data);
+        } else {
+          console.warn('本地存储中没有用户数据，用户可能未登录');
+          // 如果没有用户数据，可以跳转到登录页面
+          // router.replace('/login');
+        }
       } catch (error) {
         console.error('获取用户数据失败:', error);
       }

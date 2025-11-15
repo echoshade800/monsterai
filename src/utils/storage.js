@@ -86,35 +86,15 @@ class StorageManager {
    */
   async getUserData() {
     try {
-      // await AsyncStorage.initializeManifestFromFile();
       const userDataString = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (userDataString) {
         const userData = JSON.parse(userDataString);
-        return UserData.fromJSON(userData);
+        // 如果数据是普通对象，直接返回（保留所有字段）
+        // 如果需要转换为 UserData 实例，可以使用 UserData.fromJSON(userData)
+        return userData;
       }
-      // 模拟假数据
-      const mockUserData = {
-        uid: "95890526477221924",
-        id: "95890526477221924",
-        userName: "USER6VPTIXFW8",
-        avatar: "",
-        vipLevel: 0,
-        passId: "z1tRob7TfjD2Hx3bdqmBYqHptyoWvEVTBete0Jc28U4=",
-        availableAmount: 0.0,
-        country: "United States/US",
-        city: "Los Angeles",
-        canSetPassword: false,
-        age: "",
-        gender: "",
-        height: "120",
-        weight: "100",
-        goal: "计算机视觉",
-        timezone: "+800",
-        email: "hello6@hello.com",
-        created_at: "2025-11-04T10:52:53",
-        updated_at: "2025-11-12T08:38:56"
-      };
-      return new UserData(mockUserData);
+      // 如果没有数据，返回 null
+      return null;
     } catch (error) {
       console.error('获取用户数据失败:', error);
       return null;

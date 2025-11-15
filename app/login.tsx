@@ -5,6 +5,7 @@ import { Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 
 import { appleLoginWithUserInfo } from '../src/services/appleAuthService';
 import { googleLoginWithUserInfo } from '../src/services/googleAuthService';
 import userService from '../src/services/userService';
+import storageManager from '../src/utils/storage';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -49,6 +50,32 @@ export default function LoginScreen() {
     
     if (loginResult.success) {
       console.log('Backend login successful:', loginResult.data);
+      
+      // 保存用户数据到本地存储
+      // 将 UserData 对象转换为普通对象，确保所有字段都能保存
+      const userDataToSave = loginResult.data;
+      let dataToStore;
+      
+      if (userDataToSave && typeof userDataToSave === 'object') {
+        // 如果有 toJSON 方法，使用它
+        if (typeof userDataToSave.toJSON === 'function') {
+          dataToStore = userDataToSave.toJSON();
+        } else {
+          // 否则直接转换为普通对象，保留所有字段
+          dataToStore = { ...userDataToSave };
+        }
+      } else {
+        dataToStore = userDataToSave;
+      }
+      
+      const saveSuccess = await storageManager.setUserData(dataToStore);
+      
+      if (saveSuccess) {
+        console.log('User data saved to local storage successfully:', dataToStore);
+      } else {
+        console.warn('Failed to save user data to local storage');
+      }
+      
       // 登录成功后跳转到主页面
       router.replace('/(tabs)');
     } else {
@@ -99,11 +126,11 @@ export default function LoginScreen() {
         return;
       }
 
-      console.log('Google login successful:', userInfo);
-      console.log('Third ID (Google ID):', userInfo.thirdId);
-      console.log('Email:', userInfo.email);
-      console.log('Name:', userInfo.name);
-      console.log('ID Token:', userInfo.idToken);
+      console.log('Google login successful:', {
+        ...userInfo,
+        thirdId: `Google ID: ${userInfo.thirdId}`,
+        idToken: `ID Token: ${userInfo.idToken}`
+      });
       
       // 2. 调用后端 API 进行业务登录
       await handleThirdPartyLogin(userInfo, 'google');
