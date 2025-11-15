@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Switch, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
+import { Alert, Platform, ScrollView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import userService from '../src/services/userService';
+import storageManager from '../src/utils/storage';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -22,8 +24,24 @@ export default function ProfileScreen() {
         {
           text: 'Log Out',
           style: 'destructive',
-          onPress: () => {
-            router.replace('/login');
+          onPress: async () => {
+            try {
+              // 调用后端登出API（可选，即使失败也继续清空本地数据）
+              await userService.logout().catch(error => {
+                console.warn('后端登出失败，继续清空本地数据:', error);
+              });
+              
+              // 清空本地用户数据和 accessToken
+              await storageManager.clearAuthData();
+              
+              // 重置导航栈并跳转到登录页面
+              // 使用 dismissAll 清除所有路由，然后 replace 到登录页面
+              router.dismissAll();
+              router.replace('/login');
+            } catch (error) {
+              console.error('登出失败:', error);
+              Alert.alert('错误', '登出时发生错误，请重试');
+            }
           },
         },
       ]

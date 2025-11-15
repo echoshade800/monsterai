@@ -1,7 +1,7 @@
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Apple } from 'lucide-react-native';
-import { useState } from 'react';
-import { Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Alert, BackHandler, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { appleLoginWithUserInfo } from '../src/services/appleAuthService';
 import { googleLoginWithUserInfo } from '../src/services/googleAuthService';
 import userService from '../src/services/userService';
@@ -11,6 +11,22 @@ export default function LoginScreen() {
   const router = useRouter();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAppleLoading, setIsAppleLoading] = useState(false);
+
+  // 阻止返回手势和硬件返回键
+  // 登录页面不应该允许返回，必须通过登录才能进入应用
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // 阻止返回
+        return true;
+      };
+
+      // 添加返回键监听（Android）
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => backHandler.remove();
+    }, [])
+  );
 
   /**
    * 格式化当前时间
