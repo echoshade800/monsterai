@@ -218,6 +218,7 @@ export default function HomeTab() {
         }
 
         const permissionResult = await locationManager.requestLocationPermission('foreground');
+        console.log('[HomeTab] 请求位置权限结果:', permissionResult);
         if (permissionResult.success) {
           setPermissions((prev) => ({
             ...prev,
