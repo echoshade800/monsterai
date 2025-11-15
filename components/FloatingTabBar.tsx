@@ -9,7 +9,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
   return (
     <View style={[styles.container, { paddingBottom: Math.max(insets.bottom - 8, 4) }]} pointerEvents="box-none">
       <View style={styles.tabBarContainer}>
-        <BlurView intensity={100} tint="extraLight" style={StyleSheet.absoluteFill} />
+        <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
         <View style={styles.borderOverlay} />
 
@@ -93,12 +93,12 @@ const styles = StyleSheet.create({
     height: 68,
     borderRadius: 34,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
     paddingHorizontal: 8,
     width: '100%',
     maxWidth: 480,
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 34,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderColor: 'rgba(255, 255, 255, 0.6)',
     pointerEvents: 'none',
   },
   tabsWrapper: {
