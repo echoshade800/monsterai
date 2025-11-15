@@ -382,11 +382,11 @@ export default function EchoTab() {
         text: userMessage,
         system_prompt: ["you are a helpful AI assistant"],
         msg_type: photoUri ? "image" : "text",
-        image_detection_type: imageDetectionType || "full"
       };
       // 如果有图片URL，添加到请求体中
       if (photoUri) {
         requestBody.image = photoUri;
+        requestBody.image_detection_type = imageDetectionType || "full";
       }
       console.log('requestBody', requestBody);
       
@@ -438,12 +438,6 @@ export default function EchoTab() {
 
   // 处理来自相机的照片
   useEffect(() => {
-    console.log('检查照片参数:', { 
-      photoUri: params.photoUri, 
-      mode: params.mode, 
-      hasUserData: !!userData 
-    });
-    
     if (params.photoUri && params.mode && userData) {
       const photoUri = params.photoUri as string;
       const mode = params.mode as string;

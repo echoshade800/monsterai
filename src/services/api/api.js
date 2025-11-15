@@ -40,7 +40,6 @@ const API_CONFIGS = {
 
 // 获取当前环境的配置
 export const getApiConfig = () => {
-  console.log('CURRENT_ENV', CURRENT_ENV);
   const config = API_CONFIGS[CURRENT_ENV];
   
   // 返回配置对象，HEADERS 包含基础 headers
