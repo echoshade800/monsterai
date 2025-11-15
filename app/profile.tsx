@@ -1,15 +1,13 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Switch, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { ChevronRight, User } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [cameraAccess, setCameraAccess] = useState(true);
-  const [healthAccess, setHealthAccess] = useState(true);
-  const [motionAccess, setMotionAccess] = useState(false);
+  const memberSince = 'October 2024';
 
   const handleBack = () => {
     router.back();
@@ -66,6 +64,10 @@ export default function ProfileScreen() {
     console.log(`Opening ${title}`);
   };
 
+  const handleAppPermissions = () => {
+    router.push('/app-permissions');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -81,166 +83,118 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-          <View style={styles.profileCard}>
+        <View style={styles.profileCard}>
+          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarEmoji}>🦑</Text>
+            </View>
+          </View>
+          <Text style={styles.username}>USER6VPTIXFW8</Text>
+          <Text style={styles.memberSince}>Member since {memberSince}</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+
+          <View style={styles.card}>
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarEmoji}>🦑</Text>
-              </View>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/account-settings')}>
+              <Text style={styles.menuItemText}>Account</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Preferences</Text>
+
+          <View style={styles.card}>
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+
+            <View style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Notification Preferences</Text>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={setNotificationsEnabled}
+                trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+                thumbColor="#FFFFFF"
+              />
             </View>
-            <Text style={styles.username}>USER6VPTIXFW8</Text>
-            <Text style={styles.email}>hello6@hello.com</Text>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Language')}>
+              <Text style={styles.menuItemText}>Language / Region</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Units')}>
+              <Text style={styles.menuItemText}>Units</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
           </View>
+        </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Account</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>App Permissions</Text>
 
-            <View style={styles.card}>
-              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+          <View style={styles.card}>
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
-              <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/account-settings')}>
-                <Text style={styles.menuItemText}>Account</Text>
-                <ChevronRight size={20} color="#666" strokeWidth={2} />
-              </TouchableOpacity>
-
-              <View style={styles.divider} />
-
-              <View style={styles.menuItem}>
-                <Text style={styles.menuItemText}>Notification Preferences</Text>
-                <Switch
-                  value={notificationsEnabled}
-                  onValueChange={setNotificationsEnabled}
-                  trackColor={{ false: '#D1D1D6', true: '#34C759' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-
-              <View style={styles.divider} />
-
-              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Language')}>
-                <View style={styles.menuItemLeft}>
-                  <Text style={styles.menuItemText}>Language / Region</Text>
-                  <Text style={styles.menuItemSubtext}>System Default</Text>
-                </View>
-                <ChevronRight size={20} color="#666" strokeWidth={2} />
-              </TouchableOpacity>
-
-              <View style={styles.divider} />
-
-              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Connected Accounts')}>
-                <View style={styles.menuItemLeft}>
-                  <Text style={styles.menuItemText}>Connected Accounts</Text>
-                  <View style={styles.accountBadges}>
-                    <Text style={styles.accountBadge}>Apple</Text>
-                    <Text style={styles.accountBadge}>Google</Text>
-                  </View>
-                </View>
-                <ChevronRight size={20} color="#666" strokeWidth={2} />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.menuItem} onPress={handleAppPermissions}>
+              <Text style={styles.menuItemText}>App Permissions</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
           </View>
+        </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>App Permissions</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Legal</Text>
 
-            <View style={styles.card}>
-              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+          <View style={styles.card}>
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
-              <View style={styles.menuItem}>
-                <Text style={styles.menuItemText}>Camera Access</Text>
-                <Switch
-                  value={cameraAccess}
-                  onValueChange={setCameraAccess}
-                  trackColor={{ false: '#D1D1D6', true: '#34C759' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Terms of Service')}>
+              <Text style={styles.menuItemText}>Terms of Service</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
 
-              <View style={styles.divider} />
+            <View style={styles.divider} />
 
-              <View style={styles.menuItem}>
-                <Text style={styles.menuItemText}>Health API Access</Text>
-                <Switch
-                  value={healthAccess}
-                  onValueChange={setHealthAccess}
-                  trackColor={{ false: '#D1D1D6', true: '#34C759' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-
-              <View style={styles.divider} />
-
-              <View style={styles.menuItem}>
-                <Text style={styles.menuItemText}>Motion / Posture Sensor</Text>
-                <Switch
-                  value={motionAccess}
-                  onValueChange={setMotionAccess}
-                  trackColor={{ false: '#D1D1D6', true: '#34C759' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-
-              <View style={styles.divider} />
-
-              <View style={styles.menuItem}>
-                <View style={styles.menuItemLeft}>
-                  <Text style={styles.menuItemText}>Data Sync Status</Text>
-                  <Text style={styles.syncedText}>Synced 2 min ago</Text>
-                </View>
-              </View>
-            </View>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Privacy Policy')}>
+              <Text style={styles.menuItemText}>Privacy Policy</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
           </View>
+        </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Legal</Text>
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, styles.dangerTitle]}>Danger Zone</Text>
 
-            <View style={styles.card}>
-              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+          <View style={styles.card}>
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
-              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Terms of Service')}>
-                <Text style={styles.menuItemText}>Terms of Service</Text>
-                <ChevronRight size={20} color="#666" strokeWidth={2} />
-              </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+              <Text style={styles.dangerText}>Log Out</Text>
+              <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
+            </TouchableOpacity>
 
-              <View style={styles.divider} />
+            <View style={styles.divider} />
 
-              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Privacy Policy')}>
-                <Text style={styles.menuItemText}>Privacy Policy</Text>
-                <ChevronRight size={20} color="#666" strokeWidth={2} />
-              </TouchableOpacity>
-
-              <View style={styles.divider} />
-
-              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Data Usage')}>
-                <Text style={styles.menuItemText}>Data Usage Explanation</Text>
-                <ChevronRight size={20} color="#666" strokeWidth={2} />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.menuItem} onPress={handleDeleteAccount}>
+              <Text style={styles.dangerText}>Delete Account</Text>
+              <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
+            </TouchableOpacity>
           </View>
+        </View>
 
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, styles.dangerTitle]}>Danger Zone</Text>
-
-            <View style={styles.card}>
-              <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-
-              <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-                <Text style={styles.dangerText}>Log Out</Text>
-                <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
-              </TouchableOpacity>
-
-              <View style={styles.divider} />
-
-              <TouchableOpacity style={styles.menuItem} onPress={handleDeleteAccount}>
-                <Text style={styles.dangerText}>Delete Account</Text>
-                <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.footer}>
-            <Text style={styles.versionText}>MonsterAI v1.0.0 (Beta)</Text>
-          </View>
+        <View style={styles.footer}>
+          <Text style={styles.versionText}>MonsterAI v1.0.0 (Beta)</Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -319,7 +273,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     marginBottom: 4,
   },
-  email: {
+  memberSince: {
     fontSize: 15,
     color: '#666666',
   },
@@ -353,34 +307,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     minHeight: 56,
   },
-  menuItemLeft: {
-    flex: 1,
-  },
   menuItemText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-  },
-  menuItemSubtext: {
-    fontSize: 14,
-    color: '#666666',
-    marginTop: 2,
-  },
-  accountBadges: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 6,
-  },
-  accountBadge: {
-    fontSize: 12,
-    color: '#34C759',
-    fontWeight: '600',
-  },
-  syncedText: {
-    fontSize: 13,
-    color: '#34C759',
-    marginTop: 2,
-    fontWeight: '500',
   },
   dangerText: {
     fontSize: 16,
