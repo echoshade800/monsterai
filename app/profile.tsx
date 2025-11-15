@@ -98,10 +98,6 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleOpenLink = (title: string) => {
-    console.log(`Opening ${title}`);
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -156,14 +152,14 @@ export default function ProfileScreen() {
 
             <View style={styles.divider} />
 
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Language')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => console.log('Language / Region')}>
               <Text style={styles.menuItemText}>Language / Region</Text>
               <ChevronRight size={20} color="#666" strokeWidth={2} />
             </TouchableOpacity>
 
             <View style={styles.divider} />
 
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Units')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => console.log('Units')}>
               <Text style={styles.menuItemText}>Units</Text>
               <ChevronRight size={20} color="#666" strokeWidth={2} />
             </TouchableOpacity>
@@ -176,7 +172,7 @@ export default function ProfileScreen() {
           <View style={styles.card}>
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Terms of Service')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/terms-of-service')}>
               <Text style={styles.menuItemText}>Terms of Service</Text>
               <ChevronRight size={20} color="#666" strokeWidth={2} />
             </TouchableOpacity>
