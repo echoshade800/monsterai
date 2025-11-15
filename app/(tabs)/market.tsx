@@ -92,8 +92,22 @@ const GAMES_DATA = [
     id: 'linker',
     name: 'Linker',
     imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/linker.png',
-    isHot: true,
+    isHot: false,
     rating: 96,
+  },
+  {
+    id: 'qblock',
+    name: 'QBlock',
+    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/qblock.jpeg',
+    isHot: true,
+    rating: 87,
+  },
+  {
+    id: 'wordle',
+    name: 'Wordle',
+    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/wordle.jpeg',
+    isHot: true,
+    rating: 95,
   },
   {
     id: 'memory',
@@ -103,25 +117,11 @@ const GAMES_DATA = [
     rating: 89,
   },
   {
-    id: 'qblock',
-    name: 'QBlock',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/qblock.jpeg',
-    isHot: false,
-    rating: 87,
-  },
-  {
     id: 'sudoku',
     name: '数独',
     imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/sudoku.jpeg',
     isHot: false,
     rating: 93,
-  },
-  {
-    id: 'wordle',
-    name: 'Wordle',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/wordle.jpeg',
-    isHot: true,
-    rating: 95,
   },
 ];
 
