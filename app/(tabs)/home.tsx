@@ -20,7 +20,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  ArrowRight,
   X,
 } from 'lucide-react-native';
 
@@ -342,15 +341,6 @@ export default function HomeTab() {
           </View>
         </View>
 
-        <View style={styles.bottomButtonContainer}>
-          <TouchableOpacity
-            style={styles.bottomButton}
-            onPress={() => router.push('/(tabs)/index')}
-          >
-            <Text style={styles.bottomButtonText}>Log your day</Text>
-            <ArrowRight size={20} color="#000" />
-          </TouchableOpacity>
-        </View>
       </ScrollView>
 
       <Modal
@@ -595,30 +585,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
-  },
-  bottomButtonContainer: {
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 20,
-  },
-  bottomButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  bottomButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginRight: 8,
   },
   modalOverlay: {
     flex: 1,
