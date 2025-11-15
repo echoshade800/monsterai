@@ -103,8 +103,8 @@ export default function ProfileScreen() {
             <View style={styles.card}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
-              <TouchableOpacity style={styles.menuItem} onPress={() => handleOpenLink('Edit Profile')}>
-                <Text style={styles.menuItemText}>Edit Profile</Text>
+              <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/account-settings')}>
+                <Text style={styles.menuItemText}>Account</Text>
                 <ChevronRight size={20} color="#666" strokeWidth={2} />
               </TouchableOpacity>
 
