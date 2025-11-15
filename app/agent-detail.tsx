@@ -67,33 +67,37 @@ const AGENTS_DATA: Record<string, AgentData> = {
   },
   face: {
     name: 'Face Agent',
-    goal: 'My goal is to improve your facial expression and mood tracking, ensuring your emotional well-being is balanced throughout the day.',
-    mission: 'I monitor your facial expressions and alert you when emotional shifts happen, helping you stay calm and focused.',
+    goal: 'My goal is to help you track expressions and understand your emotional signals.',
+    mission: 'I read your micro-expressions to help you understand your emotional patterns.',
     tasks: [
-      'Track your facial energy and mood shifts.',
-      'Suggest calming actions when stress or negative emotions arise.',
-      'Help you keep a positive outlook throughout the day.',
+      'Analyze facial expression trends.',
+      'Detect mood shifts early.',
+      'Give gentle feedback when needed.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I message you each morning to track your mood and facial expressions.',
-      instantInsight: 'I notify you when I detect a negative shift in your expressions or energy.',
-      microChallenges: 'I suggest small tasks to help you shift your mood and expressions.',
+      dailyCheckIn: 'I ask for a quick face scan to learn your mood.',
+      instantInsight: 'If your expression changes noticeably, I tell you why it matters.',
+      microChallenges: 'Simple mood-boosting actions.',
     },
     insideMind: [
-      '[9:02am] User\'s smile intensity dropped by 8% compared to baseline.',
-      '[9:04am] Suggest: Take a quick break to improve mood and posture.',
+      '[8:44am] Smile activity decreased slightly.',
+      '[9:10am] Eye fatigue detected.',
+      '[11:22am] Neutral expression longer than usual.',
+      '[13:40pm] Positive expression returned.',
+      '[15:05pm] Stress micro-signals noticed.',
+      '[17:18pm] Mood stabilized.',
     ],
     permissions: [
-      'Camera Access — Facial Expression & Skin Data',
-      'Health API — Sleep & Heart Rate Monitoring',
-      'Posture Sensor — Body Motion Data',
+      'Camera — Facial Expression Scan',
+      'Photos — Optional upload',
+      'Health API — Emotion-related biometrics',
     ],
     outcomes: {
-      metric1: { label: 'better mood rhythm', value: '+10%' },
-      metric2: { label: 'emotional stability', value: '-20%' },
-      metric3: { label: 'micro actions', value: '4 per day' },
+      metric1: { label: 'Better mood awareness', value: '' },
+      metric2: { label: 'Early emotional-shift detection', value: '' },
+      metric3: { label: 'More expressive balance', value: '' },
     },
-    motivation: 'A happy face leads to a happy day!',
+    motivation: 'Notice your emotions, shape your day.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
   },
@@ -328,6 +332,7 @@ export default function AgentDetailPage() {
 
   const isStressAgent = agentId === 'stress';
   const isEnergyAgent = agentId === 'energy';
+  const isFaceAgent = agentId === 'face';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -404,7 +409,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {(isStressAgent || isEnergyAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent) ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -415,7 +420,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -437,7 +442,7 @@ export default function AgentDetailPage() {
                     subtitle="Body tension patterns"
                   />
                 </>
-              ) : (
+              ) : isEnergyAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
@@ -460,6 +465,24 @@ export default function AgentDetailPage() {
                     subtitle="Movement & fatigue detection"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera"
+                    subtitle="Facial Expression Scan"
+                  />
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Photos"
+                    subtitle="Optional upload"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API"
+                    subtitle="Emotion-related biometrics"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -472,7 +495,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
