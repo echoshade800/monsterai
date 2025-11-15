@@ -29,37 +29,39 @@ interface AgentData {
 
 const AGENTS_DATA: Record<string, AgentData> = {
   energy: {
-    name: 'Energy',
-    goal: 'I optimize your energy flow, so you can stay vibrant all day long. I help balance your body\'s energy, ensuring peak performance.',
-    mission: 'My mission is to ensure your energy stays steady, giving you power to tackle the day.',
+    name: 'Energy Agent',
+    goal: 'My goal is to track your daily energy and help you maintain stable, healthy vitality.',
+    mission: 'I watch your energy patterns and help you stay steady throughout the day.',
     tasks: [
-      'Optimize your energy cycles to prevent midday fatigue',
-      'Align your body\'s rhythm with natural peaks and troughs',
-      'Keep your energy steady.',
-      'Help you avoid crashes.',
-      'Balance your body and brain.',
+      'Analyze facial energy signals.',
+      'Detect drops in alertness.',
+      'Give quick boosting suggestions.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I\'ll check in each morning to gauge your mood and energy.',
-      instantInsight: 'I catch low energy and guide your recovery.',
-      microChallenges: 'Mini missions to help you adjust your energy rhythms or take breaks.',
+      dailyCheckIn: 'I message you each morning to check your energy baseline.',
+      instantInsight: 'If your energy dips, I notify you with quick tips.',
+      microChallenges: 'Small missions to help boost alertness.',
     },
     insideMind: [
-      '[11:42am] Your energy dropped 10% since morning.',
-      '[11:45am] Suggest: Take a 5-min break and stretch to recover your energy levels.',
-      '[12:30pm] Energy stabilized after snack break. Your energy will peak again after 2 hours.',
+      '[9:12am] Energy dropped 8% after breakfast.',
+      '[9:14am] Suggest: Light movement for 2 min.',
+      '[11:05am] Morning alertness steady.',
+      '[12:20pm] Noticed mild fatigue.',
+      '[14:18pm] Energy spike after fresh air exposure.',
+      '[16:02pm] Afternoon dip detected.',
     ],
     permissions: [
-      'Camera Access — Facial Expression & Skin Data',
-      'Health API — Sleep & Heart Rate Monitoring',
-      'Posture Sensor — Track Motion and Activity',
+      'Camera Access — Facial Energy Scan',
+      'Photos — Photo-based Energy Input',
+      'Health API — Heart rate & activity influence',
+      'Motion Sensor — Movement & fatigue detection',
     ],
     outcomes: {
-      metric1: { label: 'better energy rhythm', value: '+15%' },
-      metric2: { label: 'daily stress fluctuation', value: '-25%' },
-      metric3: { label: 'micro-actions per day', value: '5 personalized' },
+      metric1: { label: 'More stable daily energy', value: '' },
+      metric2: { label: 'Fewer afternoon crashes', value: '' },
+      metric3: { label: 'Better morning alertness', value: '' },
     },
-    motivation: 'Stronger rhythm, better you.',
+    motivation: 'Keep your energy steady and your day powerful.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
   },
@@ -325,6 +327,7 @@ export default function AgentDetailPage() {
   };
 
   const isStressAgent = agentId === 'stress';
+  const isEnergyAgent = agentId === 'energy';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -401,7 +404,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {isStressAgent ? (
+          {(isStressAgent || isEnergyAgent) ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -412,25 +415,52 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent ? (
+          {(isStressAgent || isEnergyAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
-              <PermissionToggle
-                icon={<Camera size={24} color="#000000" strokeWidth={2} />}
-                title="Camera Access"
-                subtitle="Facial expression signals"
-              />
-              <PermissionToggle
-                icon={<Heart size={24} color="#000000" strokeWidth={2} />}
-                title="Health API Access"
-                subtitle="Stress & heart-rate data"
-              />
-              <PermissionToggle
-                icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                title="Motion / Posture Sensor"
-                subtitle="Body tension patterns"
-              />
+              {isStressAgent ? (
+                <>
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera Access"
+                    subtitle="Facial expression signals"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API Access"
+                    subtitle="Stress & heart-rate data"
+                  />
+                  <PermissionToggle
+                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                    title="Motion / Posture Sensor"
+                    subtitle="Body tension patterns"
+                  />
+                </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Camera Access"
+                    subtitle="Facial Energy Scan"
+                  />
+                  <PermissionToggle
+                    icon={<Camera size={24} color="#000000" strokeWidth={2} />}
+                    title="Photos"
+                    subtitle="Photo-based Energy Input"
+                  />
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API"
+                    subtitle="Heart rate & activity influence"
+                  />
+                  <PermissionToggle
+                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                    title="Motion Sensor"
+                    subtitle="Movement & fatigue detection"
+                  />
+                </>
+              )}
             </View>
           ) : (
             <View style={styles.sectionCard}>
@@ -442,7 +472,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {isStressAgent ? (
+          {(isStressAgent || isEnergyAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
