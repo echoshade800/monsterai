@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   Animated,
   Switch,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BlurView } from 'expo-blur';
 import {
   MapPin,
   Heart,
@@ -21,11 +21,12 @@ import {
   ChevronRight,
   Clock,
   ArrowRight,
+  X,
 } from 'lucide-react-native';
 
 export default function HomeTab() {
   const router = useRouter();
-  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
   const [permissions, setPermissions] = useState({
     location: true,
     healthkit: false,
@@ -34,12 +35,14 @@ export default function HomeTab() {
     camera: false,
     microphone: true,
   });
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     Animated.loop(
-      Animated.timing(scrollX, {
-        toValue: -1000,
-        duration: 20000,
+      Animated.timing(scrollY, {
+        toValue: -600,
+        duration: 15000,
         useNativeDriver: true,
       })
     ).start();
@@ -144,10 +147,55 @@ export default function HomeTab() {
     }));
   };
 
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return 'Tomorrow';
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+  };
+
+  const changeDate = (days: number) => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + days);
+    setSelectedDate(newDate);
+  };
+
+  const generateCalendarDays = () => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+
+  const selectCalendarDate = (date: Date) => {
+    setSelectedDate(date);
+    setShowCalendar(false);
+  };
+
   return (
     <View style={styles.container}>
-      <BlurView intensity={20} style={StyleSheet.absoluteFill} />
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -165,10 +213,10 @@ export default function HomeTab() {
               <Animated.View
                 style={[
                   styles.thinkingScrollContent,
-                  { transform: [{ translateX: scrollX }] },
+                  { transform: [{ translateY: scrollY }] },
                 ]}
               >
-                {[...thinkingLogs, ...thinkingLogs].map((log, index) => (
+                {[...thinkingLogs, ...thinkingLogs, ...thinkingLogs].map((log, index) => (
                   <View key={index} style={styles.thinkingLogLine}>
                     {formatLogText(log).map((part, partIndex) => (
                       <Text
@@ -217,13 +265,15 @@ export default function HomeTab() {
           <Text style={styles.sectionTitle}>Timeline</Text>
 
           <View style={styles.dateControl}>
-            <Calendar size={24} color="#666" />
+            <TouchableOpacity onPress={() => setShowCalendar(true)}>
+              <Calendar size={24} color="#666" />
+            </TouchableOpacity>
             <View style={styles.dateControlCenter}>
-              <TouchableOpacity style={styles.dateArrow}>
+              <TouchableOpacity style={styles.dateArrow} onPress={() => changeDate(-1)}>
                 <ChevronLeft size={20} color="#666" />
               </TouchableOpacity>
-              <Text style={styles.dateText}>Today</Text>
-              <TouchableOpacity style={styles.dateArrow}>
+              <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
+              <TouchableOpacity style={styles.dateArrow} onPress={() => changeDate(1)}>
                 <ChevronRight size={20} color="#666" />
               </TouchableOpacity>
             </View>
@@ -261,6 +311,63 @@ export default function HomeTab() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showCalendar}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCalendar(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.calendarModal}>
+            <View style={styles.calendarHeader}>
+              <Text style={styles.calendarHeaderText}>
+                {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </Text>
+              <TouchableOpacity onPress={() => setShowCalendar(false)}>
+                <X size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.calendarWeekdays}>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <Text key={day} style={styles.calendarWeekdayText}>
+                  {day}
+                </Text>
+              ))}
+            </View>
+
+            <View style={styles.calendarDays}>
+              {generateCalendarDays().map((day, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.calendarDay,
+                    !day && styles.calendarDayEmpty,
+                    day &&
+                      day.toDateString() === selectedDate.toDateString() &&
+                      styles.calendarDaySelected,
+                  ]}
+                  onPress={() => day && selectCalendarDate(day)}
+                  disabled={!day}
+                >
+                  {day && (
+                    <Text
+                      style={[
+                        styles.calendarDayText,
+                        day.toDateString() === selectedDate.toDateString() &&
+                          styles.calendarDayTextSelected,
+                      ]}
+                    >
+                      {day.getDate()}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -268,7 +375,7 @@ export default function HomeTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5E6D3',
+    backgroundColor: '#FFFFFF',
   },
   scrollView: {
     flex: 1,
@@ -276,7 +383,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingTop: 60,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   header: {
     marginBottom: 24,
@@ -320,14 +427,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   permissionsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F5F5',
     borderRadius: 16,
     padding: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
   },
   permissionRow: {
     flexDirection: 'row',
@@ -470,5 +572,74 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     marginRight: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  calendarModal: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  calendarHeaderText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
+  },
+  calendarWeekdays: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+  },
+  calendarWeekdayText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999',
+    width: 40,
+    textAlign: 'center',
+  },
+  calendarDays: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calendarDay: {
+    width: '14.28%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 4,
+  },
+  calendarDayEmpty: {
+    backgroundColor: 'transparent',
+  },
+  calendarDaySelected: {
+    backgroundColor: '#000',
+    borderRadius: 20,
+  },
+  calendarDayText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+  },
+  calendarDayTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
 });
