@@ -641,18 +641,18 @@ const styles = StyleSheet.create({
   },
   calendarHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
     position: 'relative',
+    paddingHorizontal: 40,
   },
   calendarHeaderText: {
     fontSize: 18,
     fontWeight: '700',
     color: '#000',
-    flex: 1,
     textAlign: 'center',
-    marginHorizontal: 4,
+    marginHorizontal: 12,
   },
   calendarCloseButton: {
     position: 'absolute',
