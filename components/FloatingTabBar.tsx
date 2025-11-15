@@ -7,7 +7,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]} pointerEvents="box-none">
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom - 8, 4) }]} pointerEvents="box-none">
       <View style={styles.tabBarContainer}>
         <BlurView intensity={100} tint="extraLight" style={StyleSheet.absoluteFill} />
 
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
   },
   tabBarContainer: {
     flexDirection: 'row',
@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 10,
     paddingHorizontal: 8,
-    minWidth: 320,
-    maxWidth: 400,
+    width: '100%',
+    maxWidth: 480,
   },
   borderOverlay: {
     ...StyleSheet.absoluteFillObject,
