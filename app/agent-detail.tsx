@@ -138,33 +138,38 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#FFE4E1',
   },
   sleep: {
-    name: 'Sleep',
-    goal: 'My goal is to keep your daily stress below 35%, so your sleep improves naturally.',
-    mission: 'I help you balance work and rest so you can wake up refreshed and energized.',
+    name: 'Sleep Agent',
+    goal: 'My goal is to help you sleep deeper, fall asleep easier, and recover better.',
+    mission: 'I analyze your sleep rhythm and help you build healthy nighttime patterns.',
     tasks: [
-      'Restore balance between work and rest',
-      'Help you start days with energy, not fatigue',
+      'Monitor sleep timing and quality.',
+      'Alert you to irregular patterns.',
+      'Guide better wind-down routines.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I message you each morning with your mood trend.',
-      instantInsight: 'When your posture drops, I notify you.',
-      microChallenges: 'Join mini missions to optimize your rest cycles.',
+      dailyCheckIn: 'A morning summary of your sleep pattern.',
+      instantInsight: 'I notify you when sleep debt builds.',
+      microChallenges: 'Small night routine improvements.',
     },
     insideMind: [
-      '[11:42am] User\'s facial energy dropped 12% compared to baseline.',
-      '[11:44am] Suggest: Stretch & breathe.',
+      '[7:18am] Deep sleep duration shorter than usual.',
+      '[10:12am] Morning grogginess detected.',
+      '[14:40pm] Afternoon dip suggests sleep debt.',
+      '[20:05pm] Consistent wind-down routine detected.',
+      '[23:12pm] Late bedtime trend noticed.',
+      '[23:40pm] Suggest: Reduce screen time.',
     ],
     permissions: [
-      'Camera Access — Facial Expression & Skin Data',
-      'Health API — Sleep & Heart Rate',
-      'Posture Sensor — Phone Motion Data',
+      'Health API — Sleep data',
+      'Motion Sensor — Night movement',
+      'Calendar — Routine timing',
     ],
     outcomes: {
-      metric1: { label: 'better sleep rhythm', value: '+15%' },
-      metric2: { label: 'daily stress fluctuation', value: '-25%' },
-      metric3: { label: 'micro-actions per day', value: '5 personalized' },
+      metric1: { label: 'Better sleep quality', value: '' },
+      metric2: { label: 'More consistent rhythm', value: '' },
+      metric3: { label: 'Reduced sleep debt', value: '' },
     },
-    motivation: 'Rest easy, rise energized.',
+    motivation: 'Rest deeper, wake brighter.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
   },
@@ -339,6 +344,7 @@ export default function AgentDetailPage() {
   const isEnergyAgent = agentId === 'energy';
   const isFaceAgent = agentId === 'face';
   const isPostureAgent = agentId === 'posture';
+  const isSleepAgent = agentId === 'sleep';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>
@@ -415,7 +421,7 @@ export default function AgentDetailPage() {
             </View>
           </View>
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent) ? (
             <ScrollingMindBanner logs={agent.insideMind} />
           ) : (
             <View style={styles.mindCard}>
@@ -426,7 +432,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <Text style={styles.sectionTitle}>What I need to connect with you</Text>
@@ -489,7 +495,7 @@ export default function AgentDetailPage() {
                     subtitle="Emotion-related biometrics"
                   />
                 </>
-              ) : (
+              ) : isPostureAgent ? (
                 <>
                   <PermissionToggle
                     icon={<Activity size={24} color="#000000" strokeWidth={2} />}
@@ -507,6 +513,24 @@ export default function AgentDetailPage() {
                     subtitle="Activity & tension patterns"
                   />
                 </>
+              ) : (
+                <>
+                  <PermissionToggle
+                    icon={<Heart size={24} color="#000000" strokeWidth={2} />}
+                    title="Health API"
+                    subtitle="Sleep data"
+                  />
+                  <PermissionToggle
+                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                    title="Motion Sensor"
+                    subtitle="Night movement"
+                  />
+                  <PermissionToggle
+                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
+                    title="Calendar"
+                    subtitle="Routine timing"
+                  />
+                </>
               )}
             </View>
           ) : (
@@ -519,7 +543,7 @@ export default function AgentDetailPage() {
             </View>
           )}
 
-          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent) ? (
+          {(isStressAgent || isEnergyAgent || isFaceAgent || isPostureAgent || isSleepAgent) ? (
             <View style={styles.sectionCard}>
               <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
               <View style={styles.outcomesHeader}>
