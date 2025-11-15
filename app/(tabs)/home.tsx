@@ -24,6 +24,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import calendarManager from '../../src/utils/calendar-manager';
 import locationManager from '../../src/utils/location-manager';
 
 export default function HomeTab() {
@@ -64,7 +65,20 @@ export default function HomeTab() {
       }
     };
 
+    const syncCalendarPermission = async () => {
+      try {
+        const result = await calendarManager.checkPermission();
+        setPermissions((prev) => ({
+          ...prev,
+          calendar: result.granted,
+        }));
+      } catch (error) {
+        console.error('[HomeTab] 检查日历权限失败:', error);
+      }
+    };
+
     syncLocationPermission();
+    syncCalendarPermission();
   }, []);
 
   const thinkingLogs = [
@@ -182,18 +196,46 @@ export default function HomeTab() {
 
   const timelineEntries = allTimelineData[selectedDate.toDateString()] || [];
 
+  const getPermissionName = (id: string) => {
+    const permissionMap: Record<string, string> = {
+      location: '位置',
+      healthkit: 'HealthKit',
+      calendar: '日历',
+      photos: '照片',
+      camera: '相机',
+      microphone: '麦克风',
+    };
+    return permissionMap[id] || id;
+  };
+
   const togglePermission = async (id: string) => {
+    const currentValue = permissions[id as keyof typeof permissions];
+    const permissionName = getPermissionName(id);
+
+    // 如果尝试关闭权限，跳转到系统设置
+    if (currentValue) {
+      Alert.alert(
+        `关闭${permissionName}权限`,
+        `请在系统设置中关闭${permissionName}权限。`,
+        [
+          { text: '取消', style: 'cancel' },
+          {
+            text: '去设置',
+            onPress: async () => {
+              try {
+                await Linking.openSettings();
+              } catch (error) {
+                console.error('打开设置失败:', error);
+              }
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    // 开启权限的逻辑
     if (id === 'location') {
-      const currentValue = permissions.location;
-
-      if (currentValue) {
-        setPermissions((prev) => ({
-          ...prev,
-          location: false,
-        }));
-        return;
-      }
-
       try {
         const isServiceAvailable = await locationManager.isLocationServiceAvailable();
         if (!isServiceAvailable) {
@@ -267,6 +309,60 @@ export default function HomeTab() {
       return;
     }
 
+    if (id === 'calendar') {
+      try {
+        const permissionResult = await calendarManager.requestPermission();
+        console.log('[HomeTab] 请求日历权限结果:', permissionResult);
+        if (permissionResult.success) {
+          setPermissions((prev) => ({
+            ...prev,
+            calendar: true,
+          }));
+        } else {
+          Alert.alert(
+            '日历权限被拒绝',
+            permissionResult.error || '需要日历权限才能访问日历事件。请在设置中开启日历权限。',
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '去设置',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('打开设置失败:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('[HomeTab] 请求日历权限失败:', error);
+        Alert.alert(
+          '请求权限失败',
+          '无法请求日历权限，请稍后重试。您也可以在设置中手动开启日历权限。',
+          [
+            { text: '取消', style: 'cancel' },
+            {
+              text: '去设置',
+              onPress: async () => {
+                try {
+                  await Linking.openSettings();
+                } catch (error) {
+                  console.error('打开设置失败:', error);
+                }
+              },
+            },
+          ],
+        );
+      }
+
+      return;
+    }
+
+    // 其他权限（healthkit, photos, camera, microphone）开启时直接切换状态
+    // 关闭时已经在上面统一处理，会跳转到系统设置
     setPermissions((prev) => ({
       ...prev,
       [id]: !prev[id as keyof typeof prev],
