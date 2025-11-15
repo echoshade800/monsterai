@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
     color: '#000',
     flex: 1,
     textAlign: 'center',
-    marginHorizontal: 8,
+    marginHorizontal: 4,
   },
   calendarCloseButton: {
     position: 'absolute',
