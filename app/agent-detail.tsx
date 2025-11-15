@@ -183,41 +183,40 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#E3F2FD',
   },
   stress: {
-    name: 'Stress',
-    goal: 'I help you stay calm, balanced, and emotionally steady.',
-    mission: 'I help you notice emotional tension early and guide you to relax.',
+    name: 'Stress Agent',
+    goal: 'I help you stabilize emotions and control daily stress.',
+    mission: 'I read your expressions and patterns to find what affects your mood.',
     tasks: [
-      'Track mood & micro-expressions',
-      'Detect rising tension',
-      'Give quick calming suggestions',
+      'Detect anxiety, frustration, and tiredness.',
+      'Track emotional rhythm across the day.',
+      'Link life events to mood changes.',
+      'Offer calming actions and exercises.',
+      'Notify you when stress spikes.',
     ],
     whatIDo: {
-      dailyCheckIn: 'I check your emotional baseline each morning.',
-      instantInsight: 'I notify you when your stress starts rising.',
-      microChallenges: 'Small mood-reset tasks to help you stay grounded.',
+      dailyCheckIn: 'I review your emotional trend and highlight what needs care.',
+      instantInsight: 'I alert you when facial tension or stress rises.',
+      microChallenges: 'Short calming tasks to restore emotional stability.',
     },
     insideMind: [
-      '[9:12am] Tension +8% from baseline.',
-      '[10:04am] Your smile activity dropped noticeably.',
-      '[11:18am] Eye fatigue increased — may signal rising stress.',
-      '[1:52pm] Heart rate slightly elevated above your usual.',
-      '[2:30pm] Facial stress markers increased by 12%.',
-      '[3:05pm] Detected jaw-clenching pattern.',
-      '[4:10pm] Mood stability dipped compared to morning.',
-      '[5:22pm] Suggest: 1-minute breathing reset.',
+      '[9:14am] Mood stable.',
+      '[12:50pm] Midday stress increasing.',
+      '[15:05pm] Facial tension rising.',
+      '[17:18pm] Fatigue linked to workload.',
+      '[19:22pm] Evening calm improving.',
+      '[22:10pm] Stress 8% lower than yesterday.',
     ],
     permissions: [
-      'Camera Access — Facial expression signals',
-      'Health API Access — Stress & heart-rate data',
-      'Motion / Posture Sensor — Body tension patterns',
+      'Camera Access — emotion tracking',
+      'Health API Access — stress & heart rate',
+      'Notifications — mood alerts & reminders',
     ],
     outcomes: {
-      metric1: { label: 'Calmer Mood', value: '' },
-      metric2: { label: 'Lower Stress Peaks', value: '' },
-      metric3: { label: 'More Stability', value: '' },
-      metric4: { label: 'Better Daily Rhythm', value: '' },
+      metric1: { label: 'More Stable Mood', value: '' },
+      metric2: { label: 'Lower Stress', value: '' },
+      metric3: { label: 'Better Emotional Clarity', value: '' },
     },
-    motivation: 'Stay calm, stay grounded.',
+    motivation: 'Take control of your emotions—not the other way around.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
   },
@@ -462,17 +461,17 @@ export default function AgentDetailPage() {
                   <PermissionToggle
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
                     title="Camera Access"
-                    subtitle="Facial expression signals"
+                    subtitle="emotion tracking"
                   />
                   <PermissionToggle
                     icon={<Heart size={24} color="#000000" strokeWidth={2} />}
                     title="Health API Access"
-                    subtitle="Stress & heart-rate data"
+                    subtitle="stress & heart rate"
                   />
                   <PermissionToggle
-                    icon={<Activity size={24} color="#000000" strokeWidth={2} />}
-                    title="Motion / Posture Sensor"
-                    subtitle="Body tension patterns"
+                    icon={<Bell size={24} color="#000000" strokeWidth={2} />}
+                    title="Notifications"
+                    subtitle="mood alerts & reminders"
                   />
                 </>
               ) : isEnergyAgent ? (
