@@ -926,6 +926,10 @@ export default function HomeTab() {
         </View>
 
         <View style={styles.section}>
+          <View style={styles.permissionsHeader}>
+            <Text style={styles.permissionsHeaderTitle}>Let the Monster team collect your data automatically.</Text>
+            <Text style={styles.permissionsHeaderSubtitle}>Everything stays private and secure.</Text>
+          </View>
           <View style={styles.permissionsCard}>
             {permissionsList.map((permission, index) => (
               <View
@@ -1120,6 +1124,22 @@ const styles = StyleSheet.create({
   thinkingLogText: {
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
+    lineHeight: 20,
+  },
+  permissionsHeader: {
+    marginBottom: 16,
+  },
+  permissionsHeaderTitle: {
+    fontSize: 16,
+    fontFamily: 'Nunito_600SemiBold',
+    color: '#000000',
+    marginBottom: 4,
+    lineHeight: 22,
+  },
+  permissionsHeaderSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#666666',
     lineHeight: 20,
   },
   permissionsCard: {
