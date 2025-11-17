@@ -240,7 +240,7 @@ export default function MarketTab() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Monster AI</Text>
+          <Text style={styles.title}>MonsterAI</Text>
           <Text style={styles.subtitle}>Your personal agent store</Text>
         </View>
 
