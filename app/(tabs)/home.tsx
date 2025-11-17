@@ -1101,7 +1101,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 32,
-    fontWeight: '700',
+    fontFamily: 'Nunito_700Bold',
     color: '#000',
     lineHeight: 38,
   },
@@ -1110,7 +1110,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: 'Nunito_700Bold',
     color: '#000',
     marginBottom: 12,
   },
@@ -1134,7 +1134,7 @@ const styles = StyleSheet.create({
   },
   thinkingLogText: {
     fontSize: 14,
-    fontFamily: 'Menlo',
+    fontFamily: 'Nunito_400Regular',
     lineHeight: 20,
   },
   permissionsCard: {
@@ -1164,12 +1164,13 @@ const styles = StyleSheet.create({
   },
   permissionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000',
     marginBottom: 2,
   },
   permissionSubtitle: {
     fontSize: 13,
+    fontFamily: 'Nunito_400Regular',
     color: '#999',
   },
   dateControl: {
@@ -1196,7 +1197,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000',
     marginHorizontal: 16,
   },
@@ -1222,7 +1223,7 @@ const styles = StyleSheet.create({
   },
   timelineTime: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'Nunito_500Medium',
     color: '#000',
     marginLeft: 6,
   },
@@ -1251,12 +1252,13 @@ const styles = StyleSheet.create({
   },
   timelineCategory: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000',
     marginBottom: 4,
   },
   timelineDescription: {
     fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
     color: '#666',
     lineHeight: 20,
   },
@@ -1289,7 +1291,7 @@ const styles = StyleSheet.create({
   },
   calendarHeaderText: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'Nunito_700Bold',
     color: '#000',
     textAlign: 'center',
     marginHorizontal: 12,
@@ -1306,7 +1308,7 @@ const styles = StyleSheet.create({
   },
   calendarWeekdayText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#999',
     width: 40,
     textAlign: 'center',
@@ -1331,12 +1333,12 @@ const styles = StyleSheet.create({
   },
   calendarDayText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Nunito_500Medium',
     color: '#000',
   },
   calendarDayTextSelected: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontFamily: 'Nunito_700Bold',
   },
   noLogsContainer: {
     paddingVertical: 40,
@@ -1345,6 +1347,7 @@ const styles = StyleSheet.create({
   },
   noLogsText: {
     fontSize: 16,
+    fontFamily: 'Nunito_400Regular',
     color: '#999',
     fontStyle: 'italic',
   },
