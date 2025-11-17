@@ -49,11 +49,12 @@ export function MonsterCard({
       onPress={onCardPress || onFingerprintPress}
       activeOpacity={0.95}
     >
+      <View style={styles.topPickBadge}>
+        <Text style={styles.topPickText}>Top Pick</Text>
+      </View>
+
       <View style={styles.header}>
         <Text style={styles.name}>{name}</Text>
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{category}</Text>
-        </View>
       </View>
 
       <View style={styles.imageContainer}>
@@ -114,26 +115,31 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
+  topPickBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    zIndex: 10,
+  },
+  topPickText: {
+    fontSize: 11,
+    fontFamily: 'Nunito_600SemiBold',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     marginBottom: 6,
   },
   name: {
     fontSize: 22,
     fontFamily: 'Nunito_700Bold',
-    color: '#000000',
-  },
-  categoryBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  categoryText: {
-    fontSize: 12,
-    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
   },
   imageContainer: {
