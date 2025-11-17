@@ -1379,7 +1379,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_400Regular',
     color: '#333',
     lineHeight: 20,
-    marginTop: 8,
+    marginTop: 4,
   },
   modalOverlay: {
     flex: 1,
