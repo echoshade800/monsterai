@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
-    marginRight: -6,
+    marginRight: 0,
   },
   topPickText: {
     fontSize: 11,
