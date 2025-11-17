@@ -1006,7 +1006,9 @@ export default function HomeTab() {
             {sampleTimelineData.map((item, index) => (
               <View key={index} style={styles.timelineEntry}>
                 <View style={styles.timelineDivider}>
-                  <View style={styles.timelineDot} />
+                  <View style={styles.timelineDot}>
+                    <Clock size={14} color="#666" />
+                  </View>
                   {index < sampleTimelineData.length - 1 && (
                     <View style={styles.timelineLine} />
                   )}
@@ -1283,11 +1285,13 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   timelineDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#666',
-    marginTop: 6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#F0F0F0',
+    marginTop: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   timelineLine: {
     width: 2,
