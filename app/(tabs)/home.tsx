@@ -2,6 +2,7 @@ import { Audio } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import {
+  Bell,
   Calendar,
   Camera,
   ChevronLeft,
@@ -48,6 +49,31 @@ export default function HomeTab() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [calendarViewDate, setCalendarViewDate] = useState(new Date());
   const [allTimelineData, setAllTimelineData] = useState<Record<string, Array<{ time: string; category: string; description: string }>>>({});
+
+  // Timeline item types
+  type TimelineItem = {
+    time: string;
+    type: 'reminder' | 'prediction' | 'action';
+    title?: string;
+    subtitle?: string;
+    agentTag?: string;
+    description?: string;
+    toggleEnabled?: boolean;
+  };
+
+  // Sample timeline data
+  const sampleTimelineData: TimelineItem[] = [
+    { time: '8:00', type: 'prediction', title: 'Wake-up', subtitle: 'You usually wake around 8:00. Ready to rise?' },
+    { time: '8:05', type: 'action', agentTag: 'Energy', description: 'You got out of bed! Morning boost started.' },
+    { time: '9:00', type: 'reminder', title: 'Breakfast Reminder', toggleEnabled: true },
+    { time: '9:20', type: 'action', agentTag: 'Food', description: 'You had breakfast. Good start! 🥞' },
+    { time: '12:00', type: 'prediction', title: 'Lunch', subtitle: 'You tend to eat around noon.' },
+    { time: '12:10', type: 'action', agentTag: 'Energy', description: 'You ate! Stable energy level detected.' },
+    { time: '15:30', type: 'action', agentTag: 'Face', description: 'Eye fatigue noticed in your photo.' },
+    { time: '21:30', type: 'reminder', title: 'Sleep Reminder', toggleEnabled: true },
+    { time: '22:00', type: 'prediction', title: 'Sleep', subtitle: 'You sleep around 22:00–7:00.' },
+    { time: '22:15', type: 'action', agentTag: 'Sleep', description: 'You fell asleep. Sweet dreams! 🌙' },
+  ];
   const [loadingTimeline, setLoadingTimeline] = useState(false);
   const fetchingDatesRef = useRef<Set<string>>(new Set());
   const timelineDataCacheRef = useRef<Record<string, Array<{ time: string; category: string; description: string }>>>({});
@@ -959,6 +985,7 @@ export default function HomeTab() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Timeline</Text>
+          <Text style={styles.timelineSubtitle}>From your phone, we track daily patterns to understand your health — all data stays private.</Text>
 
           <View style={styles.dateControl}>
             <TouchableOpacity onPress={openCalendar}>
@@ -976,34 +1003,49 @@ export default function HomeTab() {
           </View>
 
           <View style={styles.timelineContainer}>
-            {loadingTimeline ? (
-              <View style={styles.noLogsContainer}>
-                <Text style={styles.noLogsText}>Loading...</Text>
-              </View>
-            ) : timelineEntries.length > 0 ? (
-              timelineEntries.map((entry, index) => (
-                <View key={index} style={styles.timelineEntry}>
-                  <View style={styles.timelineLeft}>
-                    <Clock size={16} color="#666" />
-                    <Text style={styles.timelineTime}>{entry.time}</Text>
-                  </View>
-                  <View style={styles.timelineDivider}>
-                    <View style={styles.timelineDot} />
-                    {index < timelineEntries.length - 1 && (
-                      <View style={styles.timelineLine} />
-                    )}
-                  </View>
-                  <View style={styles.timelineRight}>
-                    <Text style={styles.timelineCategory}>{entry.category}</Text>
-                    <Text style={styles.timelineDescription}>{entry.description}</Text>
-                  </View>
+            {sampleTimelineData.map((item, index) => (
+              <View key={index} style={styles.timelineEntry}>
+                <View style={styles.timelineLeft}>
+                  <Clock size={16} color="#666" />
+                  <Text style={styles.timelineTime}>{item.time}</Text>
                 </View>
-              ))
-            ) : (
-              <View style={styles.noLogsContainer}>
-                <Text style={styles.noLogsText}>No logs for today.</Text>
+                <View style={styles.timelineDivider}>
+                  <View style={styles.timelineDot} />
+                  {index < sampleTimelineData.length - 1 && (
+                    <View style={styles.timelineLine} />
+                  )}
+                </View>
+                <View style={styles.timelineRight}>
+                  {item.type === 'reminder' && (
+                    <View style={styles.timelineReminderContent}>
+                      <View style={styles.timelineReminderLeft}>
+                        <Bell size={16} color="#666" style={styles.timelineReminderIcon} />
+                        <Text style={styles.timelineReminderTitle}>{item.title}</Text>
+                      </View>
+                      <Switch
+                        value={item.toggleEnabled}
+                        trackColor={{ false: '#E0E0E0', true: '#34C759' }}
+                        thumbColor="#FFFFFF"
+                      />
+                    </View>
+                  )}
+                  {item.type === 'prediction' && (
+                    <View style={styles.timelinePredictionContent}>
+                      <Text style={styles.timelinePredictionTitle}>{item.title}</Text>
+                      <Text style={styles.timelinePredictionSubtitle}>{item.subtitle}</Text>
+                    </View>
+                  )}
+                  {item.type === 'action' && (
+                    <View style={styles.timelineActionContent}>
+                      <View style={styles.timelineActionTag}>
+                        <Text style={styles.timelineActionTagText}>{item.agentTag}</Text>
+                      </View>
+                      <Text style={styles.timelineActionDescription}>{item.description}</Text>
+                    </View>
+                  )}
+                </View>
               </View>
-            )}
+            ))}
           </View>
         </View>
 
@@ -1106,6 +1148,13 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 12,
     marginTop: -2,
+  },
+  timelineSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 16,
   },
   thinkingBanner: {
     backgroundColor: '#1E1E1E',
@@ -1266,6 +1315,66 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
     color: '#666',
+    lineHeight: 20,
+  },
+  // Reminder styles
+  timelineReminderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timelineReminderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  timelineReminderIcon: {
+    marginRight: 8,
+  },
+  timelineReminderTitle: {
+    fontSize: 15,
+    fontFamily: 'Nunito_600SemiBold',
+    color: '#000',
+  },
+  // Prediction styles
+  timelinePredictionContent: {
+    flexDirection: 'column',
+  },
+  timelinePredictionTitle: {
+    fontSize: 15,
+    fontFamily: 'Nunito_700Bold',
+    color: '#000',
+    marginBottom: 4,
+  },
+  timelinePredictionSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#999',
+    lineHeight: 20,
+  },
+  // Action styles
+  timelineActionContent: {
+    backgroundColor: '#F5F7F9',
+    borderRadius: 12,
+    padding: 12,
+  },
+  timelineActionTag: {
+    backgroundColor: '#E8EBED',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  timelineActionTagText: {
+    fontSize: 12,
+    fontFamily: 'Nunito_600SemiBold',
+    color: '#666',
+  },
+  timelineActionDescription: {
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#333',
     lineHeight: 20,
   },
   modalOverlay: {
