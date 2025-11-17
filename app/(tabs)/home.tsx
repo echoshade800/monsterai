@@ -20,7 +20,9 @@ import {
   AppState,
   Linking,
   Modal,
+  Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Switch,
   Text,
@@ -1093,17 +1095,17 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingTop: 60,
+    paddingTop: Platform.OS === 'ios' ? 126 : (StatusBar.currentHeight || 0) + 76,
     paddingBottom: 100,
   },
   header: {
     marginBottom: 24,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: 'Nunito_700Bold',
     color: '#000',
-    lineHeight: 38,
+    lineHeight: 34,
   },
   section: {
     marginBottom: 24,
