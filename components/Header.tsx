@@ -13,7 +13,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { api } from '../src/services/api-clients/client';
+import { api, getTimezone } from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
 import { CameraBox } from './CameraBox';
 
@@ -69,10 +69,18 @@ const formatTime = (timeInput: any): string => {
   return String(timeInput);
 };
 
+interface TodoItem {
+  prompt: string;
+  time: string;
+  done: boolean;
+}
+
 export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [todoItem, setTodoItem] = useState<TodoItem | null>(null);
+  const [isLoadingTodo, setIsLoadingTodo] = useState(false);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
   const scrollY = useSharedValue(0);
   const router = useRouter();
@@ -141,10 +149,132 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
     }
   }, []);
 
+  // Fetch TODO list data from API
+  const fetchTodoList = useCallback(async () => {
+    try {
+      setIsLoadingTodo(true);
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      // 获取时间戳和时区
+      const timestamp = Date.now();
+      let timezone = getTimezone();
+      
+      // 将时区格式从 "+8" 转换为 "+800" 格式（匹配 API 要求）
+      // 例如：+8 → +800, +9 → +900, -5 → -500
+      if (timezone && /^[+-]\d+$/.test(timezone)) {
+        const sign = timezone[0];
+        const hours = timezone.slice(1);
+        timezone = `${sign}${hours}00`;
+      }
+      
+      let timestampString = process.env.NODE_ENV === 'development' ? '1763353563943' : timestamp.toString();
+      // 构建查询参数
+      const queryParams = new URLSearchParams({
+        timestamp: timestampString,
+        timezone: timezone,
+      });
+      console.log('fetchTodoList queryParams', queryParams.toString());
+      
+      const response = await api.get(
+        `${API_ENDPOINTS.TODO.LIST}?${queryParams.toString()}`,
+        {
+          headers: {
+            'passid': passIdValue,
+            'accept': 'application/json',
+          },
+        }
+      );
+      console.log('fetchTodoList response', response);
+
+      if (response.isSuccess() && response.data) {
+        // API 返回格式: { code: 0, msg: "success", data: { items: [...] } }
+        if (response.data.items && Array.isArray(response.data.items) && response.data.items.length > 0) {
+          const firstItem = response.data.items[0];
+          setTodoItem({
+            prompt: firstItem.prompt || '',
+            time: firstItem.time || '',
+            done: firstItem.done || false,
+          });
+          setIsDone(firstItem.done || false);
+        } else {
+          setTodoItem(null);
+        }
+      } else {
+        setTodoItem(null);
+      }
+    } catch (error) {
+      console.error('Failed to fetch todo list:', error);
+      setTodoItem(null);
+    } finally {
+      setIsLoadingTodo(false);
+    }
+  }, []);
+
+  // Handle TODO done action
+  const handleTodoDone = useCallback(async () => {
+    if (!todoItem) return;
+    
+    try {
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      const requestBody = {
+        prompt: todoItem.prompt,
+        time: todoItem.time,
+      };
+      
+      console.log('handleTodoDone - Request:', {
+        endpoint: API_ENDPOINTS.TODO.DONE,
+        body: requestBody,
+        headers: {
+          'passid': passIdValue,
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const response = await api.post(
+        API_ENDPOINTS.TODO.DONE,
+        requestBody,
+        {
+          headers: {
+            'passid': passIdValue,
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      
+      console.log('handleTodoDone - Success Response:', {
+        code: response.code,
+        msg: response.msg,
+        data: response.data,
+      });
+      
+      if (response.isSuccess()) {
+        // 更新本地状态
+        const newDoneState = !isDone;
+        setIsDone(newDoneState);
+        setTodoItem({ ...todoItem, done: newDoneState });
+      }
+    } catch (error: any) {
+      console.error('handleTodoDone - Error Details:', {
+        errorType: error?.constructor?.name,
+        errorMessage: error?.message,
+        errorCode: error?.code,
+        errorData: error?.data,
+        fullError: error,
+        stack: error?.stack,
+      });
+    }
+  }, [todoItem, isDone]);
+
   // Fetch logs on mount
   useEffect(() => {
     fetchAgentLogs();
-  }, [fetchAgentLogs]);
+    fetchTodoList();
+  }, [fetchAgentLogs, fetchTodoList]);
 
   // 当 refreshTrigger 变化时，重新获取 AgentLogs
   useEffect(() => {
@@ -380,31 +510,37 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
                 />
               </Animated.View>
 
-              <Animated.View style={[styles.breakfastBanner, breakfastBannerStyle]}>
-                <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-                <View style={styles.breakfastContent}>
-                  <View style={styles.breakfastLeft}>
-                    <Image
-                      source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatposture.png' }}
-                      style={styles.avatarImage}
-                    />
-                    <View style={styles.breakfastTextContainer}>
-                      <Text style={styles.timeRange}>7:00-8:00</Text>
-                      <Text style={styles.taskTitle}>Eat breakfast!</Text>
+              {todoItem && (
+                <Animated.View style={[styles.breakfastBanner, breakfastBannerStyle]}>
+                  <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
+                  <View style={styles.breakfastContent}>
+                    <View style={styles.breakfastLeft}>
+                      <Image
+                        source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatposture.png' }}
+                        style={styles.avatarImage}
+                      />
+                      <View style={styles.breakfastTextContainer}>
+                        <Text style={styles.timeRange}>
+                          {todoItem?.time}
+                        </Text>
+                        <Text style={styles.taskTitle}>
+                          {todoItem?.prompt}
+                        </Text>
+                      </View>
                     </View>
+                    <TouchableOpacity
+                      style={[styles.doneButton, isDone && styles.doneButtonChecked]}
+                      onPress={handleTodoDone}
+                    >
+                      {isDone ? (
+                        <Check size={18} color="#FFFFFF" strokeWidth={3} />
+                      ) : (
+                        <Text style={styles.doneButtonText}>Done</Text>
+                      )}
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity
-                    style={[styles.doneButton, isDone && styles.doneButtonChecked]}
-                    onPress={() => setIsDone(!isDone)}
-                  >
-                    {isDone ? (
-                      <Check size={18} color="#FFFFFF" strokeWidth={3} />
-                    ) : (
-                      <Text style={styles.doneButtonText}>Done</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </Animated.View>
+                </Animated.View>
+              )}
 
               <Animated.View style={[styles.thinkingBanner, zappedBannerStyle]}>
                 <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />

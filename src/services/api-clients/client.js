@@ -175,9 +175,38 @@ const request = async (url, options = {}) => {
 
     // 检查HTTP状态码
     if (!response.ok) {
+      // 尝试读取响应体以获取更详细的错误信息
+      let errorData = null;
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+          errorMessage = errorData.msg || errorData.message || errorMessage;
+          console.error('HTTP Error Response:', {
+            status: response.status,
+            statusText: response.statusText,
+            url: `${baseUrl}${url}`,
+            responseData: errorData,
+          });
+        } else {
+          const textData = await response.text();
+          console.error('HTTP Error Response (text):', {
+            status: response.status,
+            statusText: response.statusText,
+            url: `${baseUrl}${url}`,
+            responseText: textData,
+          });
+          errorData = { raw: textData };
+        }
+      } catch (parseError) {
+        console.error('Failed to parse error response:', parseError);
+      }
+      
       throw new ApiError(
         response.status.toString(),
-        `HTTP ${response.status}: ${response.statusText}`
+        errorMessage,
+        errorData
       );
     }
 
@@ -194,6 +223,13 @@ const request = async (url, options = {}) => {
                       responseData.msg === 'success';
     
     if (!isSuccess) {
+      console.error('Business Error Response:', {
+        url: `${baseUrl}${url}`,
+        code: responseData.code,
+        msg: responseData.msg,
+        data: responseData.data,
+        fullResponse: responseData,
+      });
       throw new ApiError(
         responseData.code || 'UNKNOWN',
         responseData.msg || '请求失败',

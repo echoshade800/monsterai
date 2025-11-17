@@ -128,6 +128,11 @@ export const API_ENDPOINTS = {
   STATUS: {
     INFO: '/status/info',
   },
+
+  TODO: {
+    LIST: '/todo/list',
+    DONE: '/todo/done',
+  },
 };
 
 // 导出环境常量
