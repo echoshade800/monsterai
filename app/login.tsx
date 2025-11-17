@@ -265,13 +265,21 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 38,
     fontWeight: '800',
-    color: '#1A1A1A',
+    color: '#FFFFFF',
     marginBottom: 8,
+    fontFamily: 'SF Compact Rounded',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   tagline: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#4A4A4A',
+    color: '#FFFFFF',
+    fontFamily: 'SF Compact Rounded',
+    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   buttonContainer: {
     gap: 18,
