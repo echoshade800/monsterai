@@ -1,6 +1,6 @@
 import { Audio } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Bell,
   Calendar,
@@ -30,10 +30,52 @@ import {
   View,
 } from 'react-native';
 import api from '../../src/services/api-clients/client';
-import { getHeadersWithPassId } from '../../src/services/api/api';
+import { API_ENDPOINTS, getHeadersWithPassId } from '../../src/services/api/api';
 import calendarManager from '../../src/utils/calendar-manager';
 import healthDataManager, { HealthDataType } from '../../src/utils/health-data-manager';
 import locationManager from '../../src/utils/location-manager';
+
+const DEFAULT_MESSAGE = "I'll start giving insights once we talk a bit more.";
+
+interface LogEntry {
+  time: string;
+  message: string;
+}
+
+// Helper function to format time from various formats to HH:mm
+const formatTime = (timeInput: any): string => {
+  if (!timeInput) return '';
+  
+  // If it's already in HH:mm format, return as is
+  if (typeof timeInput === 'string' && /^\d{2}:\d{2}$/.test(timeInput)) {
+    return timeInput;
+  }
+  
+  // If it's a timestamp (number or ISO string), convert to HH:mm
+  try {
+    let date: Date;
+    
+    // Handle numeric string timestamps (e.g., "151351233523")
+    if (typeof timeInput === 'string' && /^\d+$/.test(timeInput)) {
+      const timestamp = parseInt(timeInput, 10);
+      // If it's a 13-digit timestamp (milliseconds), use as is
+      // If it's a 10-digit timestamp (seconds), convert to milliseconds
+      date = new Date(timeInput.length === 13 ? timestamp : timestamp * 1000);
+    } else {
+      date = new Date(timeInput);
+    }
+    
+    if (!isNaN(date.getTime())) {
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+  } catch (error) {
+    // If parsing fails, return the original value as string
+  }
+  
+  return String(timeInput);
+};
 
 export default function HomeTab() {
   const router = useRouter();
@@ -77,7 +119,8 @@ export default function HomeTab() {
   const [loadingTimeline, setLoadingTimeline] = useState(false);
   const fetchingDatesRef = useRef<Set<string>>(new Set());
   const timelineDataCacheRef = useRef<Record<string, Array<{ time: string; category: string; description: string }>>>({});
-
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
 
   // 检查所有健康子项权限状态
   const checkAllHealthPermissions = async (silent = false): Promise<boolean> => {
@@ -235,27 +278,109 @@ export default function HomeTab() {
     };
   }, []);
 
-  const thinkingLogs = [
-    "[11:42am] User's facial energy dropped 12% compared to baseline.",
-    '[11:44am] Suggest: Stretch & breathe.',
-    '[10:04am] Smile activity dropped noticeably.',
-    '[11:18am] Eye fatigue increased — may indicate stress.',
-    '[12:22pm] Posture stability decreased during sitting.',
-    '[12:40pm] Micro-expression tension rising.',
-  ];
+  // Fetch agent log data from API
+  const fetchAgentLogs = useCallback(async () => {
+    try {
+      setIsLoadingLogs(true);
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      const response = await api.get(
+        API_ENDPOINTS.AGENT_LOG.INFO,
+        {
+          headers: {
+            'passid': passIdValue,
+          },
+        }
+      );
+      console.log('fetchAgentLogs response', response);
 
-  const formatLogText = (text: string) => {
-    const parts = [];
-    const timeMatch = text.match(/\[(.*?)\]/);
+      if (response.isSuccess() && response.data) {
+        // Transform API response to log entries format
+        // API returns: { code: 0, msg: "success", data: { records: [...], ... } }
+        let entries: LogEntry[] = [];
+        
+        if (response.data.records && Array.isArray(response.data.records)) {
+          entries = response.data.records.map((item: any) => {
+            // Use created_at (ISO string) or timestamp for time formatting
+            const timeSource = item.created_at || item.timestamp;
+            const time = formatTime(timeSource);
+            // Use reasoning as the message content
+            const message = item.reasoning || '';
+            
+            return {
+              time,
+              message,
+            };
+          }).filter((entry: LogEntry) => entry.time && entry.message);
+        }
 
-    if (timeMatch) {
-      parts.push({ text: `[${timeMatch[1]}]`, color: '#7FFF7F' });
-      text = text.substring(timeMatch[0].length).trim();
+        if (entries.length > 0) {
+          setLogEntries(entries);
+        } else {
+          // 如果没有获取到数据，显示默认文案
+          setLogEntries([{ time: '', message: DEFAULT_MESSAGE }]);
+        }
+      } else {
+        // 如果响应不成功，显示默认文案
+        setLogEntries([{ time: '', message: DEFAULT_MESSAGE }]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch agent logs:', error);
+      // 获取失败时，显示默认文案
+      setLogEntries([{ time: '', message: DEFAULT_MESSAGE }]);
+    } finally {
+      setIsLoadingLogs(false);
     }
+  }, []);
 
-    const words = text.split(' ');
+  // Fetch logs on mount
+  useEffect(() => {
+    fetchAgentLogs();
+  }, [fetchAgentLogs]);
+
+  // 每次页面聚焦时，触发刷新 AgentLogs
+  useFocusEffect(
+    useCallback(() => {
+      console.log('Home 页面聚焦，触发刷新 AgentLogs');
+      fetchAgentLogs();
+    }, [fetchAgentLogs])
+  );
+
+  // Update scroll animation when log entries change
+  useEffect(() => {
+    const lineHeight = 23;
+    const totalHeight = logEntries.length * lineHeight;
+    
+    // 如果只有一条消息且没有时间（默认消息），不进行滚动
+    const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
+
+    if (totalHeight > 0 && !isDefaultMessage) {
+      Animated.loop(
+        Animated.timing(scrollY, {
+          toValue: -totalHeight,
+          duration: 15000,
+          useNativeDriver: true,
+        })
+      ).start();
+    } else {
+      scrollY.setValue(0);
+    }
+  }, [logEntries, scrollY]);
+
+  const formatLogText = (entry: LogEntry) => {
+    const parts: Array<{ text: string; color: string }> = [];
+    
+    // 如果有时间，添加时间部分
+    if (entry.time) {
+      parts.push({ text: `[${entry.time}]`, color: '#E91E63' });
+      parts.push({ text: ' ', color: '#E8E8E8' });
+    }
+    
+    // 处理消息内容
+    const words = entry.message.split(' ');
     words.forEach((word, index) => {
-      let color = '#E8E8E8';
+      let color = '#000000';
 
       if (word.match(/\d+%/)) {
         color = '#FF6B6B';
@@ -269,7 +394,7 @@ export default function HomeTab() {
 
       parts.push({ text: word, color });
       if (index < words.length - 1) {
-        parts.push({ text: ' ', color: '#E8E8E8' });
+        parts.push({ text: ' ', color: '#000000' });
       }
     });
 
@@ -948,6 +1073,32 @@ export default function HomeTab() {
                 </View>
               ))}
             </ScrollView>
+            <View style={styles.thinkingScrollContainer}>
+              <Animated.View
+                style={[
+                  styles.thinkingScrollContent,
+                  { transform: [{ translateY: scrollY }] },
+                ]}
+              >
+                {(() => {
+                  // 如果只有默认消息，不重复显示
+                  const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
+                  const entriesToRender = isDefaultMessage ? logEntries : [...logEntries, ...logEntries];
+                  return entriesToRender.map((entry, index) => (
+                    <View key={index} style={styles.thinkingLogLine}>
+                      {formatLogText(entry).map((part, partIndex) => (
+                        <Text
+                          key={partIndex}
+                          style={[styles.thinkingLogText, { color: '#FFFFFF' }]}
+                        >
+                          {part.text}
+                        </Text>
+                      ))}
+                    </View>
+                  ));
+                })()}
+              </Animated.View>
+            </View>
           </View>
         </View>
 
