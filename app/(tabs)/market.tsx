@@ -265,7 +265,7 @@ export default function MarketTab() {
           {renderGameRow(GAMES_DATA)}
         </View>
 
-        <View style={styles.gamesSection}>
+        <View style={styles.miniAppsSection}>
           <Text style={styles.gamesSectionTitle}>Mini APPs</Text>
           {renderMiniAppRow(MINIAPPS_DATA)}
         </View>
@@ -327,6 +327,10 @@ const styles = StyleSheet.create({
   },
   gamesSection: {
     marginTop: 16,
+    paddingBottom: 20,
+  },
+  miniAppsSection: {
+    marginTop: 0,
     paddingBottom: 20,
   },
   gamesSectionTitle: {
