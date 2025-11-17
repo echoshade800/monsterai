@@ -46,6 +46,7 @@
     "expo-task-manager": "~14.0.7",
     "expo-updates": "~29.0.10",
     "expo-web-browser": "~15.0.9",
+    "flow-parser": "^0.291.0",
     "lucide-react-native": "^0.553.0",
     "prop-types": "^15.8.1",
     "react": "19.1.0",
