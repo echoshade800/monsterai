@@ -170,7 +170,7 @@ export default function ProfileScreen() {
               <Text style={styles.avatarEmoji}>🦑</Text>
             </View>
           </View>
-          <Text style={styles.username}>USER6VPTIXFW8</Text>
+          <Text style={styles.username}>{name}</Text>
         </View>
 
         <View style={styles.section}>
