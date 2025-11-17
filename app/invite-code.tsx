@@ -19,7 +19,7 @@ export default function InviteCodeScreen() {
     // 测试环境下，1111 为通用邀请码，方便快速登录
     if (CURRENT_ENV === ENV.DEVELOPMENT && trimmedCode === '1111') {
       console.log('测试环境：使用通用邀请码 1111，直接通过验证');
-      router.replace('/login');
+      router.replace('/(tabs)');
       return;
     }
 
@@ -44,8 +44,8 @@ export default function InviteCodeScreen() {
       console.log('邀请码验证响应:', data);
       // 当 code 为 0 时表示验证成功
       if (data.code === 0) {
-        // 验证成功，跳转到登录页面
-        router.replace('/login');
+        // 验证成功，直接进入聊天页面
+        router.replace('/(tabs)');
       } else {
         alert(data.msg || 'Invalid invite code. Please try again.');
       }

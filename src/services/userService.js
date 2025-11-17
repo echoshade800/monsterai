@@ -1,4 +1,4 @@
-import api, { ApiError, UserData } from './api-clients/client';
+import api, { ApiError, UserData, getTimezone } from './api-clients/client';
 import { API_ENDPOINTS } from './api/api';
 
 // 用户服务类
@@ -248,6 +248,46 @@ class UserService {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
         message: error instanceof ApiError ? error.message : '重置密码失败',
+      };
+    }
+  }
+
+  /**
+   * 获取用户状态信息（包括邀请码）
+   * @returns {Promise<Object>} 状态信息，包含 invite_code 字段
+   */
+  async getUserStatusInfo() {
+    try {
+      // 获取时区，使用标准时区名称格式
+      let timezone = 'string'; // 默认值
+      try {
+        // 尝试获取系统时区名称
+        const timeZoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (timeZoneName) {
+          timezone = timeZoneName;
+        } else {
+          // 如果获取不到，使用偏移量格式
+          timezone = getTimezone();
+        }
+      } catch (error) {
+        console.warn('获取时区失败，使用默认值:', error);
+        timezone = getTimezone();
+      }
+
+      const response = await api.post(API_ENDPOINTS.STATUS.INFO, {
+        timezone: timezone,
+      }, { requireAuth: true });
+
+      return {
+        success: true,
+        data: response.data,
+        message: response.getMessage(),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
+        message: error instanceof ApiError ? error.message : '获取用户状态信息失败',
       };
     }
   }

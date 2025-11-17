@@ -241,7 +241,7 @@ export const api = {
     
     // DELETE请求
     delete: (url, options = {}) => request(url, { ...options, method: 'DELETE', apiType: 'auth' }),
-  },
+  }
 };
 
 // 导出认证API（从auth模块导入）

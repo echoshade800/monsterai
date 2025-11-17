@@ -20,15 +20,15 @@ export default function Index() {
           // 重定向到主界面
           router.replace('/(tabs)');
         } else {
-          console.log('未检测到本地用户信息，跳转到邀请码页面');
+          console.log('未检测到本地用户信息，跳转到登录页面');
           setHasUserData(false);
-          // 重定向到邀请码页面
-          router.replace('/invite-code');
+          // 重定向到登录页面
+          router.replace('/login');
         }
       } catch (error) {
         console.error('检查用户信息失败:', error);
-        // 出错时跳转到邀请码页面
-        router.replace('/invite-code');
+        // 出错时跳转到登录页面
+        router.replace('/login');
       } finally {
         setIsChecking(false);
       }
@@ -47,7 +47,7 @@ export default function Index() {
   }
 
   // 根据检查结果重定向（作为后备方案）
-  return <Redirect href={hasUserData ? '/(tabs)' : '/invite-code'} />;
+  return <Redirect href={hasUserData ? '/(tabs)' : '/login'} />;
 }
 
 const styles = StyleSheet.create({

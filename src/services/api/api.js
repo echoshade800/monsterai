@@ -123,6 +123,10 @@ export const API_ENDPOINTS = {
   AGENT_LOG: {
     INFO: '/data-agent/agent-log/info',
   },
+
+  STATUS: {
+    INFO: '/status/info',
+  },
 };
 
 // 导出环境常量

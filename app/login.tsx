@@ -92,8 +92,39 @@ export default function LoginScreen() {
         console.warn('Failed to save user data to local storage');
       }
       
-      // 登录成功后跳转到主页面
-      router.replace('/(tabs)');
+      // 登录成功后，获取用户状态信息，检查是否有邀请码
+      try {
+        const statusResult = await userService.getUserStatusInfo();
+        
+        if (statusResult.success && statusResult.data) {
+          // 检查响应中是否有 invite_code 字段
+          const inviteCode = statusResult.data.invite_code;
+          
+          // invite_code 可能是一个对象 {code: "...", ctime: "..."} 或者直接是字符串
+          const hasInviteCode = inviteCode && (
+            (typeof inviteCode === 'object' && inviteCode.code) || 
+            (typeof inviteCode === 'string' && inviteCode.length > 0)
+          );
+          
+          if (hasInviteCode) {
+            // 如果有邀请码，直接进入聊天页面
+            console.log('检测到邀请码，直接进入聊天页面:', inviteCode);
+            router.replace('/(tabs)');
+          } else {
+            // 如果没有邀请码，进入邀请码页面
+            console.log('未检测到邀请码，进入邀请码页面');
+            router.replace('/invite-code');
+          }
+        } else {
+          // 如果获取状态信息失败，默认进入邀请码页面
+          console.warn('获取用户状态信息失败，进入邀请码页面:', statusResult.message);
+          router.replace('/invite-code');
+        }
+      } catch (error) {
+        // 如果调用状态API出错，默认进入邀请码页面
+        console.error('获取用户状态信息出错:', error);
+        router.replace('/invite-code');
+      }
     } else {
       console.error('Backend login failed:', loginResult.message);
       Alert.alert('登录失败', loginResult.message || '后端登录失败，请重试');
