@@ -1291,8 +1291,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   timelineTime: {
-    fontSize: 14,
-    fontFamily: 'Nunito_500Medium',
+    fontSize: 16,
+    fontFamily: 'Nunito_700Bold',
     color: '#000',
     marginBottom: 8,
   },
