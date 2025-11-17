@@ -103,19 +103,8 @@ export default function HomeTab() {
     toggleEnabled?: boolean;
   };
 
-  // Sample timeline data
-  const sampleTimelineData: TimelineItem[] = [
-    { time: '8:00', type: 'prediction', title: 'Wake-up', subtitle: 'You usually wake around 8:00. Ready to rise?' },
-    { time: '8:05', type: 'action', agentTag: 'Energy', description: 'You got out of bed! Morning boost started.' },
-    { time: '9:00', type: 'reminder', title: 'Breakfast Reminder', toggleEnabled: true },
-    { time: '9:20', type: 'action', agentTag: 'Food', description: 'You had breakfast. Good start! 🥞' },
-    { time: '12:00', type: 'prediction', title: 'Lunch', subtitle: 'You tend to eat around noon.' },
-    { time: '12:10', type: 'action', agentTag: 'Energy', description: 'You ate! Stable energy level detected.' },
-    { time: '15:30', type: 'action', agentTag: 'Face', description: 'Eye fatigue noticed in your photo.' },
-    { time: '21:30', type: 'reminder', title: 'Sleep Reminder', toggleEnabled: true },
-    { time: '22:00', type: 'prediction', title: 'Sleep', subtitle: 'You sleep around 22:00–7:00.' },
-    { time: '22:15', type: 'action', agentTag: 'Sleep', description: 'You fell asleep. Sweet dreams! 🌙' },
-  ];
+  // Timeline data from API
+  const [timelineData, setTimelineData] = useState<TimelineItem[]>([]);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
   const fetchingDatesRef = useRef<Set<string>>(new Set());
   const timelineDataCacheRef = useRef<Record<string, Array<{ time: string; category: string; description: string }>>>({});
@@ -334,17 +323,137 @@ export default function HomeTab() {
     }
   }, []);
 
+  // 将 API 响应映射到 TimelineItem
+  const mapApiRecordToTimelineItem = (record: any): TimelineItem | null => {
+    const { time, type } = record;
+    
+    if (!time || !type) {
+      return null;
+    }
+
+    // 处理 reminder 类型
+    if (type.endsWith('_reminder')) {
+      const reminderType = type.replace('_reminder', '');
+      const titleMap: Record<string, string> = {
+        sleep: 'Sleep Reminder',
+        getup: 'Wake-up Reminder',
+        breakfast: 'Breakfast Reminder',
+        lunch: 'Lunch Reminder',
+        dinner: 'Dinner Reminder',
+      };
+      return {
+        time,
+        type: 'reminder',
+        title: titleMap[reminderType] || `${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)} Reminder`,
+        toggleEnabled: !record.cancel, // cancel: false 表示启用
+      };
+    }
+
+    // 处理 prediction 类型
+    if (['sleep', 'getup', 'breakfast', 'lunch', 'dinner'].includes(type)) {
+      const titleMap: Record<string, { title: string; subtitle: string }> = {
+        sleep: { title: 'Sleep', subtitle: 'You sleep around this time.' },
+        getup: { title: 'Wake-up', subtitle: 'You usually wake around this time. Ready to rise?' },
+        breakfast: { title: 'Breakfast', subtitle: 'You tend to have breakfast around this time.' },
+        lunch: { title: 'Lunch', subtitle: 'You tend to eat around this time.' },
+        dinner: { title: 'Dinner', subtitle: 'You tend to have dinner around this time.' },
+      };
+      const mapped = titleMap[type] || { title: type.charAt(0).toUpperCase() + type.slice(1), subtitle: '' };
+      return {
+        time,
+        type: 'prediction',
+        title: mapped.title,
+        subtitle: mapped.subtitle,
+      };
+    }
+
+    // 处理 action 类型（*_done）
+    if (type.endsWith('_done')) {
+      const actionType = type.replace('_done', '');
+      const agentTagMap: Record<string, string> = {
+        breakfast: 'Food',
+        lunch: 'Food',
+        dinner: 'Food',
+        getup: 'Energy',
+        sleep: 'Sleep',
+      };
+      const descriptionMap: Record<string, string> = {
+        breakfast: 'You had breakfast. Good start! 🥞',
+        lunch: 'You ate! Stable energy level detected.',
+        dinner: 'You had dinner. Evening meal completed.',
+        getup: 'You got out of bed! Morning boost started.',
+        sleep: 'You fell asleep. Sweet dreams! 🌙',
+      };
+      return {
+        time,
+        type: 'action',
+        agentTag: agentTagMap[actionType] || 'Activity',
+        description: descriptionMap[actionType] || `You completed ${actionType}.`,
+      };
+    }
+
+    return null;
+  };
+
+  // 从 API 获取 timeline 数据
+  const fetchTimelineInfo = useCallback(async () => {
+    try {
+      setLoadingTimeline(true);
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      const response = await api.get(API_ENDPOINTS.TIMELINE.INFO, {
+        headers: {
+          'accept': 'application/json',
+          'passid': passIdValue,
+        },
+      });
+
+      console.log('fetchTimelineInfo response', response);
+
+      if (response.isSuccess() && response.data) {
+        // API 返回格式: { code: 0, msg: "success", data: { records: [...], ... } }
+        let items: TimelineItem[] = [];
+        
+        if (response.data.records && Array.isArray(response.data.records)) {
+          // 按时间排序
+          const sortedRecords = [...response.data.records].sort((a, b) => {
+            const timeA = a.time || '';
+            const timeB = b.time || '';
+            return timeA.localeCompare(timeB);
+          });
+
+          // 映射每个记录
+          items = sortedRecords
+            .map((record) => mapApiRecordToTimelineItem(record))
+            .filter((item): item is TimelineItem => item !== null);
+        }
+
+        setTimelineData(items);
+      } else {
+        setTimelineData([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch timeline info:', error);
+      setTimelineData([]);
+    } finally {
+      setLoadingTimeline(false);
+    }
+  }, []);
+
   // Fetch logs on mount
   useEffect(() => {
     fetchAgentLogs();
-  }, [fetchAgentLogs]);
+    fetchTimelineInfo();
+  }, [fetchAgentLogs, fetchTimelineInfo]);
 
-  // 每次页面聚焦时，触发刷新 AgentLogs
+  // 每次页面聚焦时，触发刷新 AgentLogs 和 Timeline
   useFocusEffect(
     useCallback(() => {
-      console.log('Home 页面聚焦，触发刷新 AgentLogs');
+      console.log('Home 页面聚焦，触发刷新 AgentLogs 和 Timeline');
       fetchAgentLogs();
-    }, [fetchAgentLogs])
+      fetchTimelineInfo();
+    }, [fetchAgentLogs, fetchTimelineInfo])
   );
 
   // Update scroll animation when log entries change
@@ -1141,16 +1250,21 @@ export default function HomeTab() {
           </View>
 
           <View style={styles.timelineContainer}>
-            {sampleTimelineData.map((item, index) => (
-              <View key={index} style={styles.timelineEntry}>
-                <View style={styles.timelineDivider}>
-                  <View style={styles.timelineDot}>
-                    <Clock size={14} color="#666" />
+            {loadingTimeline ? (
+              <Text style={styles.timelineLoadingText}>Loading timeline...</Text>
+            ) : timelineData.length === 0 ? (
+              <Text style={styles.timelineEmptyText}>No timeline data available</Text>
+            ) : (
+              timelineData.map((item, index) => (
+                <View key={index} style={styles.timelineEntry}>
+                  <View style={styles.timelineDivider}>
+                    <View style={styles.timelineDot}>
+                      <Clock size={14} color="#666" />
+                    </View>
+                    {index < timelineData.length - 1 && (
+                      <View style={styles.timelineLine} />
+                    )}
                   </View>
-                  {index < sampleTimelineData.length - 1 && (
-                    <View style={styles.timelineLine} />
-                  )}
-                </View>
                 <View style={styles.timelineContent}>
                   {item.type === 'reminder' && (
                     <>
@@ -1192,7 +1306,8 @@ export default function HomeTab() {
                   )}
                 </View>
               </View>
-            ))}
+              ))
+            )}
           </View>
         </View>
 
@@ -1626,5 +1741,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_400Regular',
     color: '#999',
     fontStyle: 'italic',
+  },
+  timelineLoadingText: {
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#666',
+    textAlign: 'center',
+    paddingVertical: 20,
+  },
+  timelineEmptyText: {
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#999',
+    textAlign: 'center',
+    paddingVertical: 20,
   },
 });

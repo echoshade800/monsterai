@@ -133,6 +133,10 @@ export const API_ENDPOINTS = {
     LIST: '/todo/list',
     DONE: '/todo/done',
   },
+
+  TIMELINE: {
+    INFO: '/timeline/info',
+  },
 };
 
 // 导出环境常量
