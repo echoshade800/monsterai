@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, Platform, StatusBar, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, StatusBar, Image, TouchableOpacity, Modal } from 'react-native';
 import { MonsterCard } from '../../components/MonsterCard';
 import { GameCard } from '../../components/GameCard';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 
 const MONSTERS_DATA = [
   {
@@ -158,6 +159,7 @@ const MINIAPPS_DATA = [
 
 export default function MarketTab() {
   const router = useRouter();
+  const [showComingSoonModal, setShowComingSoonModal] = useState(false);
 
   const handleFingerprintPress = (monsterId: string) => {
     router.push({
@@ -178,6 +180,14 @@ export default function MarketTab() {
   const handleMiniAppPress = (appId: string) => {
     const app = MINIAPPS_DATA.find(a => a.id === appId);
     console.log('Opening mini app:', appId, 'URL:', app?.imageUrl);
+  };
+
+  const handleBannerPress = () => {
+    setShowComingSoonModal(true);
+  };
+
+  const closeModal = () => {
+    setShowComingSoonModal(false);
   };
 
   const renderGameRow = (games: typeof GAMES_DATA) => (
@@ -271,13 +281,47 @@ export default function MarketTab() {
         </View>
 
         <View style={styles.bannerSection}>
-          <Image
-            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/spark.png' }}
-            style={styles.bannerImage}
-            resizeMode="cover"
-          />
+          <TouchableOpacity onPress={handleBannerPress} activeOpacity={0.8}>
+            <Image
+              source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/spark.png' }}
+              style={styles.bannerImage}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showComingSoonModal}
+        transparent
+        animationType="fade"
+        onRequestClose={closeModal}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={closeModal}
+        >
+          <TouchableOpacity
+            style={styles.modalContent}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={styles.modalTitle}>🌟 Coming Soon!</Text>
+            <Text style={styles.modalMessage}>
+              We're preparing the UGC Creator Program.{'\n'}
+              Can't wait to welcome you onboard soon.
+            </Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={closeModal}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalButtonText}>Got it</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -357,5 +401,52 @@ const styles = StyleSheet.create({
     height: 108,
     borderRadius: 16,
     overflow: 'hidden',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    width: '80%',
+    maxWidth: 340,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: 'Nunito_700Bold',
+    color: '#000000',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    fontFamily: 'Nunito_400Regular',
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  modalButton: {
+    backgroundColor: '#000000',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 24,
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Nunito_600SemiBold',
   },
 });
