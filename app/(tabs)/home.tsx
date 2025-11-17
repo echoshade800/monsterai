@@ -1249,12 +1249,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    position: 'relative',
   },
   dateControlCenter: {
-    flex: 1,
+    position: 'absolute',
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    pointerEvents: 'box-none',
   },
   dateArrow: {
     padding: 8,
