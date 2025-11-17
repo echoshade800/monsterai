@@ -51,9 +51,9 @@ export function MonsterCard({
     >
       <View style={styles.header}>
         <Text style={styles.name}>{name}</Text>
-      </View>
-      <View style={styles.topPickBadge}>
-        <Text style={styles.topPickText}>Top Pick</Text>
+        <View style={styles.topPickBadge}>
+          <Text style={styles.topPickText}>Top Pick</Text>
+        </View>
       </View>
 
       <View style={styles.imageContainer}>
@@ -115,14 +115,11 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   topPickBadge: {
-    position: 'absolute',
-    top: 16,
-    right: 18,
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
-    zIndex: 1,
+    marginRight: -6,
   },
   topPickText: {
     fontSize: 11,
@@ -135,6 +132,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
+    marginRight: -10,
   },
   name: {
     fontSize: 22,
