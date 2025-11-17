@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -49,9 +49,11 @@ export function CameraBox() {
         </View>
       ) : (
         <View style={styles.placeholderContainer}>
-          <View style={styles.cameraPlaceholder}>
-            <Text style={styles.cameraEmoji}>📸💥</Text>
-          </View>
+          <Image
+            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/cameraneed.png' }}
+            style={styles.cameraPlaceholder}
+            resizeMode="cover"
+          />
           <View style={styles.cameraIconButton}>
             <View style={styles.cameraIconInner}>
               <Camera size={14} color="#FFFFFF" strokeWidth={2} />
@@ -89,14 +91,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   cameraPlaceholder: {
-    flex: 1,
-    backgroundColor: '#8B7355',
+    width: '100%',
+    height: '100%',
     borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cameraEmoji: {
-    fontSize: 32,
   },
   cameraIconButton: {
     position: 'absolute',
