@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, Dimensions, Platform } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -111,7 +110,7 @@ export default function AvatarCropModal({ visible, imageUri, onCancel, onConfirm
       animationType="slide"
       onRequestClose={handleCancel}
     >
-      <View style={styles.container}>
+      <GestureHandlerRootView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
             <Text style={styles.cancelText}>Cancel</Text>
@@ -135,7 +134,7 @@ export default function AvatarCropModal({ visible, imageUri, onCancel, onConfirm
             </Animated.View>
           </GestureDetector>
 
-          <View style={styles.overlay}>
+          <View style={styles.overlay} pointerEvents="none">
             <View style={styles.overlayTop} />
             <View style={styles.overlayRow}>
               <View style={styles.overlaySide} />
@@ -151,7 +150,7 @@ export default function AvatarCropModal({ visible, imageUri, onCancel, onConfirm
         <View style={styles.instructions}>
           <Text style={styles.instructionText}>Pinch to zoom, drag to move</Text>
         </View>
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
