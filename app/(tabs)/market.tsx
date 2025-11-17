@@ -8,7 +8,7 @@ const MONSTERS_DATA = [
   {
     id: 'energy',
     name: 'Energy',
-    category: "Editor's Pick",
+    category: 'Health',
     description: 'Stay strong and stress-free.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
     backgroundColor: '#F5E6D3',
@@ -18,7 +18,7 @@ const MONSTERS_DATA = [
   {
     id: 'face',
     name: 'Face',
-    category: "Editor's Pick",
+    category: 'Beauty',
     description: 'I make your skin glow with data.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
     backgroundColor: '#E8F5E9',
@@ -28,7 +28,7 @@ const MONSTERS_DATA = [
   {
     id: 'posture',
     name: 'Posture',
-    category: "Editor's Pick",
+    category: 'Body',
     description: 'I fix your posture, so you feel great all day.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
     backgroundColor: '#FFE4E1',
@@ -38,7 +38,7 @@ const MONSTERS_DATA = [
   {
     id: 'sleep',
     name: 'Sleep',
-    category: "Editor's Pick",
+    category: 'Restful',
     description: 'I guide you to better sleep, naturally.',
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
     backgroundColor: '#E3F2FD',
@@ -48,7 +48,7 @@ const MONSTERS_DATA = [
   {
     id: 'stress',
     name: 'Stress',
-    category: "Editor's Pick",
+    category: 'Physical',
     description: "I'm your cozy friend for calm days and happy minds.",
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
     backgroundColor: '#FFE0B2',
@@ -58,7 +58,7 @@ const MONSTERS_DATA = [
   {
     id: 'feces',
     name: 'Poop',
-    category: "Editor's Pick",
+    category: 'Available',
     description: "I'm your cute buddy for happy, healthy poops!",
     imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
     backgroundColor: '#F5E6D3',
