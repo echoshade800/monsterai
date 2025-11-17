@@ -350,10 +350,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 20,
     paddingBottom: 20,
+    alignItems: 'center',
   },
   bannerImage: {
-    width: '100%',
-    height: 180,
+    width: 369,
+    height: 108,
     borderRadius: 16,
     overflow: 'hidden',
   },
