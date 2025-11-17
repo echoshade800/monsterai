@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, Platform, StatusBar, Image, TouchableOpacity, Modal } from 'react-native';
-import { MonsterCard } from '../../components/MonsterCard';
-import { GameCard } from '../../components/GameCard';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Image, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { GameCard } from '../../components/GameCard';
+import { MonsterCard } from '../../components/MonsterCard';
 
 const MONSTERS_DATA = [
   {
@@ -175,11 +175,13 @@ export default function MarketTab() {
   const handlePlayPress = (gameId: string) => {
     const game = GAMES_DATA.find(g => g.id === gameId);
     console.log('Playing game:', gameId, 'URL:', game?.imageUrl);
+    setShowComingSoonModal(true);
   };
 
   const handleMiniAppPress = (appId: string) => {
     const app = MINIAPPS_DATA.find(a => a.id === appId);
     console.log('Opening mini app:', appId, 'URL:', app?.imageUrl);
+    setShowComingSoonModal(true);
   };
 
   const handleBannerPress = () => {
@@ -309,7 +311,7 @@ export default function MarketTab() {
           >
             <Text style={styles.modalTitle}>🌟 Coming Soon!</Text>
             <Text style={styles.modalMessage}>
-              We're preparing the UGC Creator Program.{'\n'}
+              We're preparing the MiniApp Program.{'\n'}
               Can't wait to welcome you onboard soon.
             </Text>
             <TouchableOpacity
