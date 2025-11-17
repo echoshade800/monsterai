@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 6,
-    top: -13,
+    top: 5,
   },
   iconContainer: {
     width: 52,
