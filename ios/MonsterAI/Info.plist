@@ -88,6 +88,8 @@
 	</dict>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>MonsterAI 需要访问您的日历数据，用于为您创建和管理日程安排，帮助您更好地规划时间。</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>MonsterAI 需要访问您的日历数据，用于为您创建和管理日程安排，帮助您更好地规划时间。</string>
 	<key>NSCameraUsageDescription</key>
 	<string>MonsterAI 需要访问相机，用于拍摄照片和视频，为您提供更丰富的交互体验。</string>
 	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
