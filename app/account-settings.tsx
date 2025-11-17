@@ -1,22 +1,18 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Alert, Modal, TextInput, FlatList } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function AccountSettingsScreen() {
   const router = useRouter();
 
-  const [name, setName] = useState('USER6VPTIXFW8');
-  const [birthday, setBirthday] = useState('2003/10/17');
-  const [sex, setSex] = useState('Female');
-  const [height, setHeight] = useState('171 cm');
+  const [name, setName] = useState('');
+  const [sex, setSex] = useState('');
+  const [height, setHeight] = useState('');
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
-  const [tempYear, setTempYear] = useState('2003');
-  const [tempMonth, setTempMonth] = useState('10');
-  const [tempDay, setTempDay] = useState('17');
-  const [tempHeight, setTempHeight] = useState('171');
+  const [tempHeight, setTempHeight] = useState('');
 
   const handleBack = () => {
     router.back();
@@ -25,14 +21,6 @@ export default function AccountSettingsScreen() {
   const handleEditName = () => {
     setTempValue(name);
     setEditingField('name');
-  };
-
-  const handleEditBirthday = () => {
-    const parts = birthday.split('/');
-    setTempYear(parts[0]);
-    setTempMonth(parts[1]);
-    setTempDay(parts[2]);
-    setEditingField('birthday');
   };
 
   const handleEditSex = () => {
@@ -47,8 +35,6 @@ export default function AccountSettingsScreen() {
   const handleSave = () => {
     if (editingField === 'name') {
       setName(tempValue);
-    } else if (editingField === 'birthday') {
-      setBirthday(`${tempYear}/${tempMonth}/${tempDay}`);
     } else if (editingField === 'sex') {
       setSex(tempValue);
     } else if (editingField === 'height') {
