@@ -20,6 +20,7 @@ import { CameraBox } from './CameraBox';
 interface HeaderProps {
   isCollapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
+  refreshTrigger?: number; // 当这个值变化时，触发刷新 AgentLogs
 }
 
 const EXPANDED_HEIGHT = 600;
@@ -68,7 +69,7 @@ const formatTime = (timeInput: any): string => {
   return String(timeInput);
 };
 
-export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
+export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
@@ -144,6 +145,13 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   useEffect(() => {
     fetchAgentLogs();
   }, [fetchAgentLogs]);
+
+  // 当 refreshTrigger 变化时，重新获取 AgentLogs
+  useEffect(() => {
+    if (refreshTrigger !== undefined) {
+      fetchAgentLogs();
+    }
+  }, [refreshTrigger, fetchAgentLogs]);
 
   // Update scroll animation when log entries change
   useEffect(() => {

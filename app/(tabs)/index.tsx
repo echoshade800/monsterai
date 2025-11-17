@@ -1,5 +1,5 @@
 
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import EventSource from 'react-native-sse';
@@ -32,6 +32,7 @@ export default function EchoTab() {
   const [currentResponse, setCurrentResponse] = useState('');
   const [userData, setUserData] = useState<any>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const apiConfig = getApiConfig();
 
   // 将 API 返回的数据转换为 Message 格式
@@ -519,6 +520,14 @@ export default function EchoTab() {
     historyInitializedRef.current = true;
     fetchConversationHistory();
   }, [fetchConversationHistory, params.photoUri]);
+
+  // 每次页面聚焦时，触发刷新 AgentLogs
+  useFocusEffect(
+    useCallback(() => {
+      console.log('页面聚焦，触发刷新 AgentLogs');
+      setRefreshTrigger(prev => prev + 1);
+    }, [])
+  );
   
   // 处理流式响应
   const handleStreamResponse = useCallback(async (userMessage: string, photoUri?: string, imageDetectionType?: string) => {
@@ -813,6 +822,18 @@ export default function EchoTab() {
             isCollapsed={isCollapsed}
             onCollapse={handleCollapse}
           />
+      <Header
+        isCollapsed={isCollapsed}
+        onCollapse={handleCollapse}
+        refreshTrigger={refreshTrigger}
+      />
+
+      <ConversationSection 
+        messages={messages} 
+        isLoading={isLoading}
+        isSending={isSending}
+        currentResponse={currentResponse}
+      />
 
           <ConversationSection
             messages={messages}
