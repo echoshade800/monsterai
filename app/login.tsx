@@ -98,13 +98,11 @@ export default function LoginScreen() {
         
         if (statusResult.success && statusResult.data) {
           // 检查响应中是否有 invite_code 字段
+          // invite_code 是一个对象 {code: "...", ctime: "..."}
           const inviteCode = statusResult.data.invite_code;
-          
-          // invite_code 可能是一个对象 {code: "...", ctime: "..."} 或者直接是字符串
-          const hasInviteCode = inviteCode && (
-            (typeof inviteCode === 'object' && inviteCode.code) || 
-            (typeof inviteCode === 'string' && inviteCode.length > 0)
-          );
+          const hasInviteCode = inviteCode && 
+                                typeof inviteCode === 'object' && 
+                                inviteCode.code;
           
           if (hasInviteCode) {
             // 如果有邀请码，直接进入聊天页面
