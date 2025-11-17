@@ -290,8 +290,8 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const sharedCameraStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
-      right: 42,
-      bottom: 18,
+      right: 12,
+      bottom: 30,
       width: 120,
       height: 94,
       zIndex: 1000,
