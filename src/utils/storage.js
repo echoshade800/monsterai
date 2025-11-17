@@ -333,6 +333,52 @@ class StorageManager {
       return false;
     }
   }
+
+  /**
+   * 通用存储方法
+   * @param {string} key - 存储键
+   * @param {string} value - 存储值
+   * @returns {Promise<boolean>} 存储是否成功
+   */
+  async setItem(key, value) {
+    try {
+      await AsyncStorage.setItem(key, value);
+      return true;
+    } catch (error) {
+      console.error(`存储 ${key} 失败:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * 通用获取方法
+   * @param {string} key - 存储键
+   * @returns {Promise<string|null>} 存储值或null
+   */
+  async getItem(key) {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      return value;
+    } catch (error) {
+      console.error(`获取 ${key} 失败:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * 通用删除方法
+   * @param {string} key - 存储键
+   * @returns {Promise<boolean>} 删除是否成功
+   */
+  async removeItem(key) {
+    try {
+      await AsyncStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      console.error(`删除 ${key} 失败:`, error);
+      return false;
+    }
+  }
 }
 
 // 创建单例实例
