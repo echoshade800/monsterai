@@ -253,11 +253,6 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     marginBottom: 28,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 12,
   },
   appName: {
     fontSize: 38,
