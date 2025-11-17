@@ -1005,17 +1005,14 @@ export default function HomeTab() {
           <View style={styles.timelineContainer}>
             {sampleTimelineData.map((item, index) => (
               <View key={index} style={styles.timelineEntry}>
-                <View style={styles.timelineLeft}>
-                  <Clock size={16} color="#666" />
-                  <Text style={styles.timelineTime}>{item.time}</Text>
-                </View>
                 <View style={styles.timelineDivider}>
                   <View style={styles.timelineDot} />
                   {index < sampleTimelineData.length - 1 && (
                     <View style={styles.timelineLine} />
                   )}
                 </View>
-                <View style={styles.timelineRight}>
+                <View style={styles.timelineContent}>
+                  <Text style={styles.timelineTime}>{item.time}</Text>
                   {item.type === 'reminder' && (
                     <View style={styles.timelineReminderContent}>
                       <View style={styles.timelineReminderLeft}>
@@ -1270,22 +1267,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 8,
   },
-  timelineLeft: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    width: 100,
-    paddingTop: 2,
-  },
-  timelineTime: {
-    fontSize: 14,
-    fontFamily: 'Nunito_500Medium',
-    color: '#000',
-    marginLeft: 6,
-  },
   timelineDivider: {
     width: 20,
     alignItems: 'center',
-    marginHorizontal: 8,
+    marginRight: 12,
   },
   timelineDot: {
     width: 8,
@@ -1301,9 +1286,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minHeight: 40,
   },
-  timelineRight: {
+  timelineContent: {
     flex: 1,
     paddingBottom: 16,
+  },
+  timelineTime: {
+    fontSize: 14,
+    fontFamily: 'Nunito_500Medium',
+    color: '#000',
+    marginBottom: 8,
   },
   timelineCategory: {
     fontSize: 15,
