@@ -125,6 +125,37 @@ const GAMES_DATA = [
   },
 ];
 
+const MINIAPPS_DATA = [
+  {
+    id: 'leaflens',
+    name: 'leaflens',
+    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/miniapp1.jpeg',
+    isHot: false,
+    rating: 92,
+  },
+  {
+    id: 'accounting',
+    name: 'Accounting',
+    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/miniapp2.jpeg',
+    isHot: true,
+    rating: 95,
+  },
+  {
+    id: 'countdownday',
+    name: 'countdown day',
+    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/miniapp3.jpeg',
+    isHot: false,
+    rating: 88,
+  },
+  {
+    id: 'todo',
+    name: 'todo',
+    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/miniapp4.png',
+    isHot: true,
+    rating: 91,
+  },
+];
+
 export default function MarketTab() {
   const router = useRouter();
 
@@ -144,6 +175,11 @@ export default function MarketTab() {
     console.log('Playing game:', gameId, 'URL:', game?.imageUrl);
   };
 
+  const handleMiniAppPress = (appId: string) => {
+    const app = MINIAPPS_DATA.find(a => a.id === appId);
+    console.log('Opening mini app:', appId, 'URL:', app?.imageUrl);
+  };
+
   const renderGameRow = (games: typeof GAMES_DATA) => (
     <ScrollView
       horizontal
@@ -160,6 +196,27 @@ export default function MarketTab() {
           isHot={game.isHot}
           rating={game.rating}
           onPlayPress={handlePlayPress}
+        />
+      ))}
+    </ScrollView>
+  );
+
+  const renderMiniAppRow = (apps: typeof MINIAPPS_DATA) => (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.gamesRow}
+      contentContainerStyle={styles.gamesRowContent}
+    >
+      {apps.map((app) => (
+        <GameCard
+          key={app.id}
+          id={app.id}
+          name={app.name}
+          imageUrl={app.imageUrl}
+          isHot={app.isHot}
+          rating={app.rating}
+          onPlayPress={handleMiniAppPress}
         />
       ))}
     </ScrollView>
@@ -206,6 +263,11 @@ export default function MarketTab() {
         <View style={styles.gamesSection}>
           <Text style={styles.gamesSectionTitle}>Game Store</Text>
           {renderGameRow(GAMES_DATA)}
+        </View>
+
+        <View style={styles.gamesSection}>
+          <Text style={styles.gamesSectionTitle}>Mini APPs</Text>
+          {renderMiniAppRow(MINIAPPS_DATA)}
         </View>
       </ScrollView>
     </View>
