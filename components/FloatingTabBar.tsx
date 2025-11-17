@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#666666',
     opacity: 0.8,
-    marginTop: 2,
+    marginTop: -1,
   },
   labelFocused: {
     fontWeight: '700',
