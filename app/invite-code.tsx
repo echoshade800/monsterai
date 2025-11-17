@@ -62,15 +62,15 @@ export default function InviteCodeScreen() {
     router.push('/under-construction');
   };
 
-  const handleSkip = () => {
-    router.replace('/login');
-  };
+  // const handleSkip = () => {
+  //   router.replace('/login');
+  // };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+      {/* <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
         <Text style={styles.skipButtonText}>Skip</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <Image
         source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}

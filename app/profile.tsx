@@ -13,22 +13,74 @@ import storageManager from '../src/utils/storage';
 export default function ProfileScreen() {
   const router = useRouter();
 
-  const [name, setName] = useState('USER6VPTIXFW8');
-  const [birthday, setBirthday] = useState('2003/10/17');
-  const [sex, setSex] = useState('female');
-  const [height, setHeight] = useState('171 cm');
+  const [name, setName] = useState('');
+  const [sex, setSex] = useState('');
+  const [height, setHeight] = useState('');
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
-  const [tempHeight, setTempHeight] = useState('171');
+  const [tempHeight, setTempHeight] = useState('');
 
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
 
   useEffect(() => {
     loadAvatar();
+    loadUserInfo();
   }, []);
+
+  const loadUserInfo = async () => {
+    try {
+      const result: any = await userService.getUserInfo();
+      if (result?.success && result?.data) {
+        const userData = result.data;
+        
+        // 填充用户名，如果没有则设置为 "Unknown"
+        if (userData.userName) {
+          setName(userData.userName);
+        } else {
+          setName('Unknown');
+        }
+        
+        // 填充性别，如果没有则设置为 "Unknown"
+        if (userData.gender) {
+          setSex(userData.gender);
+        } else {
+          setSex('Unknown');
+        }
+        
+        // 填充身高（格式化为 "xxx cm"），如果没有则设置为 "Unknown"
+        // 如果已经是 "xxx cm" 格式，直接使用；如果是数字，添加 " cm"
+        if (userData.height) {
+          const heightStr = String(userData.height);
+          if (heightStr.includes('cm')) {
+            setHeight(heightStr);
+          } else {
+            setHeight(`${heightStr} cm`);
+          }
+        } else {
+          setHeight('Unknown');
+        }
+        
+        // 填充头像（如果有）
+        if (userData.avatar) {
+          setAvatarUri(userData.avatar);
+        }
+      } else {
+        // 如果获取失败，也设置为 Unknown
+        setName('Unknown');
+        setSex('Unknown');
+        setHeight('Unknown');
+      }
+    } catch (error) {
+      console.error('加载用户信息失败:', error);
+      // 如果出错，设置为 Unknown
+      setName('Unknown');
+      setSex('Unknown');
+      setHeight('Unknown');
+    }
+  };
 
   const loadAvatar = async () => {
     try {
@@ -55,22 +107,43 @@ export default function ProfileScreen() {
   };
 
   const handleEditName = () => {
-    setTempValue(name);
+    // 如果 name 是 "Unknown"，则 tempValue 设置为空字符串
+    if (name === 'Unknown') {
+      setTempValue('');
+    } else {
+      setTempValue(name);
+    }
     setEditingField('name');
   };
 
   const handleEditSex = () => {
-    setTempValue(sex);
+    // 如果 sex 是 "Unknown"，则 tempValue 设置为空字符串
+    if (sex === 'Unknown') {
+      setTempValue('');
+    } else {
+      setTempValue(sex);
+    }
     setEditingField('sex');
   };
 
   const handleEditHeight = () => {
-    setTempHeight(height.replace(' cm', ''));
+    // 如果 height 是 "Unknown"，则 tempHeight 设置为空字符串
+    if (height === 'Unknown' || height === 'Unknown cm') {
+      setTempHeight('');
+    } else {
+      setTempHeight(height.replace(' cm', ''));
+    }
     setEditingField('height');
   };
 
   const handleSave = async () => {
     if (editingField === 'name') {
+      // 如果值是 "Unknown"，不发送到服务器
+      if (tempValue === 'Unknown' || tempValue.trim() === '') {
+        Alert.alert('提示', '请输入有效的姓名');
+        return;
+      }
+      
       try {
         // 先获取用户信息，确保保留其他字段
         const userInfoResult: any = await userService.getUserInfo();
@@ -102,6 +175,12 @@ export default function ProfileScreen() {
         Alert.alert('错误', '保存姓名时发生错误，请稍后重试');
       }
     } else if (editingField === 'sex') {
+      // 如果值是 "Unknown"，不发送到服务器
+      if (tempValue === 'Unknown' || tempValue.trim() === '') {
+        Alert.alert('提示', '请选择性别');
+        return;
+      }
+      
       try {
         // 先获取用户信息，确保保留其他字段
         const userInfoResult: any = await userService.getUserInfo();
@@ -133,6 +212,12 @@ export default function ProfileScreen() {
         Alert.alert('错误', '保存性别时发生错误，请稍后重试');
       }
     } else if (editingField === 'height') {
+      // 如果值是 "Unknown" 或为空，不发送到服务器
+      if (tempHeight === 'Unknown' || tempHeight.trim() === '') {
+        Alert.alert('提示', '请选择身高');
+        return;
+      }
+      
       try {
         // 先获取用户信息，确保保留其他字段
         const userInfoResult: any = await userService.getUserInfo();
@@ -346,7 +431,9 @@ export default function ProfileScreen() {
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
                 <Text style={styles.menuItemLabel}>Sex</Text>
-                <Text style={styles.menuItemValue}>{sex.charAt(0).toUpperCase() + sex.slice(1)}</Text>
+                <Text style={styles.menuItemValue}>
+                  {sex ? sex.charAt(0).toUpperCase() + sex.slice(1) : ''}
+                </Text>
               </View>
               <TouchableOpacity style={styles.editButton} onPress={handleEditSex}>
                 <Text style={styles.editButtonText}>Edit</Text>
