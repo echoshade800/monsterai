@@ -104,8 +104,7 @@ export const API_ENDPOINTS = {
   
   // 用户相关
   USER: {
-    INFO: '/user/get/user/info',
-    UPDATE_INFO: '/user/info',
+    INFO: '/user-info/info',
     UPDATE_USER_INFO: '/user-info/info',
     CHANGE_PASSWORD: '/user/password',
     DELETE_ACCOUNT: '/user-info/account',

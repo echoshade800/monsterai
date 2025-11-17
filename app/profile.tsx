@@ -1,14 +1,14 @@
 import { BlurView } from 'expo-blur';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { Alert, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { useState, useEffect } from 'react';
-import * as ImagePicker from 'expo-image-picker';
+import { useEffect, useState } from 'react';
+import { Alert, Image, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import AvatarCropModal from '../components/AvatarCropModal';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
-import AvatarCropModal from '../components/AvatarCropModal';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -79,17 +79,48 @@ export default function ProfileScreen() {
     setEditingField('height');
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingField === 'name') {
-      setName(tempValue);
+      try {
+        // 先获取用户信息，确保保留其他字段
+        const userInfoResult: any = await userService.getUserInfo();
+        
+        // 准备更新数据，如果需要可以合并现有数据
+        let updateData: any = {
+          userName: tempValue,
+        };
+        
+        // 如果成功获取到用户信息，可以合并其他字段（如果需要）
+        if (userInfoResult?.success && userInfoResult?.data) {
+          const currentUserData = userInfoResult.data;
+          // 如果需要保留其他字段，可以在这里合并
+          // 目前只更新 userName，所以直接使用上面的 updateData
+        }
+        
+        // 更新用户信息
+        const updateResult: any = await userService.updateUserInfo(updateData);
+        
+        if (updateResult?.success) {
+          setName(tempValue);
+          Alert.alert('成功', '姓名已更新');
+          setEditingField(null);
+        } else {
+          Alert.alert('错误', updateResult?.message || '更新姓名失败');
+        }
+      } catch (error) {
+        console.error('保存姓名时出错:', error);
+        Alert.alert('错误', '保存姓名时发生错误，请稍后重试');
+      }
     } else if (editingField === 'birthday') {
       setBirthday(`${tempYear}/${tempMonth}/${tempDay}`);
+      setEditingField(null);
     } else if (editingField === 'sex') {
       setSex(tempValue);
+      setEditingField(null);
     } else if (editingField === 'height') {
       setHeight(`${tempHeight} cm`);
+      setEditingField(null);
     }
-    setEditingField(null);
   };
 
   const handleCancel = () => {

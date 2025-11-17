@@ -215,10 +215,13 @@ const request = async (url, options = {}) => {
     console.log('responseData', responseData);
     
     // 检查业务状态码
-    // 支持两种格式：
+    // 支持多种格式：
     // 1. {code: "A0000", msg: "...", data: ...}
-    // 2. {msg: "succ", data: ...} - 如果 msg 是 "succ" 也认为是成功
+    // 2. {code: 0, msg: "...", data: ...} - code 为 0 也表示成功
+    // 3. {msg: "succ", data: ...} - 如果 msg 是 "succ" 也认为是成功
+    // 4. {msg: "success", data: ...} - 如果 msg 是 "success" 也认为是成功
     const isSuccess = responseData.code === API_STATUS.SUCCESS || 
+                      responseData.code === 0 ||
                       responseData.msg === 'succ' || 
                       responseData.msg === 'success';
     

@@ -113,7 +113,7 @@ class UserService {
    */
   async getUserInfo() {
     try {
-      const response = await api.post(API_ENDPOINTS.USER.INFO, { requireAuth: true });
+      const response = await api.get(API_ENDPOINTS.USER.INFO, { requireAuth: true });
       
       const userData = new UserData(response.data);
       
@@ -138,7 +138,7 @@ class UserService {
    */
   async updateUserInfo(userInfo) {
     try {
-      const response = await api.put(API_ENDPOINTS.USER.UPDATE_INFO, userInfo, { requireAuth: true });
+      const response = await api.post(API_ENDPOINTS.USER.UPDATE_USER_INFO, userInfo, { requireAuth: true });
       
       const userData = new UserData(response.data);
       
