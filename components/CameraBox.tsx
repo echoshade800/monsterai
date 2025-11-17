@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   previewContainer: {
     flex: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#8B7355',
   },
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   cameraPlaceholder: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 12,
   },
   cameraIconButton: {
     position: 'absolute',

@@ -1108,7 +1108,7 @@ const styles = StyleSheet.create({
   },
   thinkingBanner: {
     backgroundColor: '#1E1E1E',
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 20,
     height: 200,
     overflow: 'hidden',
