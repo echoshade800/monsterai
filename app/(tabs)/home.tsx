@@ -1131,9 +1131,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   permissionsHeaderTitle: {
-    fontSize: 16,
-    fontFamily: 'Nunito_600SemiBold',
-    color: '#000000',
+    fontSize: 20,
+    fontFamily: 'Nunito_700Bold',
+    color: '#000',
     marginBottom: 4,
     lineHeight: 22,
   },
