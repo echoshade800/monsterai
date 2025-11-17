@@ -1,7 +1,7 @@
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Keyboard, StyleSheet, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, TouchableOpacity, View } from 'react-native';
 import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
@@ -653,7 +653,11 @@ export default function EchoTab() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity
+      style={styles.container}
+      activeOpacity={1}
+      onPress={() => Keyboard.dismiss()}
+    >
       <Header
         isCollapsed={isCollapsed}
         onCollapse={handleCollapse}
@@ -674,7 +678,7 @@ export default function EchoTab() {
         isSending={isSending}
         disabled={!userData}
       />
-    </View>
+    </TouchableOpacity>
   );
 }
 
