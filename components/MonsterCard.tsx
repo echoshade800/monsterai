@@ -110,9 +110,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 4,
+    elevation: 6,
   },
   header: {
     flexDirection: 'row',
