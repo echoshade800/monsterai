@@ -1293,6 +1293,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     backgroundColor: '#F0F0F0',
+    marginTop: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1314,10 +1315,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   timelineTime: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: 'Nunito_700Bold',
     color: '#000',
-    lineHeight: 20,
   },
   timelineCategory: {
     fontSize: 15,
