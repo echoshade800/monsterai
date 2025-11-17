@@ -1093,25 +1093,25 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingTop: 60,
+    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 20,
     paddingBottom: 100,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000',
-    lineHeight: 38,
+    fontSize: 28,
+    fontFamily: 'Nunito_700Bold',
+    color: '#000000',
+    lineHeight: 34,
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
+    fontFamily: 'Nunito_700Bold',
+    color: '#000000',
     marginBottom: 12,
   },
   thinkingBanner: {
@@ -1164,13 +1164,14 @@ const styles = StyleSheet.create({
   },
   permissionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
+    fontFamily: 'Nunito_600SemiBold',
+    color: '#000000',
     marginBottom: 2,
   },
   permissionSubtitle: {
     fontSize: 13,
-    color: '#999',
+    fontFamily: 'Nunito_400Regular',
+    color: '#999999',
   },
   dateControl: {
     flexDirection: 'row',
