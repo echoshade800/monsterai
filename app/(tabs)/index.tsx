@@ -818,23 +818,11 @@ export default function EchoTab() {
     <View style={styles.container}>
       <TouchableWithoutFeedback onPress={dismissKeyboard}>
         <View style={styles.contentWrapper}>
-          <Header
-            isCollapsed={isCollapsed}
-            onCollapse={handleCollapse}
-          />
-      <Header
-        isCollapsed={isCollapsed}
-        onCollapse={handleCollapse}
-        refreshTrigger={refreshTrigger}
-      />
-
-      <ConversationSection 
-        messages={messages} 
-        isLoading={isLoading}
-        isSending={isSending}
-        currentResponse={currentResponse}
-      />
-
+        <Header
+          isCollapsed={isCollapsed}
+          onCollapse={handleCollapse}
+          refreshTrigger={refreshTrigger}
+        />
           <ConversationSection
             messages={messages}
             isLoading={isLoading}

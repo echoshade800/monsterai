@@ -355,18 +355,8 @@ export default function HomeTab() {
     // 如果只有一条消息且没有时间（默认消息），不进行滚动
     const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
 
-    if (totalHeight > 0 && !isDefaultMessage) {
-      Animated.loop(
-        Animated.timing(scrollY, {
-          toValue: -totalHeight,
-          duration: 15000,
-          useNativeDriver: true,
-        })
-      ).start();
-    } else {
-      scrollY.setValue(0);
-    }
-  }, [logEntries, scrollY]);
+    
+  }, [logEntries]);
 
   const formatLogText = (entry: LogEntry) => {
     const parts: Array<{ text: string; color: string }> = [];
@@ -1055,12 +1045,8 @@ export default function HomeTab() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>How I Think</Text>
           <View style={styles.thinkingBanner}>
-            <ScrollView
-              style={styles.thinkingScrollContainer}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
-            >
-              {thinkingLogs.map((log, index) => (
+            
+              {/* {thinkingLogs.map((log, index) => (
                 <View key={index} style={styles.thinkingLogLine}>
                   {formatLogText(log).map((part, partIndex) => (
                     <Text
@@ -1071,15 +1057,15 @@ export default function HomeTab() {
                     </Text>
                   ))}
                 </View>
-              ))}
-            </ScrollView>
-            <View style={styles.thinkingScrollContainer}>
-              <Animated.View
-                style={[
-                  styles.thinkingScrollContent,
-                  { transform: [{ translateY: scrollY }] },
-                ]}
-              >
+              ))} */}
+            
+            <ScrollView
+              style={styles.thinkingScrollContainer}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
+            >
+              <View style={styles.thinkingScrollContainer}>
+              
                 {(() => {
                   // 如果只有默认消息，不重复显示
                   const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
@@ -1097,8 +1083,9 @@ export default function HomeTab() {
                     </View>
                   ));
                 })()}
-              </Animated.View>
             </View>
+            </ScrollView>
+            
           </View>
         </View>
 
