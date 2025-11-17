@@ -26,14 +26,7 @@ const EXPANDED_HEIGHT = 600;
 const COLLAPSED_HEIGHT = 332;
 const COLLAPSE_THRESHOLD = 100;
 
-// Default fallback entries
-const DEFAULT_LOG_ENTRIES = [
-  { time: '07:42', message: "User's facial energy dropped 12% vs baseline." },
-  { time: '07:45', message: 'Tag: Low energy morning, possible poor sleep.' },
-  { time: '08:02', message: 'Suggest: Protein breakfast + 5-min stretch.' },
-  { time: '08:15', message: 'Mood signal improving by 6%.' },
-  { time: '08:40', message: 'Saved to Life Log → Breakfast check-in.' },
-];
+const DEFAULT_MESSAGE = "I'll start giving insights once we talk a bit more.";
 
 interface LogEntry {
   time: string;
@@ -77,7 +70,7 @@ const formatTime = (timeInput: any): string => {
 
 export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
-  const [logEntries, setLogEntries] = useState<LogEntry[]>(DEFAULT_LOG_ENTRIES);
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
   const scrollY = useSharedValue(0);
@@ -130,11 +123,18 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
 
         if (entries.length > 0) {
           setLogEntries(entries);
+        } else {
+          // 如果没有获取到数据，显示默认文案
+          setLogEntries([{ time: '', message: DEFAULT_MESSAGE }]);
         }
+      } else {
+        // 如果响应不成功，显示默认文案
+        setLogEntries([{ time: '', message: DEFAULT_MESSAGE }]);
       }
     } catch (error) {
       console.error('Failed to fetch agent logs:', error);
-      // Keep default entries on error
+      // 获取失败时，显示默认文案
+      setLogEntries([{ time: '', message: DEFAULT_MESSAGE }]);
     } finally {
       setIsLoadingLogs(false);
     }
@@ -149,8 +149,11 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   useEffect(() => {
     const lineHeight = 23;
     const totalHeight = logEntries.length * lineHeight;
+    
+    // 如果只有一条消息且没有时间（默认消息），不进行滚动
+    const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
 
-    if (totalHeight > 0) {
+    if (totalHeight > 0 && !isDefaultMessage) {
       scrollY.value = withRepeat(
         withTiming(totalHeight, {
           duration: 15000,
@@ -158,6 +161,8 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
         -1,
         false
       );
+    } else {
+      scrollY.value = 0;
     }
   }, [logEntries]);
 
@@ -403,12 +408,17 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
-                        {[...logEntries, ...logEntries].map((entry, index) => (
-                          <Text key={index} style={styles.logLine}>
-                            <Text style={styles.logTime}>[{entry.time}]</Text>
-                            <Text style={styles.logText}> {entry.message}</Text>
-                          </Text>
-                        ))}
+                        {(() => {
+                          // 如果只有默认消息，不重复显示
+                          const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
+                          const entriesToRender = isDefaultMessage ? logEntries : [...logEntries, ...logEntries];
+                          return entriesToRender.map((entry, index) => (
+                            <Text key={index} style={styles.logLine}>
+                              {entry.time ? <Text style={styles.logTime}>[{entry.time}]</Text> : null}
+                              <Text style={styles.logText}>{entry.time ? ' ' : ''}{entry.message}</Text>
+                            </Text>
+                          ));
+                        })()}
                       </Animated.View>
                     </View>
                   </TouchableOpacity>
@@ -444,12 +454,17 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
-                        {[...logEntries, ...logEntries].map((entry, index) => (
-                          <Text key={index} style={styles.logLine}>
-                            <Text style={styles.logTime}>[{entry.time}]</Text>
-                            <Text style={styles.logText}> {entry.message}</Text>
-                          </Text>
-                        ))}
+                        {(() => {
+                          // 如果只有默认消息，不重复显示
+                          const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
+                          const entriesToRender = isDefaultMessage ? logEntries : [...logEntries, ...logEntries];
+                          return entriesToRender.map((entry, index) => (
+                            <Text key={index} style={styles.logLine}>
+                              {entry.time ? <Text style={styles.logTime}>[{entry.time}]</Text> : null}
+                              <Text style={styles.logText}>{entry.time ? ' ' : ''}{entry.message}</Text>
+                            </Text>
+                          ));
+                        })()}
                       </Animated.View>
                     </View>
                   </TouchableOpacity>
