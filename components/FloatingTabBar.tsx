@@ -174,9 +174,9 @@ const styles = StyleSheet.create({
   },
   iconBackground: {
     position: 'absolute',
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#666666',
     opacity: 0.8,
-    marginTop: -5,
+    marginTop: -7,
   },
   labelFocused: {
     fontWeight: '700',
