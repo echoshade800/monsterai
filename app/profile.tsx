@@ -1,12 +1,14 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { Alert, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useState } from 'react';
+import { Alert, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
+import { useState, useEffect } from 'react';
+import * as ImagePicker from 'expo-image-picker';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
+import AvatarCropModal from '../components/AvatarCropModal';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -15,6 +17,7 @@ export default function ProfileScreen() {
   const [birthday, setBirthday] = useState('2003/10/17');
   const [sex, setSex] = useState('Female');
   const [height, setHeight] = useState('171 cm');
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
@@ -22,6 +25,33 @@ export default function ProfileScreen() {
   const [tempMonth, setTempMonth] = useState('10');
   const [tempDay, setTempDay] = useState('17');
   const [tempHeight, setTempHeight] = useState('171');
+
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+
+  useEffect(() => {
+    loadAvatar();
+  }, []);
+
+  const loadAvatar = async () => {
+    try {
+      const savedAvatar = await storageManager.getItem('userAvatar');
+      if (savedAvatar) {
+        setAvatarUri(savedAvatar);
+      }
+    } catch (error) {
+      console.error('Error loading avatar:', error);
+    }
+  };
+
+  const saveAvatar = async (uri: string) => {
+    try {
+      await storageManager.setItem('userAvatar', uri);
+      setAvatarUri(uri);
+    } catch (error) {
+      console.error('Error saving avatar:', error);
+    }
+  };
 
   const handleBack = () => {
     router.back();
@@ -64,6 +94,51 @@ export default function ProfileScreen() {
 
   const handleCancel = () => {
     setEditingField(null);
+  };
+
+  const handleAvatarPress = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert(
+        'Photos Access Needed',
+        'Photos access is needed to change your profile picture.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Go to Settings',
+            onPress: () => {
+              if (Platform.OS === 'ios') {
+                // iOS will show the system settings
+              }
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setSelectedImageUri(result.assets[0].uri);
+      setShowCropModal(true);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setSelectedImageUri(null);
+  };
+
+  const handleCropConfirm = async (croppedUri: string) => {
+    await saveAvatar(croppedUri);
+    setShowCropModal(false);
+    setSelectedImageUri(null);
   };
 
   const handleLogout = () => {
@@ -165,11 +240,15 @@ export default function ProfileScreen() {
       >
         <View style={styles.profileCard}>
           <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-          <View style={styles.avatarContainer}>
+          <TouchableOpacity onPress={handleAvatarPress} style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarEmoji}>🦑</Text>
+              {avatarUri ? (
+                <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarEmoji}>🦑</Text>
+              )}
             </View>
-          </View>
+          </TouchableOpacity>
           <Text style={styles.username}>{name}</Text>
         </View>
 
@@ -406,6 +485,15 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      {selectedImageUri && (
+        <AvatarCropModal
+          visible={showCropModal}
+          imageUri={selectedImageUri}
+          onCancel={handleCropCancel}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </View>
   );
 }
@@ -476,6 +564,11 @@ const styles = StyleSheet.create({
   },
   avatarEmoji: {
     fontSize: 40,
+  },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   username: {
     fontSize: 20,
