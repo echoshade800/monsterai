@@ -15,15 +15,12 @@ export default function ProfileScreen() {
 
   const [name, setName] = useState('USER6VPTIXFW8');
   const [birthday, setBirthday] = useState('2003/10/17');
-  const [sex, setSex] = useState('Female');
+  const [sex, setSex] = useState('female');
   const [height, setHeight] = useState('171 cm');
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
-  const [tempYear, setTempYear] = useState('2003');
-  const [tempMonth, setTempMonth] = useState('10');
-  const [tempDay, setTempDay] = useState('17');
   const [tempHeight, setTempHeight] = useState('171');
 
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
@@ -62,15 +59,8 @@ export default function ProfileScreen() {
     setEditingField('name');
   };
 
-  const handleEditBirthday = () => {
-    const parts = birthday.split('/');
-    setTempYear(parts[0]);
-    setTempMonth(parts[1]);
-    setTempDay(parts[2]);
-    setEditingField('birthday');
-  };
-
   const handleEditSex = () => {
+    setTempValue(sex);
     setEditingField('sex');
   };
 
@@ -111,15 +101,68 @@ export default function ProfileScreen() {
         console.error('保存姓名时出错:', error);
         Alert.alert('错误', '保存姓名时发生错误，请稍后重试');
       }
-    } else if (editingField === 'birthday') {
-      setBirthday(`${tempYear}/${tempMonth}/${tempDay}`);
-      setEditingField(null);
     } else if (editingField === 'sex') {
-      setSex(tempValue);
-      setEditingField(null);
+      try {
+        // 先获取用户信息，确保保留其他字段
+        const userInfoResult: any = await userService.getUserInfo();
+        
+        // 准备更新数据，将 sex 映射到 API 的 gender 字段
+        let updateData: any = {
+          gender: tempValue,
+        };
+        
+        // 如果成功获取到用户信息，可以合并其他字段（如果需要）
+        if (userInfoResult?.success && userInfoResult?.data) {
+          const currentUserData = userInfoResult.data;
+          // 如果需要保留其他字段，可以在这里合并
+          // 目前只更新 gender，所以直接使用上面的 updateData
+        }
+        
+        // 更新用户信息
+        const updateResult: any = await userService.updateUserInfo(updateData);
+        
+        if (updateResult?.success) {
+          setSex(tempValue);
+          Alert.alert('成功', '性别已更新');
+          setEditingField(null);
+        } else {
+          Alert.alert('错误', updateResult?.message || '更新性别失败');
+        }
+      } catch (error) {
+        console.error('保存性别时出错:', error);
+        Alert.alert('错误', '保存性别时发生错误，请稍后重试');
+      }
     } else if (editingField === 'height') {
-      setHeight(`${tempHeight} cm`);
-      setEditingField(null);
+      try {
+        // 先获取用户信息，确保保留其他字段
+        const userInfoResult: any = await userService.getUserInfo();
+        
+        // 准备更新数据，将 tempHeight（纯数字）映射到 API 的 height 字段
+        let updateData: any = {
+          height: tempHeight,
+        };
+        
+        // 如果成功获取到用户信息，可以合并其他字段（如果需要）
+        if (userInfoResult?.success && userInfoResult?.data) {
+          const currentUserData = userInfoResult.data;
+          // 如果需要保留其他字段，可以在这里合并
+          // 目前只更新 height，所以直接使用上面的 updateData
+        }
+        
+        // 更新用户信息
+        const updateResult: any = await userService.updateUserInfo(updateData);
+        
+        if (updateResult?.success) {
+          setHeight(`${tempHeight} cm`);
+          Alert.alert('成功', '身高已更新');
+          setEditingField(null);
+        } else {
+          Alert.alert('错误', updateResult?.message || '更新身高失败');
+        }
+      } catch (error) {
+        console.error('保存身高时出错:', error);
+        Alert.alert('错误', '保存身高时发生错误，请稍后重试');
+      }
     }
   };
 
@@ -303,20 +346,8 @@ export default function ProfileScreen() {
 
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
-                <Text style={styles.menuItemLabel}>Birthday</Text>
-                <Text style={styles.menuItemValue}>{birthday}</Text>
-              </View>
-              <TouchableOpacity style={styles.editButton} onPress={handleEditBirthday}>
-                <Text style={styles.editButtonText}>Edit</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.menuItem}>
-              <View style={styles.menuItemLeft}>
                 <Text style={styles.menuItemLabel}>Sex</Text>
-                <Text style={styles.menuItemValue}>{sex}</Text>
+                <Text style={styles.menuItemValue}>{sex.charAt(0).toUpperCase() + sex.slice(1)}</Text>
               </View>
               <TouchableOpacity style={styles.editButton} onPress={handleEditSex}>
                 <Text style={styles.editButtonText}>Edit</Text>
@@ -394,7 +425,6 @@ export default function ProfileScreen() {
 
             <Text style={styles.modalTitle}>
               {editingField === 'name' && 'Edit Name'}
-              {editingField === 'birthday' && 'Edit Birthday'}
               {editingField === 'sex' && 'Edit Sex'}
               {editingField === 'height' && 'Edit Height'}
             </Text>
@@ -412,74 +442,21 @@ export default function ProfileScreen() {
               </View>
             )}
 
-            {editingField === 'birthday' && (
-              <View style={styles.pickerRow}>
-                <View style={styles.pickerColumn}>
-                  <Text style={styles.pickerLabel}>Year</Text>
-                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
-                    {Array.from({ length: 100 }, (_, i) => (2024 - i).toString()).map(year => (
-                      <TouchableOpacity
-                        key={year}
-                        style={[styles.pickerItem, year === tempYear && styles.pickerItemSelected]}
-                        onPress={() => setTempYear(year)}
-                      >
-                        <Text style={[styles.pickerItemText, year === tempYear && styles.pickerItemTextSelected]}>
-                          {year}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-                <View style={styles.pickerColumn}>
-                  <Text style={styles.pickerLabel}>Month</Text>
-                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
-                    {Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(month => (
-                      <TouchableOpacity
-                        key={month}
-                        style={[styles.pickerItem, month === tempMonth && styles.pickerItemSelected]}
-                        onPress={() => setTempMonth(month)}
-                      >
-                        <Text style={[styles.pickerItemText, month === tempMonth && styles.pickerItemTextSelected]}>
-                          {month}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-                <View style={styles.pickerColumn}>
-                  <Text style={styles.pickerLabel}>Day</Text>
-                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
-                    {Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(day => (
-                      <TouchableOpacity
-                        key={day}
-                        style={[styles.pickerItem, day === tempDay && styles.pickerItemSelected]}
-                        onPress={() => setTempDay(day)}
-                      >
-                        <Text style={[styles.pickerItemText, day === tempDay && styles.pickerItemTextSelected]}>
-                          {day}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              </View>
-            )}
-
             {editingField === 'sex' && (
               <View style={styles.optionsContainer}>
                 <TouchableOpacity
-                  style={[styles.optionButton, tempValue === 'Male' && styles.optionButtonSelected]}
-                  onPress={() => setTempValue('Male')}
+                  style={[styles.optionButton, tempValue === 'male' && styles.optionButtonSelected]}
+                  onPress={() => setTempValue('male')}
                 >
-                  <Text style={[styles.optionText, tempValue === 'Male' && styles.optionTextSelected]}>
+                  <Text style={[styles.optionText, tempValue === 'male' && styles.optionTextSelected]}>
                     Male
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.optionButton, tempValue === 'Female' && styles.optionButtonSelected]}
-                  onPress={() => setTempValue('Female')}
+                  style={[styles.optionButton, tempValue === 'female' && styles.optionButtonSelected]}
+                  onPress={() => setTempValue('female')}
                 >
-                  <Text style={[styles.optionText, tempValue === 'Female' && styles.optionTextSelected]}>
+                  <Text style={[styles.optionText, tempValue === 'female' && styles.optionTextSelected]}>
                     Female
                   </Text>
                 </TouchableOpacity>
