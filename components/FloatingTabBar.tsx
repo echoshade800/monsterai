@@ -1,10 +1,26 @@
 import { BlurView } from 'expo-blur';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useEffect, useRef } from 'react';
 
 export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const animatedValues = useRef(
+    state.routes.map(() => new Animated.Value(0))
+  ).current;
+
+  useEffect(() => {
+    state.routes.forEach((route, index) => {
+      const isFocused = state.index === index;
+      Animated.spring(animatedValues[index], {
+        toValue: isFocused ? 1 : 0,
+        useNativeDriver: false,
+        tension: 100,
+        friction: 10,
+      }).start();
+    });
+  }, [state.index]);
 
   return (
     <View style={[styles.container, { paddingBottom: Math.max(insets.bottom - 8, 4) }]} pointerEvents="box-none">
@@ -37,6 +53,16 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
               size: 24,
             });
 
+            const scale = animatedValues[index].interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.8, 1],
+            });
+
+            const opacity = animatedValues[index].interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 1],
+            });
+
             return (
               <TouchableOpacity
                 key={route.key}
@@ -52,11 +78,21 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
                   styles.tabContent,
                   isFocused && styles.tabContentFocused
                 ]}>
-                  <View style={[
-                    styles.iconContainer,
-                    isFocused && styles.iconContainerFocused
-                  ]}>
-                    {icon}
+                  <View style={styles.iconWrapper}>
+                    {isFocused && (
+                      <Animated.View
+                        style={[
+                          styles.iconBackground,
+                          {
+                            opacity,
+                            transform: [{ scale }],
+                          },
+                        ]}
+                      />
+                    )}
+                    <View style={styles.iconContainer}>
+                      {icon}
+                    </View>
                   </View>
                   <Text
                     style={[
@@ -130,16 +166,31 @@ const styles = StyleSheet.create({
   },
   tabContentFocused: {
   },
-  iconContainer: {
-    width: 36,
-    height: 36,
+  iconWrapper: {
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18,
     marginBottom: 2,
   },
-  iconContainerFocused: {
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+  iconBackground: {
+    position: 'absolute',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  iconContainer: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 26,
+    zIndex: 1,
   },
   label: {
     fontSize: 10,
