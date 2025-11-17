@@ -1,20 +1,21 @@
 import { Image } from 'expo-image';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 interface Agent {
   id: string;
   name: string;
+  param_name: string;
   avatarUrl: string;
 }
-
-const AGENTS: Agent[] = [
-  { id: 'feces', name: 'Feces', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png' },
-  { id: 'stress', name: 'Stress', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png' },
-  { id: 'sleep', name: 'Sleep', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png' },
-  { id: 'posture', name: 'Posture', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png' },
-  { id: 'face', name: 'Face', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png' },
-  { id: 'energy', name: 'Energy', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png' },
+// face、posture、food_calorie、 sleep、stress、feces
+export const AGENTS: Agent[] = [
+  { id: 'feces', name: 'Feces', param_name: 'feces', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png' },
+  { id: 'stress', name: 'Stress', param_name: 'stress', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png' },
+  { id: 'sleep', name: 'Sleep', param_name: 'sleep', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png' },
+  { id: 'posture', name: 'Posture', param_name: 'posture', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png' },
+  { id: 'face', name: 'Face', param_name: 'face', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png' },
+  { id: 'energy', name: 'Energy', param_name: 'energy', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png' },
 ];
 
 interface MentionSelectorProps {

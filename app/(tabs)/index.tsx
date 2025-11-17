@@ -6,6 +6,7 @@ import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
 import { InputField } from '../../components/InputField';
+import { AGENTS } from '../../components/MentionSelector';
 import { getAppVersion, getDeviceId, getTimezone } from '../../src/services/api-clients/client';
 import { API_ENDPOINTS, getApiConfig, getHeadersWithPassId } from '../../src/services/api/api';
 import conversationService from '../../src/services/conversationService';
@@ -529,6 +530,19 @@ export default function EchoTab() {
     }, [])
   );
   
+  // 检测消息中的 @mention 并返回对应的 param_name
+  const detectMention = (message: string): string | null => {
+    // 遍历所有 agents，检查消息中是否包含 @AgentName
+    for (const agent of AGENTS) {
+      // 使用正则表达式匹配 @AgentName（不区分大小写，但保持大小写敏感以匹配完整单词）
+      const mentionPattern = new RegExp(`@${agent.name}\\b`, 'i');
+      if (mentionPattern.test(message)) {
+        return agent.param_name;
+      }
+    }
+    return null;
+  };
+
   // 处理流式响应
   const handleStreamResponse = useCallback(async (userMessage: string, photoUri?: string, imageDetectionType?: string) => {
     try {
@@ -552,6 +566,9 @@ export default function EchoTab() {
         setMessages(prev => [...prev, userMsg]);
       }
 
+      // 检测消息中的 @mention
+      const mentionedAgent = detectMention(userMessage);
+
       // 构建请求体
       const requestBody: any = {
         uid: String(userData.uid || userData.id),
@@ -566,6 +583,10 @@ export default function EchoTab() {
       if (photoUri) {
         requestBody.image = photoUri;
         requestBody.image_detection_type = imageDetectionType || "full";
+      }
+      // 如果消息中包含 @mention，添加 at 字段
+      if (mentionedAgent) {
+        requestBody.at = mentionedAgent;
       }
       console.log('requestBody', requestBody);
       
@@ -713,8 +734,11 @@ export default function EchoTab() {
         content: messageText,
       }]);
 
+      // 检测消息中的 @mention（虽然 function call 结果通常不会有，但为了完整性也检测）
+      const mentionedAgent = detectMention(messageText);
+
       // 构建请求体
-      const requestBody = {
+      const requestBody: any = {
         uid: String(userData.uid || userData.id),
         msg_id: generateMsgId(),
         trace_id: generateTraceId(),
@@ -728,6 +752,10 @@ export default function EchoTab() {
           output: messageText
         }
       };
+      // 如果消息中包含 @mention，添加 at 字段
+      if (mentionedAgent) {
+        requestBody.at = mentionedAgent;
+      }
 
       // 调用通用处理函数
       await handleStreamRequest({
