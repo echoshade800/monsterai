@@ -205,8 +205,7 @@ export default function MarketTab() {
 
         <View style={styles.gamesSection}>
           <Text style={styles.gamesSectionTitle}>Game Store</Text>
-          {renderGameRow(GAMES_DATA.slice(0, 4))}
-          {renderGameRow(GAMES_DATA.slice(4, 8))}
+          {renderGameRow(GAMES_DATA)}
         </View>
       </ScrollView>
     </View>
