@@ -123,12 +123,12 @@ export function CameraBox() {
 const styles = StyleSheet.create({
   cameraBox: {
     width: 170,
-    height: 104,
+    height: 102,
     position: 'relative',
   },
   previewContainer: {
     flex: 1,
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#8B7355',
   },
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   cameraPlaceholder: {
     width: '100%',
     height: '100%',
-    borderRadius: 14,
+    borderRadius: 16,
   },
   cameraIconButton: {
     position: 'absolute',
