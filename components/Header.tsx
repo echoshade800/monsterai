@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
   thinkingHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 2,
   },
   brainEmoji: {
     fontSize: 18,
