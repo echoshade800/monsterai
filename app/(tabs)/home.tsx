@@ -927,8 +927,8 @@ export default function HomeTab() {
 
         <View style={styles.section}>
           <View style={styles.permissionsHeader}>
-            <Text style={styles.permissionsHeaderTitle}>Let the Monster team collect your data automatically.</Text>
-            <Text style={styles.permissionsHeaderSubtitle}>Everything stays private and secure.</Text>
+            <Text style={styles.permissionsHeaderTitle}>Get the Full Experience</Text>
+            <Text style={styles.permissionsHeaderSubtitle}>Let the Monster team collect your data automatically. Everything stays private and secure.</Text>
           </View>
           <View style={styles.permissionsCard}>
             {permissionsList.map((permission, index) => (
