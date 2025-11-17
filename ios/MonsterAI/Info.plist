@@ -110,6 +110,8 @@
 	<string>MonsterAI 需要访问您的相册，用于选择和分享照片，丰富您的使用体验。</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
 	<string>MonsterAI 需要访问您的提醒事项数据，用于为您创建和管理提醒，帮助您更好地完成任务。</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>MonsterAI 需要访问您的提醒数据，用于为您创建和管理日程安排，帮助您更好地规划时间。</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIBackgroundModes</key>

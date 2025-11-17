@@ -12,6 +12,7 @@
 		692221AE2EC3445D00D83707 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B125A412E43E43D9BDBF56EF /* GoogleService-Info.plist */; };
 		692221B12EC3520E00D83707 /* UIWindow+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221AF2EC3520E00D83707 /* UIWindow+Extension.swift */; };
 		692221CB2EC3522200D83707 /* H5JSExecUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221BF2EC3522200D83707 /* H5JSExecUtil.swift */; };
+		6972830B2ECB77BD002CA26A /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 6972830A2ECB77BC002CA26A /* main.jsbundle */; };
 		69BDDAB02EC70E13000FFB6F /* NetworkTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69BDDAAD2EC70E13000FFB6F /* NetworkTrigger.swift */; };
 		69BDDAB42EC70E13000FFB6F /* NetworkTrigger.m in Sources */ = {isa = PBXBuildFile; fileRef = 69BDDAAC2EC70E13000FFB6F /* NetworkTrigger.m */; };
 		7039A3809BD53B9F881D6527 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3094C3227435657AF770B4 /* ExpoModulesProvider.swift */; };
@@ -30,6 +31,7 @@
 		3D3094C3227435657AF770B4 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-MonsterAI/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		692221AF2EC3520E00D83707 /* UIWindow+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+Extension.swift"; sourceTree = "<group>"; };
 		692221BF2EC3522200D83707 /* H5JSExecUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = H5JSExecUtil.swift; sourceTree = "<group>"; };
+		6972830A2ECB77BC002CA26A /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		69BDDAAC2EC70E13000FFB6F /* NetworkTrigger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NetworkTrigger.m; sourceTree = "<group>"; };
 		69BDDAAD2EC70E13000FFB6F /* NetworkTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrigger.swift; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = MonsterAI/SplashScreen.storyboard; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				6972830A2ECB77BC002CA26A /* main.jsbundle */,
 				13B07FAE1A68108700A75B9A /* MonsterAI */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -219,6 +222,7 @@
 				692221AE2EC3445D00D83707 /* GoogleService-Info.plist in Resources */,
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				6972830B2ECB77BD002CA26A /* main.jsbundle in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				73CD3E1488B474606E63C396 /* PrivacyInfo.xcprivacy in Resources */,
 			);

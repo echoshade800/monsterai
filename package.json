@@ -68,9 +68,12 @@
   },
   "private": true,
   "devDependencies": {
-    "@babel/core": "^7.25.0",
-    "@types/react": "~19.1.10",
     "babel-preset-expo": "~54.0.0",
+    "@babel/core": "^7.25.2",
+    "@react-native-community/cli": "^20.0.2",
+    "@react-native/metro-config": "^0.81.4",
+    "@types/react": "~19.1.10",
+    "@aws-sdk/client-s3": "^3.888.0",
     "typescript": "~5.9.2"
   }
 }
