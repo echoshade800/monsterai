@@ -78,9 +78,9 @@ export function MonsterCard({
         >
           <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
           {hired ? (
-            <Check size={18} color="#4CAF50" strokeWidth={2.5} />
+            <Check size={16} color="#4CAF50" strokeWidth={2.5} />
           ) : (
-            <Check size={18} color="#666666" strokeWidth={2.5} />
+            <Check size={16} color="#666666" strokeWidth={2.5} />
           )}
           <Text style={[styles.hireText, hired && styles.hiredText]}>
             {hired ? 'Hired' : 'Hire'}
@@ -183,14 +183,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
     overflow: 'hidden',
-    gap: 6,
+    gap: 5,
   },
   hireText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
   },
