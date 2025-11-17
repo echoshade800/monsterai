@@ -229,25 +229,25 @@ class UserService {
     }
   }
 
-  /**
-   * 退出登录
-   * @returns {Promise<Object>} 结果
-   */
-  async logout() {
-    try {
-      const response = await api.auth.post(API_ENDPOINTS.AUTH.LOGOUT, {}, { requireAuth: true });
-      return {
-        success: true,
-        message: response.getMessage(),
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '退出登录失败',
-      };
-    }
-  }
+  // /**
+  //  * 退出登录
+  //  * @returns {Promise<Object>} 结果
+  //  */
+  // async logout() {
+  //   try {
+  //     const response = await api.auth.post(API_ENDPOINTS.AUTH.LOGOUT, {}, { requireAuth: true });
+  //     return {
+  //       success: true,
+  //       message: response.getMessage(),
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
+  //       message: error instanceof ApiError ? error.message : '退出登录失败',
+  //     };
+  //   }
+  // }
 
   /**
    * 忘记密码

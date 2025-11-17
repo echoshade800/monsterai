@@ -36,6 +36,7 @@ export default function InviteCodeScreen() {
       const response = await fetch(inviteUrl, {
         method: 'POST',
         headers: {
+          ...headersWithPassId,
           'Accept': 'application/json',
         },
       });

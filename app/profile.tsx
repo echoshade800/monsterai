@@ -227,10 +227,9 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               // 调用后端登出API（可选，即使失败也继续清空本地数据）
-              await userService.logout().catch(error => {
-                console.warn('后端登出失败，继续清空本地数据:', error);
-              });
-              
+              // await userService.logout().catch(error => {
+              //   console.warn('后端登出失败，继续清空本地数据:', error);
+              // });
               // 清空本地用户数据和 accessToken
               await storageManager.clearAuthData();
               
