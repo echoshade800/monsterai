@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, StatusBar, Image } from 'react-native';
 import { MonsterCard } from '../../components/MonsterCard';
 import { GameCard } from '../../components/GameCard';
 import { useRouter } from 'expo-router';
@@ -269,6 +269,14 @@ export default function MarketTab() {
           <Text style={styles.gamesSectionTitle}>Mini APPs</Text>
           {renderMiniAppRow(MINIAPPS_DATA)}
         </View>
+
+        <View style={styles.bannerSection}>
+          <Image
+            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/spark.png' }}
+            style={styles.bannerImage}
+            resizeMode="cover"
+          />
+        </View>
       </ScrollView>
     </View>
   );
@@ -333,5 +341,16 @@ const styles = StyleSheet.create({
   },
   gamesRowContent: {
     paddingHorizontal: 20,
+  },
+  bannerSection: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  bannerImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
 });
