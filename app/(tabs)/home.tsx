@@ -16,7 +16,6 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
-  Animated,
   AppState,
   Linking,
   Modal,
@@ -37,7 +36,6 @@ import locationManager from '../../src/utils/location-manager';
 
 export default function HomeTab() {
   const router = useRouter();
-  const scrollY = useRef(new Animated.Value(0)).current;
   const [permissions, setPermissions] = useState({
     location: true,
     healthkit: false,
@@ -54,15 +52,6 @@ export default function HomeTab() {
   const fetchingDatesRef = useRef<Set<string>>(new Set());
   const timelineDataCacheRef = useRef<Record<string, Array<{ time: string; category: string; description: string }>>>({});
 
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(scrollY, {
-        toValue: -600,
-        duration: 15000,
-        useNativeDriver: true,
-      })
-    ).start();
-  }, []);
 
   // 检查所有健康子项权限状态
   const checkAllHealthPermissions = async (silent = false): Promise<boolean> => {
@@ -915,27 +904,24 @@ export default function HomeTab() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>How I Think</Text>
           <View style={styles.thinkingBanner}>
-            <View style={styles.thinkingScrollContainer}>
-              <Animated.View
-                style={[
-                  styles.thinkingScrollContent,
-                  { transform: [{ translateY: scrollY }] },
-                ]}
-              >
-                {[...thinkingLogs, ...thinkingLogs, ...thinkingLogs].map((log, index) => (
-                  <View key={index} style={styles.thinkingLogLine}>
-                    {formatLogText(log).map((part, partIndex) => (
-                      <Text
-                        key={partIndex}
-                        style={[styles.thinkingLogText, { color: part.color }]}
-                      >
-                        {part.text}
-                      </Text>
-                    ))}
-                  </View>
-                ))}
-              </Animated.View>
-            </View>
+            <ScrollView
+              style={styles.thinkingScrollContainer}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
+            >
+              {thinkingLogs.map((log, index) => (
+                <View key={index} style={styles.thinkingLogLine}>
+                  {formatLogText(log).map((part, partIndex) => (
+                    <Text
+                      key={partIndex}
+                      style={[styles.thinkingLogText, { color: part.color }]}
+                    >
+                      {part.text}
+                    </Text>
+                  ))}
+                </View>
+              ))}
+            </ScrollView>
           </View>
         </View>
 
@@ -1125,9 +1111,6 @@ const styles = StyleSheet.create({
   },
   thinkingScrollContainer: {
     flex: 1,
-  },
-  thinkingScrollContent: {
-    flexDirection: 'column',
   },
   thinkingLogLine: {
     flexDirection: 'row',
