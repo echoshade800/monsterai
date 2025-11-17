@@ -1240,7 +1240,6 @@ const styles = StyleSheet.create({
   dateControl: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
@@ -1252,6 +1251,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   dateControlCenter: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
