@@ -65,7 +65,7 @@ PODS:
     - React-Core
   - ExpoAppleAuthentication (8.0.7):
     - ExpoModulesCore
-  - ExpoAsset (12.0.9):
+  - ExpoAsset (12.0.10):
     - ExpoModulesCore
   - ExpoBlur (15.0.7):
     - ExpoModulesCore
@@ -77,7 +77,7 @@ PODS:
     - ZXingObjC/PDF417
   - ExpoDevice (8.0.9):
     - ExpoModulesCore
-  - ExpoFileSystem (19.0.17):
+  - ExpoFileSystem (19.0.18):
     - ExpoModulesCore
   - ExpoFont (14.0.9):
     - ExpoModulesCore
@@ -3156,12 +3156,12 @@ DEPENDENCIES:
   - Expo (from `../node_modules/expo`)
   - "ExpoAdapterGoogleSignIn (from `../node_modules/@react-native-google-signin/google-signin/expo/ios`)"
   - ExpoAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
-  - ExpoAsset (from `../node_modules/expo/node_modules/expo-asset/ios`)
+  - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoBlur (from `../node_modules/expo-blur/ios`)
   - ExpoCalendar (from `../node_modules/expo-calendar/ios`)
   - ExpoCamera (from `../node_modules/expo-camera/ios`)
   - ExpoDevice (from `../node_modules/expo-device/ios`)
-  - ExpoFileSystem (from `../node_modules/expo/node_modules/expo-file-system/ios`)
+  - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
   - ExpoHead (from `../node_modules/expo-router/ios`)
@@ -3331,7 +3331,7 @@ EXTERNAL SOURCES:
   ExpoAppleAuthentication:
     :path: "../node_modules/expo-apple-authentication/ios"
   ExpoAsset:
-    :path: "../node_modules/expo/node_modules/expo-asset/ios"
+    :path: "../node_modules/expo-asset/ios"
   ExpoBlur:
     :path: "../node_modules/expo-blur/ios"
   ExpoCalendar:
@@ -3341,7 +3341,7 @@ EXTERNAL SOURCES:
   ExpoDevice:
     :path: "../node_modules/expo-device/ios"
   ExpoFileSystem:
-    :path: "../node_modules/expo/node_modules/expo-file-system/ios"
+    :path: "../node_modules/expo-file-system/ios"
   ExpoFont:
     :path: "../node_modules/expo-font/ios"
   ExpoHaptics:
@@ -3576,12 +3576,12 @@ SPEC CHECKSUMS:
   Expo: 92029ee79999b8a398d8e4b9a69f9bd4db59dc8b
   ExpoAdapterGoogleSignIn: 5965ec283d2c0f53c483c4e2080ea055a881dfe9
   ExpoAppleAuthentication: bc9de6e9ff3340604213ab9031d4c4f7f802623e
-  ExpoAsset: 9ba6fbd677fb8e241a3899ac00fa735bc911eadf
+  ExpoAsset: d839c8eae8124470332408427327e8f88beb2dfd
   ExpoBlur: 2dd8f64aa31f5d405652c21d3deb2d2588b1852f
   ExpoCalendar: 34fe3956dab6278057a8ad04c648fe43bd642ef5
   ExpoCamera: 2a87c210f8955350ea5c70f1d539520b2fc5d940
   ExpoDevice: 148accb4071873d19fba80a2506c58ffa433d620
-  ExpoFileSystem: b79eadbda7b7f285f378f95f959cc9313a1c9c61
+  ExpoFileSystem: a67324b609244372efac5abb599f7f555b6584f0
   ExpoFont: cf9d90ec1d3b97c4f513211905724c8171f82961
   ExpoHaptics: 807476b0c39e9d82b7270349d6487928ce32df84
   ExpoHead: e317214fa14edeaf17748d39ec9e550a3d1194fb

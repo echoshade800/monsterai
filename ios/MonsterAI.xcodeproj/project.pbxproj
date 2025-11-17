@@ -12,7 +12,43 @@
 		692221AE2EC3445D00D83707 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B125A412E43E43D9BDBF56EF /* GoogleService-Info.plist */; };
 		692221B12EC3520E00D83707 /* UIWindow+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221AF2EC3520E00D83707 /* UIWindow+Extension.swift */; };
 		692221CB2EC3522200D83707 /* H5JSExecUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692221BF2EC3522200D83707 /* H5JSExecUtil.swift */; };
-		6972830B2ECB77BD002CA26A /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 6972830A2ECB77BC002CA26A /* main.jsbundle */; };
+		6972834D2ECB7EC1002CA26A /* Nunito_900Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283282ECB7EC1002CA26A /* Nunito_900Black.ttf */; };
+		6972834E2ECB7EC1002CA26A /* sitemap.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283452ECB7EC1002CA26A /* sitemap.png */; };
+		6972834F2ECB7EC1002CA26A /* Nunito_300Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283102ECB7EC1002CA26A /* Nunito_300Light.ttf */; };
+		697283502ECB7EC1002CA26A /* Nunito_600SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6972831C2ECB7EC1002CA26A /* Nunito_600SemiBold.ttf */; };
+		697283512ECB7EC1002CA26A /* Nunito_200ExtraLight_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6972830E2ECB7EC1002CA26A /* Nunito_200ExtraLight_Italic.ttf */; };
+		697283522ECB7EC1002CA26A /* back-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283302ECB7EC1002CA26A /* back-icon@2x.png */; };
+		697283532ECB7EC1002CA26A /* file.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283422ECB7EC1002CA26A /* file.png */; };
+		697283542ECB7EC1002CA26A /* close-icon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283372ECB7EC1002CA26A /* close-icon@3x.png */; };
+		697283552ECB7EC1002CA26A /* Nunito_400Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283142ECB7EC1002CA26A /* Nunito_400Regular.ttf */; };
+		697283562ECB7EC1002CA26A /* back-icon-mask.png in Resources */ = {isa = PBXBuildFile; fileRef = 6972832F2ECB7EC1002CA26A /* back-icon-mask.png */; };
+		697283572ECB7EC1002CA26A /* search-icon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6972833A2ECB7EC1002CA26A /* search-icon@3x.png */; };
+		697283582ECB7EC1002CA26A /* search-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283392ECB7EC1002CA26A /* search-icon@2x.png */; };
+		697283592ECB7EC1002CA26A /* Nunito_700Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283202ECB7EC1002CA26A /* Nunito_700Bold.ttf */; };
+		6972835A2ECB7EC1002CA26A /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283402ECB7EC1002CA26A /* arrow_down.png */; };
+		6972835B2ECB7EC1002CA26A /* Nunito_600SemiBold_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6972831E2ECB7EC1002CA26A /* Nunito_600SemiBold_Italic.ttf */; };
+		6972835C2ECB7EC1002CA26A /* pkg.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283442ECB7EC1002CA26A /* pkg.png */; };
+		6972835D2ECB7EC1002CA26A /* Nunito_500Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283182ECB7EC1002CA26A /* Nunito_500Medium.ttf */; };
+		6972835E2ECB7EC1002CA26A /* Nunito_700Bold_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283222ECB7EC1002CA26A /* Nunito_700Bold_Italic.ttf */; };
+		6972835F2ECB7EC1002CA26A /* close-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283362ECB7EC1002CA26A /* close-icon@2x.png */; };
+		697283602ECB7EC1002CA26A /* close-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283352ECB7EC1002CA26A /* close-icon.png */; };
+		697283612ECB7EC1002CA26A /* forward.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283432ECB7EC1002CA26A /* forward.png */; };
+		697283622ECB7EC1002CA26A /* Nunito_500Medium_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6972831A2ECB7EC1002CA26A /* Nunito_500Medium_Italic.ttf */; };
+		697283632ECB7EC1002CA26A /* back-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 6972832E2ECB7EC1002CA26A /* back-icon.png */; };
+		697283642ECB7EC1002CA26A /* Nunito_900Black_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6972832A2ECB7EC1002CA26A /* Nunito_900Black_Italic.ttf */; };
+		697283652ECB7EC1002CA26A /* Nunito_200ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6972830C2ECB7EC1002CA26A /* Nunito_200ExtraLight.ttf */; };
+		697283662ECB7EC1002CA26A /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283412ECB7EC1002CA26A /* error.png */; };
+		697283672ECB7EC1002CA26A /* Nunito_300Light_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283122ECB7EC1002CA26A /* Nunito_300Light_Italic.ttf */; };
+		697283682ECB7EC1002CA26A /* back-icon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283312ECB7EC1002CA26A /* back-icon@3x.png */; };
+		697283692ECB7EC1002CA26A /* clear-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283332ECB7EC1002CA26A /* clear-icon@2x.png */; };
+		6972836A2ECB7EC1002CA26A /* clear-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283322ECB7EC1002CA26A /* clear-icon.png */; };
+		6972836B2ECB7EC1002CA26A /* Nunito_800ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283242ECB7EC1002CA26A /* Nunito_800ExtraBold.ttf */; };
+		6972836C2ECB7EC1002CA26A /* Nunito_800ExtraBold_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283262ECB7EC1002CA26A /* Nunito_800ExtraBold_Italic.ttf */; };
+		6972836D2ECB7EC1002CA26A /* unmatched.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283462ECB7EC1002CA26A /* unmatched.png */; };
+		6972836E2ECB7EC1002CA26A /* clear-icon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283342ECB7EC1002CA26A /* clear-icon@3x.png */; };
+		6972836F2ECB7EC1002CA26A /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 6972834B2ECB7EC1002CA26A /* main.jsbundle */; };
+		697283702ECB7EC1002CA26A /* Nunito_400Regular_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697283162ECB7EC1002CA26A /* Nunito_400Regular_Italic.ttf */; };
+		697283712ECB7EC1002CA26A /* search-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 697283382ECB7EC1002CA26A /* search-icon.png */; };
 		69BDDAB02EC70E13000FFB6F /* NetworkTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69BDDAAD2EC70E13000FFB6F /* NetworkTrigger.swift */; };
 		69BDDAB42EC70E13000FFB6F /* NetworkTrigger.m in Sources */ = {isa = PBXBuildFile; fileRef = 69BDDAAC2EC70E13000FFB6F /* NetworkTrigger.m */; };
 		7039A3809BD53B9F881D6527 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3094C3227435657AF770B4 /* ExpoModulesProvider.swift */; };
@@ -31,7 +67,43 @@
 		3D3094C3227435657AF770B4 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-MonsterAI/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		692221AF2EC3520E00D83707 /* UIWindow+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+Extension.swift"; sourceTree = "<group>"; };
 		692221BF2EC3522200D83707 /* H5JSExecUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = H5JSExecUtil.swift; sourceTree = "<group>"; };
-		6972830A2ECB77BC002CA26A /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
+		6972830C2ECB7EC1002CA26A /* Nunito_200ExtraLight.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_200ExtraLight.ttf; sourceTree = "<group>"; };
+		6972830E2ECB7EC1002CA26A /* Nunito_200ExtraLight_Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_200ExtraLight_Italic.ttf; sourceTree = "<group>"; };
+		697283102ECB7EC1002CA26A /* Nunito_300Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_300Light.ttf; sourceTree = "<group>"; };
+		697283122ECB7EC1002CA26A /* Nunito_300Light_Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_300Light_Italic.ttf; sourceTree = "<group>"; };
+		697283142ECB7EC1002CA26A /* Nunito_400Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_400Regular.ttf; sourceTree = "<group>"; };
+		697283162ECB7EC1002CA26A /* Nunito_400Regular_Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_400Regular_Italic.ttf; sourceTree = "<group>"; };
+		697283182ECB7EC1002CA26A /* Nunito_500Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_500Medium.ttf; sourceTree = "<group>"; };
+		6972831A2ECB7EC1002CA26A /* Nunito_500Medium_Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_500Medium_Italic.ttf; sourceTree = "<group>"; };
+		6972831C2ECB7EC1002CA26A /* Nunito_600SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_600SemiBold.ttf; sourceTree = "<group>"; };
+		6972831E2ECB7EC1002CA26A /* Nunito_600SemiBold_Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_600SemiBold_Italic.ttf; sourceTree = "<group>"; };
+		697283202ECB7EC1002CA26A /* Nunito_700Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_700Bold.ttf; sourceTree = "<group>"; };
+		697283222ECB7EC1002CA26A /* Nunito_700Bold_Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_700Bold_Italic.ttf; sourceTree = "<group>"; };
+		697283242ECB7EC1002CA26A /* Nunito_800ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_800ExtraBold.ttf; sourceTree = "<group>"; };
+		697283262ECB7EC1002CA26A /* Nunito_800ExtraBold_Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_800ExtraBold_Italic.ttf; sourceTree = "<group>"; };
+		697283282ECB7EC1002CA26A /* Nunito_900Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_900Black.ttf; sourceTree = "<group>"; };
+		6972832A2ECB7EC1002CA26A /* Nunito_900Black_Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Nunito_900Black_Italic.ttf; sourceTree = "<group>"; };
+		6972832E2ECB7EC1002CA26A /* back-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-icon.png"; sourceTree = "<group>"; };
+		6972832F2ECB7EC1002CA26A /* back-icon-mask.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-icon-mask.png"; sourceTree = "<group>"; };
+		697283302ECB7EC1002CA26A /* back-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-icon@2x.png"; sourceTree = "<group>"; };
+		697283312ECB7EC1002CA26A /* back-icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-icon@3x.png"; sourceTree = "<group>"; };
+		697283322ECB7EC1002CA26A /* clear-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clear-icon.png"; sourceTree = "<group>"; };
+		697283332ECB7EC1002CA26A /* clear-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clear-icon@2x.png"; sourceTree = "<group>"; };
+		697283342ECB7EC1002CA26A /* clear-icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clear-icon@3x.png"; sourceTree = "<group>"; };
+		697283352ECB7EC1002CA26A /* close-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "close-icon.png"; sourceTree = "<group>"; };
+		697283362ECB7EC1002CA26A /* close-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "close-icon@2x.png"; sourceTree = "<group>"; };
+		697283372ECB7EC1002CA26A /* close-icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "close-icon@3x.png"; sourceTree = "<group>"; };
+		697283382ECB7EC1002CA26A /* search-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search-icon.png"; sourceTree = "<group>"; };
+		697283392ECB7EC1002CA26A /* search-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search-icon@2x.png"; sourceTree = "<group>"; };
+		6972833A2ECB7EC1002CA26A /* search-icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search-icon@3x.png"; sourceTree = "<group>"; };
+		697283402ECB7EC1002CA26A /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
+		697283412ECB7EC1002CA26A /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = error.png; sourceTree = "<group>"; };
+		697283422ECB7EC1002CA26A /* file.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = file.png; sourceTree = "<group>"; };
+		697283432ECB7EC1002CA26A /* forward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = forward.png; sourceTree = "<group>"; };
+		697283442ECB7EC1002CA26A /* pkg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pkg.png; sourceTree = "<group>"; };
+		697283452ECB7EC1002CA26A /* sitemap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sitemap.png; sourceTree = "<group>"; };
+		697283462ECB7EC1002CA26A /* unmatched.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = unmatched.png; sourceTree = "<group>"; };
+		6972834B2ECB7EC1002CA26A /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		69BDDAAC2EC70E13000FFB6F /* NetworkTrigger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NetworkTrigger.m; sourceTree = "<group>"; };
 		69BDDAAD2EC70E13000FFB6F /* NetworkTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTrigger.swift; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = MonsterAI/SplashScreen.storyboard; sourceTree = "<group>"; };
@@ -67,6 +139,7 @@
 				692221B02EC3520E00D83707 /* extension */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
+				6972834C2ECB7EC1002CA26A /* rnbundle */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				B125A412E43E43D9BDBF56EF /* GoogleService-Info.plist */,
@@ -100,6 +173,266 @@
 			path = extension;
 			sourceTree = "<group>";
 		};
+		6972830D2ECB7EC1002CA26A /* 200ExtraLight */ = {
+			isa = PBXGroup;
+			children = (
+				6972830C2ECB7EC1002CA26A /* Nunito_200ExtraLight.ttf */,
+			);
+			path = 200ExtraLight;
+			sourceTree = "<group>";
+		};
+		6972830F2ECB7EC1002CA26A /* 200ExtraLight_Italic */ = {
+			isa = PBXGroup;
+			children = (
+				6972830E2ECB7EC1002CA26A /* Nunito_200ExtraLight_Italic.ttf */,
+			);
+			path = 200ExtraLight_Italic;
+			sourceTree = "<group>";
+		};
+		697283112ECB7EC1002CA26A /* 300Light */ = {
+			isa = PBXGroup;
+			children = (
+				697283102ECB7EC1002CA26A /* Nunito_300Light.ttf */,
+			);
+			path = 300Light;
+			sourceTree = "<group>";
+		};
+		697283132ECB7EC1002CA26A /* 300Light_Italic */ = {
+			isa = PBXGroup;
+			children = (
+				697283122ECB7EC1002CA26A /* Nunito_300Light_Italic.ttf */,
+			);
+			path = 300Light_Italic;
+			sourceTree = "<group>";
+		};
+		697283152ECB7EC1002CA26A /* 400Regular */ = {
+			isa = PBXGroup;
+			children = (
+				697283142ECB7EC1002CA26A /* Nunito_400Regular.ttf */,
+			);
+			path = 400Regular;
+			sourceTree = "<group>";
+		};
+		697283172ECB7EC1002CA26A /* 400Regular_Italic */ = {
+			isa = PBXGroup;
+			children = (
+				697283162ECB7EC1002CA26A /* Nunito_400Regular_Italic.ttf */,
+			);
+			path = 400Regular_Italic;
+			sourceTree = "<group>";
+		};
+		697283192ECB7EC1002CA26A /* 500Medium */ = {
+			isa = PBXGroup;
+			children = (
+				697283182ECB7EC1002CA26A /* Nunito_500Medium.ttf */,
+			);
+			path = 500Medium;
+			sourceTree = "<group>";
+		};
+		6972831B2ECB7EC1002CA26A /* 500Medium_Italic */ = {
+			isa = PBXGroup;
+			children = (
+				6972831A2ECB7EC1002CA26A /* Nunito_500Medium_Italic.ttf */,
+			);
+			path = 500Medium_Italic;
+			sourceTree = "<group>";
+		};
+		6972831D2ECB7EC1002CA26A /* 600SemiBold */ = {
+			isa = PBXGroup;
+			children = (
+				6972831C2ECB7EC1002CA26A /* Nunito_600SemiBold.ttf */,
+			);
+			path = 600SemiBold;
+			sourceTree = "<group>";
+		};
+		6972831F2ECB7EC1002CA26A /* 600SemiBold_Italic */ = {
+			isa = PBXGroup;
+			children = (
+				6972831E2ECB7EC1002CA26A /* Nunito_600SemiBold_Italic.ttf */,
+			);
+			path = 600SemiBold_Italic;
+			sourceTree = "<group>";
+		};
+		697283212ECB7EC1002CA26A /* 700Bold */ = {
+			isa = PBXGroup;
+			children = (
+				697283202ECB7EC1002CA26A /* Nunito_700Bold.ttf */,
+			);
+			path = 700Bold;
+			sourceTree = "<group>";
+		};
+		697283232ECB7EC1002CA26A /* 700Bold_Italic */ = {
+			isa = PBXGroup;
+			children = (
+				697283222ECB7EC1002CA26A /* Nunito_700Bold_Italic.ttf */,
+			);
+			path = 700Bold_Italic;
+			sourceTree = "<group>";
+		};
+		697283252ECB7EC1002CA26A /* 800ExtraBold */ = {
+			isa = PBXGroup;
+			children = (
+				697283242ECB7EC1002CA26A /* Nunito_800ExtraBold.ttf */,
+			);
+			path = 800ExtraBold;
+			sourceTree = "<group>";
+		};
+		697283272ECB7EC1002CA26A /* 800ExtraBold_Italic */ = {
+			isa = PBXGroup;
+			children = (
+				697283262ECB7EC1002CA26A /* Nunito_800ExtraBold_Italic.ttf */,
+			);
+			path = 800ExtraBold_Italic;
+			sourceTree = "<group>";
+		};
+		697283292ECB7EC1002CA26A /* 900Black */ = {
+			isa = PBXGroup;
+			children = (
+				697283282ECB7EC1002CA26A /* Nunito_900Black.ttf */,
+			);
+			path = 900Black;
+			sourceTree = "<group>";
+		};
+		6972832B2ECB7EC1002CA26A /* 900Black_Italic */ = {
+			isa = PBXGroup;
+			children = (
+				6972832A2ECB7EC1002CA26A /* Nunito_900Black_Italic.ttf */,
+			);
+			path = 900Black_Italic;
+			sourceTree = "<group>";
+		};
+		6972832C2ECB7EC1002CA26A /* nunito */ = {
+			isa = PBXGroup;
+			children = (
+				6972830D2ECB7EC1002CA26A /* 200ExtraLight */,
+				6972830F2ECB7EC1002CA26A /* 200ExtraLight_Italic */,
+				697283112ECB7EC1002CA26A /* 300Light */,
+				697283132ECB7EC1002CA26A /* 300Light_Italic */,
+				697283152ECB7EC1002CA26A /* 400Regular */,
+				697283172ECB7EC1002CA26A /* 400Regular_Italic */,
+				697283192ECB7EC1002CA26A /* 500Medium */,
+				6972831B2ECB7EC1002CA26A /* 500Medium_Italic */,
+				6972831D2ECB7EC1002CA26A /* 600SemiBold */,
+				6972831F2ECB7EC1002CA26A /* 600SemiBold_Italic */,
+				697283212ECB7EC1002CA26A /* 700Bold */,
+				697283232ECB7EC1002CA26A /* 700Bold_Italic */,
+				697283252ECB7EC1002CA26A /* 800ExtraBold */,
+				697283272ECB7EC1002CA26A /* 800ExtraBold_Italic */,
+				697283292ECB7EC1002CA26A /* 900Black */,
+				6972832B2ECB7EC1002CA26A /* 900Black_Italic */,
+			);
+			path = nunito;
+			sourceTree = "<group>";
+		};
+		6972832D2ECB7EC1002CA26A /* @expo-google-fonts */ = {
+			isa = PBXGroup;
+			children = (
+				6972832C2ECB7EC1002CA26A /* nunito */,
+			);
+			path = "@expo-google-fonts";
+			sourceTree = "<group>";
+		};
+		6972833B2ECB7EC1002CA26A /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				6972832E2ECB7EC1002CA26A /* back-icon.png */,
+				6972832F2ECB7EC1002CA26A /* back-icon-mask.png */,
+				697283302ECB7EC1002CA26A /* back-icon@2x.png */,
+				697283312ECB7EC1002CA26A /* back-icon@3x.png */,
+				697283322ECB7EC1002CA26A /* clear-icon.png */,
+				697283332ECB7EC1002CA26A /* clear-icon@2x.png */,
+				697283342ECB7EC1002CA26A /* clear-icon@3x.png */,
+				697283352ECB7EC1002CA26A /* close-icon.png */,
+				697283362ECB7EC1002CA26A /* close-icon@2x.png */,
+				697283372ECB7EC1002CA26A /* close-icon@3x.png */,
+				697283382ECB7EC1002CA26A /* search-icon.png */,
+				697283392ECB7EC1002CA26A /* search-icon@2x.png */,
+				6972833A2ECB7EC1002CA26A /* search-icon@3x.png */,
+			);
+			path = assets;
+			sourceTree = "<group>";
+		};
+		6972833C2ECB7EC1002CA26A /* module */ = {
+			isa = PBXGroup;
+			children = (
+				6972833B2ECB7EC1002CA26A /* assets */,
+			);
+			path = module;
+			sourceTree = "<group>";
+		};
+		6972833D2ECB7EC1002CA26A /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				6972833C2ECB7EC1002CA26A /* module */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		6972833E2ECB7EC1002CA26A /* elements */ = {
+			isa = PBXGroup;
+			children = (
+				6972833D2ECB7EC1002CA26A /* lib */,
+			);
+			path = elements;
+			sourceTree = "<group>";
+		};
+		6972833F2ECB7EC1002CA26A /* @react-navigation */ = {
+			isa = PBXGroup;
+			children = (
+				6972833E2ECB7EC1002CA26A /* elements */,
+			);
+			path = "@react-navigation";
+			sourceTree = "<group>";
+		};
+		697283472ECB7EC1002CA26A /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				697283402ECB7EC1002CA26A /* arrow_down.png */,
+				697283412ECB7EC1002CA26A /* error.png */,
+				697283422ECB7EC1002CA26A /* file.png */,
+				697283432ECB7EC1002CA26A /* forward.png */,
+				697283442ECB7EC1002CA26A /* pkg.png */,
+				697283452ECB7EC1002CA26A /* sitemap.png */,
+				697283462ECB7EC1002CA26A /* unmatched.png */,
+			);
+			path = assets;
+			sourceTree = "<group>";
+		};
+		697283482ECB7EC1002CA26A /* expo-router */ = {
+			isa = PBXGroup;
+			children = (
+				697283472ECB7EC1002CA26A /* assets */,
+			);
+			path = "expo-router";
+			sourceTree = "<group>";
+		};
+		697283492ECB7EC1002CA26A /* node_modules */ = {
+			isa = PBXGroup;
+			children = (
+				6972832D2ECB7EC1002CA26A /* @expo-google-fonts */,
+				6972833F2ECB7EC1002CA26A /* @react-navigation */,
+				697283482ECB7EC1002CA26A /* expo-router */,
+			);
+			path = node_modules;
+			sourceTree = "<group>";
+		};
+		6972834A2ECB7EC1002CA26A /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				697283492ECB7EC1002CA26A /* node_modules */,
+			);
+			path = assets;
+			sourceTree = "<group>";
+		};
+		6972834C2ECB7EC1002CA26A /* rnbundle */ = {
+			isa = PBXGroup;
+			children = (
+				6972834A2ECB7EC1002CA26A /* assets */,
+				6972834B2ECB7EC1002CA26A /* main.jsbundle */,
+			);
+			path = rnbundle;
+			sourceTree = "<group>";
+		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -110,7 +443,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				6972830A2ECB77BC002CA26A /* main.jsbundle */,
 				13B07FAE1A68108700A75B9A /* MonsterAI */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -222,9 +554,45 @@
 				692221AE2EC3445D00D83707 /* GoogleService-Info.plist in Resources */,
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				6972830B2ECB77BD002CA26A /* main.jsbundle in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				73CD3E1488B474606E63C396 /* PrivacyInfo.xcprivacy in Resources */,
+				6972834D2ECB7EC1002CA26A /* Nunito_900Black.ttf in Resources */,
+				6972834E2ECB7EC1002CA26A /* sitemap.png in Resources */,
+				6972834F2ECB7EC1002CA26A /* Nunito_300Light.ttf in Resources */,
+				697283502ECB7EC1002CA26A /* Nunito_600SemiBold.ttf in Resources */,
+				697283512ECB7EC1002CA26A /* Nunito_200ExtraLight_Italic.ttf in Resources */,
+				697283522ECB7EC1002CA26A /* back-icon@2x.png in Resources */,
+				697283532ECB7EC1002CA26A /* file.png in Resources */,
+				697283542ECB7EC1002CA26A /* close-icon@3x.png in Resources */,
+				697283552ECB7EC1002CA26A /* Nunito_400Regular.ttf in Resources */,
+				697283562ECB7EC1002CA26A /* back-icon-mask.png in Resources */,
+				697283572ECB7EC1002CA26A /* search-icon@3x.png in Resources */,
+				697283582ECB7EC1002CA26A /* search-icon@2x.png in Resources */,
+				697283592ECB7EC1002CA26A /* Nunito_700Bold.ttf in Resources */,
+				6972835A2ECB7EC1002CA26A /* arrow_down.png in Resources */,
+				6972835B2ECB7EC1002CA26A /* Nunito_600SemiBold_Italic.ttf in Resources */,
+				6972835C2ECB7EC1002CA26A /* pkg.png in Resources */,
+				6972835D2ECB7EC1002CA26A /* Nunito_500Medium.ttf in Resources */,
+				6972835E2ECB7EC1002CA26A /* Nunito_700Bold_Italic.ttf in Resources */,
+				6972835F2ECB7EC1002CA26A /* close-icon@2x.png in Resources */,
+				697283602ECB7EC1002CA26A /* close-icon.png in Resources */,
+				697283612ECB7EC1002CA26A /* forward.png in Resources */,
+				697283622ECB7EC1002CA26A /* Nunito_500Medium_Italic.ttf in Resources */,
+				697283632ECB7EC1002CA26A /* back-icon.png in Resources */,
+				697283642ECB7EC1002CA26A /* Nunito_900Black_Italic.ttf in Resources */,
+				697283652ECB7EC1002CA26A /* Nunito_200ExtraLight.ttf in Resources */,
+				697283662ECB7EC1002CA26A /* error.png in Resources */,
+				697283672ECB7EC1002CA26A /* Nunito_300Light_Italic.ttf in Resources */,
+				697283682ECB7EC1002CA26A /* back-icon@3x.png in Resources */,
+				697283692ECB7EC1002CA26A /* clear-icon@2x.png in Resources */,
+				6972836A2ECB7EC1002CA26A /* clear-icon.png in Resources */,
+				6972836B2ECB7EC1002CA26A /* Nunito_800ExtraBold.ttf in Resources */,
+				6972836C2ECB7EC1002CA26A /* Nunito_800ExtraBold_Italic.ttf in Resources */,
+				6972836D2ECB7EC1002CA26A /* unmatched.png in Resources */,
+				6972836E2ECB7EC1002CA26A /* clear-icon@3x.png in Resources */,
+				6972836F2ECB7EC1002CA26A /* main.jsbundle in Resources */,
+				697283702ECB7EC1002CA26A /* Nunito_400Regular_Italic.ttf in Resources */,
+				697283712ECB7EC1002CA26A /* search-icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,8 +765,6 @@
 				"$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
 			);
 			name = "[CP-User] [RNFB] Core Configuration";
-			outputPaths = (
-			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "#!/usr/bin/env bash\n#\n# Copyright (c) 2016-present Invertase Limited & Contributors\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this library except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#   http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n#\n\n##########################################################################\n##########################################################################\n#\n#  NOTE THAT IF YOU CHANGE THIS FILE YOU MUST RUN pod install AFTERWARDS\n#\n#  This file is installed as an Xcode build script in the project file\n#  by cocoapods, and you will not see your changes until you pod install\n#\n##########################################################################\n##########################################################################\n\nset -e\n\n_MAX_LOOKUPS=2;\n_SEARCH_RESULT=''\n_RN_ROOT_EXISTS=''\n_CURRENT_LOOKUPS=1\n_JSON_ROOT=\"'react-native'\"\n_JSON_FILE_NAME='firebase.json'\n_JSON_OUTPUT_BASE64='e30=' # { }\n_CURRENT_SEARCH_DIR=${PROJECT_DIR}\n_PLIST_BUDDY=/usr/libexec/PlistBuddy\n_TARGET_PLIST=\"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n_DSYM_PLIST=\"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist\"\n\n# plist arrays\n_PLIST_ENTRY_KEYS=()\n_PLIST_ENTRY_TYPES=()\n_PLIST_ENTRY_VALUES=()\n\nfunction setPlistValue {\n  echo \"note:      setting plist entry '$1' of type '$2' in file '$4'\"\n  ${_PLIST_BUDDY} -c \"Add :$1 $2 '$3'\" $4 || echo \"note:      '$1' already exists\"\n}\n\nfunction getFirebaseJsonKeyValue () {\n  if [[ ${_RN_ROOT_EXISTS} ]]; then\n    ruby -Ku -e \"require 'rubygems';require 'json'; output=JSON.parse('$1'); puts output[$_JSON_ROOT]['$2']\"\n  else\n    echo \"\"\n  fi;\n}\n\nfunction jsonBoolToYesNo () {\n  if [[ $1 == \"false\" ]]; then\n    echo \"NO\"\n  elif [[ $1 == \"true\" ]]; then\n    echo \"YES\"\n  else echo \"NO\"\n  fi\n}\n\necho \"note: -> RNFB build script started\"\necho \"note: 1) Locating ${_JSON_FILE_NAME} file:\"\n\nif [[ -z ${_CURRENT_SEARCH_DIR} ]]; then\n  _CURRENT_SEARCH_DIR=$(pwd)\nfi;\n\nwhile true; do\n  _CURRENT_SEARCH_DIR=$(dirname \"$_CURRENT_SEARCH_DIR\")\n  if [[ \"$_CURRENT_SEARCH_DIR\" == \"/\" ]] || [[ ${_CURRENT_LOOKUPS} -gt ${_MAX_LOOKUPS} ]]; then break; fi;\n  echo \"note:      ($_CURRENT_LOOKUPS of $_MAX_LOOKUPS) Searching in '$_CURRENT_SEARCH_DIR' for a ${_JSON_FILE_NAME} file.\"\n  _SEARCH_RESULT=$(find \"$_CURRENT_SEARCH_DIR\" -maxdepth 2 -name ${_JSON_FILE_NAME} -print | /usr/bin/head -n 1)\n  if [[ ${_SEARCH_RESULT} ]]; then\n    echo \"note:      ${_JSON_FILE_NAME} found at $_SEARCH_RESULT\"\n    break;\n  fi;\n  _CURRENT_LOOKUPS=$((_CURRENT_LOOKUPS+1))\ndone\n\nif [[ ${_SEARCH_RESULT} ]]; then\n  _JSON_OUTPUT_RAW=$(cat \"${_SEARCH_RESULT}\")\n  if ! _RN_ROOT_EXISTS=$(ruby -Ku -e \"require 'json'; output=JSON.parse('$_JSON_OUTPUT_RAW'); puts output[$_JSON_ROOT]\"); then\n    echo \"error: Failed to parse firebase.json, check for syntax errors.\"\n    exit 1\n  fi\n\n  if [[ ${_RN_ROOT_EXISTS} ]]; then\n    if ! python3 --version >/dev/null 2>&1; then echo \"error: python3 not found, firebase.json file processing error.\" && exit 1; fi\n    _JSON_OUTPUT_BASE64=$(python3 -c 'import json,sys,base64;print(base64.b64encode(bytes(json.dumps(json.loads(open('\"'${_SEARCH_RESULT}'\"', '\"'rb'\"').read())['${_JSON_ROOT}']), '\"'utf-8'\"')).decode())' || echo \"e30=\")\n  fi\n\n  _PLIST_ENTRY_KEYS+=(\"firebase_json_raw\")\n  _PLIST_ENTRY_TYPES+=(\"string\")\n  _PLIST_ENTRY_VALUES+=(\"$_JSON_OUTPUT_BASE64\")\n\n  # config.app_data_collection_default_enabled\n  _APP_DATA_COLLECTION_ENABLED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"app_data_collection_default_enabled\")\n  if [[ $_APP_DATA_COLLECTION_ENABLED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseDataCollectionDefaultEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_APP_DATA_COLLECTION_ENABLED\")\")\n  fi\n\n  # config.analytics_auto_collection_enabled\n  _ANALYTICS_AUTO_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_auto_collection_enabled\")\n  if [[ $_ANALYTICS_AUTO_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FIREBASE_ANALYTICS_COLLECTION_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AUTO_COLLECTION\")\")\n  fi\n\n  # config.analytics_collection_deactivated\n  _ANALYTICS_DEACTIVATED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_collection_deactivated\")\n  if [[ $_ANALYTICS_DEACTIVATED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_DEACTIVATED\")\")\n  fi\n\n  # config.analytics_idfv_collection_enabled\n  _ANALYTICS_IDFV_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_idfv_collection_enabled\")\n  if [[ $_ANALYTICS_IDFV_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_IDFV_COLLECTION\")\")\n  fi\n\n  # config.analytics_default_allow_analytics_storage\n  _ANALYTICS_STORAGE=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_analytics_storage\")\n  if [[ $_ANALYTICS_STORAGE ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_ANALYTICS_STORAGE\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_STORAGE\")\")\n  fi\n\n  # config.analytics_default_allow_ad_storage\n  _ANALYTICS_AD_STORAGE=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_storage\")\n  if [[ $_ANALYTICS_AD_STORAGE ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AD_STORAGE\")\")\n  fi\n\n  # config.analytics_default_allow_ad_user_data\n  _ANALYTICS_AD_USER_DATA=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_user_data\")\n  if [[ $_ANALYTICS_AD_USER_DATA ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_USER_DATA\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AD_USER_DATA\")\")\n  fi\n\n  # config.analytics_default_allow_ad_personalization_signals\n  _ANALYTICS_PERSONALIZATION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_personalization_signals\")\n  if [[ $_ANALYTICS_PERSONALIZATION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_PERSONALIZATION\")\")\n  fi\n\n  # config.analytics_registration_with_ad_network_enabled\n  _ANALYTICS_REGISTRATION_WITH_AD_NETWORK=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"google_analytics_registration_with_ad_network_enabled\")\n  if [[ $_ANALYTICS_REGISTRATION_WITH_AD_NETWORK ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_REGISTRATION_WITH_AD_NETWORK\")\")\n  fi\n\n  # config.google_analytics_automatic_screen_reporting_enabled\n  _ANALYTICS_AUTO_SCREEN_REPORTING=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"google_analytics_automatic_screen_reporting_enabled\")\n  if [[ $_ANALYTICS_AUTO_SCREEN_REPORTING ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseAutomaticScreenReportingEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AUTO_SCREEN_REPORTING\")\")\n  fi\n\n  # config.perf_auto_collection_enabled\n  _PERF_AUTO_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"perf_auto_collection_enabled\")\n  if [[ $_PERF_AUTO_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"firebase_performance_collection_enabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_PERF_AUTO_COLLECTION\")\")\n  fi\n\n  # config.perf_collection_deactivated\n  _PERF_DEACTIVATED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"perf_collection_deactivated\")\n  if [[ $_PERF_DEACTIVATED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"firebase_performance_collection_deactivated\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_PERF_DEACTIVATED\")\")\n  fi\n\n  # config.messaging_auto_init_enabled\n  _MESSAGING_AUTO_INIT=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"messaging_auto_init_enabled\")\n  if [[ $_MESSAGING_AUTO_INIT ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseMessagingAutoInitEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_MESSAGING_AUTO_INIT\")\")\n  fi\n\n  # config.in_app_messaging_auto_colllection_enabled\n  _FIAM_AUTO_INIT=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"in_app_messaging_auto_collection_enabled\")\n  if [[ $_FIAM_AUTO_INIT ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseInAppMessagingAutomaticDataCollectionEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_FIAM_AUTO_INIT\")\")\n  fi\n\n  # config.app_check_token_auto_refresh\n  _APP_CHECK_TOKEN_AUTO_REFRESH=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"app_check_token_auto_refresh\")\n  if [[ $_APP_CHECK_TOKEN_AUTO_REFRESH ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseAppCheckTokenAutoRefreshEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_APP_CHECK_TOKEN_AUTO_REFRESH\")\")\n  fi\n\n  # config.crashlytics_disable_auto_disabler - undocumented for now - mainly for debugging, document if becomes useful\n  _CRASHLYTICS_AUTO_DISABLE_ENABLED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"crashlytics_disable_auto_disabler\")\n  if [[ $_CRASHLYTICS_AUTO_DISABLE_ENABLED == \"true\" ]]; then\n    echo \"Disabled Crashlytics auto disabler.\" # do nothing\n  else\n    _PLIST_ENTRY_KEYS+=(\"FirebaseCrashlyticsCollectionEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"NO\")\n  fi\nelse\n  _PLIST_ENTRY_KEYS+=(\"firebase_json_raw\")\n  _PLIST_ENTRY_TYPES+=(\"string\")\n  _PLIST_ENTRY_VALUES+=(\"$_JSON_OUTPUT_BASE64\")\n  echo \"warning:   A firebase.json file was not found, whilst this file is optional it is recommended to include it to configure firebase services in React Native Firebase.\"\nfi;\n\necho \"note: 2) Injecting Info.plist entries: \"\n\n# Log out the keys we're adding\nfor i in \"${!_PLIST_ENTRY_KEYS[@]}\"; do\n  echo \"    ->  $i) ${_PLIST_ENTRY_KEYS[$i]}\" \"${_PLIST_ENTRY_TYPES[$i]}\" \"${_PLIST_ENTRY_VALUES[$i]}\"\ndone\n\nfor plist in \"${_TARGET_PLIST}\" \"${_DSYM_PLIST}\" ; do\n  if [[ -f \"${plist}\" ]]; then\n\n    # paths with spaces break the call to setPlistValue. temporarily modify\n    # the shell internal field separator variable (IFS), which normally\n    # includes spaces, to consist only of line breaks\n    oldifs=$IFS\n    IFS=\"\n\"\n\n    for i in \"${!_PLIST_ENTRY_KEYS[@]}\"; do\n      setPlistValue \"${_PLIST_ENTRY_KEYS[$i]}\" \"${_PLIST_ENTRY_TYPES[$i]}\" \"${_PLIST_ENTRY_VALUES[$i]}\" \"${plist}\"\n    done\n\n    # restore the original internal field separator value\n    IFS=$oldifs\n  else\n    echo \"warning:   A Info.plist build output file was not found (${plist})\"\n  fi\ndone\n\necho \"note: <- RNFB build script finished\"\n";

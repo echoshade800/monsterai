@@ -4,9 +4,12 @@
 // AppRegistry.registerComponent('StepsMiniApp', () => App);
 
 import { ExpoRoot } from 'expo-router';
+import { AppRegistry } from 'react-native';
 
 // 让 expo-router 扫描 ./app 目录
 function Root() {
   const ctx = (require as any).context ? (require as any).context('./app') : undefined;
   return <ExpoRoot context={ctx} />;
 }
+
+AppRegistry.registerComponent('main', () => Root);
