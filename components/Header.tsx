@@ -685,14 +685,14 @@ const styles = StyleSheet.create({
   thinkingHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   brainEmoji: {
     fontSize: 18,
     marginRight: 6,
   },
   thinkingTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
