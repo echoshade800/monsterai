@@ -241,7 +241,7 @@ export default function MarketTab() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>Monster AI</Text>
-          <Text style={styles.subtitle}>your personal agent store</Text>
+          <Text style={styles.subtitle}>Your personal agent store</Text>
         </View>
 
         <View style={styles.grid}>
