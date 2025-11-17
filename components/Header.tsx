@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   thinkingBanner: {
-    height: 130,
+    height: 113,
     borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   collapsedThinkingBanner: {
-    height: 130,
+    height: 113,
     borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
