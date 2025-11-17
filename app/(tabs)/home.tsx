@@ -1105,6 +1105,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_700Bold',
     color: '#000',
     marginBottom: 12,
+    marginTop: -2,
   },
   thinkingBanner: {
     backgroundColor: '#1E1E1E',
