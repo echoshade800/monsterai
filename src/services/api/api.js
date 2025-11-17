@@ -135,6 +135,7 @@ export const API_ENDPOINTS = {
 
   TIMELINE: {
     INFO: '/timeline/info',
+    SAVE: '/timeline/save',
   },
 };
 

@@ -94,6 +94,7 @@ export default function HomeTab() {
 
   // Timeline item types
   type TimelineItem = {
+    id?: string;
     time: string;
     type: 'reminder' | 'prediction' | 'action';
     title?: string;
@@ -331,6 +332,9 @@ export default function HomeTab() {
       return null;
     }
 
+    // 获取 id，支持 id 和 _id 两种格式
+    const recordId = record.id || record._id;
+
     // 处理 reminder 类型
     if (type.endsWith('_reminder')) {
       const reminderType = type.replace('_reminder', '');
@@ -342,6 +346,7 @@ export default function HomeTab() {
         dinner: 'Dinner Reminder',
       };
       return {
+        id: recordId,
         time,
         type: 'reminder',
         title: titleMap[reminderType] || `${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)} Reminder`,
@@ -432,7 +437,14 @@ export default function HomeTab() {
 
           // 映射每个记录
           items = sortedRecords
-            .map((record) => mapApiRecordToTimelineItem(record))
+            .map((record) => {
+              const item = mapApiRecordToTimelineItem(record);
+              // 调试：如果 reminder 类型但没有 id，记录日志
+              if (item && item.type === 'reminder' && !item.id) {
+                console.warn('Reminder item missing id:', record);
+              }
+              return item;
+            })
             .filter((item): item is TimelineItem => item !== null);
         }
 
@@ -447,6 +459,42 @@ export default function HomeTab() {
       setLoadingTimeline(false);
     }
   }, [selectedDate]);
+
+  // 处理提醒开关切换
+  const handleToggleReminder = async (item: TimelineItem, newValue: boolean) => {
+    if (!item.id) {
+      console.error('Timeline item missing id:', item);
+      Alert.alert('错误', '无法更新提醒状态：缺少 ID');
+      return;
+    }
+
+    try {
+      // 打开开关，cancel 为 false；关闭开关，cancel 为 true
+      const cancel = !newValue;
+      
+      // 调用 API 更新状态
+      const response = await api.post(
+        API_ENDPOINTS.TIMELINE.SAVE,
+        {
+          id: item.id,
+          cancel: cancel,
+        },
+        { requireAuth: true }
+      );
+
+      // 更新本地状态
+      setTimelineData((prevData) =>
+        prevData.map((dataItem) =>
+          dataItem.id === item.id
+            ? { ...dataItem, toggleEnabled: newValue }
+            : dataItem
+        )
+      );
+    } catch (error) {
+      console.error('更新提醒状态失败:', error);
+      Alert.alert('错误', '更新提醒状态失败，请稍后重试');
+    }
+  };
 
   // Fetch logs on mount
   useEffect(() => {
@@ -1287,13 +1335,14 @@ export default function HomeTab() {
                           <Text style={styles.timelineReminderTitle}>{item.title}</Text>
                         </View>
                       </View>
-                      {/* <View style={styles.timelineReminderToggle}>
+                      <View style={styles.timelineReminderToggle}>
                         <Switch
                           value={item.toggleEnabled}
+                          onValueChange={(newValue) => handleToggleReminder(item, newValue)}
                           trackColor={{ false: '#E0E0E0', true: '#34C759' }}
                           thumbColor="#FFFFFF"
                         />
-                      </View> */}
+                      </View>
                     </>
                   )}
                   {item.type === 'prediction' && (
