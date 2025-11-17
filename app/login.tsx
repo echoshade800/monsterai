@@ -1,7 +1,7 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Apple } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Alert, BackHandler, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SvgUri } from 'react-native-svg';
 import { appleLoginWithUserInfo } from '../src/services/appleAuthService';
 import { googleLoginWithUserInfo } from '../src/services/googleAuthService';
 import userService from '../src/services/userService';
@@ -191,7 +191,11 @@ export default function LoginScreen() {
             disabled={isAppleLoading}
           >
             <View style={styles.buttonContent}>
-              <Apple size={24} color="#000000" fill="#000000" />
+              <SvgUri
+                uri="https://dzdbhsix5ppsc.cloudfront.net/monster/materials/Appleicon.svg"
+                width={24}
+                height={24}
+              />
               <Text style={styles.buttonText}>
                 {isAppleLoading ? 'Loading...' : 'Continue with Apple'}
               </Text>
@@ -204,7 +208,11 @@ export default function LoginScreen() {
             disabled={isGoogleLoading}
           >
             <View style={styles.buttonContent}>
-              <Text style={styles.googleIcon}>G</Text>
+              <SvgUri
+                uri="https://dzdbhsix5ppsc.cloudfront.net/monster/materials/Googleicon.svg"
+                width={24}
+                height={24}
+              />
               <Text style={styles.buttonText}>
                 {isGoogleLoading ? 'Loading...' : 'Continue with Google'}
               </Text>
@@ -286,11 +294,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
     gap: 12,
-  },
-  googleIcon: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#4285F4',
   },
   buttonText: {
     fontSize: 18,
