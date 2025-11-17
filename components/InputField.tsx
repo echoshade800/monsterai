@@ -57,7 +57,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
       bottom: interpolate(
         expanded,
         [0, 1],
-        [100, keyboardHeight.value + 10]
+        [114, keyboardHeight.value + 10]
       ),
       left: interpolate(expanded, [0, 1], [140, 20]),
       right: interpolate(expanded, [0, 1], [90, 20]),
@@ -71,7 +71,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
       bottom: interpolate(
         expanded,
         [0, 1],
-        [100, keyboardHeight.value + 10]
+        [114, keyboardHeight.value + 10]
       ),
       opacity: interpolate(expanded, [0, 1], [1, 0]),
     };
@@ -129,7 +129,8 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
       />
 
       <Animated.View style={[styles.container, containerAnimatedStyle]}>
-        <BlurView intensity={70} tint="light" style={StyleSheet.absoluteFill} />
+        <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+        <View style={styles.borderOverlay} />
         <View style={styles.inputContainer}>
           <Animated.View style={[styles.atButtonWrapper, atButtonAnimatedStyle]}>
             <TouchableOpacity
@@ -174,7 +175,8 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
           onPress={handleCameraPress}
           disabled={disabled}
         >
-          <BlurView intensity={70} tint="light" style={StyleSheet.absoluteFill} />
+          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+          <View style={styles.cameraButtonBorder} />
           <Camera size={24} color={disabled ? "#999999" : "#000000"} strokeWidth={2.5} />
         </TouchableOpacity>
       </Animated.View>
@@ -187,11 +189,22 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderRadius: 25,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+  },
+  borderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    pointerEvents: 'none',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -233,11 +246,22 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+  },
+  cameraButtonBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    pointerEvents: 'none',
   },
   cameraButtonDisabled: {
     opacity: 0.4,
