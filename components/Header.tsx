@@ -469,15 +469,13 @@ const styles = StyleSheet.create({
   },
   timeRange: {
     fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
     color: '#666666',
     marginBottom: 2,
   },
   taskTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
   doneButton: {
@@ -498,8 +496,7 @@ const styles = StyleSheet.create({
   },
   doneButtonText: {
     fontSize: 15,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
   },
   thinkingBanner: {
@@ -594,8 +591,7 @@ const styles = StyleSheet.create({
   },
   thinkingTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
   thinkingLogContainer: {
@@ -632,8 +628,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 28,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
 });

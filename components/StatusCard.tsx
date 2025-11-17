@@ -116,8 +116,7 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     fontSize: 28,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
     marginBottom: 8,
   },
@@ -128,14 +127,13 @@ const styles = StyleSheet.create({
   },
   stressLabel: {
     fontSize: 16,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#666666',
     marginRight: 8,
   },
   stressValue: {
     fontSize: 28,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
   graphContainer: {
@@ -162,7 +160,7 @@ const styles = StyleSheet.create({
   },
   cameraPlaceholderText: {
     fontSize: 40,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     marginTop: -30,
   },
   cameraButton: {

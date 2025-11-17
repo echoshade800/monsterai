@@ -180,8 +180,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
   logContainer: {
@@ -252,7 +251,7 @@ const styles = StyleSheet.create({
   },
   cameraPlaceholderText: {
     fontSize: 40,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     marginTop: -30,
   },
   cameraButton: {

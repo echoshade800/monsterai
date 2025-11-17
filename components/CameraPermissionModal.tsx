@@ -62,15 +62,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
     marginBottom: 12,
     textAlign: 'center',
   },
   message: {
     fontSize: 16,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#666666',
     textAlign: 'center',
     marginBottom: 25,
@@ -89,8 +88,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#666666',
   },
   allowButton: {
@@ -102,8 +100,7 @@ const styles = StyleSheet.create({
   },
   allowButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#FFFFFF',
   },
 });

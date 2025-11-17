@@ -122,8 +122,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 22,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
   categoryBadge: {
@@ -134,8 +133,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
   },
   imageContainer: {
@@ -161,8 +159,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 12,
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
     color: '#000000',
     lineHeight: 14,
   },
@@ -191,8 +188,7 @@ const styles = StyleSheet.create({
   },
   hireText: {
     fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
   },
   hiredText: {

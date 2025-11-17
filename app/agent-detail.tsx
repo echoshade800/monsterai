@@ -693,16 +693,14 @@ const styles = StyleSheet.create({
   },
   agentName: {
     fontSize: 48,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
     textAlign: 'center',
     marginBottom: 16,
   },
   goalText: {
     fontSize: 16,
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
     color: '#000000',
     textAlign: 'center',
     lineHeight: 24,
@@ -729,14 +727,12 @@ const styles = StyleSheet.create({
   },
   hireButtonText: {
     fontSize: 18,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#FFFFFF',
   },
   freeTrialText: {
     fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: 'rgba(255, 255, 255, 0.7)',
   },
   missionCard: {
@@ -754,8 +750,7 @@ const styles = StyleSheet.create({
   },
   taskText: {
     fontSize: 15,
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
     color: '#000000',
     flex: 1,
     lineHeight: 22,
@@ -769,8 +764,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
     marginBottom: 16,
   },
@@ -782,15 +776,13 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
     marginBottom: 6,
   },
   featureDescription: {
     fontSize: 14,
-    fontWeight: '400',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#333333',
     lineHeight: 20,
   },
@@ -802,8 +794,7 @@ const styles = StyleSheet.create({
   },
   mindTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#FFFFFF',
     marginBottom: 16,
   },
@@ -817,8 +808,7 @@ const styles = StyleSheet.create({
   },
   permissionText: {
     fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
     color: '#000000',
     lineHeight: 22,
     marginBottom: 8,
@@ -842,8 +832,7 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 11,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#666666',
     textAlign: 'center',
     marginBottom: 8,
@@ -857,14 +846,12 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontSize: 16,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
   motivationText: {
     fontSize: 18,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
     textAlign: 'center',
     marginTop: 8,
@@ -881,8 +868,7 @@ const styles = StyleSheet.create({
   },
   mindBannerTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#FFFFFF',
     marginBottom: 16,
     lineHeight: 24,
@@ -936,15 +922,13 @@ const styles = StyleSheet.create({
   },
   permissionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
     marginBottom: 2,
   },
   permissionSubtitle: {
     fontSize: 13,
-    fontWeight: '400',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#666666',
   },
   outcomeKeywordsGrid: {
@@ -962,8 +946,7 @@ const styles = StyleSheet.create({
   },
   outcomeKeyword: {
     fontSize: 15,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
     textAlign: 'center',
   },

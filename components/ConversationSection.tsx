@@ -323,8 +323,7 @@ const styles = StyleSheet.create({
   timestamp: {
     fontSize: 13,
     color: '#999999',
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
   },
   assistantMessageContainer: {
     flexDirection: 'column',
@@ -342,7 +341,7 @@ const styles = StyleSheet.create({
   },
   assistantText: {
     fontSize: 15,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#000000',
     lineHeight: 22,
   },
@@ -367,7 +366,7 @@ const styles = StyleSheet.create({
   },
   userText: {
     fontSize: 15,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#000000',
     lineHeight: 22,
   },
@@ -407,11 +406,11 @@ const styles = StyleSheet.create({
   imageErrorText: {
     fontSize: 13,
     color: '#FFFFFF',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
   },
   photoOnlyText: {
     fontSize: 13,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#666666',
   },
   textWithImage: {
@@ -428,7 +427,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#999999',
   },
   typingIndicatorWrapper: {
@@ -453,7 +452,7 @@ const styles = StyleSheet.create({
   },
   typingText: {
     fontSize: 14,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#999999',
     fontStyle: 'italic',
   },

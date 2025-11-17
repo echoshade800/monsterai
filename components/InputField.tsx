@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_400Regular',
     color: '#000000',
     maxHeight: 100,
     paddingHorizontal: 4,

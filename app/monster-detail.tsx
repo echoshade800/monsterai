@@ -234,8 +234,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 40,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
   },
   categoryBadge: {
@@ -246,14 +245,12 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_600SemiBold',
     color: '#000000',
   },
   description: {
     fontSize: 16,
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
     color: '#000000',
     lineHeight: 24,
     marginBottom: 24,
@@ -263,8 +260,7 @@ const styles = StyleSheet.create({
   },
   abilitiesTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
     marginBottom: 16,
   },
@@ -282,8 +278,7 @@ const styles = StyleSheet.create({
   },
   abilityText: {
     fontSize: 16,
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
     color: '#000000',
     flex: 1,
   },
@@ -305,8 +300,7 @@ const styles = StyleSheet.create({
   },
   hireButtonText: {
     fontSize: 18,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#FFFFFF',
   },
 });

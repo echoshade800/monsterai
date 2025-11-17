@@ -231,15 +231,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    fontWeight: '500',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_500Medium',
     color: '#666666',
   },
   grid: {
@@ -264,8 +262,7 @@ const styles = StyleSheet.create({
   },
   gamesSectionTitle: {
     fontSize: 28,
-    fontWeight: '700',
-    fontFamily: 'SF Compact Rounded',
+    fontFamily: 'Nunito_700Bold',
     color: '#000000',
     paddingHorizontal: 20,
     marginBottom: 16,
