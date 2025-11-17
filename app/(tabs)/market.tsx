@@ -400,8 +400,13 @@ const styles = StyleSheet.create({
   bannerImage: {
     width: 369,
     height: 108,
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
   modalOverlay: {
     flex: 1,
