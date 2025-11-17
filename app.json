@@ -26,7 +26,13 @@
           "cameraPermission": "Allow Monster AI to access your camera to record moments."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.827695368889-p02agvs6fcqqj0djmumg5ddldjdpjlmh"
+        }
+      ]
     ],
     "android": {
       "package": "com.fanthus.monsterai.debug"
