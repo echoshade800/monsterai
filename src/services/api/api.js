@@ -21,16 +21,16 @@ const API_CONFIGS = {
     },
   },
   [ENV.STAGING]: {
-    BASE_URL: 'http://23.20.151.253:8998',
-    AUTH_BASE_URL: 'http://54.80.146.38:8999',
+    BASE_URL: 'https://py.mymonster.ai',
+    AUTH_BASE_URL: 'https://java.mymonster.ai',
     TIMEOUT: 10000,
     HEADERS: {
       'Content-Type': 'application/json',
     },
   },
   [ENV.PRODUCTION]: {
-    BASE_URL: 'http://23.20.151.253:8998',
-    AUTH_BASE_URL: 'http://54.80.146.38:8999',
+    BASE_URL: 'https://py.mymonster.ai',
+    AUTH_BASE_URL: 'https://java.mymonster.ai',
     TIMEOUT: 10000,
     HEADERS: {
       'Content-Type': 'application/json',
