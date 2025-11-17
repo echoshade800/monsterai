@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 60,
+    marginTop: -2,
   },
   tabContentFocused: {
   },
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 6,
-    top: 3,
+    top: 1,
   },
   iconContainer: {
     width: 52,
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#666666',
     opacity: 0.8,
-    marginTop: -9,
+    marginTop: -11,
   },
   labelFocused: {
     fontWeight: '700',
