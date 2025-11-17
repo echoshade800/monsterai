@@ -119,6 +119,10 @@ export const API_ENDPOINTS = {
     HISTORY: '/conversation/history',
     HISTORY_INFO: '/conversation/history/info',
   },
+
+  AGENT_LOG: {
+    INFO: '/data-agent/agent-log/info',
+  },
 };
 
 // 导出环境常量

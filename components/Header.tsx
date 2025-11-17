@@ -1,19 +1,21 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ImageBackground, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { User, Check } from 'lucide-react-native';
-import { useState, useEffect } from 'react';
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-  interpolate,
-  Extrapolate,
-  useSharedValue,
-  runOnJS,
-  withRepeat,
-} from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { CameraBox } from './CameraBox';
 import { useRouter } from 'expo-router';
+import { Check, User } from 'lucide-react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Image, ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  Extrapolate,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+import { api } from '../src/services/api-clients/client';
+import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
+import { CameraBox } from './CameraBox';
 
 interface HeaderProps {
   isCollapsed?: boolean;
@@ -24,7 +26,8 @@ const EXPANDED_HEIGHT = 600;
 const COLLAPSED_HEIGHT = 332;
 const COLLAPSE_THRESHOLD = 100;
 
-const LOG_ENTRIES = [
+// Default fallback entries
+const DEFAULT_LOG_ENTRIES = [
   { time: '07:42', message: "User's facial energy dropped 12% vs baseline." },
   { time: '07:45', message: 'Tag: Low energy morning, possible poor sleep.' },
   { time: '08:02', message: 'Suggest: Protein breakfast + 5-min stretch.' },
@@ -32,8 +35,50 @@ const LOG_ENTRIES = [
   { time: '08:40', message: 'Saved to Life Log → Breakfast check-in.' },
 ];
 
+interface LogEntry {
+  time: string;
+  message: string;
+}
+
+// Helper function to format time from various formats to HH:mm
+const formatTime = (timeInput: any): string => {
+  if (!timeInput) return '';
+  
+  // If it's already in HH:mm format, return as is
+  if (typeof timeInput === 'string' && /^\d{2}:\d{2}$/.test(timeInput)) {
+    return timeInput;
+  }
+  
+  // If it's a timestamp (number or ISO string), convert to HH:mm
+  try {
+    let date: Date;
+    
+    // Handle numeric string timestamps (e.g., "151351233523")
+    if (typeof timeInput === 'string' && /^\d+$/.test(timeInput)) {
+      const timestamp = parseInt(timeInput, 10);
+      // If it's a 13-digit timestamp (milliseconds), use as is
+      // If it's a 10-digit timestamp (seconds), convert to milliseconds
+      date = new Date(timeInput.length === 13 ? timestamp : timestamp * 1000);
+    } else {
+      date = new Date(timeInput);
+    }
+    
+    if (!isNaN(date.getTime())) {
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+  } catch (error) {
+    // If parsing fails, return the original value as string
+  }
+  
+  return String(timeInput);
+};
+
 export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
+  const [logEntries, setLogEntries] = useState<LogEntry[]>(DEFAULT_LOG_ENTRIES);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
   const scrollY = useSharedValue(0);
   const router = useRouter();
@@ -46,18 +91,75 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
     router.push('/profile');
   };
 
+  // Fetch agent log data from API
+  const fetchAgentLogs = useCallback(async () => {
+    try {
+      setIsLoadingLogs(true);
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      const response = await api.get(
+        API_ENDPOINTS.AGENT_LOG.INFO,
+        {
+          headers: {
+            'passid': passIdValue,
+          },
+        }
+      );
+      console.log('fetchAgentLogs response', response);
+
+      if (response.isSuccess() && response.data) {
+        // Transform API response to log entries format
+        // API returns: { code: 0, msg: "success", data: { records: [...], ... } }
+        let entries: LogEntry[] = [];
+        
+        if (response.data.records && Array.isArray(response.data.records)) {
+          entries = response.data.records.map((item: any) => {
+            // Use created_at (ISO string) or timestamp for time formatting
+            const timeSource = item.created_at || item.timestamp;
+            const time = formatTime(timeSource);
+            // Use reasoning as the message content
+            const message = item.reasoning || '';
+            
+            return {
+              time,
+              message,
+            };
+          }).filter((entry: LogEntry) => entry.time && entry.message);
+        }
+
+        if (entries.length > 0) {
+          setLogEntries(entries);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch agent logs:', error);
+      // Keep default entries on error
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  }, []);
+
+  // Fetch logs on mount
+  useEffect(() => {
+    fetchAgentLogs();
+  }, [fetchAgentLogs]);
+
+  // Update scroll animation when log entries change
   useEffect(() => {
     const lineHeight = 23;
-    const totalHeight = LOG_ENTRIES.length * lineHeight;
+    const totalHeight = logEntries.length * lineHeight;
 
-    scrollY.value = withRepeat(
-      withTiming(totalHeight, {
-        duration: 15000,
-      }),
-      -1,
-      false
-    );
-  }, []);
+    if (totalHeight > 0) {
+      scrollY.value = withRepeat(
+        withTiming(totalHeight, {
+          duration: 15000,
+        }),
+        -1,
+        false
+      );
+    }
+  }, [logEntries]);
 
   useEffect(() => {
     animatedCollapse.value = withTiming(isCollapsed ? 1 : 0, {
@@ -300,7 +402,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
-                        {[...LOG_ENTRIES, ...LOG_ENTRIES].map((entry, index) => (
+                        {[...logEntries, ...logEntries].map((entry, index) => (
                           <Text key={index} style={styles.logLine}>
                             <Text style={styles.logTime}>[{entry.time}]</Text>
                             <Text style={styles.logText}> {entry.message}</Text>
@@ -341,7 +443,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
                     </View>
                     <View style={styles.thinkingLogContainer}>
                       <Animated.View style={logScrollStyle}>
-                        {[...LOG_ENTRIES, ...LOG_ENTRIES].map((entry, index) => (
+                        {[...logEntries, ...logEntries].map((entry, index) => (
                           <Text key={index} style={styles.logLine}>
                             <Text style={styles.logTime}>[{entry.time}]</Text>
                             <Text style={styles.logText}> {entry.message}</Text>
