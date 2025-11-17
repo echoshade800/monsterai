@@ -1012,33 +1012,45 @@ export default function HomeTab() {
                   )}
                 </View>
                 <View style={styles.timelineContent}>
-                  <Text style={styles.timelineTime}>{item.time}</Text>
                   {item.type === 'reminder' && (
-                    <View style={styles.timelineReminderContent}>
-                      <View style={styles.timelineReminderLeft}>
-                        <Bell size={16} color="#666" style={styles.timelineReminderIcon} />
-                        <Text style={styles.timelineReminderTitle}>{item.title}</Text>
+                    <>
+                      <View style={styles.timelineHeader}>
+                        <Text style={styles.timelineTime}>{item.time}</Text>
+                        <View style={styles.timelineReminderLeft}>
+                          <Bell size={16} color="#666" style={styles.timelineReminderIcon} />
+                          <Text style={styles.timelineReminderTitle}>{item.title}</Text>
+                        </View>
                       </View>
-                      <Switch
-                        value={item.toggleEnabled}
-                        trackColor={{ false: '#E0E0E0', true: '#34C759' }}
-                        thumbColor="#FFFFFF"
-                      />
-                    </View>
+                      <View style={styles.timelineReminderToggle}>
+                        <Switch
+                          value={item.toggleEnabled}
+                          trackColor={{ false: '#E0E0E0', true: '#34C759' }}
+                          thumbColor="#FFFFFF"
+                        />
+                      </View>
+                    </>
                   )}
                   {item.type === 'prediction' && (
-                    <View style={styles.timelinePredictionContent}>
-                      <Text style={styles.timelinePredictionTitle}>{item.title}</Text>
+                    <>
+                      <View style={styles.timelineHeader}>
+                        <Text style={styles.timelineTime}>{item.time}</Text>
+                        <Text style={styles.timelinePredictionTitle}>{item.title}</Text>
+                      </View>
                       <Text style={styles.timelinePredictionSubtitle}>{item.subtitle}</Text>
-                    </View>
+                    </>
                   )}
                   {item.type === 'action' && (
-                    <View style={styles.timelineActionContent}>
-                      <View style={styles.timelineActionTag}>
-                        <Text style={styles.timelineActionTagText}>{item.agentTag}</Text>
+                    <>
+                      <View style={styles.timelineHeader}>
+                        <Text style={styles.timelineTime}>{item.time}</Text>
+                        <View style={styles.timelineActionTag}>
+                          <Text style={styles.timelineActionTagText}>{item.agentTag}</Text>
+                        </View>
                       </View>
-                      <Text style={styles.timelineActionDescription}>{item.description}</Text>
-                    </View>
+                      <View style={styles.timelineActionContent}>
+                        <Text style={styles.timelineActionDescription}>{item.description}</Text>
+                      </View>
+                    </>
                   )}
                 </View>
               </View>
@@ -1290,11 +1302,16 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingBottom: 16,
   },
+  timelineHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 12,
+  },
   timelineTime: {
     fontSize: 16,
     fontFamily: 'Nunito_700Bold',
     color: '#000',
-    marginBottom: 8,
   },
   timelineCategory: {
     fontSize: 15,
@@ -1309,11 +1326,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   // Reminder styles
-  timelineReminderContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   timelineReminderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1327,15 +1339,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_600SemiBold',
     color: '#000',
   },
-  // Prediction styles
-  timelinePredictionContent: {
-    flexDirection: 'column',
+  timelineReminderToggle: {
+    alignSelf: 'flex-start',
   },
+  // Prediction styles
   timelinePredictionTitle: {
     fontSize: 15,
     fontFamily: 'Nunito_700Bold',
     color: '#000',
-    marginBottom: 4,
   },
   timelinePredictionSubtitle: {
     fontSize: 14,
@@ -1355,7 +1366,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     alignSelf: 'flex-start',
-    marginBottom: 6,
   },
   timelineActionTagText: {
     fontSize: 12,
