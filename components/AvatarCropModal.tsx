@@ -111,22 +111,6 @@ export default function AvatarCropModal({ visible, imageUri, onCancel, onConfirm
       onRequestClose={handleCancel}
     >
       <GestureHandlerRootView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-            <Text style={styles.cancelText}>Cancel</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Move and Scale</Text>
-          <TouchableOpacity
-            onPress={handleConfirm}
-            style={styles.headerButton}
-            disabled={isProcessing}
-          >
-            <Text style={[styles.doneText, isProcessing && styles.disabledText]}>
-              {isProcessing ? 'Processing...' : 'Choose'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.cropArea}>
           <GestureDetector gesture={composed}>
             <Animated.View style={[styles.imageContainer, animatedStyle]}>
@@ -147,6 +131,22 @@ export default function AvatarCropModal({ visible, imageUri, onCancel, onConfirm
           </View>
         </View>
 
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Move and Scale</Text>
+          <TouchableOpacity
+            onPress={handleConfirm}
+            style={styles.headerButton}
+            disabled={isProcessing}
+          >
+            <Text style={[styles.doneText, isProcessing && styles.disabledText]}>
+              {isProcessing ? 'Processing...' : 'Choose'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.instructions}>
           <Text style={styles.instructionText}>Pinch to zoom, drag to move</Text>
         </View>
@@ -161,13 +161,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 20,
     paddingBottom: 15,
-    backgroundColor: '#000000',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    zIndex: 10,
   },
   headerButton: {
     minWidth: 80,
@@ -191,7 +196,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   cropArea: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -242,9 +247,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   instructions: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingVertical: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
     alignItems: 'center',
-    backgroundColor: '#000000',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    zIndex: 10,
   },
   instructionText: {
     fontSize: 14,
