@@ -1,7 +1,8 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { Alert, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
@@ -10,8 +11,59 @@ import storageManager from '../src/utils/storage';
 export default function ProfileScreen() {
   const router = useRouter();
 
+  const [name, setName] = useState('USER6VPTIXFW8');
+  const [birthday, setBirthday] = useState('2003/10/17');
+  const [sex, setSex] = useState('Female');
+  const [height, setHeight] = useState('171 cm');
+
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [tempValue, setTempValue] = useState('');
+  const [tempYear, setTempYear] = useState('2003');
+  const [tempMonth, setTempMonth] = useState('10');
+  const [tempDay, setTempDay] = useState('17');
+  const [tempHeight, setTempHeight] = useState('171');
+
   const handleBack = () => {
     router.back();
+  };
+
+  const handleEditName = () => {
+    setTempValue(name);
+    setEditingField('name');
+  };
+
+  const handleEditBirthday = () => {
+    const parts = birthday.split('/');
+    setTempYear(parts[0]);
+    setTempMonth(parts[1]);
+    setTempDay(parts[2]);
+    setEditingField('birthday');
+  };
+
+  const handleEditSex = () => {
+    setEditingField('sex');
+  };
+
+  const handleEditHeight = () => {
+    setTempHeight(height.replace(' cm', ''));
+    setEditingField('height');
+  };
+
+  const handleSave = () => {
+    if (editingField === 'name') {
+      setName(tempValue);
+    } else if (editingField === 'birthday') {
+      setBirthday(`${tempYear}/${tempMonth}/${tempDay}`);
+    } else if (editingField === 'sex') {
+      setSex(tempValue);
+    } else if (editingField === 'height') {
+      setHeight(`${tempHeight} cm`);
+    }
+    setEditingField(null);
+  };
+
+  const handleCancel = () => {
+    setEditingField(null);
   };
 
   const handleLogout = () => {
@@ -122,13 +174,56 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+
           <View style={styles.card}>
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
 
-            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/account-settings')}>
-              <Text style={styles.menuItemText}>Account</Text>
-              <ChevronRight size={20} color="#666" strokeWidth={2} />
-            </TouchableOpacity>
+            <View style={styles.menuItem}>
+              <View style={styles.menuItemLeft}>
+                <Text style={styles.menuItemLabel}>Name</Text>
+                <Text style={styles.menuItemValue}>{name}</Text>
+              </View>
+              <TouchableOpacity style={styles.editButton} onPress={handleEditName}>
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.menuItem}>
+              <View style={styles.menuItemLeft}>
+                <Text style={styles.menuItemLabel}>Birthday</Text>
+                <Text style={styles.menuItemValue}>{birthday}</Text>
+              </View>
+              <TouchableOpacity style={styles.editButton} onPress={handleEditBirthday}>
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.menuItem}>
+              <View style={styles.menuItemLeft}>
+                <Text style={styles.menuItemLabel}>Sex</Text>
+                <Text style={styles.menuItemValue}>{sex}</Text>
+              </View>
+              <TouchableOpacity style={styles.editButton} onPress={handleEditSex}>
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.menuItem}>
+              <View style={styles.menuItemLeft}>
+                <Text style={styles.menuItemLabel}>Height</Text>
+                <Text style={styles.menuItemValue}>{height}</Text>
+              </View>
+              <TouchableOpacity style={styles.editButton} onPress={handleEditHeight}>
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -176,6 +271,141 @@ export default function ProfileScreen() {
           <Text style={styles.versionText}>MonsterAI v1.0.0 (Beta)</Text>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={editingField !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCancel}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <BlurView intensity={100} tint="light" style={StyleSheet.absoluteFill} />
+
+            <Text style={styles.modalTitle}>
+              {editingField === 'name' && 'Edit Name'}
+              {editingField === 'birthday' && 'Edit Birthday'}
+              {editingField === 'sex' && 'Edit Sex'}
+              {editingField === 'height' && 'Edit Height'}
+            </Text>
+
+            {editingField === 'name' && (
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  value={tempValue}
+                  onChangeText={setTempValue}
+                  placeholder="Enter your name"
+                  placeholderTextColor="#999"
+                  autoFocus
+                />
+              </View>
+            )}
+
+            {editingField === 'birthday' && (
+              <View style={styles.pickerRow}>
+                <View style={styles.pickerColumn}>
+                  <Text style={styles.pickerLabel}>Year</Text>
+                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 100 }, (_, i) => (2024 - i).toString()).map(year => (
+                      <TouchableOpacity
+                        key={year}
+                        style={[styles.pickerItem, year === tempYear && styles.pickerItemSelected]}
+                        onPress={() => setTempYear(year)}
+                      >
+                        <Text style={[styles.pickerItemText, year === tempYear && styles.pickerItemTextSelected]}>
+                          {year}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                <View style={styles.pickerColumn}>
+                  <Text style={styles.pickerLabel}>Month</Text>
+                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(month => (
+                      <TouchableOpacity
+                        key={month}
+                        style={[styles.pickerItem, month === tempMonth && styles.pickerItemSelected]}
+                        onPress={() => setTempMonth(month)}
+                      >
+                        <Text style={[styles.pickerItemText, month === tempMonth && styles.pickerItemTextSelected]}>
+                          {month}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                <View style={styles.pickerColumn}>
+                  <Text style={styles.pickerLabel}>Day</Text>
+                  <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(day => (
+                      <TouchableOpacity
+                        key={day}
+                        style={[styles.pickerItem, day === tempDay && styles.pickerItemSelected]}
+                        onPress={() => setTempDay(day)}
+                      >
+                        <Text style={[styles.pickerItemText, day === tempDay && styles.pickerItemTextSelected]}>
+                          {day}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+            )}
+
+            {editingField === 'sex' && (
+              <View style={styles.optionsContainer}>
+                <TouchableOpacity
+                  style={[styles.optionButton, tempValue === 'Male' && styles.optionButtonSelected]}
+                  onPress={() => setTempValue('Male')}
+                >
+                  <Text style={[styles.optionText, tempValue === 'Male' && styles.optionTextSelected]}>
+                    Male
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.optionButton, tempValue === 'Female' && styles.optionButtonSelected]}
+                  onPress={() => setTempValue('Female')}
+                >
+                  <Text style={[styles.optionText, tempValue === 'Female' && styles.optionTextSelected]}>
+                    Female
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {editingField === 'height' && (
+              <View style={styles.singlePickerContainer}>
+                <Text style={styles.pickerLabel}>Height (cm)</Text>
+                <ScrollView style={styles.singlePickerScrollView} showsVerticalScrollIndicator={false}>
+                  {Array.from({ length: 121 }, (_, i) => (120 + i).toString()).map(h => (
+                    <TouchableOpacity
+                      key={h}
+                      style={[styles.pickerItem, h === tempHeight && styles.pickerItemSelected]}
+                      onPress={() => setTempHeight(h)}
+                    >
+                      <Text style={[styles.pickerItemText, h === tempHeight && styles.pickerItemTextSelected]}>
+                        {h}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -287,6 +517,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000000',
   },
+  menuItemLeft: {
+    flex: 1,
+  },
+  menuItemLabel: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 4,
+  },
+  menuItemValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  editButton: {
+    backgroundColor: '#E5E5E5',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  editButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000000',
+  },
   dangerText: {
     fontSize: 16,
     fontWeight: '600',
@@ -305,5 +559,134 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#999999',
     fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    padding: 24,
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000000',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  inputContainer: {
+    marginBottom: 24,
+  },
+  textInput: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#000000',
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+    height: 200,
+  },
+  pickerColumn: {
+    flex: 1,
+  },
+  pickerLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666666',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  pickerScrollView: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: 12,
+    maxHeight: 160,
+  },
+  singlePickerContainer: {
+    marginBottom: 24,
+  },
+  singlePickerScrollView: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: 12,
+    maxHeight: 200,
+  },
+  pickerItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  pickerItemSelected: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: '#000000',
+  },
+  pickerItemTextSelected: {
+    fontWeight: '700',
+  },
+  optionsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  optionButton: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  optionButtonSelected: {
+    backgroundColor: '#000000',
+  },
+  optionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  optionTextSelected: {
+    color: '#FFFFFF',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: '#000000',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
