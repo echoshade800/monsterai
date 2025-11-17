@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 2,
+    marginBottom: 0,
   },
   iconBackground: {
     position: 'absolute',
@@ -183,6 +183,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 6,
+    top: -13,
   },
   iconContainer: {
     width: 52,

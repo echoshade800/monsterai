@@ -14,12 +14,7 @@ export default function TabLayout() {
         options={{
           title: 'Echo',
           tabBarIcon: ({ color, focused }) => (
-            <MessageCircle
-              size={26}
-              color={color}
-              fill={focused ? color : 'none'}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <MessageCircle size={26} color={color} strokeWidth={2.5} />
           ),
         }}
       />
@@ -28,12 +23,7 @@ export default function TabLayout() {
         options={{
           title: 'Life Log',
           tabBarIcon: ({ color, focused }) => (
-            <BookText
-              size={26}
-              color={color}
-              fill={focused ? color : 'none'}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <BookText size={26} color={color} strokeWidth={2.5} />
           ),
         }}
       />
@@ -42,12 +32,7 @@ export default function TabLayout() {
         options={{
           title: 'Store',
           tabBarIcon: ({ color, focused }) => (
-            <Store
-              size={26}
-              color={color}
-              fill={focused ? color : 'none'}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <Store size={26} color={color} strokeWidth={2.5} />
           ),
         }}
       />
@@ -56,12 +41,7 @@ export default function TabLayout() {
         options={{
           title: 'Social',
           tabBarIcon: ({ color, focused }) => (
-            <Users
-              size={26}
-              color={color}
-              fill={focused ? color : 'none'}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <Users size={26} color={color} strokeWidth={2.5} />
           ),
         }}
       />
