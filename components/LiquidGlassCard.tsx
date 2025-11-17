@@ -21,14 +21,14 @@ export function LiquidGlassCard({ children, style, intensity = 70 }: LiquidGlass
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 22,
+    borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
   content: {
     flex: 1,

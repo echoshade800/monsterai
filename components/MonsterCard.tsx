@@ -103,16 +103,16 @@ export function MonsterCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 24,
+    borderRadius: 12,
     padding: 16,
     height: 200,
     position: 'relative',
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
   topPickBadge: {
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
