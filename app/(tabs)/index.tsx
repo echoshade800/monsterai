@@ -1,7 +1,7 @@
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Keyboard, StyleSheet, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
@@ -652,21 +652,28 @@ export default function EchoTab() {
     };
   }, []);
 
+  const dismissKeyboard = useCallback(() => {
+    Keyboard.dismiss();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Header
-        isCollapsed={isCollapsed}
-        onCollapse={handleCollapse}
-      />
+      <TouchableWithoutFeedback onPress={dismissKeyboard}>
+        <View style={styles.contentWrapper}>
+          <Header
+            isCollapsed={isCollapsed}
+            onCollapse={handleCollapse}
+          />
 
-      <ConversationSection
-        messages={messages}
-        isLoading={isLoading}
-        isSending={isSending}
-        currentResponse={currentResponse}
-        keyboardHeight={keyboardHeight}
-      />
-
+          <ConversationSection
+            messages={messages}
+            isLoading={isLoading}
+            isSending={isSending}
+            currentResponse={currentResponse}
+            keyboardHeight={keyboardHeight}
+          />
+        </View>
+      </TouchableWithoutFeedback>
 
       <InputField
         onFocus={handleInputFocus}
@@ -682,6 +689,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F7F9',
+  },
+  contentWrapper: {
+    flex: 1,
   },
   testButton: {
     position: 'absolute',

@@ -223,7 +223,8 @@ export function ConversationSection({
       style={styles.scrollContainer}
       contentContainerStyle={[styles.container, { paddingBottom: dynamicPaddingBottom }]}
       showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
+      keyboardShouldPersistTaps="always"
+      keyboardDismissMode="on-drag"
     >
       {messages.map((message) => {
         if (message.type === 'timestamp') {
