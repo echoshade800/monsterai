@@ -49,12 +49,11 @@ export function MonsterCard({
       onPress={onCardPress || onFingerprintPress}
       activeOpacity={0.95}
     >
-      <View style={styles.topPickBadge}>
-        <Text style={styles.topPickText}>Top Pick</Text>
-      </View>
-
       <View style={styles.header}>
         <Text style={styles.name}>{name}</Text>
+        <View style={styles.topPickBadge}>
+          <Text style={styles.topPickText}>Top Pick</Text>
+        </View>
       </View>
 
       <View style={styles.imageContainer}>
@@ -116,14 +115,10 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   topPickBadge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
-    zIndex: 10,
   },
   topPickText: {
     fontSize: 11,
@@ -133,7 +128,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
   },
