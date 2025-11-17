@@ -116,53 +116,6 @@ export default function EchoTab() {
     return [];
   };
 
-  // 获取对话历史
-  const fetchConversationHistory = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const result = await conversationService.getConversationHistory();
-      
-      if (result.success && result.data) {
-        const convertedMessages = convertToMessages(result.data);
-        // 反转消息数组，使最旧的消息在前，最新的在后
-        const historyMessages = convertedMessages.reverse();
-        
-        // 合并历史消息和当前消息，确保新消息在最后
-        setMessages(prev => {
-          // 如果已经有消息，合并而不是替换
-          if (prev.length > 0) {
-            // 创建一个消息ID集合，用于去重
-            const existingIds = new Set(prev.map(msg => msg.id));
-            // 只添加不存在的历史消息
-            const newHistoryMessages = historyMessages.filter(msg => !existingIds.has(msg.id));
-            // 历史消息在前（最旧在前，最新在后），新消息在后（确保最新消息在最后）
-            const merged = [...newHistoryMessages, ...prev];
-            console.log('合并消息:', { 
-              prevCount: prev.length, 
-              historyCount: historyMessages.length, 
-              newCount: newHistoryMessages.length,
-              mergedCount: merged.length,
-              note: '历史消息在前，新消息在后，确保最新消息在最后'
-            });
-            return merged;
-          }
-          // 如果没有现有消息，直接使用历史消息
-          return historyMessages;
-        });
-      } else {
-        console.error('获取对话历史失败:', result.message);
-        // 只有在没有现有消息时才清空
-        setMessages(prev => prev.length > 0 ? prev : []);
-      }
-    } catch (error) {
-      console.error('获取对话历史异常:', error);
-      // 只有在没有现有消息时才清空
-      setMessages(prev => prev.length > 0 ? prev : []);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   // 初始化用户数据（从本地存储获取真实数据）
   useEffect(() => {
     const initUserData = async () => {
@@ -184,27 +137,6 @@ export default function EchoTab() {
     };
     initUserData();
   }, []);
-
-  // 组件挂载时获取对话历史（只在首次挂载且没有照片参数时获取）
-  useEffect(() => {
-    // 如果有照片参数，说明是拍照返回，不需要重新获取历史消息
-    if (params.photoUri) {
-      console.log('检测到照片参数，跳过获取历史消息，直接处理照片');
-      setIsLoading(false);
-      return;
-    }
-    
-    // 如果已经初始化过，不再重复获取
-    if (historyInitializedRef.current) {
-      console.log('历史消息已初始化，跳过重复获取');
-      setIsLoading(false);
-      return;
-    }
-    
-    // 首次挂载且没有照片参数时，获取历史消息
-    historyInitializedRef.current = true;
-    fetchConversationHistory();
-  }, [fetchConversationHistory, params.photoUri]);
 
   // 生成唯一ID
   const generateTraceId = () => {
@@ -369,7 +301,224 @@ export default function EchoTab() {
     }
   }, [apiConfig]);
 
+  // 发送新用户欢迎语消息
+  const sendNewUserMessage = useCallback(async (userDataParam = null) => {
+    try {
+      console.log('sendNewUserMessage ing');
+      
+      // 优先使用传入的参数，如果没有则使用状态中的 userData
+      const currentUserData = userDataParam || userData;
+      
+      if (!currentUserData) {
+        console.log('sendNewUserMessage end with no userData');
+        return;
+      }
+      
+      // 获取设备信息
+      const deviceId = await getDeviceId();
+      const version = getAppVersion();
+      const timezone = getTimezone();
+      
+      // 构建请求体
+      const requestBody = {
+        uid: String(currentUserData.uid || currentUserData.id),
+        msg_id: generateMsgId(),
+        trace_id: generateTraceId(),
+        timestamp: Date.now().toString(),
+        text: '',
+        system_prompt: ["you are a helpful AI assistant"],
+        msg_type: "new_user"
+      };
+      
+      console.log('发送 new_user 消息:', requestBody);
+      
+      // 调用通用处理函数，静默处理，不显示响应和错误
+      await handleStreamRequest({
+        requestBody,
+        tempMessageId: 'temp_new_user',
+        logPrefix: 'New User 消息',
+        onComplete: () => {
+          // new_user 消息不需要显示响应，直接返回 false 停止默认处理
+          console.log('New User 消息已发送');
+          return false;
+        },
+        errorMessage: '发送 New User 消息失败',
+        silent: true, // 静默模式，不显示错误提示
+        extraHeaders: {
+          'device': deviceId,
+          'timezone': timezone,
+          'version': version,
+          'passId': currentUserData.passId || '',
+        }
+      });
+      
+      console.log('sendNewUserMessage end');
+    } catch (error) {
+      console.error('发送 new_user 消息失败:', error);
+      // 静默失败，不显示错误提示
+    }
+  }, [userData, handleStreamRequest]);
 
+  // 发送 enter_user 消息
+  const sendEnterUserMessage = useCallback(async (userDataParam = null) => {
+    try {
+      console.log('sendEnterUserMessage ing');
+      
+      // 优先使用传入的参数，如果没有则使用状态中的 userData
+      const currentUserData = userDataParam || userData;
+      
+      if (!currentUserData) {
+        console.log('sendEnterUserMessage end with no userData');
+        return;
+      }
+      
+      // 获取设备信息
+      const deviceId = await getDeviceId();
+      const version = getAppVersion();
+      const timezone = getTimezone();
+      
+      // 构建请求体
+      const requestBody = {
+        uid: String(currentUserData.uid || currentUserData.id),
+        msg_id: generateMsgId(),
+        trace_id: generateTraceId(),
+        timestamp: Date.now().toString(),
+        text: '',
+        system_prompt: ["you are a helpful AI assistant"],
+        msg_type: "enter"
+      };
+      
+      console.log('发送 enter 消息:', requestBody);
+      
+      // 调用通用处理函数，静默处理，不显示响应和错误
+      await handleStreamRequest({
+        requestBody,
+        tempMessageId: 'temp_enter_user',
+        logPrefix: 'Enter User 消息',
+        onComplete: () => {
+          // enter 消息不需要显示响应，直接返回 false 停止默认处理
+          console.log('Enter User 消息已发送');
+          return false;
+        },
+        errorMessage: '发送 Enter User 消息失败',
+        silent: true, // 静默模式，不显示错误提示
+        extraHeaders: {
+          'device': deviceId,
+          'timezone': timezone,
+          'version': version,
+          'passId': currentUserData.passId || '',
+        }
+      });
+      
+      console.log('sendEnterUserMessage end');
+    } catch (error) {
+      console.error('发送 enter 消息失败:', error);
+      // 静默失败，不显示错误提示
+    }
+  }, [userData, handleStreamRequest]);
+
+  // 获取对话历史
+  const fetchConversationHistory = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const result = await conversationService.getConversationHistory();
+      
+      let historyMessages: Message[] = [];
+      
+      if (result.success && result.data) {
+        const convertedMessages = convertToMessages(result.data);
+        // 反转消息数组，使最旧的消息在前，最新的在后
+        historyMessages = convertedMessages.reverse();
+        
+        // 合并历史消息和当前消息，确保新消息在最后
+        setMessages(prev => {
+          // 如果已经有消息，合并而不是替换
+          if (prev.length > 0) {
+            // 创建一个消息ID集合，用于去重
+            const existingIds = new Set(prev.map(msg => msg.id));
+            // 只添加不存在的历史消息
+            const newHistoryMessages = historyMessages.filter(msg => !existingIds.has(msg.id));
+            // 历史消息在前（最旧在前，最新在后），新消息在后（确保最新消息在最后）
+            const merged = [...newHistoryMessages, ...prev];
+            console.log('合并消息:', { 
+              prevCount: prev.length, 
+              historyCount: historyMessages.length, 
+              newCount: newHistoryMessages.length,
+              mergedCount: merged.length,
+              note: '历史消息在前，新消息在后，确保最新消息在最后'
+            });
+            return merged;
+          }
+          // 如果没有现有消息，直接使用历史消息
+          return historyMessages;
+        });
+      } else {
+        console.error('获取对话历史失败:', result.message);
+        // 只有在没有现有消息时才清空
+        setMessages(prev => prev.length > 0 ? prev : []);
+      }
+      
+      // 根据历史消息是否为空，调用相应的函数
+      // 如果 userData 未加载，尝试从 storageManager 获取
+      let currentUserData = userData;
+      if (!currentUserData) {
+        try {
+          currentUserData = await storageManager.getUserData();
+          if (currentUserData) {
+            console.log('从 storageManager 获取用户数据:', currentUserData);
+            setUserData(currentUserData);
+          }
+        } catch (error) {
+          console.error('从 storageManager 获取用户数据失败:', error);
+        }
+      }
+
+      if (historyMessages.length === 0) {
+        // 历史消息为空，发送新用户欢迎语消息
+        console.log('历史消息为空，发送新用户欢迎语消息');
+        if (currentUserData) {
+          await sendNewUserMessage(currentUserData);
+        } else {
+          console.warn('用户数据未加载，无法发送新用户消息');
+        }
+      } else {
+        // 历史消息有值，发送 enter 消息
+        console.log('历史消息有值，发送 enter 消息');
+        if (currentUserData) {
+          await sendEnterUserMessage(currentUserData);
+        } else {
+          console.warn('用户数据未加载，无法发送 enter 消息');
+        }
+      }
+    } catch (error) {
+      console.error('获取对话历史异常:', error);
+      // 只有在没有现有消息时才清空
+      setMessages(prev => prev.length > 0 ? prev : []);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userData, sendNewUserMessage, sendEnterUserMessage]);
+
+  // 组件挂载时获取对话历史（只在首次挂载且没有照片参数时获取）
+  useEffect(() => {
+    // 如果有照片参数，说明是拍照返回，不需要重新获取历史消息
+    if (params.photoUri) {
+      console.log('检测到照片参数，跳过获取历史消息，直接处理照片');
+      setIsLoading(false);
+      return;
+    }
+    
+    // 如果已经初始化过，不再重复获取
+    if (historyInitializedRef.current) {
+      console.log('历史消息已初始化，跳过重复获取');
+      setIsLoading(false);
+      return;
+    }
+    
+    // 首次挂载且没有照片参数时，获取历史消息
+    historyInitializedRef.current = true;
+    fetchConversationHistory();
+  }, [fetchConversationHistory, params.photoUri]);
   
   // 处理流式响应
   const handleStreamResponse = useCallback(async (userMessage: string, photoUri?: string, imageDetectionType?: string) => {
