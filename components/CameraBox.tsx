@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, Alert, Linking } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -39,9 +39,43 @@ export function CameraBox() {
           }, 300);
         } else {
           console.log('[CameraBox] Permission denied');
+          Alert.alert(
+            '相机权限被拒绝',
+            '需要相机权限才能使用相机功能。请在设置中开启相机权限。',
+            [
+              { text: '取消', style: 'cancel' },
+              {
+                text: '去设置',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('打开设置失败:', error);
+                  }
+                },
+              },
+            ],
+          );
         }
       } catch (error) {
         console.error('[CameraBox] Error requesting permission:', error);
+        Alert.alert(
+          '请求权限失败',
+          '无法请求相机权限，请稍后重试。您也可以在设置中手动开启相机权限。',
+          [
+            { text: '取消', style: 'cancel' },
+            {
+              text: '去设置',
+              onPress: async () => {
+                try {
+                  await Linking.openSettings();
+                } catch (error) {
+                  console.error('打开设置失败:', error);
+                }
+              },
+            },
+          ],
+        );
       }
     } else {
       console.log('[CameraBox] Permission already granted, navigating to camera');
