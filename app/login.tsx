@@ -71,7 +71,6 @@ export default function LoginScreen() {
       // 将 UserData 对象转换为普通对象，确保所有字段都能保存
       const userDataToSave = loginResult.data;
       let dataToStore;
-      
       if (userDataToSave && typeof userDataToSave === 'object') {
         // 如果有 toJSON 方法，使用它
         if (typeof userDataToSave.toJSON === 'function') {
@@ -90,6 +89,21 @@ export default function LoginScreen() {
         console.log('User data saved to local storage successfully:', dataToStore);
       } else {
         console.warn('Failed to save user data to local storage');
+      }
+      
+      // 登录成功后，更新用户信息
+      try {
+        const updateResult = await userService.updateUserInfoAfterLogin(dataToStore);
+        console.log('更新用户信息结果:', updateResult);
+        if (updateResult.success) {
+          console.log('用户信息更新成功:', updateResult.data);
+        } else {
+          console.warn('用户信息更新失败:', updateResult.message);
+          // 更新失败不影响后续流程，继续执行
+        }
+      } catch (error) {
+        console.error('更新用户信息出错:', error);
+        // 更新失败不影响后续流程，继续执行
       }
       
       // 登录成功后，获取用户状态信息，检查是否有邀请码

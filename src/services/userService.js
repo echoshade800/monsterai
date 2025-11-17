@@ -157,6 +157,53 @@ class UserService {
   }
 
   /**
+   * 更新用户详细信息（登录后调用）
+   * @param {Object|UserData} userData - 登录返回的用户数据（可以是 UserData 对象或普通对象）
+   * @returns {Promise<Object>} 更新结果
+   */
+  async updateUserInfoAfterLogin(userData) {
+    try {
+      // 如果是 UserData 对象，转换为普通对象以获取所有字段
+      let userDataObj = userData;
+      if (userData && typeof userData === 'object') {
+        if (typeof userData.toJSON === 'function') {
+          userDataObj = userData.toJSON();
+        } else {
+          userDataObj = { ...userData };
+        }
+      }
+
+      // 从登录结果中提取字段并映射到 API 需要的格式
+      const updateData = {
+        userName: userDataObj.userName || '',
+        age: userDataObj.age || '',
+        gender: userDataObj.gender || '',
+        country: userDataObj.country || '',
+        city: userDataObj.city || '',
+        height: userDataObj.height || '',
+        weight: userDataObj.weight || '',
+        goal: userDataObj.goal || '',
+      };
+
+      console.log('更新用户信息，发送数据:', updateData);
+
+      const response = await api.post(API_ENDPOINTS.USER.UPDATE_USER_INFO, updateData, { requireAuth: true });
+      
+      return {
+        success: true,
+        data: response.data,
+        message: response.getMessage(),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
+        message: error instanceof ApiError ? error.message : '更新用户信息失败',
+      };
+    }
+  }
+
+  /**
    * 修改密码
    * @param {string} oldPassword - 旧密码
    * @param {string} newPassword - 新密码
