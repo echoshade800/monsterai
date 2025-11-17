@@ -396,13 +396,20 @@ export default function HomeTab() {
   };
 
   // 从 API 获取 timeline 数据
-  const fetchTimelineInfo = useCallback(async () => {
+  const fetchTimelineInfo = useCallback(async (date?: Date) => {
     try {
       setLoadingTimeline(true);
       const baseHeaders = await getHeadersWithPassId();
       const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
       
-      const response = await api.get(API_ENDPOINTS.TIMELINE.INFO, {
+      // 计算 day 参数（如果提供了日期则使用该日期，否则使用当前选中的日期）
+      const targetDate = date || selectedDate;
+      const day = calculateDayOffset(targetDate);
+      
+      // 构建请求 URL，添加 day 查询参数
+      const url = `${API_ENDPOINTS.TIMELINE.INFO}?day=${day}`;
+      
+      const response = await api.get(url, {
         headers: {
           'accept': 'application/json',
           'passid': passIdValue,
@@ -439,7 +446,7 @@ export default function HomeTab() {
     } finally {
       setLoadingTimeline(false);
     }
-  }, []);
+  }, [selectedDate]);
 
   // Fetch logs on mount
   useEffect(() => {
@@ -452,8 +459,8 @@ export default function HomeTab() {
     useCallback(() => {
       console.log('Home 页面聚焦，触发刷新 AgentLogs 和 Timeline');
       fetchAgentLogs();
-      fetchTimelineInfo();
-    }, [fetchAgentLogs, fetchTimelineInfo])
+      fetchTimelineInfo(selectedDate);
+    }, [fetchAgentLogs, fetchTimelineInfo, selectedDate])
   );
 
   // Update scroll animation when log entries change
@@ -547,8 +554,12 @@ export default function HomeTab() {
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
     
+    // 如果目标日期是今天，直接返回 0
+    if (targetDate.getTime() === today.getTime()) {
+      return 0;
+    }
+    
     // 计算今天减去目标日期的天数差
-    // 如果目标日期是今天，结果为 0
     // 如果目标日期是昨天，结果为 1
     // 如果目标日期是前天，结果为 2
     const diffTime = today.getTime() - targetDate.getTime();
@@ -652,7 +663,8 @@ export default function HomeTab() {
   // 当 selectedDate 变化时，获取对应日期的 timeline 数据
   useEffect(() => {
     fetchTimelineData(selectedDate);
-  }, [selectedDate, fetchTimelineData]);
+    fetchTimelineInfo(selectedDate);
+  }, [selectedDate, fetchTimelineData, fetchTimelineInfo]);
 
   const timelineEntries = allTimelineData[selectedDate.toDateString()] || [];
 
@@ -1268,20 +1280,20 @@ export default function HomeTab() {
                 <View style={styles.timelineContent}>
                   {item.type === 'reminder' && (
                     <>
-                      <View style={styles.timelineHeader}>
+                      <View style={styles.timelineReminderHeader}>
                         <Text style={styles.timelineTime}>{item.time}</Text>
                         <View style={styles.timelineReminderLeft}>
                           <Bell size={16} color="#666" style={styles.timelineReminderIcon} />
                           <Text style={styles.timelineReminderTitle}>{item.title}</Text>
                         </View>
                       </View>
-                      <View style={styles.timelineReminderToggle}>
+                      {/* <View style={styles.timelineReminderToggle}>
                         <Switch
                           value={item.toggleEnabled}
                           trackColor={{ false: '#E0E0E0', true: '#34C759' }}
                           thumbColor="#FFFFFF"
                         />
-                      </View>
+                      </View> */}
                     </>
                   )}
                   {item.type === 'prediction' && (
@@ -1544,7 +1556,7 @@ const styles = StyleSheet.create({
   },
   timelineEntry: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   timelineDivider: {
     width: 20,
@@ -1569,12 +1581,18 @@ const styles = StyleSheet.create({
   },
   timelineContent: {
     flex: 1,
-    paddingBottom: 16,
+    paddingBottom: 8,
   },
   timelineHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+    gap: 12,
+  },
+  timelineReminderHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 0,
     gap: 12,
   },
   timelineTime: {
