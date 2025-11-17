@@ -663,11 +663,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
-    paddingBottom: 15,
+    paddingBottom: 8,
   },
   collapsedBannerContainer: {
     paddingHorizontal: 15,
-    marginTop: -38,
+    marginTop: -28,
     marginBottom: 12,
   },
   collapsedThinkingBanner: {
