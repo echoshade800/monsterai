@@ -1040,17 +1040,15 @@ export default function HomeTab() {
                     </>
                   )}
                   {item.type === 'action' && (
-                    <>
+                    <View style={styles.timelineActionContent}>
                       <View style={styles.timelineHeader}>
                         <Text style={styles.timelineTime}>{item.time}</Text>
                         <View style={styles.timelineActionTag}>
                           <Text style={styles.timelineActionTagText}>{item.agentTag}</Text>
                         </View>
                       </View>
-                      <View style={styles.timelineActionContent}>
-                        <Text style={styles.timelineActionDescription}>{item.description}</Text>
-                      </View>
-                    </>
+                      <Text style={styles.timelineActionDescription}>{item.description}</Text>
+                    </View>
                   )}
                 </View>
               </View>
@@ -1361,7 +1359,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   timelineActionTag: {
-    backgroundColor: '#E8EBED',
+    backgroundColor: '#FFFFFF',
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -1377,6 +1375,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_400Regular',
     color: '#333',
     lineHeight: 20,
+    marginTop: 8,
   },
   modalOverlay: {
     flex: 1,
