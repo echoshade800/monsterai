@@ -291,7 +291,7 @@ export function Header({ isCollapsed = false, onCollapse }: HeaderProps) {
     return {
       position: 'absolute',
       right: 72,
-      bottom: 34,
+      bottom: 28,
       width: 120,
       height: 94,
       zIndex: 1000,
