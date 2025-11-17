@@ -10,33 +10,54 @@ export function CameraBox() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('[CameraBox] Permission changed:', permission);
     if (permission?.granted) {
       setShowPreview(true);
+    } else {
+      setShowPreview(false);
     }
   }, [permission]);
 
   const handlePress = async () => {
+    console.log('[CameraBox] handlePress - Permission status:', permission);
+
     if (!permission) {
+      console.log('[CameraBox] Permission object not available yet');
       return;
     }
 
     if (!permission.granted) {
-      const result = await requestPermission();
-      if (result.granted) {
-        setShowPreview(true);
-        setTimeout(() => {
-          router.push('/camera');
-        }, 300);
+      console.log('[CameraBox] Requesting camera permission...');
+      try {
+        const result = await requestPermission();
+        console.log('[CameraBox] Permission request result:', result);
+
+        if (result.granted) {
+          setShowPreview(true);
+          setTimeout(() => {
+            router.push('/camera');
+          }, 300);
+        } else {
+          console.log('[CameraBox] Permission denied');
+        }
+      } catch (error) {
+        console.error('[CameraBox] Error requesting permission:', error);
       }
     } else {
+      console.log('[CameraBox] Permission already granted, navigating to camera');
       router.push('/camera');
     }
   };
 
   return (
-    <TouchableOpacity style={styles.cameraBox} onPress={handlePress} activeOpacity={0.8}>
+    <TouchableOpacity
+      style={styles.cameraBox}
+      onPress={handlePress}
+      activeOpacity={0.8}
+      disabled={false}
+    >
       {showPreview && permission?.granted ? (
-        <View style={styles.previewContainer}>
+        <View style={styles.previewContainer} pointerEvents="none">
           <CameraView style={styles.cameraPreview} facing="back">
             <View style={styles.previewOverlay}>
               <View style={styles.cameraIconButton}>
@@ -48,7 +69,7 @@ export function CameraBox() {
           </CameraView>
         </View>
       ) : (
-        <View style={styles.placeholderContainer}>
+        <View style={styles.placeholderContainer} pointerEvents="none">
           <Image
             source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/cameraneed.png' }}
             style={styles.cameraPlaceholder}
