@@ -1095,7 +1095,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 86 : (StatusBar.currentHeight || 0) + 36,
+    paddingTop: Platform.OS === 'ios' ? 46 : (StatusBar.currentHeight || 0) - 4,
     paddingBottom: 100,
   },
   header: {
