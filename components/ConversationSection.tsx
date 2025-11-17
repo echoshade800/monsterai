@@ -15,6 +15,7 @@ interface ConversationSectionProps {
   isLoading?: boolean;
   isSending?: boolean;
   currentResponse?: string;
+  keyboardHeight?: number;
 }
 
 // 图片组件，带加载和错误处理
@@ -107,11 +108,12 @@ function MessageImage({ uri }: { uri: string }) {
   );
 }
 
-export function ConversationSection({ 
-  messages = [], 
-  isLoading = false, 
+export function ConversationSection({
+  messages = [],
+  isLoading = false,
   isSending = false,
-  currentResponse = ''
+  currentResponse = '',
+  keyboardHeight = 0
 }: ConversationSectionProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const dot1Anim = useRef(new Animated.Value(0.4)).current;
@@ -181,6 +183,15 @@ export function ConversationSection({
     }
   }, [messages.length, messages, isSending, currentResponse]);
 
+  // 当键盘出现时，滚动到底部
+  useEffect(() => {
+    if (keyboardHeight > 0 && scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [keyboardHeight]);
+
   // 复制消息到剪贴板
   const handleCopyMessage = (content: string) => {
     Clipboard.setString(content);
@@ -202,12 +213,17 @@ export function ConversationSection({
       </View>
     );
   }
+
+  // Calculate dynamic padding based on keyboard height
+  const dynamicPaddingBottom = keyboardHeight > 0 ? keyboardHeight + 80 : 200;
+
   return (
     <ScrollView
       ref={scrollViewRef}
       style={styles.scrollContainer}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, { paddingBottom: dynamicPaddingBottom }]}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       {messages.map((message) => {
         if (message.type === 'timestamp') {

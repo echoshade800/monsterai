@@ -1,7 +1,7 @@
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, View } from 'react-native';
 import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
@@ -31,6 +31,7 @@ export default function EchoTab() {
   const [isSending, setIsSending] = useState(false);
   const [currentResponse, setCurrentResponse] = useState('');
   const [userData, setUserData] = useState<any>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const apiConfig = getApiConfig();
 
   // 将 API 返回的数据转换为 Message 格式
@@ -635,6 +636,22 @@ export default function EchoTab() {
     setIsCollapsed(collapsed);
   }, []);
 
+  // Listen for keyboard events
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener('keyboardWillShow', (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+
+    const keyboardWillHide = Keyboard.addListener('keyboardWillHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <Header
@@ -642,11 +659,12 @@ export default function EchoTab() {
         onCollapse={handleCollapse}
       />
 
-      <ConversationSection 
-        messages={messages} 
+      <ConversationSection
+        messages={messages}
         isLoading={isLoading}
         isSending={isSending}
         currentResponse={currentResponse}
+        keyboardHeight={keyboardHeight}
       />
 
 
