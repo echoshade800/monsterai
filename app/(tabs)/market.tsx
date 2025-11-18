@@ -137,7 +137,7 @@ const MINIAPPS_DATA = [
   {
     id: 'accounting',
     name: 'Accounting',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/miniapp2.jpeg',
+    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/pocket.jpg',
     isHot: true,
     rating: 95,
   },

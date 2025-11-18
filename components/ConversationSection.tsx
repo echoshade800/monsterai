@@ -53,12 +53,12 @@ function MessageImage({ uri }: { uri: string }) {
           processedUri = `file://${encodedPath}`;
         }
       } catch (e) {
-        console.warn('处理文件路径时出错:', e);
+        console.warn('Error processing file path:', e);
       }
     }
 
     // 记录图片加载信息
-    console.log('加载图片:', {
+    console.log('Loading image:', {
       originalUri: uri.length > 100 ? uri.substring(0, 100) + '...' : uri,
       processedUri: processedUri.length > 100 ? processedUri.substring(0, 100) + '...' : processedUri,
       isLocalFile: processedUri.startsWith('file://'),
@@ -69,7 +69,7 @@ function MessageImage({ uri }: { uri: string }) {
   };
 
   const handleLoadError = (error: any) => {
-    console.error('图片加载失败:', {
+    console.error('Image loading failed:', {
       uri: uri.substring(0, 100),
       error: error?.nativeEvent?.error || error
     });
@@ -84,12 +84,12 @@ function MessageImage({ uri }: { uri: string }) {
         style={styles.messageImage}
         resizeMode="cover"
         onLoadStart={() => {
-          console.log('开始加载图片:', uri.substring(0, 100));
+          console.log('Starting to load image:', uri.substring(0, 100));
           setIsLoading(true);
           setHasError(false);
         }}
         onLoad={() => {
-          console.log('图片加载成功:', uri.substring(0, 100));
+          console.log('Image loaded successfully:', uri.substring(0, 100));
           setIsLoading(false);
         }}
         onError={handleLoadError}
@@ -101,7 +101,7 @@ function MessageImage({ uri }: { uri: string }) {
       )}
       {hasError && (
         <View style={styles.imageErrorContainer}>
-          <Text style={styles.imageErrorText}>图片加载失败</Text>
+          <Text style={styles.imageErrorText}>Image loading failed</Text>
         </View>
       )}
     </View>
@@ -123,7 +123,7 @@ export function ConversationSection({
   // 打字指示器动画
   useEffect(() => {
     if (isSending && !currentResponse) {
-      console.log('开始打字指示器动画');
+      console.log('Starting typing indicator animation');
       
       // 重置动画值
       dot1Anim.setValue(0.4);
@@ -158,7 +158,7 @@ export function ConversationSection({
       anim3.start();
 
       return () => {
-        console.log('停止打字指示器动画');
+        console.log('Stopping typing indicator animation');
         anim1.stop();
         anim2.stop();
         anim3.stop();
@@ -195,7 +195,7 @@ export function ConversationSection({
   // 复制消息到剪贴板
   const handleCopyMessage = (content: string) => {
     Clipboard.setString(content);
-    Alert.alert('已复制', '消息已复制到剪贴板', [{ text: '确定' }]);
+    Alert.alert('Copied', 'Message copied to clipboard', [{ text: 'OK' }]);
   };
 
   if (isLoading) {
@@ -209,7 +209,7 @@ export function ConversationSection({
   if (!messages || messages.length === 0) {
     return (
       <View style={[styles.scrollContainer, styles.emptyContainer]}>
-        <Text style={styles.emptyText}>暂无对话记录</Text>
+        <Text style={styles.emptyText}>No conversation history</Text>
       </View>
     );
   }
@@ -255,7 +255,7 @@ export function ConversationSection({
         return (
           <View key={message.id} style={styles.userMessageContainer}>
             <Pressable
-              onLongPress={() => handleCopyMessage(message.content || '图片消息')}
+              onLongPress={() => handleCopyMessage(message.content || 'Image message')}
               style={[styles.userBubble, message.photoUri && styles.userBubbleWithPhoto]}
             >
               {message.photoUri && (
@@ -266,7 +266,7 @@ export function ConversationSection({
                   {message.content}
                 </Text>
               ) : message.photoUri && !message.content ? (
-                <Text style={styles.photoOnlyText}>📷 图片</Text>
+                <Text style={styles.photoOnlyText}>📷 Image</Text>
               ) : null}
             </Pressable>
           </View>
@@ -307,7 +307,7 @@ export function ConversationSection({
                 ]} 
               />
             </View>
-            <Text style={styles.typingText}>正在思考...</Text>
+            <Text style={styles.typingText}>Thinking...</Text>
           </View>
         </View>
       )}
@@ -315,8 +315,8 @@ export function ConversationSection({
       {__DEV__ && (
         <View style={{ padding: 10, backgroundColor: 'rgba(0,0,0,0.1)' }}>
           <Text style={{ fontSize: 10 }}>isSending: {String(isSending)}</Text>
-          <Text style={{ fontSize: 10 }}>currentResponse: {currentResponse ? '有内容' : '空'}</Text>
-          <Text style={{ fontSize: 10 }}>显示指示器: {String(isSending && !currentResponse)}</Text>
+          <Text style={{ fontSize: 10 }}>currentResponse: {currentResponse ? 'Has content' : 'Empty'}</Text>
+          <Text style={{ fontSize: 10 }}>Show indicator: {String(isSending && !currentResponse)}</Text>
         </View>
       )}
     </ScrollView>
