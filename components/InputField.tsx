@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   penIconWrapper: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
+    marginRight: 24,
     pointerEvents: 'none',
   },
   input: {
