@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
   },
   thinkingLeft: {
     flex: 1,
-    paddingRight: 12,
+    paddingRight: 20,
   },
   thinkingHeader: {
     flexDirection: 'row',
