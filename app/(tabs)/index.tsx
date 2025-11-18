@@ -386,7 +386,7 @@ export default function EchoTab() {
                   handleFinalError();
                 }
               }
-            }, 10000) as any;
+            }, 300000) as any;
 
           }).catch((error) => {
             console.error(`${logPrefix}Failed to get headers:`, error);
@@ -427,9 +427,9 @@ export default function EchoTab() {
       // 显示错误提示（只在非静默模式下）
       if (!silent) {
         const finalErrorMessage = retryCount >= maxRetries 
-          ? `${errorMessage}\n\n已重试 ${maxRetries} 次，请检查网络连接后重试。`
+          ? `${errorMessage}\n\nRetried ${maxRetries} times. Please check your network connection and try again.`
           : errorMessage;
-        Alert.alert('连接错误', finalErrorMessage);
+        Alert.alert('Connection Error', finalErrorMessage);
       }
 
       // 清理状态
