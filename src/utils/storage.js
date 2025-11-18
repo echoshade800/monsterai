@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const STORAGE_KEYS = {
   USER_DATA: 'userData',
   ACCESS_TOKEN: 'accessToken',
+  DEVICE_TOKEN: 'deviceToken', // 推送通知设备 token
   // 可以添加更多存储键
   SETTINGS: 'settings',
   CACHE: 'cache',
@@ -376,6 +377,51 @@ class StorageManager {
       return true;
     } catch (error) {
       console.error(`删除 ${key} 失败:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * 保存设备推送 Token
+   * @param {string} deviceToken - 设备推送 Token
+   * @returns {Promise<boolean>} 保存是否成功
+   */
+  async setDeviceToken(deviceToken) {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.DEVICE_TOKEN, deviceToken);
+      console.log('设备 Token 保存到本地成功');
+      return true;
+    } catch (error) {
+      console.error('保存设备 Token 到本地失败:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取设备推送 Token
+   * @returns {Promise<string|null>} 设备推送 Token 或 null
+   */
+  async getDeviceToken() {
+    try {
+      const token = await AsyncStorage.getItem(STORAGE_KEYS.DEVICE_TOKEN);
+      return token;
+    } catch (error) {
+      console.error('获取设备 Token 失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 清除设备推送 Token
+   * @returns {Promise<boolean>} 清除是否成功
+   */
+  async clearDeviceToken() {
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEYS.DEVICE_TOKEN);
+      console.log('设备 Token 清除成功');
+      return true;
+    } catch (error) {
+      console.error('清除设备 Token 失败:', error);
       return false;
     }
   }

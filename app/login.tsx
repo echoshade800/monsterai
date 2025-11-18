@@ -2,6 +2,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, BackHandler, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SvgUri } from 'react-native-svg';
+import api from '../src/services/api-clients/client';
+import { API_ENDPOINTS } from '../src/services/api/api';
 import { appleLoginWithUserInfo } from '../src/services/appleAuthService';
 import { googleLoginWithUserInfo } from '../src/services/googleAuthService';
 import userService from '../src/services/userService';
@@ -104,6 +106,40 @@ export default function LoginScreen() {
       } catch (error) {
         console.error('更新用户信息出错:', error);
         // 更新失败不影响后续流程，继续执行
+      }
+      
+      // 登录成功后，上传本地保存的 device-token（如果有）
+      try {
+        const localDeviceToken = await storageManager.getDeviceToken();
+        if (localDeviceToken) {
+          console.log('检测到本地保存的 device-token，开始上传');
+          try {
+            const response = await api.post(
+              API_ENDPOINTS.DEVICE_TOKEN.SET,
+              {
+                device_token: localDeviceToken,
+              },
+              {
+                requireAuth: false,
+                headers: {
+                  'accept': 'application/json',
+                  // passId 会通过 getHeadersWithPassId() 自动添加
+                },
+              }
+            );
+            console.log('本地 device-token 上传成功:', response);
+            // 上传成功后，清除本地保存的 token
+            await storageManager.clearDeviceToken();
+          } catch (error) {
+            console.error('上传本地 device-token 失败:', error);
+            // 上传失败不影响后续流程，继续执行
+          }
+        } else {
+          console.log('本地没有保存的 device-token');
+        }
+      } catch (error) {
+        console.error('获取本地 device-token 时出错:', error);
+        // 获取失败不影响后续流程，继续执行
       }
       
       // 登录成功后，获取用户状态信息，检查是否有邀请码

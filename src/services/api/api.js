@@ -137,6 +137,10 @@ export const API_ENDPOINTS = {
     INFO: '/timeline/info',
     SAVE: '/timeline/save',
   },
+
+  DEVICE_TOKEN: {
+    SET: '/device-token/set',
+  },
 };
 
 // 导出环境常量

@@ -15,6 +15,9 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { analytics } from '../config/firebase';
+import api from '../src/services/api-clients/client';
+import { API_ENDPOINTS } from '../src/services/api/api';
+import storageManager from '../src/utils/storage';
 
 // 配置通知处理程序
 Notifications.setNotificationHandler({
@@ -28,6 +31,30 @@ Notifications.setNotificationHandler({
 });
 
 SplashScreen.preventAutoHideAsync();
+
+// 上传设备 Token 到服务器
+async function uploadDeviceTokenToServer(deviceToken) {
+  try {
+    const response = await api.post(
+      API_ENDPOINTS.DEVICE_TOKEN.SET,
+      {
+        device_token: deviceToken,
+      },
+      {
+        requireAuth: false,
+        headers: {
+          'accept': 'application/json',
+          // passId 会通过 getHeadersWithPassId() 自动添加
+        },
+      }
+    );
+    console.log('设备 Token 上传成功:', response);
+    return true;
+  } catch (error) {
+    console.error('上传设备 Token 失败:', error);
+    return false;
+  }
+}
 
 // 注册推送通知
 async function registerForPushNotificationsAsync() {
@@ -108,10 +135,29 @@ export default function Layout() {
     initializeAnalytics();
     
     // 注册推送通知
-    registerForPushNotificationsAsync().then(token => {
+    registerForPushNotificationsAsync().then(async token => {
       if (token) {
         console.log('推送通知注册成功，Token:', token);
-        // 这里可以将 token 保存到服务器或本地存储
+        
+        // 检查用户是否已登录（是否有 passId）
+        try {
+          const userData = await storageManager.getUserData();
+          const hasPassId = userData && userData.passId;
+          
+          if (hasPassId) {
+            // 已登录：直接上传 device-token
+            console.log('用户已登录，直接上传 device-token');
+            await uploadDeviceTokenToServer(token);
+          } else {
+            // 未登录：保存到本地
+            console.log('用户未登录，将 device-token 保存到本地');
+            await storageManager.setDeviceToken(token);
+          }
+        } catch (error) {
+          console.error('处理 device-token 时发生错误:', error);
+          // 如果检查登录状态失败，默认保存到本地
+          await storageManager.setDeviceToken(token);
+        }
       } else {
         console.log('推送通知注册失败或未获取到 Token');
       }
