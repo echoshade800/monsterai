@@ -307,7 +307,7 @@ export function ConversationSection({
                 ]} 
               />
             </View>
-            <Text style={styles.typingText}>Thinking...</Text>
+            <Text style={styles.typingText} numberOfLines={1}>Thinking...</Text>
           </View>
         </View>
       )}
@@ -472,5 +472,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_400Regular',
     color: '#999999',
     fontStyle: 'italic',
+    flexShrink: 0,
   },
 });
