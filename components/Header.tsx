@@ -23,9 +23,11 @@ interface HeaderProps {
   refreshTrigger?: number; // 当这个值变化时，触发刷新 AgentLogs
 }
 
-const EXPANDED_HEIGHT = 600;
+const EXPANDED_HEIGHT_WITH_TODO = 600;
+const EXPANDED_HEIGHT_WITHOUT_TODO = 520;
 const COLLAPSED_HEIGHT = 332;
 const COLLAPSE_THRESHOLD = 100;
+const TODO_BANNER_HEIGHT = 80;
 
 const DEFAULT_MESSAGE = "I'll start giving insights once we talk a bit more.";
 
@@ -306,7 +308,7 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
 
   useEffect(() => {
     animatedCollapse.value = withTiming(isCollapsed ? 1 : 0, {
-      duration: 400,
+      duration: 250,
     });
   }, [isCollapsed]);
 
@@ -325,10 +327,11 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
     });
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
+    const expandedHeight = todoItem ? EXPANDED_HEIGHT_WITH_TODO : EXPANDED_HEIGHT_WITHOUT_TODO;
     const height = interpolate(
       animatedCollapse.value,
       [0, 1],
-      [EXPANDED_HEIGHT, COLLAPSED_HEIGHT],
+      [expandedHeight, COLLAPSED_HEIGHT],
       Extrapolate.CLAMP
     );
 
