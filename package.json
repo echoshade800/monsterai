@@ -1,13 +1,14 @@
 {
   "name": "monsterai",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "scripts": {
     "dev": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "ios:device": "npx expo run:ios --device \"Fan's iPhone 16pro\"",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "version-sync": "react-native-version"
   },
   "dependencies": {
     "@expo-google-fonts/nunito": "^0.4.2",
@@ -71,12 +72,13 @@
   },
   "private": true,
   "devDependencies": {
-    "babel-preset-expo": "~54.0.0",
+    "@aws-sdk/client-s3": "^3.888.0",
     "@babel/core": "^7.25.2",
     "@react-native-community/cli": "^20.0.2",
     "@react-native/metro-config": "^0.81.4",
     "@types/react": "~19.1.10",
-    "@aws-sdk/client-s3": "^3.888.0",
+    "babel-preset-expo": "~54.0.0",
+    "react-native-version": "^4.0.0",
     "typescript": "~5.9.2"
   }
 }

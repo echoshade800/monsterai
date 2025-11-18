@@ -2,7 +2,7 @@
   "expo": {
     "name": "MonsterAI",
     "slug": "MonsterAI",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "scheme": "monsterai",
     "ios": {
       "googleServicesFile": "./GoogleService-Info.plist",
@@ -16,7 +16,8 @@
         "com.apple.developer.applesignin": [
           "Default"
         ]
-      }
+      },
+      "buildNumber": "2"
     },
     "plugins": [
       "expo-router",
@@ -39,7 +40,8 @@
       "expo-font"
     ],
     "android": {
-      "package": "com.fanthus.monsterai.debug"
+      "package": "com.fanthus.monsterai.debug",
+      "versionCode": 2
     },
     "extra": {
       "eas": {
