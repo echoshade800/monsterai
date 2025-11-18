@@ -48,10 +48,10 @@ async function uploadDeviceTokenToServer(deviceToken) {
         },
       }
     );
-    console.log('设备 Token 上传成功:', response);
+    console.log('Device token uploaded successfully:', response);
     return true;
   } catch (error) {
-    console.error('上传设备 Token 失败:', error);
+    console.error('Failed to upload device token:', error);
     return false;
   }
 }
@@ -63,40 +63,40 @@ async function registerForPushNotificationsAsync() {
   
   if (Platform.OS === 'android') {
     // Android 配置（暂时跳过）
-    console.log('Android 平台，跳过推送通知注册');
+    console.log('Android platform, skipping push notification registration');
     return null;
   }
 
   if (Device.isDevice) {
-    console.log('检测到真实设备');
+    console.log('Real device detected');
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    console.log('当前权限状态:', existingStatus);
+    console.log('Current permission status:', existingStatus);
     let finalStatus = existingStatus;
     
     if (existingStatus !== 'granted') {
-      console.log('请求推送通知权限');
+      console.log('Requesting push notification permission');
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
-      console.log('权限请求结果:', status);
+      console.log('Permission request result:', status);
     }
     
     if (finalStatus !== 'granted') {
-      console.log('推送通知权限未授予');
+      console.log('Push notification permission not granted');
       return null;
     }
     
-    console.log('获取设备推送 Token');
+    console.log('Getting device push token');
     try {
       token = await Notifications.getDevicePushTokenAsync();
-      console.log('推送 Token 获取成功:', token.data);
+      console.log('Push token obtained successfully:', token.data);
       return token.data; // 返回 token 字符串
     } catch (error) {
-      console.error('获取推送 Token 失败:', error);
-      console.error('错误信息:', error.message);
+      console.error('Failed to get push token:', error);
+      console.error('Error message:', error.message);
       return null;
     }
   } else {
-    console.log('必须使用真实设备才能注册推送通知');
+    console.log('Must use a real device to register for push notifications');
     return null;
   }
 }
@@ -118,7 +118,7 @@ export default function Layout() {
 
   // 应用启动时初始化 Firebase 和注册推送通知
   useEffect(() => {
-    console.log('Layout 组件已挂载，开始初始化');
+    console.log('Layout component mounted, starting initialization');
     
     // 初始化 Firebase Analytics
     const initializeAnalytics = async () => {
@@ -126,9 +126,9 @@ export default function Layout() {
         await analytics().logEvent('app_open', {
           platform: Platform.OS,
         });
-        console.log('Firebase Analytics 初始化成功');
+        console.log('Firebase Analytics initialized successfully');
       } catch (error) {
-        console.error('Analytics 初始化错误:', error);
+        console.error('Analytics initialization error:', error);
       }
     };
     
@@ -137,7 +137,7 @@ export default function Layout() {
     // 注册推送通知
     registerForPushNotificationsAsync().then(async token => {
       if (token) {
-        console.log('推送通知注册成功，Token:', token);
+        console.log('Push notification registered successfully, Token:', token);
         
         // 检查用户是否已登录（是否有 passId）
         try {
@@ -146,23 +146,23 @@ export default function Layout() {
           
           if (hasPassId) {
             // 已登录：直接上传 device-token
-            console.log('用户已登录，直接上传 device-token');
+            console.log('User is logged in, uploading device-token directly');
             await uploadDeviceTokenToServer(token);
           } else {
             // 未登录：保存到本地
-            console.log('用户未登录，将 device-token 保存到本地');
+            console.log('User not logged in, saving device-token locally');
             await storageManager.setDeviceToken(token);
           }
         } catch (error) {
-          console.error('处理 device-token 时发生错误:', error);
+          console.error('Error handling device-token:', error);
           // 如果检查登录状态失败，默认保存到本地
           await storageManager.setDeviceToken(token);
         }
       } else {
-        console.log('推送通知注册失败或未获取到 Token');
+        console.log('Push notification registration failed or no token obtained');
       }
     }).catch(error => {
-      console.error('注册推送通知时发生错误:', error);
+      console.error('Error registering push notifications:', error);
     });
   }, []);
 

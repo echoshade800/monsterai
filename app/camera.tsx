@@ -104,14 +104,14 @@ export default function CameraScreen() {
     selectedAgent: string,
     mode: 'photo' | 'photo-text',
     router: any,
-    logPrefix: string = '导航参数'
+    logPrefix: string = 'Navigation params'
   ) {
     // 检查是否有有效的上传结果
     const hasValidUploadUrl = uploadResult && (uploadResult.url || uploadResult.presigned_url || uploadResult.s3_uri);
     
     // 如果只有本地URI（上传失败或没有有效的上传结果），则直接返回，不继续执行后续逻辑
     if (!hasValidUploadUrl) {
-      console.log('只有本地URI，上传失败或没有有效的上传结果，停止后续处理');
+      console.log('Only local URI available, upload failed or no valid upload result, stopping subsequent processing');
       return;
     }
 
@@ -167,7 +167,7 @@ export default function CameraScreen() {
       });
 
       if (!photo?.uri) {
-        Alert.alert('错误', '拍照失败，请重试');
+        Alert.alert('Error', 'Failed to take picture, please try again');
         setIsUploading(false);
         return;
       }
@@ -183,14 +183,14 @@ export default function CameraScreen() {
           }
         }
       } catch (e) {
-        console.warn('获取用户ID失败，使用匿名:', e);
+        console.warn('Failed to get user ID, using anonymous:', e);
       }
 
       // 准备上传参数
       const filename = `photo_${Date.now()}.jpg`;
       const mimeType = 'image/jpeg';
 
-      console.log('开始上传照片到S3:', { uid, filename, mimeType, photoUri: photo.uri });
+      console.log('Starting to upload photo to S3:', { uid, filename, mimeType, photoUri: photo.uri });
 
       // 上传到S3
       let uploadResult;
@@ -201,18 +201,18 @@ export default function CameraScreen() {
           filename,
           mimeType,
         });
-        console.log('照片上传成功:', uploadResult);
+        console.log('Photo uploaded successfully:', uploadResult);
       } catch (uploadError) {
-        console.error('上传照片到S3失败:', uploadError);
+        console.error('Failed to upload photo to S3:', uploadError);
         // 上传失败时，仍然使用本地URI
-        Alert.alert('上传失败', '图片上传失败，将使用本地图片。错误: ' + (uploadError as Error).message);
+        Alert.alert('Upload Failed', 'Image upload failed, will use local image. Error: ' + (uploadError as Error).message);
       }
 
       // 处理图片上传后的导航逻辑
-      navigateWithImage(uploadResult, photo.uri, selectedAgent, mode, router, '导航参数');
+      navigateWithImage(uploadResult, photo.uri, selectedAgent, mode, router, 'Navigation params');
     } catch (error) {
-      console.error('拍照失败:', error);
-      Alert.alert('错误', '拍照失败: ' + (error as Error).message);
+      console.error('Failed to take picture:', error);
+      Alert.alert('Error', 'Failed to take picture: ' + (error as Error).message);
     } finally {
       setIsUploading(false);
     }
@@ -235,7 +235,7 @@ export default function CameraScreen() {
         const selectedImage = result.assets[0];
 
         if (!selectedImage?.uri) {
-          Alert.alert('错误', '选择图片失败，请重试');
+          Alert.alert('Error', 'Failed to select image, please try again');
           setIsUploading(false);
           return;
         }
@@ -251,14 +251,14 @@ export default function CameraScreen() {
             }
           }
         } catch (e) {
-          console.warn('获取用户ID失败，使用匿名:', e);
+          console.warn('Failed to get user ID, using anonymous:', e);
         }
 
         // 准备上传参数
         const filename = `photo_${Date.now()}.jpg`;
         const mimeType = 'image/jpeg';
 
-        console.log('开始上传相册图片到S3:', { uid, filename, mimeType, photoUri: selectedImage.uri });
+        console.log('Starting to upload album image to S3:', { uid, filename, mimeType, photoUri: selectedImage.uri });
 
         // 上传到S3
         let uploadResult;
@@ -269,19 +269,19 @@ export default function CameraScreen() {
             filename,
             mimeType,
           });
-          console.log('相册图片上传成功:', uploadResult);
+          console.log('Album image uploaded successfully:', uploadResult);
         } catch (uploadError) {
-          console.error('上传相册图片到S3失败:', uploadError);
+          console.error('Failed to upload album image to S3:', uploadError);
           // 上传失败时，仍然使用本地URI
-          Alert.alert('上传失败', '图片上传失败，将使用本地图片。错误: ' + (uploadError as Error).message);
+          Alert.alert('Upload Failed', 'Image upload failed, will use local image. Error: ' + (uploadError as Error).message);
         }
 
         // 处理图片上传后的导航逻辑
-        navigateWithImage(uploadResult, selectedImage.uri, selectedAgent, mode, router, '相册选择导航参数');
+        navigateWithImage(uploadResult, selectedImage.uri, selectedAgent, mode, router, 'Album selection navigation params');
       }
     } catch (error) {
-      console.error('选择图片失败:', error);
-      Alert.alert('错误', '选择图片失败: ' + (error as Error).message);
+      console.error('Failed to select image:', error);
+      Alert.alert('Error', 'Failed to select image: ' + (error as Error).message);
     } finally {
       setIsUploading(false);
     }

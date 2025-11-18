@@ -73,10 +73,10 @@ class StorageManager {
     try {
       const dataToStore = userData instanceof UserData ? userData.toJSON() : userData;
       await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(dataToStore));
-      console.log('用户数据存储成功');
+      console.log('User data stored successfully');
       return true;
     } catch (error) {
-      console.error('存储用户数据失败:', error);
+      console.error('Failed to store user data:', error);
       return false;
     }
   }
@@ -97,7 +97,7 @@ class StorageManager {
       // 如果没有数据，返回 null
       return null;
     } catch (error) {
-      console.error('获取用户数据失败:', error);
+      console.error('Failed to get user data:', error);
       return null;
     }
   }
@@ -133,7 +133,7 @@ class StorageManager {
       console.log('setMiniAppData' , `${miniAppName}info`, 'to local storage:', data);
       return true;
     } catch (error) {
-      console.error('存储MiniApp数据失败:', error);
+      console.error('Failed to store MiniApp data:', error);
       return false;
     }
   }
@@ -146,10 +146,10 @@ class StorageManager {
   async setAccessToken(token) {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
-      console.log('访问令牌存储成功');
+      console.log('Access token stored successfully');
       return true;
     } catch (error) {
-      console.error('存储访问令牌失败:', error);
+      console.error('Failed to store access token:', error);
       return false;
     }
   }
@@ -163,7 +163,7 @@ class StorageManager {
       const token = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
       return token;
     } catch (error) {
-      console.error('获取访问令牌失败:', error);
+      console.error('Failed to get access token:', error);
       return null;
     }
   }
@@ -177,7 +177,7 @@ class StorageManager {
       const token = await this.getAccessToken();
       return !!token;
     } catch (error) {
-      console.error('检查访问令牌失败:', error);
+      console.error('Failed to check access token:', error);
       return false;
     }
   }
@@ -189,10 +189,10 @@ class StorageManager {
   async clearUserData() {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.USER_DATA);
-      console.log('用户数据清除成功');
+      console.log('User data cleared successfully');
       return true;
     } catch (error) {
-      console.error('清除用户数据失败:', error);
+      console.error('Failed to clear user data:', error);
       return false;
     }
   }
@@ -204,10 +204,10 @@ class StorageManager {
   async clearAccessToken() {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-      console.log('访问令牌清除成功');
+      console.log('Access token cleared successfully');
       return true;
     } catch (error) {
-      console.error('清除访问令牌失败:', error);
+      console.error('Failed to clear access token:', error);
       return false;
     }
   }
@@ -223,10 +223,10 @@ class StorageManager {
         this.clearUserData(),
         this.clearAccessToken(),
       ]);
-      console.log('认证数据清除成功');
+      console.log('Auth data cleared successfully');
       return true;
     } catch (error) {
-      console.error('清除认证数据失败:', error);
+      console.error('Failed to clear auth data:', error);
       return false;
     }
   }
@@ -240,7 +240,7 @@ class StorageManager {
       const keys = await AsyncStorage.getAllKeys();
       return keys;
     } catch (error) {
-      console.error('获取所有键失败:', error);
+      console.error('Failed to get all keys:', error);
       return [];
     }
   }
@@ -262,7 +262,7 @@ class StorageManager {
         keys: keys,
       };
     } catch (error) {
-      console.error('获取存储信息失败:', error);
+      console.error('Failed to get storage info:', error);
       return {
         totalKeys: 0,
         hasUserData: false,
@@ -285,10 +285,10 @@ class StorageManager {
       ]);
       
       await AsyncStorage.multiSet(keyValuePairs);
-      console.log('批量存储成功');
+      console.log('Batch storage successful');
       return true;
     } catch (error) {
-      console.error('批量存储失败:', error);
+      console.error('Failed to batch store:', error);
       return false;
     }
   }
@@ -315,7 +315,7 @@ class StorageManager {
       
       return result;
     } catch (error) {
-      console.error('批量获取失败:', error);
+      console.error('Failed to batch get:', error);
       return {};
     }
   }
@@ -327,10 +327,10 @@ class StorageManager {
   async clearAll() {
     try {
       await AsyncStorage.clear();
-      console.log('所有数据清除成功');
+      console.log('All data cleared successfully');
       return true;
     } catch (error) {
-      console.error('清除所有数据失败:', error);
+      console.error('Failed to clear all data:', error);
       return false;
     }
   }
@@ -389,10 +389,10 @@ class StorageManager {
   async setDeviceToken(deviceToken) {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.DEVICE_TOKEN, deviceToken);
-      console.log('设备 Token 保存到本地成功');
+      console.log('Device token saved to local storage successfully');
       return true;
     } catch (error) {
-      console.error('保存设备 Token 到本地失败:', error);
+      console.error('Failed to save device token to local storage:', error);
       return false;
     }
   }
@@ -406,7 +406,7 @@ class StorageManager {
       const token = await AsyncStorage.getItem(STORAGE_KEYS.DEVICE_TOKEN);
       return token;
     } catch (error) {
-      console.error('获取设备 Token 失败:', error);
+      console.error('Failed to get device token:', error);
       return null;
     }
   }
@@ -418,10 +418,10 @@ class StorageManager {
   async clearDeviceToken() {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.DEVICE_TOKEN);
-      console.log('设备 Token 清除成功');
+      console.log('Device token cleared successfully');
       return true;
     } catch (error) {
-      console.error('清除设备 Token 失败:', error);
+      console.error('Failed to clear device token:', error);
       return false;
     }
   }

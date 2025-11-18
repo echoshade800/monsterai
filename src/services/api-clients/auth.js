@@ -5,7 +5,7 @@ const getAuthToken = async () => {
   try {
     return await AsyncStorage.getItem('accessToken');
   } catch (error) {
-    console.error('获取token失败:', error);
+    console.error('Failed to get token:', error);
     return null;
   }
 };
@@ -15,7 +15,7 @@ const setAuthToken = async (token) => {
   try {
     await AsyncStorage.setItem('accessToken', token);
   } catch (error) {
-    console.error('设置token失败:', error);
+    console.error('Failed to set token:', error);
   }
 };
 
@@ -24,7 +24,7 @@ const clearAuthToken = async () => {
   try {
     await AsyncStorage.removeItem('accessToken');
   } catch (error) {
-    console.error('清除token失败:', error);
+    console.error('Failed to clear token:', error);
   }
 };
 

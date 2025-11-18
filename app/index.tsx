@@ -15,18 +15,18 @@ export default function Index() {
         const userData = await storageManager.getUserData();
         
         if (userData) {
-          console.log('检测到本地用户信息，直接进入主界面');
+          console.log('Local user info detected, entering main interface directly');
           setHasUserData(true);
           // 重定向到主界面
           router.replace('/(tabs)');
         } else {
-          console.log('未检测到本地用户信息，跳转到登录页面');
+          console.log('No local user info detected, redirecting to login page');
           setHasUserData(false);
           // 重定向到登录页面
           router.replace('/login');
         }
       } catch (error) {
-        console.error('检查用户信息失败:', error);
+        console.error('Failed to check user info:', error);
         // 出错时跳转到登录页面
         router.replace('/login');
       } finally {

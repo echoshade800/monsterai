@@ -72,11 +72,11 @@ const getDeviceId = async () => {
     if (!deviceId) {
       deviceId = uuid.v4();
       await AsyncStorage.setItem('deviceId', deviceId);
-      console.log('生成新的设备ID:', deviceId);
+      console.log('Generated new device ID:', deviceId);
     }
     return deviceId;
   } catch (error) {
-    console.error('获取设备ID失败:', error);
+    console.error('Failed to get device ID:', error);
     return uuid.v4(); // 如果获取失败，返回临时UUID
   }
 };
@@ -89,7 +89,7 @@ const getTimezone = () => {
     const sign = timezoneOffset <= 0 ? '+' : '-';
     return `${sign}${hours}`;
   } catch (error) {
-    console.error('获取时区失败:', error);
+    console.error('Failed to get timezone:', error);
     return '+8'; // 默认返回 +8
   }
 };

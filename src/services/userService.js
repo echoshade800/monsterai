@@ -185,7 +185,7 @@ class UserService {
         goal: userDataObj.goal || '',
       };
 
-      console.log('更新用户信息，发送数据:', updateData);
+      console.log('Updating user info, sending data:', updateData);
 
       const response = await api.post(API_ENDPOINTS.USER.UPDATE_USER_INFO, updateData, { requireAuth: true });
       
@@ -317,7 +317,7 @@ class UserService {
           timezone = getTimezone();
         }
       } catch (error) {
-        console.warn('获取时区失败，使用默认值:', error);
+        console.warn('Failed to get timezone, using default value:', error);
         timezone = getTimezone();
       }
 

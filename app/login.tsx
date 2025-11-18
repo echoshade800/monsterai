@@ -96,15 +96,15 @@ export default function LoginScreen() {
       // 登录成功后，更新用户信息
       try {
         const updateResult = await userService.updateUserInfoAfterLogin(dataToStore);
-        console.log('更新用户信息结果:', updateResult);
+        console.log('User info update result:', updateResult);
         if (updateResult.success) {
-          console.log('用户信息更新成功:', updateResult.data);
+          console.log('User info updated successfully:', updateResult.data);
         } else {
-          console.warn('用户信息更新失败:', updateResult.message);
+          console.warn('Failed to update user info:', updateResult.message);
           // 更新失败不影响后续流程，继续执行
         }
       } catch (error) {
-        console.error('更新用户信息出错:', error);
+        console.error('Error updating user info:', error);
         // 更新失败不影响后续流程，继续执行
       }
       
@@ -112,7 +112,7 @@ export default function LoginScreen() {
       try {
         const localDeviceToken = await storageManager.getDeviceToken();
         if (localDeviceToken) {
-          console.log('检测到本地保存的 device-token，开始上传');
+          console.log('Detected locally saved device-token, starting upload');
           try {
             const response = await api.post(
               API_ENDPOINTS.DEVICE_TOKEN.SET,
@@ -127,18 +127,18 @@ export default function LoginScreen() {
                 },
               }
             );
-            console.log('本地 device-token 上传成功:', response);
+            console.log('Local device-token uploaded successfully:', response);
             // 上传成功后，清除本地保存的 token
             await storageManager.clearDeviceToken();
           } catch (error) {
-            console.error('上传本地 device-token 失败:', error);
+            console.error('Failed to upload local device-token:', error);
             // 上传失败不影响后续流程，继续执行
           }
         } else {
-          console.log('本地没有保存的 device-token');
+          console.log('No locally saved device-token');
         }
       } catch (error) {
-        console.error('获取本地 device-token 时出错:', error);
+        console.error('Error getting local device-token:', error);
         // 获取失败不影响后续流程，继续执行
       }
       
@@ -156,26 +156,26 @@ export default function LoginScreen() {
           
           if (hasInviteCode) {
             // 如果有邀请码，直接进入聊天页面
-            console.log('检测到邀请码，直接进入聊天页面:', inviteCode);
+            console.log('Invite code detected, entering chat page directly:', inviteCode);
             router.replace('/(tabs)');
           } else {
             // 如果没有邀请码，进入邀请码页面
-            console.log('未检测到邀请码，进入邀请码页面');
+            console.log('No invite code detected, entering invite code page');
             router.replace('/invite-code');
           }
         } else {
           // 如果获取状态信息失败，默认进入邀请码页面
-          console.warn('获取用户状态信息失败，进入邀请码页面:', statusResult.message);
+          console.warn('Failed to get user status info, entering invite code page:', statusResult.message);
           router.replace('/invite-code');
         }
       } catch (error) {
         // 如果调用状态API出错，默认进入邀请码页面
-        console.error('获取用户状态信息出错:', error);
+        console.error('Error getting user status info:', error);
         router.replace('/invite-code');
       }
     } else {
       console.error('Backend login failed:', loginResult.message);
-      Alert.alert('登录失败', loginResult.message || '后端登录失败，请重试');
+      Alert.alert('Login Failed', loginResult.message || 'Backend login failed, please try again');
     }
   };
 
@@ -202,7 +202,7 @@ export default function LoginScreen() {
       await handleThirdPartyLogin(userInfo, 'apple');
     } catch (error) {
       console.error('Apple login error:', error);
-      Alert.alert('登录失败', error.message || 'Apple 登录失败，请重试');
+      Alert.alert('Login Failed', error.message || 'Apple login failed, please try again');
     } finally {
       setIsAppleLoading(false);
     }
@@ -231,7 +231,7 @@ export default function LoginScreen() {
       await handleThirdPartyLogin(userInfo, 'google');
     } catch (error) {
       console.error('Google login error:', error);
-      Alert.alert('登录失败', error.message || 'Google 登录失败，请重试');
+      Alert.alert('Login Failed', error.message || 'Google login failed, please try again');
     } finally {
       setIsGoogleLoading(false);
     }

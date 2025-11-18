@@ -64,7 +64,7 @@ export const getHeadersWithPassId = async () => {
       headers.passId = userData.passId;
     }
   } catch (error) {
-    console.warn('获取 passId 失败:', error);
+    console.warn('Failed to get passId:', error);
   }
   
   return headers;
