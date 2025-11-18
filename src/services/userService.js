@@ -29,7 +29,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '登录失败',
+        message: error instanceof ApiError ? error.message : 'Login failed',
       };
     }
   }
@@ -71,7 +71,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '第三方登录失败',
+        message: error instanceof ApiError ? error.message : 'Third-party login failed',
       };
     }
   }
@@ -102,7 +102,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '注册失败',
+        message: error instanceof ApiError ? error.message : 'Registration failed',
       };
     }
   }
@@ -126,7 +126,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '获取用户信息失败',
+        message: error instanceof ApiError ? error.message : 'Failed to get user info',
       };
     }
   }
@@ -151,7 +151,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '更新用户信息失败',
+        message: error instanceof ApiError ? error.message : 'Failed to update user info',
       };
     }
   }
@@ -198,7 +198,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '更新用户信息失败',
+        message: error instanceof ApiError ? error.message : 'Failed to update user info',
       };
     }
   }
@@ -224,7 +224,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '修改密码失败',
+        message: error instanceof ApiError ? error.message : 'Failed to change password',
       };
     }
   }
@@ -268,7 +268,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '发送重置密码邮件失败',
+        message: error instanceof ApiError ? error.message : 'Failed to send password reset email',
       };
     }
   }
@@ -294,7 +294,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '重置密码失败',
+        message: error instanceof ApiError ? error.message : 'Failed to reset password',
       };
     }
   }
@@ -334,7 +334,7 @@ class UserService {
       return {
         success: false,
         error: error instanceof ApiError ? error : new ApiError('UNKNOWN', error.message),
-        message: error instanceof ApiError ? error.message : '获取用户状态信息失败',
+        message: error instanceof ApiError ? error.message : 'Failed to get user status info',
       };
     }
   }

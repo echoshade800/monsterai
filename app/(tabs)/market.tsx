@@ -119,7 +119,7 @@ const GAMES_DATA = [
   },
   {
     id: 'sudoku',
-    name: '数独',
+    name: 'Sudoku',
     imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/sudoku.jpeg',
     isHot: false,
     rating: 93,
@@ -144,7 +144,7 @@ const MINIAPPS_DATA = [
   {
     id: 'countdownday',
     name: 'countdown day',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/miniapp3.jpeg',
+    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/daysmatter.jpg',
     isHot: false,
     rating: 88,
   },

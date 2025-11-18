@@ -1,5 +1,4 @@
 import { BlurView } from 'expo-blur';
-import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -74,7 +73,7 @@ export default function ProfileScreen() {
         setHeight('Unknown');
       }
     } catch (error) {
-      console.error('加载用户信息失败:', error);
+      console.error('Failed to load user info:', error);
       // 如果出错，设置为 Unknown
       setName('Unknown');
       setSex('Unknown');
@@ -140,7 +139,7 @@ export default function ProfileScreen() {
     if (editingField === 'name') {
       // 如果值是 "Unknown"，不发送到服务器
       if (tempValue === 'Unknown' || tempValue.trim() === '') {
-        Alert.alert('提示', '请输入有效的姓名');
+        Alert.alert('Tip', 'Please enter a valid name');
         return;
       }
       
@@ -165,19 +164,19 @@ export default function ProfileScreen() {
         
         if (updateResult?.success) {
           setName(tempValue);
-          Alert.alert('成功', '姓名已更新');
+          Alert.alert('Success', 'Name updated');
           setEditingField(null);
         } else {
-          Alert.alert('错误', updateResult?.message || '更新姓名失败');
+          Alert.alert('Error', updateResult?.message || 'Failed to update name');
         }
       } catch (error) {
-        console.error('保存姓名时出错:', error);
-        Alert.alert('错误', '保存姓名时发生错误，请稍后重试');
+        console.error('Error saving name:', error);
+        Alert.alert('Error', 'Error occurred while saving name, please try again later');
       }
     } else if (editingField === 'sex') {
       // 如果值是 "Unknown"，不发送到服务器
       if (tempValue === 'Unknown' || tempValue.trim() === '') {
-        Alert.alert('提示', '请选择性别');
+        Alert.alert('Tip', 'Please select gender');
         return;
       }
       
@@ -202,19 +201,19 @@ export default function ProfileScreen() {
         
         if (updateResult?.success) {
           setSex(tempValue);
-          Alert.alert('成功', '性别已更新');
+          Alert.alert('Success', 'Gender updated');
           setEditingField(null);
         } else {
-          Alert.alert('错误', updateResult?.message || '更新性别失败');
+          Alert.alert('Error', updateResult?.message || 'Failed to update gender');
         }
       } catch (error) {
-        console.error('保存性别时出错:', error);
-        Alert.alert('错误', '保存性别时发生错误，请稍后重试');
+        console.error('Error saving gender:', error);
+        Alert.alert('Error', 'Error occurred while saving gender, please try again later');
       }
     } else if (editingField === 'height') {
       // 如果值是 "Unknown" 或为空，不发送到服务器
       if (tempHeight === 'Unknown' || tempHeight.trim() === '') {
-        Alert.alert('提示', '请选择身高');
+        Alert.alert('Tip', 'Please select height');
         return;
       }
       
@@ -239,14 +238,14 @@ export default function ProfileScreen() {
         
         if (updateResult?.success) {
           setHeight(`${tempHeight} cm`);
-          Alert.alert('成功', '身高已更新');
+          Alert.alert('Success', 'Height updated');
           setEditingField(null);
         } else {
-          Alert.alert('错误', updateResult?.message || '更新身高失败');
+          Alert.alert('Error', updateResult?.message || 'Failed to update height');
         }
       } catch (error) {
-        console.error('保存身高时出错:', error);
-        Alert.alert('错误', '保存身高时发生错误，请稍后重试');
+        console.error('Error saving height:', error);
+        Alert.alert('Error', 'Error occurred while saving height, please try again later');
       }
     }
   };
@@ -256,37 +255,37 @@ export default function ProfileScreen() {
   };
 
   const handleAvatarPress = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    console.log("handle avatar pressed")
+    // const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    // if (status !== 'granted') {
+    //   Alert.alert(
+    //     'Photos Access Needed',
+    //     'Photos access is needed to change your profile picture.',
+    //     [
+    //       { text: 'Cancel', style: 'cancel' },
+    //       {
+    //         text: 'Go to Settings',
+    //         onPress: () => {
+    //           if (Platform.OS === 'ios') {
+    //             // iOS will show the system settings
+    //           }
+    //         },
+    //       },
+    //     ]
+    //   );
+    //   return;
+    // }
 
-    if (status !== 'granted') {
-      Alert.alert(
-        'Photos Access Needed',
-        'Photos access is needed to change your profile picture.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Go to Settings',
-            onPress: () => {
-              if (Platform.OS === 'ios') {
-                // iOS will show the system settings
-              }
-            },
-          },
-        ]
-      );
-      return;
-    }
+    // const result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //   allowsEditing: false,
+    //   quality: 1,
+    // });
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setSelectedImageUri(result.assets[0].uri);
-      setShowCropModal(true);
-    }
+    // if (!result.canceled && result.assets[0]) {
+    //   setSelectedImageUri(result.assets[0].uri);
+    //   setShowCropModal(true);
+    // }
   };
 
   const handleCropCancel = () => {
@@ -323,8 +322,8 @@ export default function ProfileScreen() {
               router.dismissAll();
               router.replace('/login');
             } catch (error) {
-              console.error('登出失败:', error);
-              Alert.alert('错误', '登出时发生错误，请重试');
+              console.error('Logout failed:', error);
+              Alert.alert('Error', 'Error occurred during logout, please try again');
             }
           },
         },
@@ -365,10 +364,10 @@ export default function ProfileScreen() {
                       router.dismissAll();
                       router.replace('/login');
                     } catch (error) {
-                      console.error('[Profile] 删除账户失败:', error);
+                      console.error('[Profile] Failed to delete account:', error);
                       Alert.alert(
-                        '删除账户失败',
-                        error.message || '删除账户时发生错误，请重试'
+                        'Failed to delete account',
+                        error.message || 'Error occurred while deleting account, please try again'
                       );
                     }
                   },

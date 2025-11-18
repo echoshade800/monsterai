@@ -27,7 +27,7 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet, onSkip }: Invi
       // 构建请求 URL
       const baseUrl = getBaseUrl('default');
       const inviteUrl = `${baseUrl}/invite-code/use?code=${encodeURIComponent(code.trim())}`;
-      console.log('邀请码验证地址:', inviteUrl);
+      console.log('Invite code verification URL:', inviteUrl);
       
       const response = await fetch(inviteUrl, {
         method: 'POST',
@@ -37,7 +37,7 @@ export function InviteCodeModal({ visible, onValidCode, onNotYet, onSkip }: Invi
       });
 
       const data = await response.json();
-      console.log('邀请码验证响应:', data);
+      console.log('Invite code verification response:', data);
       // 当 code 为 0 时表示验证成功
       if (data.code === 0) {
         onValidCode();

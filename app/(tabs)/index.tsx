@@ -73,7 +73,7 @@ export default function EchoTab() {
       
       // 如果消息包含图片，记录日志
       if (photoUri) {
-        console.log('转换图片消息:', {
+        console.log('Converting image message:', {
           msg_type: item.msg_type,
           has_image: !!photoUri,
           content: getMessageContent(item),
@@ -126,15 +126,15 @@ export default function EchoTab() {
         const data = await storageManager.getUserData();
         
         if (data) {
-          console.log('从本地存储加载用户数据:', data);
+          console.log('Loading user data from local storage:', data);
           setUserData(data);
         } else {
-          console.warn('本地存储中没有用户数据，用户可能未登录');
+          console.warn('No user data in local storage, user may not be logged in');
           // 如果没有用户数据，可以跳转到登录页面
           // router.replace('/login');
         }
       } catch (error) {
-        console.error('获取用户数据失败:', error);
+        console.error('Failed to get user data:', error);
       }
     };
     initUserData();
@@ -250,7 +250,7 @@ export default function EchoTab() {
             }
           }
         } catch (parseError) {
-          console.error(`${logPrefix}解析错误:`, parseError, '原始数据:', event.data);
+          console.error(`${logPrefix}Parse error:`, parseError, 'Raw data:', event.data);
         }
       });
 
@@ -271,7 +271,7 @@ export default function EchoTab() {
           }
 
           if (!silent) {
-            Alert.alert('错误', errorMessage);
+            Alert.alert('Error', errorMessage);
           }
 
           accumulatedText = '';
@@ -332,7 +332,7 @@ export default function EchoTab() {
         msg_type: "new_user"
       };
       
-      console.log('发送 new_user 消息:', requestBody);
+      console.log('Sending new_user message:', requestBody);
       
       // 调用通用处理函数，静默处理，不显示响应和错误
       await handleStreamRequest({
@@ -344,7 +344,7 @@ export default function EchoTab() {
           console.log('New User 消息已发送');
           return false;
         },
-        errorMessage: '发送 New User 消息失败',
+        errorMessage: 'Failed to send New User message',
         silent: true, // 静默模式，不显示错误提示
         extraHeaders: {
           'device': deviceId,
@@ -356,7 +356,7 @@ export default function EchoTab() {
       
       console.log('sendNewUserMessage end');
     } catch (error) {
-      console.error('发送 new_user 消息失败:', error);
+      console.error('Failed to send new_user message:', error);
       // 静默失败，不显示错误提示
     }
   }, [userData, handleStreamRequest]);
@@ -390,7 +390,7 @@ export default function EchoTab() {
         msg_type: "enter"
       };
       
-      console.log('发送 enter 消息:', requestBody);
+      console.log('Sending enter message:', requestBody);
       
       // 调用通用处理函数，静默处理，不显示响应和错误
       await handleStreamRequest({
@@ -402,7 +402,7 @@ export default function EchoTab() {
           console.log('Enter User 消息已发送');
           return false;
         },
-        errorMessage: '发送 Enter User 消息失败',
+        errorMessage: 'Failed to send Enter User message',
         silent: true, // 静默模式，不显示错误提示
         extraHeaders: {
           'device': deviceId,
@@ -414,7 +414,7 @@ export default function EchoTab() {
       
       console.log('sendEnterUserMessage end');
     } catch (error) {
-      console.error('发送 enter 消息失败:', error);
+      console.error('Failed to send enter message:', error);
       // 静默失败，不显示错误提示
     }
   }, [userData, handleStreamRequest]);
@@ -442,12 +442,12 @@ export default function EchoTab() {
             const newHistoryMessages = historyMessages.filter(msg => !existingIds.has(msg.id));
             // 历史消息在前（最旧在前，最新在后），新消息在后（确保最新消息在最后）
             const merged = [...newHistoryMessages, ...prev];
-            console.log('合并消息:', { 
+            console.log('Merging messages:', { 
               prevCount: prev.length, 
               historyCount: historyMessages.length, 
               newCount: newHistoryMessages.length,
               mergedCount: merged.length,
-              note: '历史消息在前，新消息在后，确保最新消息在最后'
+              note: 'History messages first, new messages last, ensuring latest message is at the end'
             });
             return merged;
           }
@@ -455,7 +455,7 @@ export default function EchoTab() {
           return historyMessages;
         });
       } else {
-        console.error('获取对话历史失败:', result.message);
+        console.error('Failed to get conversation history:', result.message);
         // 只有在没有现有消息时才清空
         setMessages(prev => prev.length > 0 ? prev : []);
       }
@@ -467,33 +467,33 @@ export default function EchoTab() {
         try {
           currentUserData = await storageManager.getUserData();
           if (currentUserData) {
-            console.log('从 storageManager 获取用户数据:', currentUserData);
+            console.log('Getting user data from storageManager:', currentUserData);
             setUserData(currentUserData);
           }
         } catch (error) {
-          console.error('从 storageManager 获取用户数据失败:', error);
+          console.error('Failed to get user data from storageManager:', error);
         }
       }
 
       if (historyMessages.length === 0) {
         // 历史消息为空，发送新用户欢迎语消息
-        console.log('历史消息为空，发送新用户欢迎语消息');
+        console.log('History messages empty, sending new user welcome message');
         if (currentUserData) {
           await sendNewUserMessage(currentUserData);
         } else {
-          console.warn('用户数据未加载，无法发送新用户消息');
+          console.warn('User data not loaded, cannot send new user message');
         }
       } else {
         // 历史消息有值，发送 enter 消息
-        console.log('历史消息有值，发送 enter 消息');
+        console.log('History messages exist, sending enter message');
         if (currentUserData) {
           await sendEnterUserMessage(currentUserData);
         } else {
-          console.warn('用户数据未加载，无法发送 enter 消息');
+          console.warn('User data not loaded, cannot send enter message');
         }
       }
     } catch (error) {
-      console.error('获取对话历史异常:', error);
+      console.error('Error getting conversation history:', error);
       // 只有在没有现有消息时才清空
       setMessages(prev => prev.length > 0 ? prev : []);
     } finally {
@@ -505,14 +505,14 @@ export default function EchoTab() {
   useEffect(() => {
     // 如果有照片参数，说明是拍照返回，不需要重新获取历史消息
     if (params.photoUri) {
-      console.log('检测到照片参数，跳过获取历史消息，直接处理照片');
+      console.log('Photo parameter detected, skipping history fetch, processing photo directly');
       setIsLoading(false);
       return;
     }
     
     // 如果已经初始化过，不再重复获取
     if (historyInitializedRef.current) {
-      console.log('历史消息已初始化，跳过重复获取');
+      console.log('History messages already initialized, skipping duplicate fetch');
       setIsLoading(false);
       return;
     }
@@ -525,7 +525,7 @@ export default function EchoTab() {
   // 每次页面聚焦时，触发刷新 AgentLogs
   useFocusEffect(
     useCallback(() => {
-      console.log('页面聚焦，触发刷新 AgentLogs');
+      console.log('Page focused, triggering AgentLogs refresh');
       setRefreshTrigger(prev => prev + 1);
     }, [])
   );
@@ -547,7 +547,7 @@ export default function EchoTab() {
   const handleStreamResponse = useCallback(async (userMessage: string, photoUri?: string, imageDetectionType?: string) => {
     try {
       if (!userData) {
-        Alert.alert('错误', '用户信息未加载，请重试');
+        Alert.alert('Error', 'User info not loaded, please try again');
         return;
       }
 
@@ -594,11 +594,11 @@ export default function EchoTab() {
       await handleStreamRequest({
         requestBody,
         tempMessageId: 'temp_ai_response',
-        logPrefix: '普通消息',
+        logPrefix: 'Regular message',
         onComplete: (responseData, eventSource) => {
           // 检查 Function Call
           if (responseData.msg_type === 'fun_call' && responseData.call_res) {
-            console.log('检测到 Function Call:', responseData.call_res);
+            console.log('Function Call detected:', responseData.call_res);
 
             setMessages(prev => {
               const filtered = prev.filter(msg => msg.id !== 'temp_ai_response');
@@ -617,21 +617,21 @@ export default function EchoTab() {
 
             handleFunctionCall(responseData.call_res).catch(error => {
               console.error('Function call 执行失败:', error);
-              Alert.alert('错误', '执行功能调用时发生错误');
+              Alert.alert('Error', 'Error executing function call');
             });
 
             return false; // 停止默认处理
           }
           return true; // 继续默认处理
         },
-        errorMessage: '连接中断，请重试'
+        errorMessage: 'Connection interrupted, please try again'
       });
       
       // 注意：setIsSending(false) 现在在 handleStreamRequest 的 complete 或 error 事件中处理
 
     } catch (error) {
-      console.error('发送消息错误:', error);
-      Alert.alert('错误', '发送消息失败，请重试');
+      console.error('Error sending message:', error);
+      Alert.alert('Error', 'Failed to send message, please try again');
       setIsSending(false);
     }
   }, [userData, handleStreamRequest]);
@@ -647,7 +647,7 @@ export default function EchoTab() {
 
       // 避免重复处理同一张照片
       if (processedPhotoRef.current === photoUri) {
-        console.log('照片已处理过，跳过:', photoUri);
+        console.log('Photo already processed, skipping:', photoUri);
         return;
       }
       processedPhotoRef.current = photoUri;
@@ -663,7 +663,7 @@ export default function EchoTab() {
         photoUri: photoUri,
       };
 
-      console.log('准备添加用户图片消息到界面:', {
+      console.log('Preparing to add user image message to interface:', {
         id: userMsg.id,
         type: userMsg.type,
         hasPhotoUri: !!userMsg.photoUri,
@@ -673,16 +673,16 @@ export default function EchoTab() {
       
       // 使用函数式更新确保消息被正确添加
       setMessages(prev => {
-        console.log('当前消息列表长度:', prev.length);
+        console.log('Current message list length:', prev.length);
         // 检查是否已经存在相同的消息（避免重复）
         const exists = prev.some(msg => msg.id === messageId || (msg.photoUri === photoUri && msg.type === 'user'));
         if (exists) {
-          console.log('消息已存在，跳过添加');
+          console.log('Message already exists, skipping add');
           return prev;
         }
         const newMessages = [...prev, userMsg];
-        console.log('✅ 成功添加消息，更新后的消息列表长度:', newMessages.length);
-        console.log('最新消息:', newMessages[newMessages.length - 1]);
+        console.log('✅ Successfully added message, updated message list length:', newMessages.length);
+        console.log('Latest message:', newMessages[newMessages.length - 1]);
         return newMessages;
       });
       
@@ -691,7 +691,7 @@ export default function EchoTab() {
         ? description 
         : 'Please analyze this photo';
       
-      console.log('发送图片消息:', { 
+      console.log('Sending image message:', { 
         mode, 
         description, 
         messageText, 
@@ -718,11 +718,11 @@ export default function EchoTab() {
   const sendFunctionCallResult = useCallback(async (callId: string, functionName: string, result: any) => {
     try {
       if (!userData) {
-        Alert.alert('错误', '用户信息未加载，请重试');
+        Alert.alert('Error', 'User info not loaded, please try again');
         return;
       }
 
-      console.log('发送 Function Call 结果给服务器:', { callId, functionName, result });
+      console.log('Sending Function Call result to server:', { callId, functionName, result });
       const messageText = typeof result === 'string' ? result : JSON.stringify(result);
 
       const messageTimestamp = Date.now().toString();
@@ -761,23 +761,23 @@ export default function EchoTab() {
       await handleStreamRequest({
         requestBody,
         tempMessageId: 'temp_function_ai_response',
-        logPrefix: 'Function Call 响应',
+        logPrefix: 'Function Call response',
         onComplete: () => {
-          console.log('Function Call 后的 AI 回复已显示');
+          console.log('AI response after Function Call has been displayed');
           return true;
         },
-        errorMessage: 'Function Call 响应连接中断'
+        errorMessage: 'Function Call response connection interrupted'
       });
 
     } catch (error) {
-      console.error('发送 Function Call 结果失败:', error);
-      Alert.alert('错误', '发送功能调用结果失败，请重试');
+      console.error('Failed to send Function Call result:', error);
+      Alert.alert('Error', 'Failed to send function call result, please try again');
     }
   }, [userData, handleStreamRequest]);
 
   // 处理 function call
   const handleFunctionCall = useCallback(async (functionCallData: any) => {
-    console.log('处理 function call:', functionCallData);
+    console.log('Processing function call:', functionCallData);
 
     const { name, arguments: argsString, call_id } = functionCallData;
     let args;
@@ -786,8 +786,8 @@ export default function EchoTab() {
     try {
       args = JSON.parse(argsString);
     } catch (parseError) {
-      console.error('解析参数失败:', parseError);
-      const errorMessage = `参数格式错误: ${(parseError as Error).message}`;
+      console.error('Failed to parse parameters:', parseError);
+      const errorMessage = `Parameter format error: ${(parseError as Error).message}`;
       await sendFunctionCallResult(call_id, name, errorMessage);
       return;
     }

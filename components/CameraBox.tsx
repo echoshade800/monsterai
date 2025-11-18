@@ -40,17 +40,17 @@ export function CameraBox() {
         } else {
           console.log('[CameraBox] Permission denied');
           Alert.alert(
-            '相机权限被拒绝',
-            '需要相机权限才能使用相机功能。请在设置中开启相机权限。',
+            'Camera permission denied',
+            'Camera permission is required to use camera function. Please enable camera permission in settings.',
             [
-              { text: '取消', style: 'cancel' },
+              { text: 'Cancel', style: 'cancel' },
               {
-                text: '去设置',
+                text: 'Go to Settings',
                 onPress: async () => {
                   try {
                     await Linking.openSettings();
                   } catch (error) {
-                    console.error('打开设置失败:', error);
+                    console.error('Failed to open settings:', error);
                   }
                 },
               },
@@ -60,8 +60,8 @@ export function CameraBox() {
       } catch (error) {
         console.error('[CameraBox] Error requesting permission:', error);
         Alert.alert(
-          '请求权限失败',
-          '无法请求相机权限，请稍后重试。您也可以在设置中手动开启相机权限。',
+          'Failed to request permission',
+          'Unable to request camera permission, please try again later. You can also manually enable camera permission in settings.',
           [
             { text: '取消', style: 'cancel' },
             {

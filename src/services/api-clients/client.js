@@ -30,7 +30,7 @@ export class ApiResponse {
   }
 
   getMessage() {
-    return this.msg || '请求失败';
+    return this.msg || 'Request failed';
   }
 }
 
@@ -162,7 +162,7 @@ const request = async (url, options = {}) => {
   try {
     // 创建超时Promise
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new ApiError('TIMEOUT', '请求超时')), timeout);
+      setTimeout(() => reject(new ApiError('TIMEOUT', 'Request timeout')), timeout);
     });
 
     console.log('url', `${baseUrl}${url}`);
@@ -235,7 +235,7 @@ const request = async (url, options = {}) => {
       });
       throw new ApiError(
         responseData.code || 'UNKNOWN',
-        responseData.msg || '请求失败',
+        responseData.msg || 'Request failed',
         responseData.data
       );
     }
@@ -249,7 +249,7 @@ const request = async (url, options = {}) => {
     }
     
     // 网络错误或其他错误
-    throw new ApiError('NETWORK_ERROR', error.message || '网络请求失败');
+    throw new ApiError('NETWORK_ERROR', error.message || 'Network request failed');
   }
 };
 

@@ -464,7 +464,7 @@ export default function HomeTab() {
   const handleToggleReminder = async (item: TimelineItem, newValue: boolean) => {
     if (!item.id) {
       console.error('Timeline item missing id:', item);
-      Alert.alert('错误', '无法更新提醒状态：缺少 ID');
+      Alert.alert('Error', 'Cannot update reminder status: missing ID');
       return;
     }
 
@@ -491,8 +491,8 @@ export default function HomeTab() {
         )
       );
     } catch (error) {
-      console.error('更新提醒状态失败:', error);
-      Alert.alert('错误', '更新提醒状态失败，请稍后重试');
+      console.error('Failed to update reminder status:', error);
+      Alert.alert('Error', 'Failed to update reminder status, please try again later');
     }
   };
 
@@ -718,12 +718,12 @@ export default function HomeTab() {
 
   const getPermissionName = (id: string) => {
     const permissionMap: Record<string, string> = {
-      location: '位置',
+      location: 'Location',
       healthkit: 'HealthKit',
-      calendar: '日历',
-      photos: '照片',
-      camera: '相机',
-      microphone: '麦克风',
+      calendar: 'Calendar',
+      photos: 'Photos',
+      camera: 'Camera',
+      microphone: 'Microphone',
     };
     return permissionMap[id] || id;
   };
@@ -760,17 +760,17 @@ export default function HomeTab() {
         const isServiceAvailable = await locationManager.isLocationServiceAvailable();
         if (!isServiceAvailable) {
           Alert.alert(
-            '位置服务不可用',
-            '请在设备设置中启用位置服务',
+            'Location service unavailable',
+            'Please enable location service in device settings',
             [
-              { text: '取消', style: 'cancel' },
+              { text: 'Cancel', style: 'cancel' },
               {
-                text: '去设置',
+                text: 'Go to Settings',
                 onPress: async () => {
                   try {
                     await Linking.openSettings();
                   } catch (error) {
-                    console.error('打开设置失败:', error);
+                    console.error('Failed to open settings:', error);
                   }
                 },
               },
@@ -788,17 +788,17 @@ export default function HomeTab() {
           }));
         } else {
           Alert.alert(
-            '位置权限被拒绝',
-            permissionResult.error || '需要位置权限才能使用位置服务。请在设置中开启位置权限。',
+            'Location permission denied',
+            permissionResult.error || 'Location permission is required to use location service. Please enable location permission in settings.',
             [
-              { text: '取消', style: 'cancel' },
+              { text: 'Cancel', style: 'cancel' },
               {
-                text: '去设置',
+                text: 'Go to Settings',
                 onPress: async () => {
                   try {
                     await Linking.openSettings();
                   } catch (error) {
-                    console.error('打开设置失败:', error);
+                    console.error('Failed to open settings:', error);
                   }
                 },
               },
@@ -806,10 +806,10 @@ export default function HomeTab() {
           );
         }
       } catch (error) {
-        console.error('[HomeTab] 请求位置权限失败:', error);
+        console.error('[HomeTab] Failed to request location permission:', error);
         Alert.alert(
-          '请求权限失败',
-          '无法请求位置权限，请稍后重试。您也可以在设置中手动开启位置权限。',
+          'Failed to request permission',
+          'Unable to request location permission, please try again later. You can also manually enable location permission in settings.',
           [
             { text: '取消', style: 'cancel' },
             {
@@ -840,17 +840,17 @@ export default function HomeTab() {
           }));
         } else {
           Alert.alert(
-            '日历权限被拒绝',
-            permissionResult.error || '需要日历权限才能访问日历事件。请在设置中开启日历权限。',
+            'Calendar permission denied',
+            permissionResult.error || 'Calendar permission is required to access calendar events. Please enable calendar permission in settings.',
             [
-              { text: '取消', style: 'cancel' },
+              { text: 'Cancel', style: 'cancel' },
               {
-                text: '去设置',
+                text: 'Go to Settings',
                 onPress: async () => {
                   try {
                     await Linking.openSettings();
                   } catch (error) {
-                    console.error('打开设置失败:', error);
+                    console.error('Failed to open settings:', error);
                   }
                 },
               },
@@ -858,10 +858,10 @@ export default function HomeTab() {
           );
         }
       } catch (error) {
-        console.error('[HomeTab] 请求日历权限失败:', error);
+        console.error('[HomeTab] Failed to request calendar permission:', error);
         Alert.alert(
-          '请求权限失败',
-          '无法请求日历权限，请稍后重试。您也可以在设置中手动开启日历权限。',
+          'Failed to request permission',
+          'Unable to request calendar permission, please try again later. You can also manually enable calendar permission in settings.',
           [
             { text: '取消', style: 'cancel' },
             {
@@ -887,9 +887,9 @@ export default function HomeTab() {
         const isAvailable = await healthDataManager.isAvailable();
         if (!isAvailable) {
           Alert.alert(
-            'HealthKit 不可用',
-            'HealthKit 仅在 iOS 设备上可用，且需要设备支持。',
-            [{ text: '确定', style: 'default' }],
+            'HealthKit unavailable',
+            'HealthKit is only available on iOS devices and requires device support.',
+            [{ text: 'OK', style: 'default' }],
           );
           return;
         }
@@ -909,17 +909,17 @@ export default function HomeTab() {
 
           if (!allAuthorized) {
             Alert.alert(
-              '部分权限未授权',
-              '部分健康数据权限未授权。请在系统设置中开启所有 HealthKit 权限。',
+              'Some permissions not authorized',
+              'Some health data permissions are not authorized. Please enable all HealthKit permissions in system settings.',
               [
-                { text: '取消', style: 'cancel' },
+                { text: 'Cancel', style: 'cancel' },
                 {
-                  text: '去设置',
+                  text: 'Go to Settings',
                   onPress: async () => {
                     try {
                       await Linking.openSettings();
                     } catch (error) {
-                      console.error('打开设置失败:', error);
+                      console.error('Failed to open settings:', error);
                     }
                   },
                 },
@@ -928,17 +928,17 @@ export default function HomeTab() {
           }
         } else {
           Alert.alert(
-            'HealthKit 权限被拒绝',
-            permissionResult.error || '需要 HealthKit 权限才能访问健康数据。请在设置中开启 HealthKit 权限。',
+            'HealthKit permission denied',
+            permissionResult.error || 'HealthKit permission is required to access health data. Please enable HealthKit permission in settings.',
             [
-              { text: '取消', style: 'cancel' },
+              { text: 'Cancel', style: 'cancel' },
               {
-                text: '去设置',
+                text: 'Go to Settings',
                 onPress: async () => {
                   try {
                     await Linking.openSettings();
                   } catch (error) {
-                    console.error('打开设置失败:', error);
+                    console.error('Failed to open settings:', error);
                   }
                 },
               },
@@ -946,10 +946,10 @@ export default function HomeTab() {
           );
         }
       } catch (error) {
-        console.error('[HomeTab] 请求 HealthKit 权限失败:', error);
+        console.error('[HomeTab] Failed to request HealthKit permission:', error);
         Alert.alert(
-          '请求权限失败',
-          '无法请求 HealthKit 权限，请稍后重试。您也可以在设置中手动开启 HealthKit 权限。',
+          'Failed to request permission',
+          'Unable to request HealthKit permission, please try again later. You can also manually enable HealthKit permission in settings.',
           [
             { text: '取消', style: 'cancel' },
             {
@@ -986,17 +986,17 @@ export default function HomeTab() {
             photos: false,
           }));
           Alert.alert(
-            '相册权限被拒绝',
-            '需要相册权限才能访问照片。请在设置中开启相册权限。',
+            'Photo library permission denied',
+            'Photo library permission is required to access photos. Please enable photo library permission in settings.',
             [
-              { text: '取消', style: 'cancel' },
+              { text: 'Cancel', style: 'cancel' },
               {
-                text: '去设置',
+                text: 'Go to Settings',
                 onPress: async () => {
                   try {
                     await Linking.openSettings();
                   } catch (error) {
-                    console.error('打开设置失败:', error);
+                    console.error('Failed to open settings:', error);
                   }
                 },
               },
@@ -1004,10 +1004,10 @@ export default function HomeTab() {
           );
         }
       } catch (error) {
-        console.error('[HomeTab] 请求相册权限失败:', error);
+        console.error('[HomeTab] Failed to request photo library permission:', error);
         Alert.alert(
-          '请求权限失败',
-          '无法请求相册权限，请稍后重试。您也可以在设置中手动开启相册权限。',
+          'Failed to request permission',
+          'Unable to request photo library permission, please try again later. You can also manually enable photo library permission in settings.',
           [
             { text: '取消', style: 'cancel' },
             {
@@ -1043,17 +1043,17 @@ export default function HomeTab() {
             camera: false,
           }));
           Alert.alert(
-            '相机权限被拒绝',
-            '需要相机权限才能使用相机功能。请在设置中开启相机权限。',
+            'Camera permission denied',
+            'Camera permission is required to use camera function. Please enable camera permission in settings.',
             [
-              { text: '取消', style: 'cancel' },
+              { text: 'Cancel', style: 'cancel' },
               {
-                text: '去设置',
+                text: 'Go to Settings',
                 onPress: async () => {
                   try {
                     await Linking.openSettings();
                   } catch (error) {
-                    console.error('打开设置失败:', error);
+                    console.error('Failed to open settings:', error);
                   }
                 },
               },
@@ -1061,10 +1061,10 @@ export default function HomeTab() {
           );
         }
       } catch (error) {
-        console.error('[HomeTab] 请求相机权限失败:', error);
+        console.error('[HomeTab] Failed to request camera permission:', error);
         Alert.alert(
-          '请求权限失败',
-          '无法请求相机权限，请稍后重试。您也可以在设置中手动开启相机权限。',
+          'Failed to request permission',
+          'Unable to request camera permission, please try again later. You can also manually enable camera permission in settings.',
           [
             { text: '取消', style: 'cancel' },
             {
@@ -1100,17 +1100,17 @@ export default function HomeTab() {
             microphone: false,
           }));
           Alert.alert(
-            '麦克风权限被拒绝',
-            '需要麦克风权限才能使用录音功能。请在设置中开启麦克风权限。',
+            'Microphone permission denied',
+            'Microphone permission is required to use recording function. Please enable microphone permission in settings.',
             [
-              { text: '取消', style: 'cancel' },
+              { text: 'Cancel', style: 'cancel' },
               {
-                text: '去设置',
+                text: 'Go to Settings',
                 onPress: async () => {
                   try {
                     await Linking.openSettings();
                   } catch (error) {
-                    console.error('打开设置失败:', error);
+                    console.error('Failed to open settings:', error);
                   }
                 },
               },
@@ -1118,10 +1118,10 @@ export default function HomeTab() {
           );
         }
       } catch (error) {
-        console.error('[HomeTab] 请求麦克风权限失败:', error);
+        console.error('[HomeTab] Failed to request microphone permission:', error);
         Alert.alert(
-          '请求权限失败',
-          '无法请求麦克风权限，请稍后重试。您也可以在设置中手动开启麦克风权限。',
+          'Failed to request permission',
+          'Unable to request microphone permission, please try again later. You can also manually enable microphone permission in settings.',
           [
             { text: '取消', style: 'cancel' },
             {

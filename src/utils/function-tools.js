@@ -33,7 +33,7 @@ if (AppleHealthKit && BrokenHealthKit.Constants) {
  */
 export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
   console.log('=== uploadImageToS3 开始 ===');
-  console.log('参数:', { uid, uri, filename, mimeType });
+  console.log('Parameters:', { uid, uri, filename, mimeType });
   
   // 图片压缩配置
   const MAX_WIDTH = 1000; // 最大宽度（保持宽高比）
@@ -44,7 +44,7 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
   let processedFilename = filename || 'upload.jpg';
   
   try {
-    console.log('开始压缩图片...');
+    console.log('Starting to compress image...');
     // 压缩图片
     const manipResult = await ImageManipulator.manipulateAsync(
       uri,
@@ -57,7 +57,7 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
         format: ImageManipulator.SaveFormat.JPEG, // 统一转换为 JPEG 格式以减小文件大小
       }
     );
-    console.log('图片压缩结果:', manipResult);
+    console.log('Image compression result:', manipResult);
     processedUri = manipResult.uri;
     processedMimeType = 'image/jpeg';
     // 如果原文件名不是 .jpg 或 .jpeg，则更新扩展名
@@ -65,14 +65,14 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
       processedFilename = processedFilename.replace(/\.[^.]+$/, '.jpg');
     }
     
-    console.log('图片压缩完成:', {
-      原始URI: uri,
-      压缩后URI: processedUri,
-      原始大小: '未知',
-      压缩后大小: manipResult.width + 'x' + manipResult.height,
+    console.log('Image compression completed:', {
+      originalURI: uri,
+      compressedURI: processedUri,
+      originalSize: 'Unknown',
+      compressedSize: manipResult.width + 'x' + manipResult.height,
     });
   } catch (error) {
-    console.warn('图片压缩失败，使用原始图片:', error);
+    console.warn('Image compression failed, using original image:', error);
     // 如果压缩失败，继续使用原始图片
   }
   
@@ -88,15 +88,15 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
   
   // 获取包含 passId 的 headers
   const headersWithPassId = await getHeadersWithPassId();
-  console.log('获取到的 headers:', headersWithPassId);
+  console.log('Headers obtained:', headersWithPassId);
   
   // 使用 API 配置中的 BASE_URL
   const baseUrl = getBaseUrl('default');
   const uploadUrl = `${baseUrl}/upload/image`;
-  console.log('上传地址:', uploadUrl);
+  console.log('Upload URL:', uploadUrl);
   
   try {
-    console.log('开始发送请求...');
+    console.log('Starting to send request...');
     const resp = await fetch(uploadUrl, {
       method: 'POST',
       headers: {
@@ -107,14 +107,14 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
       body: form,
     });
 
-    console.log('请求响应状态:', resp.status, resp.statusText);
-    console.log('响应 headers:', resp.headers);
+    console.log('Response status:', resp.status, resp.statusText);
+    console.log('Response headers:', resp.headers);
 
     const json = await resp.json();
     console.log('upload image to s3 response:', JSON.stringify(json, null, 2));
     
     if (!resp.ok) {
-      console.error('上传失败，响应内容:', json);
+      console.error('Upload failed, response content:', json);
       throw new Error(json?.detail || json?.message || 'Upload failed');
     }
     
@@ -122,9 +122,9 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
     return json.data;
   } catch (error) {
     console.error('=== uploadImageToS3 失败 ===');
-    console.error('错误类型:', error.name);
-    console.error('错误信息:', error.message);
-    console.error('错误堆栈:', error.stack);
+    console.error('Error type:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     throw error;
   }
 };
@@ -136,14 +136,14 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
  * @returns {Promise<string>} 拍照结果信息
  */
 export const takePhoto = async (args) => {
-  console.log('开始拍照功能:', args);
+  console.log('Starting photo capture function:', args);
   
   try {
     // 请求相机权限
     const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
     
     if (cameraPermission.status !== 'granted') {
-      return '❌ 相机权限被拒绝，无法拍照';
+      return '❌ Camera permission denied, cannot take photo';
     }
     
     // 启动相机拍照
@@ -155,12 +155,12 @@ export const takePhoto = async (args) => {
     });
     
     if (result.canceled) {
-      return '📷 用户取消了拍照';
+      return '📷 User cancelled photo capture';
     }
     
     if (result.assets && result.assets.length > 0) {
       const photo = result.assets[0];
-      const purpose = args.purpose || '记录';
+      const purpose = args.purpose || 'Record';
       
       try {
         // 获取用户ID
@@ -174,14 +174,14 @@ export const takePhoto = async (args) => {
             }
           }
         } catch (e) {
-          console.warn('获取用户ID失败，使用匿名:', e);
+          console.warn('Failed to get user ID, using anonymous:', e);
         }
         
         // 准备上传参数
         const filename = photo.fileName || `photo_${Date.now()}.jpg`;
         const mimeType = photo.mimeType || 'image/jpeg';
         
-        console.log('开始上传照片到S3:', { uid, filename, mimeType });
+        console.log('Starting to upload photo to S3:', { uid, filename, mimeType });
         
         // 上传到S3
         const uploadResult = await uploadImageToS3({
@@ -191,7 +191,7 @@ export const takePhoto = async (args) => {
           mimeType,
         });
         
-        console.log('照片上传成功:', uploadResult);
+        console.log('Photo uploaded successfully:', uploadResult);
         
         // 返回包含S3 URL的结果
         const imageUrl = uploadResult.presigned_url || uploadResult.s3_uri || '';
@@ -206,20 +206,20 @@ export const takePhoto = async (args) => {
           imageUrl: imageUrl,
           bucket: uploadResult.bucket,
           key: uploadResult.key,
-          message: `📷 拍照成功\n目的: ${purpose}\n文件大小: ${Math.round(photo.fileSize / 1024)}KB\n尺寸: ${photo.width} x ${photo.height}\n拍摄时间: ${new Date().toLocaleString()}\n图片URL: ${imageUrl}`
+          message: `📷 Photo captured successfully\nPurpose: ${purpose}\nFile size: ${Math.round(photo.fileSize / 1024)}KB\nDimensions: ${photo.width} x ${photo.height}\nCapture time: ${new Date().toLocaleString()}\nImage URL: ${imageUrl}`
         });
       } catch (uploadError) {
-        console.error('上传照片到S3失败:', uploadError);
-        return '❌ 上传照片失败: ' + uploadError.message;
+        console.error('Failed to upload photo to S3:', uploadError);
+        return '❌ Failed to upload photo: ' + uploadError.message;
       }
              
     } else {
-      return '❌ 拍照失败，未获取到照片';
+      return '❌ Photo capture failed, no photo obtained';
     }
     
   } catch (error) {
-    console.error('拍照失败:', error);
-    return '❌ 拍照失败: ' + error.message;
+    console.error('Photo capture failed:', error);
+    return '❌ Photo capture failed: ' + error.message;
   }
 };
 
@@ -230,7 +230,7 @@ export const takePhoto = async (args) => {
  * @returns {Promise<string>} 选择图片结果信息
  */
 export const selectFromGallery = async (args) => {
-  console.log('开始从图库选择图片:', args);
+  console.log('Starting to select image from gallery:', args);
   
   try {
     // 请求媒体库权限
@@ -249,12 +249,12 @@ export const selectFromGallery = async (args) => {
     });
     
     if (result.canceled) {
-      return '🖼️ 用户取消了图片选择';
+      return '🖼️ User cancelled image selection';
     }
     
     if (result.assets && result.assets.length > 0) {
       const image = result.assets[0];
-      const purpose = args.purpose || '选择';
+      const purpose = args.purpose || 'Select';
       
       try {
         // 获取用户ID
@@ -268,14 +268,14 @@ export const selectFromGallery = async (args) => {
             }
           }
         } catch (e) {
-          console.warn('获取用户ID失败，使用匿名:', e);
+          console.warn('Failed to get user ID, using anonymous:', e);
         }
         
         // 准备上传参数
         const filename = image.fileName || `image_${Date.now()}.jpg`;
         const mimeType = image.mimeType || 'image/jpeg';
         
-        console.log('开始上传图片到S3:', { uid, filename, mimeType });
+        console.log('Starting to upload image to S3:', { uid, filename, mimeType });
         
         // 上传到S3
         const uploadResult = await uploadImageToS3({
@@ -285,7 +285,7 @@ export const selectFromGallery = async (args) => {
           mimeType,
         });
         
-        console.log('图片上传成功:', uploadResult);
+        console.log('Image uploaded successfully:', uploadResult);
         
         // 返回包含S3 URL的结果
         const imageUrl = uploadResult.presigned_url || uploadResult.s3_uri || '';
@@ -300,20 +300,20 @@ export const selectFromGallery = async (args) => {
           imageUrl: imageUrl,
           bucket: uploadResult.bucket,
           key: uploadResult.key,
-          message: `🖼️ 图片选择成功\n目的: ${purpose}\n文件大小: ${Math.round(image.fileSize / 1024)}KB\n尺寸: ${image.width} x ${image.height}\n选择时间: ${new Date().toLocaleString()}\n图片URL: ${imageUrl}`
+          message: `🖼️ Image selected successfully\nPurpose: ${purpose}\nFile size: ${Math.round(image.fileSize / 1024)}KB\nDimensions: ${image.width} x ${image.height}\nSelection time: ${new Date().toLocaleString()}\nImage URL: ${imageUrl}`
         });
       } catch (uploadError) {
-        console.error('上传图片到S3失败:', uploadError);
-        return '❌ 上传图片失败: ' + uploadError.message;
+        console.error('Failed to upload image to S3:', uploadError);
+        return '❌ Failed to upload image: ' + uploadError.message;
       }
              
     } else {
-      return '❌ 图片选择失败，未获取到图片';
+      return '❌ Image selection failed, no image obtained';
     }
     
   } catch (error) {
-    console.error('图片选择失败:', error);
-    return '❌ 图片选择失败: ' + error.message;
+    console.error('Image selection failed:', error);
+    return '❌ Image selection failed: ' + error.message;
   }
 };
 
@@ -326,13 +326,13 @@ export const selectFromGallery = async (args) => {
  * @returns {Promise<string>} 步数数据信息
  */
 export const getStepCount = async (args) => {
-  console.log('开始获取步数数据:', args);
+  console.log('Starting to get step count data:', args);
   
   try {
     // 检查 HealthKit 是否可用
     const available = await healthDataManager.isAvailable();
     if (!available) {
-      return '❌ 健康数据功能不可用，请确保在iOS设备上运行';
+      return '❌ Health data function unavailable, please ensure running on iOS device';
     }
 
     let queryOptions;
@@ -354,31 +354,31 @@ export const getStepCount = async (args) => {
       switch (period) {
         case 'today':
           timePeriod = TimePeriod.TODAY;
-          periodDescription = '今天';
+          periodDescription = 'Today';
           break;
         case 'yesterday':
           timePeriod = TimePeriod.YESTERDAY;
-          periodDescription = '昨天';
+          periodDescription = 'Yesterday';
           break;
         case 'last_7_days':
           timePeriod = TimePeriod.LAST_7_DAYS;
-          periodDescription = '最近7天';
+          periodDescription = 'Last 7 days';
           break;
         case 'last_30_days':
           timePeriod = TimePeriod.LAST_30_DAYS;
-          periodDescription = '最近30天';
+          periodDescription = 'Last 30 days';
           break;
         case 'this_week':
           timePeriod = TimePeriod.THIS_WEEK;
-          periodDescription = '本周';
+          periodDescription = 'This week';
           break;
         case 'this_month':
           timePeriod = TimePeriod.THIS_MONTH;
-          periodDescription = '本月';
+          periodDescription = 'This month';
           break;
         default:
           timePeriod = TimePeriod.TODAY;
-          periodDescription = '今天';
+          periodDescription = 'Today';
       }
       queryOptions = timePeriod;
     }
@@ -387,7 +387,7 @@ export const getStepCount = async (args) => {
     const result = await healthDataManager.getStepCount(queryOptions);
     
     if (!result.success) {
-      return `❌ 获取步数数据失败: ${result.error}\n\n请确保：\n1. 已授权健康应用访问权限\n2. 设备支持健康数据功能\n3. 健康应用中有步数数据记录`;
+      return `❌ Failed to get step count data: ${result.error}\n\nPlease ensure:\n1. Health app access permission is granted\n2. Device supports health data function\n3. Step count data exists in health app`;
     }
 
     // 格式化数据
@@ -435,12 +435,12 @@ export const getStepCount = async (args) => {
       report += `• 建议每天步行10000步以保持健康\n`;
     }
 
-    console.log('步数数据获取成功');
+    console.log('Step count data retrieved successfully');
     return report;
 
   } catch (error) {
-    console.error('获取步数数据失败:', error);
-    return '❌ 获取步数数据失败: ' + error.message + '\n\n请确保：\n1. 已授权健康应用访问权限\n2. 设备支持健康数据功能\n3. 健康应用中有步数数据记录';
+    console.error('Failed to get step count data:', error);
+    return '❌ Failed to get step count data: ' + error.message + '\n\nPlease ensure:\n1. Health app access permission is granted\n2. Device supports health data function\n3. Step count data exists in health app';
   }
 };
 
@@ -456,7 +456,7 @@ export const getStepCount = async (args) => {
  * @returns {Promise<string>} 创建结果信息
  */
 export const createCalendarEvent = async (args) => {
-  console.log('开始创建日历事件:', args);
+  console.log('Starting to create calendar event:', args);
   
   try {
     const { title, startDate, endDate, notes, location, allDay = false } = args;
