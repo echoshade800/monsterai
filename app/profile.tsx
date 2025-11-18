@@ -1,4 +1,5 @@
 import { BlurView } from 'expo-blur';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -494,7 +495,9 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.versionText}>MonsterAI v1.0.0 (Beta)</Text>
+          <Text style={styles.versionText}>
+            MonsterAI v{Constants.expoConfig?.version || '0.0.1'} (Beta)
+          </Text>
         </View>
       </ScrollView>
 
