@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     left: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 16,
   },
   placeholderText: {
     fontSize: 15,
