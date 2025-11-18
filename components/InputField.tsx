@@ -252,6 +252,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    marginLeft: 24,
   },
   penIconWrapper: {
     justifyContent: 'center',
