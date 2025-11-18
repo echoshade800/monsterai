@@ -88,6 +88,14 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
     };
   });
 
+  const inputAnimatedStyle = useAnimatedStyle(() => {
+    const expanded = keyboardHeight.value > 0 ? 1 : 0;
+
+    return {
+      paddingLeft: interpolate(expanded, [0, 1], [-8, 12]),
+    };
+  });
+
   const handleFocus = () => {
     setIsFocused(true);
     onFocus?.();
@@ -141,9 +149,9 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             </TouchableOpacity>
           </Animated.View>
 
-          <TextInput
+          <Animated.TextInput
             ref={textInputRef}
-            style={styles.input}
+            style={[styles.input, inputAnimatedStyle]}
             placeholder="Typing…"
             placeholderTextColor="#999999"
             value={text}
