@@ -56,19 +56,19 @@ class LocationManager {
    * @returns {Promise<boolean>}
    */
   async isLocationServiceAvailable() {
-    console.log('[LocationManager] 🔍 开始检查位置服务可用性...');
+    console.log('[LocationManager] 🔍 Starting to check location service availability...');
     
     try {
       if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
-        console.log('[LocationManager] ⚠️ 平台检查失败: 当前平台为', Platform.OS, '，位置服务仅在移动设备上可用');
+        console.log('[LocationManager] ⚠️ Platform check failed: current platform is', Platform.OS, ', location service is only available on mobile devices');
         return false;
       }
 
       const isEnabled = await Location.hasServicesEnabledAsync();
-      console.log('[LocationManager] ✅ 位置服务可用性检查完成:', isEnabled);
+      console.log('[LocationManager] ✅ Location service availability check completed:', isEnabled);
       return isEnabled;
     } catch (error) {
-      console.error('[LocationManager] ❌ 检查位置服务可用性失败:', error);
+      console.error('[LocationManager] ❌ Failed to check location service availability:', error);
       return false;
     }
   }
@@ -79,17 +79,17 @@ class LocationManager {
    * @returns {Promise<{success: boolean, status?: string, error?: string}>}
    */
   async requestLocationPermission(permissionType = 'foreground') {
-    console.log('[LocationManager] 🔐 开始请求位置权限...');
-    console.log('[LocationManager] 📋 权限类型:', permissionType);
+    console.log('[LocationManager] 🔐 Starting to request location permission...');
+    console.log('[LocationManager] 📋 Permission type:', permissionType);
     
     try {
       // 检查位置服务是否可用
       const isServiceAvailable = await this.isLocationServiceAvailable();
       if (!isServiceAvailable) {
-        console.log('[LocationManager] ❌ 位置服务不可用');
+        console.log('[LocationManager] ❌ Location service not available');
         return {
           success: false,
-          error: '位置服务不可用，请在设备设置中启用位置服务',
+          error: 'Location service is not available, please enable location service in device settings',
         };
       }
 
@@ -103,19 +103,19 @@ class LocationManager {
       const isGranted = permission.status === LocationPermissionStatus.GRANTED;
       this.hasLocationPermission = isGranted;
       
-      console.log('[LocationManager] 📊 权限状态:', permission.status);
-      console.log('[LocationManager] ✅ 权限请求完成:', isGranted ? '已授权' : '被拒绝');
+      console.log('[LocationManager] 📊 Permission status:', permission.status);
+      console.log('[LocationManager] ✅ Permission request completed:', isGranted ? 'Granted' : 'Denied');
       
       return {
         success: isGranted,
         status: permission.status,
-        error: isGranted ? null : '位置权限被拒绝',
+        error: isGranted ? null : 'Location permission denied',
       };
     } catch (error) {
-      console.error('[LocationManager] ❌ 请求位置权限失败:', error);
+      console.error('[LocationManager] ❌ Failed to request location permission:', error);
       return {
         success: false,
-        error: error.message || '请求位置权限失败',
+        error: error.message || 'Failed to request location permission',
       };
     }
   }
@@ -126,7 +126,7 @@ class LocationManager {
    * @returns {Promise<{success: boolean, status?: string, error?: string}>}
    */
   async checkLocationPermission(permissionType = 'foreground') {
-    console.log('[LocationManager] 🔍 检查位置权限状态...');
+    console.log('[LocationManager] 🔍 Checking location permission status...');
     
     try {
       let permission;
@@ -139,18 +139,18 @@ class LocationManager {
       const isGranted = permission.status === LocationPermissionStatus.GRANTED;
       this.hasLocationPermission = isGranted;
       
-      console.log('[LocationManager] 📊 当前权限状态:', permission.status);
+      console.log('[LocationManager] 📊 Current permission status:', permission.status);
       
       return {
         success: isGranted,
         status: permission.status,
-        error: isGranted ? null : '位置权限未授权',
+        error: isGranted ? null : 'Location permission not granted',
       };
     } catch (error) {
-      console.error('[LocationManager] ❌ 检查位置权限失败:', error);
+      console.error('[LocationManager] ❌ Failed to check location permission:', error);
       return {
         success: false,
-        error: error.message || '检查位置权限失败',
+        error: error.message || 'Failed to check location permission',
       };
     }
   }
@@ -165,21 +165,21 @@ class LocationManager {
    * @returns {Promise<{success: boolean, data?: Object, error?: string}>}
    */
   async getCurrentLocation(options = {}) {
-    console.log('[LocationManager] 📍 开始获取当前位置...');
+    console.log('[LocationManager] 📍 Starting to get current location...');
     
     try {
       // 检查权限
       if (!this.hasLocationPermission) {
-        console.log('[LocationManager] 🔐 位置权限未授权，尝试申请...');
+        console.log('[LocationManager] 🔐 Location permission not granted, attempting to request...');
         const permissionResult = await this.requestLocationPermission();
         if (!permissionResult.success) {
-          console.log('[LocationManager] ❌ 位置权限申请失败');
+          console.log('[LocationManager] ❌ Location permission request failed');
           return {
             success: false,
-            error: permissionResult.error || '位置权限被拒绝',
+            error: permissionResult.error || 'Location permission denied',
           };
         }
-        console.log('[LocationManager] ✅ 位置权限申请成功');
+        console.log('[LocationManager] ✅ Location permission request successful');
       }
 
       const locationOptions = {
@@ -188,7 +188,7 @@ class LocationManager {
         maximumAge: options.maximumAge || 10000,
       };
 
-      console.log('[LocationManager] 📊 位置获取参数:', locationOptions);
+      console.log('[LocationManager] 📊 Location fetch parameters:', locationOptions);
 
       const location = await Location.getCurrentPositionAsync(locationOptions);
 
@@ -206,7 +206,7 @@ class LocationManager {
 
       // 如果需要获取地址信息
       if (options.includeAddress !== false) {
-        console.log('[LocationManager] 🏠 开始获取地址信息...');
+        console.log('[LocationManager] 🏠 Starting to get address information...');
         try {
           const addressData = await this.getAddressFromCoordinates(
             locationData.latitude, 
@@ -214,29 +214,29 @@ class LocationManager {
           );
           if (addressData.success) {
             locationData.address = addressData.data;
-            console.log('[LocationManager] ✅ 地址信息获取成功:', addressData.data);
+            console.log('[LocationManager] ✅ Address information fetched successfully:', addressData.data);
           } else {
-            console.log('[LocationManager] ⚠️ 地址信息获取失败:', addressData.error);
+            console.log('[LocationManager] ⚠️ Failed to get address information:', addressData.error);
             locationData.address = null;
           }
         } catch (error) {
-          console.error('[LocationManager] ❌ 获取地址信息异常:', error);
+          console.error('[LocationManager] ❌ Error getting address information:', error);
           locationData.address = null;
         }
       }
 
       this.currentLocation = locationData;
-      console.log('[LocationManager] ✅ 当前位置获取成功:', locationData);
+      console.log('[LocationManager] ✅ Current location fetched successfully:', locationData);
       
       return {
         success: true,
         data: locationData,
       };
     } catch (error) {
-      console.error('[LocationManager] ❌ 获取当前位置失败:', error);
+      console.error('[LocationManager] ❌ Failed to get current location:', error);
       return {
         success: false,
-        error: error.message || '获取当前位置失败',
+        error: error.message || 'Failed to get current location',
       };
     }
   }
@@ -248,8 +248,8 @@ class LocationManager {
    * @returns {Promise<{success: boolean, data?: Object, error?: string}>}
    */
   async getAddressFromCoordinates(latitude, longitude) {
-    console.log('[LocationManager] 🏠 开始获取地址信息...');
-    console.log('[LocationManager] 📍 坐标:', latitude, longitude);
+    console.log('[LocationManager] 🏠 Starting to get address information...');
+    console.log('[LocationManager] 📍 Coordinates:', latitude, longitude);
     
     try {
       const addresses = await Location.reverseGeocodeAsync({
@@ -260,11 +260,11 @@ class LocationManager {
       if (addresses && addresses.length > 0) {
         const address = addresses[0];
         const addressData = {
-          country: address.country || '未知',
-          region: address.region || '未知',
-          city: address.city || address.subregion || '未知',
-          district: address.district || address.subLocality || '未知',
-          street: address.street || '未知',
+          country: address.country || 'Unknown',
+          region: address.region || 'Unknown',
+          city: address.city || address.subregion || 'Unknown',
+          district: address.district || address.subLocality || 'Unknown',
+          street: address.street || 'Unknown',
           streetNumber: address.streetNumber || '',
           postalCode: address.postalCode || '',
           name: address.name || '',
@@ -274,23 +274,23 @@ class LocationManager {
           simpleAddress: this.formatSimpleAddress(address),
         };
 
-        console.log('[LocationManager] ✅ 地址信息获取成功:', addressData);
+        console.log('[LocationManager] ✅ Address information fetched successfully:', addressData);
         return {
           success: true,
           data: addressData,
         };
       } else {
-        console.log('[LocationManager] ⚠️ 未找到地址信息');
+        console.log('[LocationManager] ⚠️ Address information not found');
         return {
           success: false,
-          error: '未找到地址信息',
+          error: 'Address information not found',
         };
       }
     } catch (error) {
-      console.error('[LocationManager] ❌ 获取地址信息失败:', error);
+      console.error('[LocationManager] ❌ Failed to get address information:', error);
       return {
         success: false,
-        error: error.message || '获取地址信息失败',
+        error: error.message || 'Failed to get address information',
       };
     }
   }
@@ -339,29 +339,29 @@ class LocationManager {
    * @returns {Promise<{success: boolean, error?: string}>}
    */
   async startLocationTracking(options = {}) {
-    console.log('[LocationManager] 🚀 开始位置跟踪...');
+    console.log('[LocationManager] 🚀 Starting location tracking...');
     
     try {
       if (this.isTracking) {
-        console.log('[LocationManager] ⚠️ 位置跟踪已在运行中');
+        console.log('[LocationManager] ⚠️ Location tracking is already running');
         return {
           success: false,
-          error: '位置跟踪已在运行中',
+          error: 'Location tracking is already running',
         };
       }
 
       // 检查权限
       if (!this.hasLocationPermission) {
-        console.log('[LocationManager] 🔐 位置权限未授权，尝试申请...');
+        console.log('[LocationManager] 🔐 Location permission not granted, attempting to request...');
         const permissionResult = await this.requestLocationPermission();
         if (!permissionResult.success) {
-          console.log('[LocationManager] ❌ 位置权限申请失败');
+          console.log('[LocationManager] ❌ Location permission request failed');
           return {
             success: false,
-            error: permissionResult.error || '位置权限被拒绝',
+            error: permissionResult.error || 'Location permission denied',
           };
         }
-        console.log('[LocationManager] ✅ 位置权限申请成功');
+        console.log('[LocationManager] ✅ Location permission request successful');
       }
 
       const trackingOptions = {
@@ -376,7 +376,7 @@ class LocationManager {
       }
 
       this.isTracking = true;
-      console.log('[LocationManager] 📊 跟踪参数:', trackingOptions);
+      console.log('[LocationManager] 📊 Tracking parameters:', trackingOptions);
 
       // 立即获取一次位置
       const initialLocation = await this.getCurrentLocation({ 
@@ -400,17 +400,17 @@ class LocationManager {
             this.notifyCallbacks(location.data);
           }
         } catch (error) {
-          console.error('[LocationManager] ❌ 定时获取位置失败:', error);
+          console.error('[LocationManager] ❌ Failed to get location periodically:', error);
         }
       }, trackingOptions.interval);
 
-      console.log('[LocationManager] ✅ 位置跟踪已启动');
+      console.log('[LocationManager] ✅ Location tracking started');
       return { success: true };
     } catch (error) {
-      console.error('[LocationManager] ❌ 启动位置跟踪失败:', error);
+      console.error('[LocationManager] ❌ Failed to start location tracking:', error);
       return {
         success: false,
-        error: error.message || '启动位置跟踪失败',
+        error: error.message || 'Failed to start location tracking',
       };
     }
   }
@@ -420,14 +420,14 @@ class LocationManager {
    * @returns {Promise<{success: boolean, error?: string}>}
    */
   async stopLocationTracking() {
-    console.log('[LocationManager] 🛑 停止位置跟踪...');
+    console.log('[LocationManager] 🛑 Stopping location tracking...');
     
     try {
       if (!this.isTracking) {
-        console.log('[LocationManager] ⚠️ 位置跟踪未在运行');
+        console.log('[LocationManager] ⚠️ Location tracking is not running');
         return {
           success: false,
-          error: '位置跟踪未在运行',
+          error: 'Location tracking is not running',
         };
       }
 
@@ -439,13 +439,13 @@ class LocationManager {
       this.isTracking = false;
       this.trackingCallbacks.clear();
       
-      console.log('[LocationManager] ✅ 位置跟踪已停止');
+      console.log('[LocationManager] ✅ Location tracking stopped');
       return { success: true };
     } catch (error) {
-      console.error('[LocationManager] ❌ 停止位置跟踪失败:', error);
+      console.error('[LocationManager] ❌ Failed to stop location tracking:', error);
       return {
         success: false,
-        error: error.message || '停止位置跟踪失败',
+        error: error.message || 'Failed to stop location tracking',
       };
     }
   }
@@ -463,7 +463,7 @@ class LocationManager {
       this.locationHistory = this.locationHistory.slice(0, maxSize);
     }
     
-    console.log('[LocationManager] 📝 位置已添加到历史记录, 当前记录数:', this.locationHistory.length);
+    console.log('[LocationManager] 📝 Location added to history, current record count:', this.locationHistory.length);
   }
 
   /**
@@ -475,7 +475,7 @@ class LocationManager {
       try {
         callback(locationData);
       } catch (error) {
-        console.error('[LocationManager] ❌ 回调函数执行失败:', error);
+        console.error('[LocationManager] ❌ Callback execution failed:', error);
       }
     });
   }
@@ -497,19 +497,19 @@ class LocationManager {
    * @returns {Promise<{success: boolean}>}
    */
   async clearLocationHistory() {
-    console.log('[LocationManager] 🗑️ 清除位置历史记录...');
+    console.log('[LocationManager] 🗑️ Clearing location history...');
     
     try {
       this.locationHistory = [];
       this.currentLocation = null;
       
-      console.log('[LocationManager] ✅ 位置历史记录已清除');
+      console.log('[LocationManager] ✅ Location history cleared');
       return { success: true };
     } catch (error) {
-      console.error('[LocationManager] ❌ 清除位置历史记录失败:', error);
+      console.error('[LocationManager] ❌ Failed to clear location history:', error);
       return {
         success: false,
-        error: error.message || '清除位置历史记录失败',
+        error: error.message || 'Failed to clear location history',
       };
     }
   }
@@ -577,20 +577,20 @@ class LocationManager {
   formatLocationData(locationData) {
     if (!locationData) {
       return {
-        coordinates: '未知',
-        accuracy: '未知',
-        altitude: '未知',
-        speed: '未知',
-        timestamp: '未知',
+        coordinates: 'Unknown',
+        accuracy: 'Unknown',
+        altitude: 'Unknown',
+        speed: 'Unknown',
+        timestamp: 'Unknown',
       };
     }
 
     return {
       coordinates: `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`,
-      accuracy: locationData.accuracy ? `${locationData.accuracy.toFixed(2)} 米` : '未知',
-      altitude: locationData.altitude ? `${locationData.altitude.toFixed(2)} 米` : '未知',
-      speed: locationData.speed ? `${(locationData.speed * 3.6).toFixed(2)} km/h` : '未知',
-      timestamp: locationData.timestamp || '未知',
+      accuracy: locationData.accuracy ? `${locationData.accuracy.toFixed(2)} m` : 'Unknown',
+      altitude: locationData.altitude ? `${locationData.altitude.toFixed(2)} m` : 'Unknown',
+      speed: locationData.speed ? `${(locationData.speed * 3.6).toFixed(2)} km/h` : 'Unknown',
+      timestamp: locationData.timestamp || 'Unknown',
     };
   }
 
@@ -598,7 +598,7 @@ class LocationManager {
    * 销毁管理器，清理资源
    */
   destroy() {
-    console.log('[LocationManager] 🗑️ 销毁位置管理器...');
+    console.log('[LocationManager] 🗑️ Destroying location manager...');
     
     if (this.trackingInterval) {
       clearInterval(this.trackingInterval);
@@ -612,7 +612,7 @@ class LocationManager {
     this.hasLocationPermission = false;
     this.isInitialized = false;
     
-    console.log('[LocationManager] ✅ 位置管理器已销毁');
+    console.log('[LocationManager] ✅ Location manager destroyed');
   }
 }
 

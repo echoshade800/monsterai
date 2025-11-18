@@ -17,13 +17,13 @@ class CalendarManager {
    */
   async requestPermission() {
     try {
-      console.log('[CalendarManager] 🔐 请求日历权限...');
+      console.log('[CalendarManager] 🔐 Requesting calendar permission...');
       
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       
       if (status === 'granted') {
         this.hasPermission = true;
-        console.log('[CalendarManager] ✅ 日历权限已授予');
+        console.log('[CalendarManager] ✅ Calendar permission granted');
         
         // 获取可用的日历列表
         await this.loadCalendars();
@@ -33,17 +33,17 @@ class CalendarManager {
         };
       } else {
         this.hasPermission = false;
-        console.log('[CalendarManager] ❌ 日历权限被拒绝');
+        console.log('[CalendarManager] ❌ Calendar permission denied');
         return {
           success: false,
-          error: '日历权限被拒绝',
+          error: 'Calendar permission denied',
         };
       }
     } catch (error) {
-      console.error('[CalendarManager] ❌ 请求日历权限失败:', error);
+      console.error('[CalendarManager] ❌ Failed to request calendar permission:', error);
       return {
         success: false,
-        error: error.message || '请求日历权限失败',
+        error: error.message || 'Failed to request calendar permission',
       };
     }
   }
@@ -57,14 +57,14 @@ class CalendarManager {
       const { status } = await Calendar.getCalendarPermissionsAsync();
       this.hasPermission = status === 'granted';
       
-      console.log('[CalendarManager] 📋 日历权限状态:', status);
+      console.log('[CalendarManager] 📋 Calendar permission status:', status);
       
       return {
         success: true,
         granted: this.hasPermission,
       };
     } catch (error) {
-      console.error('[CalendarManager] ❌ 检查日历权限失败:', error);
+      console.error('[CalendarManager] ❌ Failed to check calendar permission:', error);
       return {
         success: false,
         granted: false,
@@ -79,28 +79,28 @@ class CalendarManager {
   async loadCalendars() {
     try {
       if (!this.hasPermission) {
-        console.log('[CalendarManager] ⚠️ 没有日历权限，无法加载日历列表');
+        console.log('[CalendarManager] ⚠️ No calendar permission, cannot load calendar list');
         return {
           success: false,
-          error: '没有日历权限',
+          error: 'No calendar permission',
         };
       }
 
-      console.log('[CalendarManager] 📅 加载日历列表...');
+      console.log('[CalendarManager] 📅 Loading calendar list...');
       
       const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
       this.calendars = calendars;
-      console.log('[CalendarManager] ✅ 加载日历列表成功:', calendars.length, '个日历');
+      console.log('[CalendarManager] ✅ Calendar list loaded successfully:', calendars.length, 'calendars');
       
       return {
         success: true,
         data: calendars,
       };
     } catch (error) {
-      console.error('[CalendarManager] ❌ 加载日历列表失败:', error);
+      console.error('[CalendarManager] ❌ Failed to load calendar list:', error);
       return {
         success: false,
-        error: error.message || '加载日历列表失败',
+        error: error.message || 'Failed to load calendar list',
       };
     }
   }
@@ -116,10 +116,10 @@ class CalendarManager {
   async getEventsInRange(options = {}) {
     try {
       if (!this.hasPermission) {
-        console.log('[CalendarManager] ⚠️ 没有日历权限，无法获取事件');
+        console.log('[CalendarManager] ⚠️ No calendar permission, cannot get events');
         return {
           success: false,
-          error: '没有日历权限',
+          error: 'No calendar permission',
         };
       }
 
@@ -132,31 +132,31 @@ class CalendarManager {
 
       // 验证参数
       if (!calendarIds || calendarIds.length === 0) {
-        console.log('[CalendarManager] ⚠️ 没有可用的日历');
+        console.log('[CalendarManager] ⚠️ No available calendars');
         return {
           success: false,
-          error: '没有可用的日历',
+          error: 'No available calendars',
         };
       }
 
       if (!(startDate instanceof Date) || !(endDate instanceof Date)) {
-        console.log('[CalendarManager] ⚠️ 日期参数无效');
+        console.log('[CalendarManager] ⚠️ Invalid date parameters');
         return {
           success: false,
-          error: '日期参数无效',
+          error: 'Invalid date parameters',
         };
       }
 
       if (startDate > endDate) {
-        console.log('[CalendarManager] ⚠️ 开始日期不能晚于结束日期');
+        console.log('[CalendarManager] ⚠️ Start date cannot be later than end date');
         return {
           success: false,
-          error: '开始日期不能晚于结束日期',
+          error: 'Start date cannot be later than end date',
         };
       }
 
-      console.log('[CalendarManager] 📅 获取事件...');
-      console.log('[CalendarManager] 📋 查询参数:', {
+      console.log('[CalendarManager] 📅 Getting events...');
+      console.log('[CalendarManager] 📋 Query parameters:', {
         calendarIds: calendarIds.length,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
@@ -168,7 +168,7 @@ class CalendarManager {
         endDate
       );
 
-      console.log('[CalendarManager] ✅ 获取事件成功:', events.length, '个事件');
+      console.log('[CalendarManager] ✅ Events fetched successfully:', events.length, 'events');
       
       // 处理事件数据，添加更多有用信息
       const processedEvents = events.map(event => ({
@@ -194,10 +194,10 @@ class CalendarManager {
         data: processedEvents,
       };
     } catch (error) {
-      console.error('[CalendarManager] ❌ 获取事件失败:', error);
+      console.error('[CalendarManager] ❌ Failed to get events:', error);
       return {
         success: false,
-        error: error.message || '获取事件失败',
+        error: error.message || 'Failed to get events',
       };
     }
   }
@@ -282,7 +282,7 @@ class CalendarManager {
       const durationMs = end - start;
       return Math.round(durationMs / (1000 * 60)); // 转换为分钟
     } catch (error) {
-      console.warn('[CalendarManager] ⚠️ 计算事件时长失败:', error);
+      console.warn('[CalendarManager] ⚠️ Failed to calculate event duration:', error);
       return 0;
     }
   }
@@ -297,7 +297,7 @@ class CalendarManager {
   formatEventTime(startDate, endDate, allDay) {
     try {
       if (allDay) {
-        return '全天';
+        return 'All day';
       }
 
       const start = new Date(startDate);
@@ -331,7 +331,7 @@ class CalendarManager {
 
       return `${startDateStr} ${startTime} - ${endDateStr} ${endTime}`;
     } catch (error) {
-      console.warn('[CalendarManager] ⚠️ 格式化事件时间失败:', error);
+      console.warn('[CalendarManager] ⚠️ Failed to format event time:', error);
       return '';
     }
   }
@@ -362,7 +362,7 @@ class CalendarManager {
 
       return grouped;
     } catch (error) {
-      console.error('[CalendarManager] ❌ 分组事件失败:', error);
+      console.error('[CalendarManager] ❌ Failed to group events:', error);
       return {};
     }
   }
@@ -402,7 +402,7 @@ class CalendarManager {
 
       return stats;
     } catch (error) {
-      console.error('[CalendarManager] ❌ 计算事件统计失败:', error);
+      console.error('[CalendarManager] ❌ Failed to calculate event statistics:', error);
       return {
         total: 0,
         allDay: 0,
@@ -440,7 +440,7 @@ class CalendarManager {
         );
       });
     } catch (error) {
-      console.error('[CalendarManager] ❌ 搜索事件失败:', error);
+      console.error('[CalendarManager] ❌ Failed to search events:', error);
       return [];
     }
   }

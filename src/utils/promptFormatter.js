@@ -12,11 +12,11 @@ export function formatPromptData(result) {
     const sections = [];
     
     if (result.data.first_contact_chat) {
-      sections.push(`【首次接触对话 Prompt】\n\n${result.data.first_contact_chat}`);
+      sections.push(`【First Contact Chat Prompt】\n\n${result.data.first_contact_chat}`);
     }
     
     if (result.data.daily_chat) {
-      sections.push(`【日常对话 Prompt】\n\n${result.data.daily_chat}`);
+      sections.push(`【Daily Chat Prompt】\n\n${result.data.daily_chat}`);
     }
     
     // 如果有其他字段，也一并展示
@@ -64,6 +64,6 @@ export function formatPromptData(result) {
     displayContent = JSON.stringify(result.data, null, 2);
   }
   
-  return displayContent || '暂无内容';
+  return displayContent || 'No content available';
 }
 

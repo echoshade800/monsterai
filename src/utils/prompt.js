@@ -40,13 +40,13 @@ export const getUserProfile = async () => {
     
     // 默认用户信息
     let userProfile = {
-      name: '用户',
-      age: '未知',
-      gender: '未知',
-      height: '未知',
-      weight: '未知',
-      location: '未知',
-      goal: '未设置'
+      name: 'User',
+      age: 'Unknown',
+      gender: 'Unknown',
+      height: 'Unknown',
+      weight: 'Unknown',
+      location: 'Unknown',
+      goal: 'Not set'
     };
 
     // 从用户数据中提取信息
@@ -79,15 +79,15 @@ export const getUserProfile = async () => {
     }
     return userProfile;
   } catch (error) {
-    console.error('获取用户信息失败:', error);
+    console.error('Failed to get user info:', error);
     return {
-      name: '用户',
-      age: '未知',
-      gender: '未知',
-      height: '未知',
-      weight: '未知',
-      location: '未知',
-      goal: '未设置'
+      name: 'User',
+      age: 'Unknown',
+      gender: 'Unknown',
+      height: 'Unknown',
+      weight: 'Unknown',
+      location: 'Unknown',
+      goal: 'Not set'
     };
   }
 };
@@ -235,14 +235,14 @@ const fetchRemoteSystemPrompt = async (url) => {
     
     if (response.ok) {
       const prompt = await response.text();
-      console.log('成功从远程获取systemPrompt');
+      console.log('Successfully fetched systemPrompt from remote');
       return prompt;
     } else {
-      console.error('从远程获取systemPrompt失败:', response.status);
+      console.error('Failed to fetch systemPrompt from remote:', response.status);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   } catch (error) {
-    console.error('从远程获取systemPrompt出错:', error);
+    console.error('Error fetching systemPrompt from remote:', error);
     throw error;
   }
 };
@@ -265,7 +265,7 @@ const mergeUserContextWithRemotePrompt = async (remotePrompt) => {
     if (userContextRegex.test(remotePrompt)) {
       // 如果包含，则替换现有的 User Context
       const mergedPrompt = remotePrompt.replace(userContextRegex, localUserContext.trim());
-      console.log('已替换服务端 prompt 中的 User Context 部分');
+      console.log('Replaced User Context section in remote prompt');
       return mergedPrompt;
     } else {
       // 如果不包含，则在适当位置插入本地 User Context
@@ -279,17 +279,17 @@ const mergeUserContextWithRemotePrompt = async (remotePrompt) => {
           styleSectionRegex, 
           `${styleMatch[1]}\n${localUserContext.trim()}\n\n`
         );
-        console.log('已在服务端 prompt 中插入本地 User Context');
+        console.log('Inserted local User Context into remote prompt');
         return mergedPrompt;
       } else {
         // 如果找不到 Style 部分，则在文件末尾添加
         const mergedPrompt = `${remotePrompt}\n\n${localUserContext.trim()}`;
-        console.log('已在服务端 prompt 末尾添加本地 User Context');
+        console.log('Appended local User Context to end of remote prompt');
         return mergedPrompt;
       }
     }
   } catch (error) {
-    console.error('合并 User Context 时出错:', error);
+    console.error('Error merging User Context:', error);
     // 如果合并失败，返回原始服务端 prompt
     return remotePrompt;
   }
@@ -313,7 +313,7 @@ export const fetchSystemPrompt = async (systemPromptURL = null) => {
         const mergedPrompt = await mergeUserContextWithRemotePrompt(remotePrompt);
         return mergedPrompt;
       } catch (error) {
-        console.warn('从远程获取systemPrompt失败，使用本地生成的提示词:', error);
+        console.warn('Failed to fetch systemPrompt from remote, using locally generated prompt:', error);
         // 远程获取失败，继续使用本地生成
       }
     }
@@ -323,7 +323,7 @@ export const fetchSystemPrompt = async (systemPromptURL = null) => {
     return localPrompt;
     
   } catch (error) {
-    console.error('获取systemPrompt出错:', error);
+    console.error('Error getting systemPrompt:', error);
     return 'You are a helpful assistant.'; // 默认提示
   }
 };
