@@ -720,9 +720,9 @@ export const FUNCTION_TOOLS = [
  * 将工具名称映射到具体的实现函数
  */
 export const TOOL_HANDLERS = {
-  'select_from_gallery': selectFromGallery,
-  'get_step_count': getStepCount,
-  'create_calendar_event': createCalendarEvent,
+  // 'select_from_gallery': selectFromGallery,
+  // 'get_step_count': getStepCount,
+  // 'create_calendar_event': createCalendarEvent,
   // 后续添加更多工具的映射
   // 'take_photo': takePhoto,
   // 'get_location_info': getLocationInfo,
