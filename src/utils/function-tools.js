@@ -32,7 +32,7 @@ if (AppleHealthKit && BrokenHealthKit.Constants) {
  * @returns {Promise<Object>} 上传结果，包含 bucket, key, presigned_url, s3_uri
  */
 export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
-  console.log('=== uploadImageToS3 开始 ===');
+  console.log('=== uploadImageToS3 started ===');
   console.log('Parameters:', { uid, uri, filename, mimeType });
   
   // 图片压缩配置
@@ -84,7 +84,7 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
     type: processedMimeType
   });
   
-  console.log('FormData 已创建');
+  console.log('FormData created');
   
   // 获取包含 passId 的 headers
   const headersWithPassId = await getHeadersWithPassId();
@@ -118,10 +118,10 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
       throw new Error(json?.detail || json?.message || 'Upload failed');
     }
     
-    console.log('=== uploadImageToS3 成功 ===');
+    console.log('=== uploadImageToS3 succeeded ===');
     return json.data;
   } catch (error) {
-    console.error('=== uploadImageToS3 失败 ===');
+    console.error('=== uploadImageToS3 failed ===');
     console.error('Error type:', error.name);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
@@ -237,7 +237,7 @@ export const selectFromGallery = async (args) => {
     const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
     if (mediaLibraryPermission.status !== 'granted') {
-      return '❌ 媒体库权限被拒绝，无法访问图库';
+      return '❌ Media library permission denied, cannot access gallery';
     }
     
     // 启动图库选择器
@@ -346,7 +346,7 @@ export const getStepCount = async (args) => {
       };
       const start = new Date(queryOptions.startDate);
       const end = new Date(queryOptions.endDate);
-      periodDescription = `自定义日期范围: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+      periodDescription = `Custom date range: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
     } else {
       // 使用预设周期
       const period = args.period || 'today';
@@ -395,44 +395,44 @@ export const getStepCount = async (args) => {
     const { startDate, endDate } = healthDataManager.getDateRange(queryOptions);
 
     // 生成报告
-    let report = `🚶 步数数据分析报告\n`;
-    report += `📅 查询周期: ${periodDescription}\n`;
-    report += `📆 日期范围: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}\n\n`;
+    let report = `🚶 Step Count Data Analysis Report\n`;
+    report += `📅 Query Period: ${periodDescription}\n`;
+    report += `📆 Date Range: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}\n\n`;
 
     if (formatted.total > 0) {
-      report += `📊 步数统计:\n`;
-      report += `  • 总步数: ${formatted.total.toLocaleString()} 步\n`;
-      report += `  • 平均每日: ${formatted.average.toLocaleString()} 步\n`;
-      report += `  • 记录天数: ${formatted.days} 天\n\n`;
+      report += `📊 Step Count Statistics:\n`;
+      report += `  • Total Steps: ${formatted.total.toLocaleString()} steps\n`;
+      report += `  • Daily Average: ${formatted.average.toLocaleString()} steps\n`;
+      report += `  • Recorded Days: ${formatted.days} days\n\n`;
 
       // 显示每日步数详情（最多显示最近7天）
       const recentRecords = formatted.records.slice(-7);
       if (recentRecords.length > 0) {
-        report += `📈 最近步数记录:\n`;
+        report += `📈 Recent Step Records:\n`;
         recentRecords.forEach(record => {
           const status = record.steps >= 10000 ? '✅' : record.steps >= 5000 ? '⚠️' : '❌';
-          report += `  • ${record.dateString}: ${record.steps.toLocaleString()} 步 ${status}\n`;
+          report += `  • ${record.dateString}: ${record.steps.toLocaleString()} steps ${status}\n`;
         });
       }
 
       // 健康建议
-      report += `\n💡 健康建议:\n`;
+      report += `\n💡 Health Recommendations:\n`;
       if (formatted.average >= 10000) {
-        report += `• 恭喜！您的运动量很充足 🎉\n`;
+        report += `• Congratulations! Your activity level is excellent 🎉\n`;
       } else if (formatted.average >= 5000) {
-        report += `• 运动量适中，建议增加一些步行活动\n`;
+        report += `• Moderate activity level, consider increasing walking activities\n`;
       } else {
-        report += `• 建议增加日常步行，目标是每天10000步\n`;
+        report += `• Recommend increasing daily walking, target 10000 steps per day\n`;
       }
-      report += `• 世界卫生组织建议成年人每天至少进行150分钟中等强度运动\n`;
-      report += `• 步行是最简单有效的有氧运动方式\n`;
+      report += `• WHO recommends adults engage in at least 150 minutes of moderate-intensity exercise daily\n`;
+      report += `• Walking is the simplest and most effective form of aerobic exercise\n`;
     } else {
-      report += `📊 步数统计:\n`;
-      report += `  暂无步数记录\n\n`;
-      report += `💡 提示：\n`;
-      report += `• 请确保iPhone已记录步数数据\n`;
-      report += `• 检查健康应用中的步数权限设置\n`;
-      report += `• 建议每天步行10000步以保持健康\n`;
+      report += `📊 Step Count Statistics:\n`;
+      report += `  No step records available\n\n`;
+      report += `💡 Tips:\n`;
+      report += `• Please ensure iPhone has recorded step data\n`;
+      report += `• Check step permission settings in Health app\n`;
+      report += `• Recommend walking 10000 steps daily to maintain health\n`;
     }
 
     console.log('Step count data retrieved successfully');
@@ -463,11 +463,11 @@ export const createCalendarEvent = async (args) => {
     
     // 验证必需参数
     if (!title) {
-      return '❌ 事件标题不能为空';
+      return '❌ Event title cannot be empty';
     }
     
     if (!startDate) {
-      return '❌ 开始时间不能为空';
+      return '❌ Start date cannot be empty';
     }
     
     // 解析日期
@@ -476,21 +476,21 @@ export const createCalendarEvent = async (args) => {
     
     // 验证日期有效性
     if (isNaN(start.getTime())) {
-      return '❌ 开始时间格式无效，请使用ISO格式 (如: 2024-01-01T10:00:00)';
+      return '❌ Invalid start date format, please use ISO format (e.g., 2024-01-01T10:00:00)';
     }
     
     if (isNaN(end.getTime())) {
-      return '❌ 结束时间格式无效，请使用ISO格式 (如: 2024-01-01T11:00:00)';
+      return '❌ Invalid end date format, please use ISO format (e.g., 2024-01-01T11:00:00)';
     }
     
     if (end <= start) {
-      return '❌ 结束时间必须晚于开始时间';
+      return '❌ End time must be later than start time';
     }
     
     // 请求日历权限
     const { status } = await Calendar.requestCalendarPermissionsAsync();
     if (status !== 'granted') {
-      return '❌ 日历权限被拒绝，无法创建事件。请在设置中允许访问日历。';
+      return '❌ Calendar permission denied, cannot create event. Please allow calendar access in settings.';
     }
     
     // 获取可写的日历
@@ -501,10 +501,10 @@ export const createCalendarEvent = async (args) => {
     const defaultCalendar = writableCalendars.find(cal => cal.isPrimary) || writableCalendars[0];
     
     if (!defaultCalendar) {
-      return '❌ 未找到可写的日历。请确保：\n1. 设备上有可写的日历\n2. 日历应用已正确配置\n3. 尝试在日历应用中手动创建一个事件来测试';
+      return '❌ No writable calendar found. Please ensure:\n1. Device has writable calendars\n2. Calendar app is properly configured\n3. Try manually creating an event in the calendar app to test';
     }
     
-    console.log('选择的日历:', { 
+    console.log('Selected calendar:', { 
       id: defaultCalendar.id, 
       title: defaultCalendar.title, 
       allowsModifications: defaultCalendar.allowsModifications 
@@ -530,51 +530,51 @@ export const createCalendarEvent = async (args) => {
     
     const eventId = await Calendar.createEventAsync(defaultCalendar.id, eventDetails);
     
-    console.log('日历事件创建成功，ID:', eventId);
+    console.log('Calendar event created successfully, ID:', eventId);
     
     // 生成成功报告
-    let report = `📅 日历事件创建成功\n\n`;
-    report += `📝 事件标题: ${title}\n`;
-    report += `📅 开始时间: ${start.toLocaleString()}\n`;
-    report += `📅 结束时间: ${end.toLocaleString()}\n`;
-    report += `⏰ 全天事件: ${allDay ? '是' : '否'}\n`;
-    report += `📋 日历: ${defaultCalendar.title}\n`;
+    let report = `📅 Calendar Event Created Successfully\n\n`;
+    report += `📝 Event Title: ${title}\n`;
+    report += `📅 Start Time: ${start.toLocaleString()}\n`;
+    report += `📅 End Time: ${end.toLocaleString()}\n`;
+    report += `⏰ All-Day Event: ${allDay ? 'Yes' : 'No'}\n`;
+    report += `📋 Calendar: ${defaultCalendar.title}\n`;
     
     if (location) {
-      report += `📍 地点: ${location}\n`;
+      report += `📍 Location: ${location}\n`;
     }
     
     if (notes) {
-      report += `📄 备注: ${notes}\n`;
+      report += `📄 Notes: ${notes}\n`;
     }
     
-    report += `\n✅ 事件已成功添加到您的日历中！`;
+    report += `\n✅ Event has been successfully added to your calendar!`;
     
     return report;
     
   } catch (error) {
-    console.error('创建日历事件失败:', error);
+    console.error('Failed to create calendar event:', error);
     
-    let errorMessage = '❌ 创建日历事件失败: ' + error.message;
+    let errorMessage = '❌ Failed to create calendar event: ' + error.message;
     
     // 根据具体错误类型提供更详细的解决建议
     if (error.message.includes('read only')) {
-      errorMessage += '\n\n📋 日历只读错误解决方案：\n';
-      errorMessage += '• 检查是否选择了正确的日历账户\n';
-      errorMessage += '• 确保日历账户支持写入操作\n';
-      errorMessage += '• 尝试在日历应用中手动创建事件\n';
-      errorMessage += '• 检查日历同步设置';
+      errorMessage += '\n\n📋 Read-only Calendar Error Solutions:\n';
+      errorMessage += '• Check if the correct calendar account is selected\n';
+      errorMessage += '• Ensure the calendar account supports write operations\n';
+      errorMessage += '• Try manually creating an event in the calendar app\n';
+      errorMessage += '• Check calendar sync settings';
     } else if (error.message.includes('permission')) {
-      errorMessage += '\n\n🔐 权限问题解决方案：\n';
-      errorMessage += '• 在设置 > 隐私与安全 > 日历中允许应用访问\n';
-      errorMessage += '• 确保选择了"完全访问"权限\n';
-      errorMessage += '• 重启应用后重试';
+      errorMessage += '\n\n🔐 Permission Issue Solutions:\n';
+      errorMessage += '• Allow app access in Settings > Privacy & Security > Calendar\n';
+      errorMessage += '• Ensure "Full Access" permission is selected\n';
+      errorMessage += '• Restart the app and try again';
     } else {
-      errorMessage += '\n\n💡 通用解决方案：\n';
-      errorMessage += '• 检查事件信息格式是否正确\n';
-      errorMessage += '• 确保开始时间不早于当前时间\n';
-      errorMessage += '• 尝试在日历应用中手动创建事件\n';
-      errorMessage += '• 重启应用后重试';
+      errorMessage += '\n\n💡 General Solutions:\n';
+      errorMessage += '• Check if event information format is correct\n';
+      errorMessage += '• Ensure start time is not earlier than current time\n';
+      errorMessage += '• Try manually creating an event in the calendar app\n';
+      errorMessage += '• Restart the app and try again';
     }
     
     return errorMessage;
@@ -597,15 +597,15 @@ export const FUNCTION_TOOLS = [
       properties: {
         latitude: {
           type: "number",
-          description: "位置的纬度"
+          description: "Latitude of the location"
         },
         longitude: {
           type: "number",
-          description: "位置的经度"
+          description: "Longitude of the location"
         },
         city: {
           type: "string",
-          description: "城市名称（可选）"
+          description: "City name (optional)"
         }
       },
       required: ["latitude", "longitude"]
@@ -740,7 +740,7 @@ export const executeToolFunction = async (toolName, args) => {
   if (!handler) {
     return {
       success: false,
-      error: `未找到工具函数: ${toolName}`
+      error: `Tool function not found: ${toolName}`
     };
   }
   
@@ -751,10 +751,10 @@ export const executeToolFunction = async (toolName, args) => {
       result: result
     };
   } catch (error) {
-    console.error(`执行工具函数 ${toolName} 失败:`, error);
+    console.error(`Failed to execute tool function ${toolName}:`, error);
     return {
       success: false,
-      error: error.message || `执行工具函数 ${toolName} 时发生错误`
+      error: error.message || `Error occurred while executing tool function ${toolName}`
     };
   }
 };
