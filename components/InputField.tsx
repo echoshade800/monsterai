@@ -11,6 +11,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { MentionSelector } from './MentionSelector';
 
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+
 interface InputFieldProps {
   onFocus?: () => void;
   onSend?: (message: string) => void;
@@ -149,7 +151,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             </TouchableOpacity>
           </Animated.View>
 
-          <Animated.TextInput
+          <AnimatedTextInput
             ref={textInputRef}
             style={[styles.input, inputAnimatedStyle]}
             placeholder="Typing…"
