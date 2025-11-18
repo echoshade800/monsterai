@@ -166,7 +166,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             <AnimatedTextInput
               ref={textInputRef}
               style={[styles.input, inputAnimatedStyle]}
-              placeholder="Typing…"
+              placeholder="Typing..."
               placeholderTextColor="#999999"
               value={text}
               onChangeText={setText}
@@ -177,6 +177,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
               editable={!disabled && !isSending}
               onSubmitEditing={handleSend}
               returnKeyType="send"
+              numberOfLines={1}
             />
           </View>
 
@@ -263,6 +264,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Nunito_400Regular',
     color: '#000000',
+    minHeight: 20,
     maxHeight: 100,
     paddingLeft: 0,
     paddingRight: 4,
@@ -270,6 +272,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     textAlignVertical: 'center',
     lineHeight: 20,
+    includeFontPadding: false,
   },
   floatingCameraButton: {
     position: 'absolute',
