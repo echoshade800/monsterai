@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_400Regular',
     color: '#000000',
     maxHeight: 100,
-    paddingLeft: -4,
+    paddingLeft: 32,
     paddingRight: 4,
     paddingVertical: 0,
     textAlign: 'left',
