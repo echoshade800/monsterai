@@ -216,10 +216,11 @@ export default function EchoTab() {
               'version': version,
               ...extraHeaders,
             };
-
+            const url = `${apiConfig.BASE_URL}${API_ENDPOINTS.CONVERSATION.STREAM}`;
+            console.log('url', url);
             // 创建 EventSource 实例
             eventSource = new EventSource(
-              `${apiConfig.BASE_URL}${API_ENDPOINTS.CONVERSATION.STREAM}`,
+              url,
               {
                 method: 'POST',
                 headers,
