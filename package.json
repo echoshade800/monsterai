@@ -6,6 +6,7 @@
     "dev": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "ios:device": "npx expo run:ios --device \"Fan's iPhone 16pro\"",
     "web": "expo start --web"
   },
   "dependencies": {
