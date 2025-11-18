@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
     maxHeight: 100,
     paddingHorizontal: 4,
     paddingVertical: 0,
+    textAlign: 'left',
     textAlignVertical: 'center',
     lineHeight: 20,
   },
