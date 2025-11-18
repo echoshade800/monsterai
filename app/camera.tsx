@@ -97,6 +97,62 @@ export default function CameraScreen() {
     );
   }
 
+  // 处理图片上传后的导航逻辑
+  function navigateWithImage(
+    uploadResult: any,
+    localUri: string,
+    selectedAgent: string,
+    mode: 'photo' | 'photo-text',
+    router: any,
+    logPrefix: string = '导航参数'
+  ) {
+    // 检查是否有有效的上传结果
+    const hasValidUploadUrl = uploadResult && (uploadResult.url || uploadResult.presigned_url || uploadResult.s3_uri);
+    
+    // 如果只有本地URI（上传失败或没有有效的上传结果），则直接返回，不继续执行后续逻辑
+    if (!hasValidUploadUrl) {
+      console.log('只有本地URI，上传失败或没有有效的上传结果，停止后续处理');
+      return;
+    }
+
+    // 获取图片URI（优先使用S3响应中的url字段（CloudFront CDN URL），失败则使用本地URI）
+    const imageUri = uploadResult?.url || uploadResult?.presigned_url || uploadResult?.s3_uri || localUri;
+
+    // 获取选中 agent 的 image_detection_type
+    const selectedAgentData = AGENTS.find(a => a.id === selectedAgent);
+    const imageDetectionType = selectedAgentData?.image_detection_type || 'full';
+    
+    console.log(`${logPrefix}:`, {
+      photoUri: imageUri,
+      agentId: selectedAgent,
+      imageDetectionType,
+      mode
+    });
+
+    // 导航到相应页面（使用 replace 避免路由栈增长）
+    if (mode === 'photo-text') {
+      router.replace({
+        pathname: '/photo-text',
+        params: { 
+          photoUri: imageUri, 
+          agentId: selectedAgent,
+          imageDetectionType
+        }
+      });
+    } else {
+      // 返回聊天页面，使用 replace 替换当前相机页面
+      router.replace({
+        pathname: '/(tabs)',
+        params: { 
+          photoUri: imageUri, 
+          agentId: selectedAgent, 
+          imageDetectionType,
+          mode: 'photo' 
+        }
+      });
+    }
+  }
+
   async function takePicture() {
     if (!cameraRef.current || isUploading) {
       return;
@@ -152,42 +208,8 @@ export default function CameraScreen() {
         Alert.alert('上传失败', '图片上传失败，将使用本地图片。错误: ' + (uploadError as Error).message);
       }
 
-      // 获取图片URI（优先使用S3响应中的url字段（CloudFront CDN URL），失败则使用本地URI）
-      const imageUri = uploadResult?.url || uploadResult?.presigned_url || uploadResult?.s3_uri || photo.uri;
-
-      // 获取选中 agent 的 image_detection_type
-      const selectedAgentData = AGENTS.find(a => a.id === selectedAgent);
-      const imageDetectionType = selectedAgentData?.image_detection_type || 'full';
-      
-      console.log('导航参数:', {
-        photoUri: imageUri,
-        agentId: selectedAgent,
-        imageDetectionType,
-        mode
-      });
-
-      // 导航到相应页面（使用 replace 避免路由栈增长）
-      if (mode === 'photo-text') {
-        router.replace({
-          pathname: '/photo-text',
-          params: { 
-            photoUri: imageUri, 
-            agentId: selectedAgent,
-            imageDetectionType
-          }
-        });
-      } else {
-        // 返回聊天页面，使用 replace 替换当前相机页面
-        router.replace({
-          pathname: '/(tabs)',
-          params: { 
-            photoUri: imageUri, 
-            agentId: selectedAgent, 
-            imageDetectionType,
-            mode: 'photo' 
-          }
-        });
-      }
+      // 处理图片上传后的导航逻辑
+      navigateWithImage(uploadResult, photo.uri, selectedAgent, mode, router, '导航参数');
     } catch (error) {
       console.error('拍照失败:', error);
       Alert.alert('错误', '拍照失败: ' + (error as Error).message);
@@ -254,42 +276,8 @@ export default function CameraScreen() {
           Alert.alert('上传失败', '图片上传失败，将使用本地图片。错误: ' + (uploadError as Error).message);
         }
 
-        // 获取图片URI（优先使用S3响应中的url字段（CloudFront CDN URL），失败则使用本地URI）
-        const imageUri = uploadResult?.url || uploadResult?.presigned_url || uploadResult?.s3_uri || selectedImage.uri;
-
-        // 获取选中 agent 的 image_detection_type
-        const selectedAgentData = AGENTS.find(a => a.id === selectedAgent);
-        const imageDetectionType = selectedAgentData?.image_detection_type || 'full';
-        
-        console.log('相册选择导航参数:', {
-          photoUri: imageUri,
-          agentId: selectedAgent,
-          imageDetectionType,
-          mode
-        });
-
-        // 导航到相应页面（使用 replace 避免路由栈增长）
-        if (mode === 'photo-text') {
-          router.replace({
-            pathname: '/photo-text',
-            params: { 
-              photoUri: imageUri, 
-              agentId: selectedAgent,
-              imageDetectionType
-            }
-          });
-        } else {
-          // 返回聊天页面，使用 replace 替换当前相机页面
-          router.replace({
-            pathname: '/(tabs)',
-            params: { 
-              photoUri: imageUri, 
-              agentId: selectedAgent,
-              imageDetectionType,
-              mode: 'photo' 
-            }
-          });
-        }
+        // 处理图片上传后的导航逻辑
+        navigateWithImage(uploadResult, selectedImage.uri, selectedAgent, mode, router, '相册选择导航参数');
       }
     } catch (error) {
       console.error('选择图片失败:', error);
