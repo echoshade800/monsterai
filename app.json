@@ -17,7 +17,7 @@
           "Default"
         ]
       },
-      "buildNumber": "4"
+      "buildNumber": "6"
     },
     "plugins": [
       "expo-router",
@@ -41,7 +41,7 @@
     ],
     "android": {
       "package": "com.fanthus.monsterai.debug",
-      "versionCode": 4
+      "versionCode": 6
     },
     "extra": {
       "eas": {
