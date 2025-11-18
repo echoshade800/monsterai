@@ -36,8 +36,8 @@ export const uploadImageToS3 = async ({ uid, uri, filename, mimeType }) => {
   console.log('Parameters:', { uid, uri, filename, mimeType });
   
   // 图片压缩配置
-  const MAX_WIDTH = 1000; // 最大宽度（保持宽高比）
-  const COMPRESS_QUALITY = 0.7; // 压缩质量（0-1，0.8 表示 80% 质量）
+  const MAX_WIDTH = 600; // 最大宽度（保持宽高比）
+  const COMPRESS_QUALITY = 0.6; // 压缩质量（0-1，0.8 表示 80% 质量）
   
   let processedUri = uri;
   let processedMimeType = mimeType || 'image/jpeg';
