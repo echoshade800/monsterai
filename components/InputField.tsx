@@ -94,7 +94,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
     const expanded = keyboardHeight.value > 0 ? 1 : 0;
 
     return {
-      paddingLeft: interpolate(expanded, [0, 1], [32, 12]),
+      paddingLeft: interpolate(expanded, [0, 1], [24, 12]),
     };
   });
 
@@ -169,7 +169,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
           <AnimatedTextInput
             ref={textInputRef}
             style={[styles.input, inputAnimatedStyle]}
-            placeholder="Typing…"
+            placeholder=""
             placeholderTextColor="#999999"
             value={text}
             onChangeText={setText}
