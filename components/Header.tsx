@@ -25,7 +25,7 @@ interface HeaderProps {
 
 const EXPANDED_HEIGHT_WITH_TODO = 600;
 const EXPANDED_HEIGHT_WITHOUT_TODO = 500;
-const COLLAPSED_HEIGHT = 332;
+const COLLAPSED_HEIGHT = 280;
 const COLLAPSE_THRESHOLD = 100;
 const TODO_BANNER_HEIGHT = 80;
 
@@ -829,7 +829,7 @@ const styles = StyleSheet.create({
   },
   collapsedBannerContainer: {
     paddingHorizontal: 15,
-    marginTop: -28,
+    marginTop: -48,
     marginBottom: 12,
   },
   collapsedThinkingBanner: {
