@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { AtSign, Camera, Send, PenLine } from 'lucide-react-native';
+import { AtSign, Camera, Send } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, {
@@ -94,18 +94,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
     const expanded = keyboardHeight.value > 0 ? 1 : 0;
 
     return {
-      paddingLeft: interpolate(expanded, [0, 1], [28, 12]),
-    };
-  });
-
-  const penIconAnimatedStyle = useAnimatedStyle(() => {
-    const expanded = keyboardHeight.value > 0 ? 1 : 0;
-
-    return {
-      opacity: interpolate(expanded, [0, 1], [1, 0]),
-      transform: [
-        { scale: interpolate(expanded, [0, 1], [1, 0.5]) }
-      ],
+      paddingLeft: interpolate(expanded, [0, 1], [12, 12]),
     };
   });
 
@@ -162,14 +151,10 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             </TouchableOpacity>
           </Animated.View>
 
-          <Animated.View style={[styles.penIconWrapper, penIconAnimatedStyle]}>
-            <PenLine size={18} color="#999999" strokeWidth={2} />
-          </Animated.View>
-
           <AnimatedTextInput
             ref={textInputRef}
             style={[styles.input, inputAnimatedStyle]}
-            placeholder="Typing…"
+            placeholder=""
             placeholderTextColor="#999999"
             value={text}
             onChangeText={setText}
@@ -248,13 +233,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  penIconWrapper: {
-    position: 'absolute',
-    left: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'none',
   },
   input: {
     flex: 1,
