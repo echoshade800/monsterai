@@ -91,11 +91,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
   });
 
   const inputAnimatedStyle = useAnimatedStyle(() => {
-    const expanded = keyboardHeight.value > 0 ? 1 : 0;
-
-    return {
-      paddingLeft: interpolate(expanded, [0, 1], [24, 12]),
-    };
+    return {};
   });
 
   const penIconAnimatedStyle = useAnimatedStyle(() => {
@@ -162,25 +158,27 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             </TouchableOpacity>
           </Animated.View>
 
-          <Animated.View style={[styles.penIconWrapper, penIconAnimatedStyle]}>
-            <PenLine size={18} color="#999999" strokeWidth={2} />
-          </Animated.View>
+          <View style={styles.textInputRow}>
+            <Animated.View style={[styles.penIconWrapper, penIconAnimatedStyle]}>
+              <PenLine size={18} color="#999999" strokeWidth={2} />
+            </Animated.View>
 
-          <AnimatedTextInput
-            ref={textInputRef}
-            style={[styles.input, inputAnimatedStyle]}
-            placeholder="Typing…"
-            placeholderTextColor="#999999"
-            value={text}
-            onChangeText={setText}
-            onFocus={handleFocus}
-            onBlur={() => setIsFocused(false)}
-            onSelectionChange={handleSelectionChange}
-            multiline
-            editable={!disabled && !isSending}
-            onSubmitEditing={handleSend}
-            returnKeyType="send"
-          />
+            <AnimatedTextInput
+              ref={textInputRef}
+              style={[styles.input, inputAnimatedStyle]}
+              placeholder="Typing…"
+              placeholderTextColor="#999999"
+              value={text}
+              onChangeText={setText}
+              onFocus={handleFocus}
+              onBlur={() => setIsFocused(false)}
+              onSelectionChange={handleSelectionChange}
+              multiline
+              editable={!disabled && !isSending}
+              onSubmitEditing={handleSend}
+              returnKeyType="send"
+            />
+          </View>
 
           {text.trim() && (
             <TouchableOpacity
@@ -249,11 +247,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  textInputRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   penIconWrapper: {
-    position: 'absolute',
-    left: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 8,
     pointerEvents: 'none',
   },
   input: {
@@ -262,7 +264,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_400Regular',
     color: '#000000',
     maxHeight: 100,
-    paddingLeft: 12,
+    paddingLeft: 0,
     paddingRight: 4,
     paddingVertical: 0,
     textAlign: 'left',
