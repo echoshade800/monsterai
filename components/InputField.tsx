@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { AtSign, Camera, Send } from 'lucide-react-native';
+import { AtSign, Camera, Send, PenLine } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, {
@@ -9,6 +9,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { Text } from 'react-native';
 import { MentionSelector } from './MentionSelector';
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -98,6 +99,14 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
     };
   });
 
+  const placeholderAnimatedStyle = useAnimatedStyle(() => {
+    const expanded = keyboardHeight.value > 0 ? 1 : 0;
+
+    return {
+      opacity: interpolate(expanded, [0, 1], [1, 0]),
+    };
+  });
+
   const handleFocus = () => {
     setIsFocused(true);
     onFocus?.();
@@ -149,6 +158,11 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
             >
               <AtSign size={20} color="#666666" strokeWidth={2} />
             </TouchableOpacity>
+          </Animated.View>
+
+          <Animated.View style={[styles.placeholderWrapper, placeholderAnimatedStyle]} pointerEvents="none">
+            <PenLine size={18} color="#999999" strokeWidth={2} />
+            <Text style={styles.placeholderText}>Typing...</Text>
           </Animated.View>
 
           <AnimatedTextInput
@@ -233,6 +247,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  placeholderWrapper: {
+    position: 'absolute',
+    left: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  placeholderText: {
+    fontSize: 15,
+    fontFamily: 'Nunito_400Regular',
+    color: '#999999',
   },
   input: {
     flex: 1,
