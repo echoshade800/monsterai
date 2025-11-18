@@ -346,7 +346,7 @@ class StorageManager {
       await AsyncStorage.setItem(key, value);
       return true;
     } catch (error) {
-      console.error(`存储 ${key} 失败:`, error);
+      console.error(`Failed to store ${key}:`, error);
       return false;
     }
   }
@@ -361,7 +361,7 @@ class StorageManager {
       const value = await AsyncStorage.getItem(key);
       return value;
     } catch (error) {
-      console.error(`获取 ${key} 失败:`, error);
+      console.error(`Failed to get ${key}:`, error);
       return null;
     }
   }
@@ -376,7 +376,7 @@ class StorageManager {
       await AsyncStorage.removeItem(key);
       return true;
     } catch (error) {
-      console.error(`删除 ${key} 失败:`, error);
+      console.error(`Failed to delete ${key}:`, error);
       return false;
     }
   }

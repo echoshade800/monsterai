@@ -351,11 +351,11 @@ export default function ProfileScreen() {
                   style: 'destructive',
                   onPress: async () => {
                     try {
-                      console.log('[Profile] 开始删除账户...');
+                      console.log('[Profile] Starting to delete account...');
                       
                       // 调用删除账户API
                       const response = await api.delete(API_ENDPOINTS.USER.DELETE_ACCOUNT);
-                      console.log('[Profile] 删除账户API响应:', response);
+                      console.log('[Profile] Delete account API response:', response);
                       
                       // 清空本地用户数据和 accessToken
                       await storageManager.clearAuthData();

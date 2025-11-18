@@ -165,7 +165,7 @@ export default function EchoTab() {
     let accumulatedText = '';
 
     try {
-      console.log(`${logPrefix}请求体:`, requestBody);
+      console.log(`${logPrefix}Request body:`, requestBody);
 
       // 合并 headers
       const baseHeaders = await getHeadersWithPassId();
@@ -210,7 +210,7 @@ export default function EchoTab() {
               }];
             });
           } else if (data.type === 'complete') {
-            console.log(`${logPrefix}完成:`, JSON.stringify(data, null, 2));
+            console.log(`${logPrefix}Complete:`, JSON.stringify(data, null, 2));
 
             if (data.data?.code === 0 && data.data?.data?.[0]) {
               const responseData = data.data.data[0];
@@ -256,7 +256,7 @@ export default function EchoTab() {
 
       // 错误事件
       eventSource.addEventListener('error', (event: any) => {
-        console.error(`${logPrefix}SSE 错误:`, event);
+        console.error(`${logPrefix}SSE error:`, event);
 
         if (event.type === 'error') {
           if (accumulatedText) {
@@ -287,13 +287,13 @@ export default function EchoTab() {
 
       // 连接打开
       eventSource.addEventListener('open', () => {
-        console.log(`${logPrefix}SSE 连接已建立`);
+        console.log(`${logPrefix}SSE connection established`);
       });
 
     } catch (error) {
-      console.error(`${logPrefix}失败:`, error);
+      console.error(`${logPrefix}Failed:`, error);
       if (!silent) {
-        Alert.alert('错误', errorMessage);
+        Alert.alert('Error', errorMessage);
       }
 
       if (eventSource) {
@@ -338,10 +338,10 @@ export default function EchoTab() {
       await handleStreamRequest({
         requestBody,
         tempMessageId: 'temp_new_user',
-        logPrefix: 'New User 消息',
+        logPrefix: 'New User message',
         onComplete: () => {
           // new_user 消息不需要显示响应，直接返回 false 停止默认处理
-          console.log('New User 消息已发送');
+          console.log('New User message sent');
           return false;
         },
         errorMessage: 'Failed to send New User message',
@@ -396,10 +396,10 @@ export default function EchoTab() {
       await handleStreamRequest({
         requestBody,
         tempMessageId: 'temp_enter_user',
-        logPrefix: 'Enter User 消息',
+        logPrefix: 'Enter User message',
         onComplete: () => {
           // enter 消息不需要显示响应，直接返回 false 停止默认处理
-          console.log('Enter User 消息已发送');
+          console.log('Enter User message sent');
           return false;
         },
         errorMessage: 'Failed to send Enter User message',
@@ -605,7 +605,7 @@ export default function EchoTab() {
               return [...filtered, {
                 id: Date.now().toString(),
                 type: 'assistant' as const,
-                content: `正在执行功能: ${responseData.call_res.name}...`,
+                content: `Executing function: ${responseData.call_res.name}...`,
               }];
             });
 
@@ -616,7 +616,7 @@ export default function EchoTab() {
             setIsSending(false);
 
             handleFunctionCall(responseData.call_res).catch(error => {
-              console.error('Function call 执行失败:', error);
+              console.error('Function call execution failed:', error);
               Alert.alert('Error', 'Error executing function call');
             });
 
@@ -792,18 +792,18 @@ export default function EchoTab() {
       return;
     }
 
-    console.log(`执行函数: ${name}, 参数:`, args);
+    console.log(`Executing function: ${name}, parameters:`, args);
 
     // 使用统一的工具执行器
     const executionResult = await executeToolFunction(name, args);
 
-    console.log(`函数执行结果:`, executionResult);
+    console.log(`Function execution result:`, executionResult);
 
     // 检查执行结果
     if (executionResult.success) {
       await sendFunctionCallResult(call_id, name, executionResult.result);
     } else {
-      const errorMessage = executionResult.error || `执行函数 ${name} 时发生未知错误`;
+      const errorMessage = executionResult.error || `Unknown error occurred while executing function ${name}`;
       await sendFunctionCallResult(call_id, name, errorMessage);
     }
   }, [sendFunctionCallResult]);

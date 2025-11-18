@@ -9,7 +9,7 @@ class ConversationService {
    */
   async getConversationHistory() {
     try {
-      console.log('[ConversationService][getConversationHistory] 开始获取对话历史');
+      console.log('[ConversationService][getConversationHistory] Starting to fetch conversation history');
 
       // 使用 GET 请求，不需要 body
       // Headers 会自动通过 api.get 方法添加（device, timezone, version, passId）
@@ -27,7 +27,7 @@ class ConversationService {
       return {
         success: false,
         error: error,
-        message: error.message || '获取对话历史失败',
+        message: error.message || 'Failed to fetch conversation history',
       };
     }
   }

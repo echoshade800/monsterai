@@ -63,14 +63,14 @@ export function CameraBox() {
           'Failed to request permission',
           'Unable to request camera permission, please try again later. You can also manually enable camera permission in settings.',
           [
-            { text: '取消', style: 'cancel' },
+            { text: 'Cancel', style: 'cancel' },
             {
-              text: '去设置',
+              text: 'Go to Settings',
               onPress: async () => {
                 try {
                   await Linking.openSettings();
                 } catch (error) {
-                  console.error('打开设置失败:', error);
+                  console.error('Failed to open settings:', error);
                 }
               },
             },

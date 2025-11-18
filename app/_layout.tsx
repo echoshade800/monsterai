@@ -59,7 +59,7 @@ async function uploadDeviceTokenToServer(deviceToken) {
 // 注册推送通知
 async function registerForPushNotificationsAsync() {
   let token;
-  console.log('registerForPushNotificationsAsync 开始执行');
+  console.log('registerForPushNotificationsAsync starting execution');
   
   if (Platform.OS === 'android') {
     // Android 配置（暂时跳过）
