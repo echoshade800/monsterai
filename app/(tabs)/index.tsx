@@ -150,7 +150,7 @@ export default function EchoTab() {
     return Date.now().toString();
   };
 
-  // 通用的流式响应处理函数
+  // 通用的流式响应处理函数（带重试机制）
   const handleStreamRequest = useCallback(async (config: {
     requestBody: any;
     tempMessageId: string;
@@ -159,147 +159,300 @@ export default function EchoTab() {
     errorMessage: string;
     silent?: boolean;
     extraHeaders?: Record<string, string>;
+    maxRetries?: number;
   }) => {
-    const { requestBody, tempMessageId, logPrefix, onComplete, errorMessage, silent = false, extraHeaders = {} } = config;
+    const { 
+      requestBody, 
+      tempMessageId, 
+      logPrefix, 
+      onComplete, 
+      errorMessage, 
+      silent = false, 
+      extraHeaders = {},
+      maxRetries = 3
+    } = config;
+    
     let eventSource: any = null;
     let accumulatedText = '';
+    let retryCount = 0;
+    let isCompleted = false;
+    let connectionOpened = false;
+    let retryTimeoutId: NodeJS.Timeout | null = null;
+    let connectionTimeoutId: NodeJS.Timeout | null = null;
 
-    try {
-      console.log(`${logPrefix}Request body:`, requestBody);
-
-      // 合并 headers
-      const baseHeaders = await getHeadersWithPassId();
-      const deviceId = await getDeviceId();
-      const version = getAppVersion();
-      const timezone = getTimezone();
-
-      const headers = {
-        ...baseHeaders,
-        'device': deviceId,
-        'timezone': timezone,
-        'version': version,
-        ...extraHeaders,
-      };
-
-      // 创建 EventSource 实例
-      eventSource = new EventSource(
-        `${apiConfig.BASE_URL}${API_ENDPOINTS.CONVERSATION.STREAM}`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(requestBody),
-          pollingInterval: 0,
-        }
+    // 判断是否为网络连接错误
+    const isNetworkError = (event: any): boolean => {
+      const errorMessage = event.message || '';
+      const xhrStatus = event.xhrStatus;
+      const xhrState = event.xhrState;
+      
+      // 网络连接丢失的错误特征
+      return (
+        errorMessage.includes('network connection was lost') ||
+        errorMessage.includes('Network request failed') ||
+        errorMessage.includes('connection') ||
+        (xhrStatus === 0 && xhrState === 4) || // 连接中断
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('TIMEOUT')
       );
+    };
 
-      // 监听消息事件
-      eventSource.addEventListener('message', (event: any) => {
+    // 创建 SSE 连接的函数
+    const createConnection = async (): Promise<void> => {
+      return new Promise((resolve, reject) => {
         try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'text_chunk') {
-            accumulatedText += data.word;
-            setCurrentResponse(accumulatedText);
+          console.log(`${logPrefix}Creating SSE connection (attempt ${retryCount + 1}/${maxRetries + 1})...`);
 
-            // 更新临时消息
-            setMessages(prev => {
-              const filtered = prev.filter(msg => msg.id !== tempMessageId);
-              return [...filtered, {
-                id: tempMessageId,
-                type: 'assistant' as const,
-                content: accumulatedText,
-              }];
+          // 合并 headers
+          getHeadersWithPassId().then(async (baseHeaders) => {
+            const deviceId = await getDeviceId();
+            const version = getAppVersion();
+            const timezone = getTimezone();
+
+            const headers = {
+              ...baseHeaders,
+              'device': deviceId,
+              'timezone': timezone,
+              'version': version,
+              ...extraHeaders,
+            };
+
+            // 创建 EventSource 实例
+            eventSource = new EventSource(
+              `${apiConfig.BASE_URL}${API_ENDPOINTS.CONVERSATION.STREAM}`,
+              {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(requestBody),
+                pollingInterval: 0,
+              }
+            );
+
+            // 连接打开事件
+            eventSource.addEventListener('open', () => {
+              connectionOpened = true;
+              // 清除连接超时定时器
+              if (connectionTimeoutId) {
+                clearTimeout(connectionTimeoutId);
+                connectionTimeoutId = null;
+              }
+              console.log(`${logPrefix}SSE connection established`);
+              resolve();
             });
-          } else if (data.type === 'complete') {
-            console.log(`${logPrefix}Complete:`, JSON.stringify(data, null, 2));
 
-            if (data.data?.code === 0 && data.data?.data?.[0]) {
-              const responseData = data.data.data[0];
+            // 监听消息事件
+            eventSource.addEventListener('message', (event: any) => {
+              try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'text_chunk') {
+                  accumulatedText += data.word;
+                  setCurrentResponse(accumulatedText);
 
-              // 调用回调处理 complete 事件
-              if (onComplete) {
-                const shouldContinue = onComplete(responseData, eventSource);
-                if (shouldContinue === false) {
+                  // 更新临时消息
+                  setMessages(prev => {
+                    const filtered = prev.filter(msg => msg.id !== tempMessageId);
+                    return [...filtered, {
+                      id: tempMessageId,
+                      type: 'assistant' as const,
+                      content: accumulatedText,
+                    }];
+                  });
+                } else if (data.type === 'complete') {
+                  console.log(`${logPrefix}Complete:`, JSON.stringify(data, null, 2));
+                  isCompleted = true;
+
+                  if (data.data?.code === 0 && data.data?.data?.[0]) {
+                    const responseData = data.data.data[0];
+
+                    // 调用回调处理 complete 事件
+                    if (onComplete) {
+                      const shouldContinue = onComplete(responseData, eventSource);
+                      if (shouldContinue === false) {
+                        accumulatedText = '';
+                        setCurrentResponse('');
+                        setIsSending(false);
+                        if (eventSource) {
+                          eventSource.close();
+                          eventSource = null;
+                        }
+                        return;
+                      }
+                    }
+
+                    // 默认文本消息处理
+                    if (responseData.msg_type === 'text') {
+                      setMessages(prev => {
+                        const filtered = prev.filter(msg => msg.id !== tempMessageId);
+                        return [...filtered, {
+                          id: responseData._id || Date.now().toString(),
+                          type: 'assistant' as const,
+                          content: responseData.text || accumulatedText,
+                        }];
+                      });
+                    }
+                  }
+
+                  // 清理
                   accumulatedText = '';
                   setCurrentResponse('');
                   setIsSending(false);
-                  return;
+
+                  if (eventSource) {
+                    eventSource.close();
+                    eventSource = null;
+                  }
+                }
+              } catch (parseError) {
+                console.error(`${logPrefix}Parse error:`, parseError, 'Raw data:', event.data);
+              }
+            });
+
+            // 错误事件
+            eventSource.addEventListener('error', (event: any) => {
+              console.error(`${logPrefix}SSE error:`, event);
+
+              // 如果已经完成，忽略后续错误
+              if (isCompleted) {
+                return;
+              }
+
+              // 检查是否为网络错误
+              const isNetworkErr = isNetworkError(event);
+
+              // 如果是网络错误且未达到最大重试次数，尝试重试
+              if (isNetworkErr && retryCount < maxRetries && !isCompleted) {
+                retryCount++;
+                const delay = Math.min(1000 * Math.pow(2, retryCount - 1), 5000); // 指数退避，最大5秒
+                
+                console.log(`${logPrefix}Network error detected, retrying in ${delay}ms (${retryCount}/${maxRetries})...`);
+
+                // 关闭当前连接
+                if (eventSource) {
+                  try {
+                    eventSource.close();
+                  } catch (e) {
+                    console.warn(`${logPrefix}Error closing eventSource:`, e);
+                  }
+                  eventSource = null;
+                }
+
+                connectionOpened = false;
+
+                // 延迟重试
+                retryTimeoutId = setTimeout(async () => {
+                  try {
+                    await createConnection();
+                  } catch (retryError) {
+                    console.error(`${logPrefix}Retry failed:`, retryError);
+                    handleFinalError();
+                  }
+                }, delay);
+
+                return;
+              }
+
+              // 非网络错误或达到最大重试次数，处理最终错误
+              handleFinalError();
+            });
+
+            // 设置连接超时（10秒）
+            connectionTimeoutId = setTimeout(() => {
+              if (!connectionOpened && !isCompleted) {
+                console.warn(`${logPrefix}Connection timeout`);
+                if (eventSource) {
+                  try {
+                    eventSource.close();
+                  } catch (e) {
+                    console.warn(`${logPrefix}Error closing eventSource on timeout:`, e);
+                  }
+                  eventSource = null;
+                }
+                
+                // 如果是网络错误且未达到最大重试次数，尝试重试
+                if (retryCount < maxRetries) {
+                  retryCount++;
+                  const delay = Math.min(1000 * Math.pow(2, retryCount - 1), 5000);
+                  console.log(`${logPrefix}Connection timeout, retrying in ${delay}ms (${retryCount}/${maxRetries})...`);
+                  
+                  retryTimeoutId = setTimeout(async () => {
+                    try {
+                      await createConnection();
+                    } catch (retryError) {
+                      console.error(`${logPrefix}Retry after timeout failed:`, retryError);
+                      handleFinalError();
+                    }
+                  }, delay);
+                } else {
+                  handleFinalError();
                 }
               }
+            }, 10000) as any;
 
-              // 默认文本消息处理
-              if (responseData.msg_type === 'text') {
-                setMessages(prev => {
-                  const filtered = prev.filter(msg => msg.id !== tempMessageId);
-                  return [...filtered, {
-                    id: responseData._id || Date.now().toString(),
-                    type: 'assistant' as const,
-                    content: responseData.text || accumulatedText,
-                  }];
-                });
-              }
-            }
+          }).catch((error) => {
+            console.error(`${logPrefix}Failed to get headers:`, error);
+            reject(error);
+          });
 
-            // 清理
-            accumulatedText = '';
-            setCurrentResponse('');
-            setIsSending(false);
-
-            if (eventSource) {
-              eventSource.close();
-              eventSource = null;
-            }
-          }
-        } catch (parseError) {
-          console.error(`${logPrefix}Parse error:`, parseError, 'Raw data:', event.data);
+        } catch (error) {
+          console.error(`${logPrefix}Failed to create connection:`, error);
+          reject(error);
         }
       });
+    };
 
-      // 错误事件
-      eventSource.addEventListener('error', (event: any) => {
-        console.error(`${logPrefix}SSE error:`, event);
-
-        if (event.type === 'error') {
-          if (accumulatedText) {
-            setMessages(prev => {
-              const filtered = prev.filter(msg => msg.id !== tempMessageId);
-              return [...filtered, {
-                id: Date.now().toString(),
-                type: 'assistant' as const,
-                content: accumulatedText,
-              }];
-            });
-          }
-
-          if (!silent) {
-            Alert.alert('Error', errorMessage);
-          }
-
-          accumulatedText = '';
-          setCurrentResponse('');
-          setIsSending(false);
-
-          if (eventSource) {
-            eventSource.close();
-            eventSource = null;
-          }
-        }
-      });
-
-      // 连接打开
-      eventSource.addEventListener('open', () => {
-        console.log(`${logPrefix}SSE connection established`);
-      });
-
-    } catch (error) {
-      console.error(`${logPrefix}Failed:`, error);
-      if (!silent) {
-        Alert.alert('Error', errorMessage);
+    // 处理最终错误
+    const handleFinalError = () => {
+      // 清除所有定时器
+      if (retryTimeoutId) {
+        clearTimeout(retryTimeoutId);
+        retryTimeoutId = null;
       }
+      if (connectionTimeoutId) {
+        clearTimeout(connectionTimeoutId);
+        connectionTimeoutId = null;
+      }
+
+      // 如果有已累积的文本，保存它
+      if (accumulatedText) {
+        setMessages(prev => {
+          const filtered = prev.filter(msg => msg.id !== tempMessageId);
+          return [...filtered, {
+            id: Date.now().toString(),
+            type: 'assistant' as const,
+            content: accumulatedText,
+          }];
+        });
+      }
+
+      // 显示错误提示（只在非静默模式下）
+      if (!silent) {
+        const finalErrorMessage = retryCount >= maxRetries 
+          ? `${errorMessage}\n\n已重试 ${maxRetries} 次，请检查网络连接后重试。`
+          : errorMessage;
+        Alert.alert('连接错误', finalErrorMessage);
+      }
+
+      // 清理状态
+      accumulatedText = '';
+      setCurrentResponse('');
+      setIsSending(false);
 
       if (eventSource) {
-        eventSource.close();
+        try {
+          eventSource.close();
+        } catch (e) {
+          console.warn(`${logPrefix}Error closing eventSource in handleFinalError:`, e);
+        }
         eventSource = null;
       }
+    };
+
+    try {
+      console.log(`${logPrefix}Request body:`, requestBody);
+      await createConnection();
+    } catch (error) {
+      console.error(`${logPrefix}Failed:`, error);
+      handleFinalError();
     }
   }, [apiConfig]);
 
