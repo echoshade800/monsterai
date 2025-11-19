@@ -1,0 +1,69 @@
+[
+    {
+      "id": "1",
+      "agentName": "energy",
+      "name": "Energy",
+      "category": "Health",
+      "description": "Stay strong and stress-free.",
+      "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png",
+      "backgroundColor": "#F5E6D3",
+      "imageSize": "225%",
+      "imageOffset": 52
+    },
+    {
+      "id": "2",
+      "agentName": "face",
+      "name": "Face",
+      "category": "Beauty",
+      "description": "I make your skin glow with data.",
+      "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png",
+      "backgroundColor": "#E8F5E9",
+      "imageSize": "215%",
+      "imageOffset": 50
+    },
+    {
+      "id": "3",
+      "agentName": "posture",
+      "name": "Posture",
+      "category": "Body",
+      "description": "I fix your posture, so you feel great all day.",
+      "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png",
+      "backgroundColor": "#FFE4E1",
+      "imageSize": "275%",
+      "imageOffset": 112
+    },
+    {
+      "id": "4",
+      "agentName": "sleep",
+      "name": "Sleep",
+      "category": "Restful",
+      "description": "I guide you to better sleep, naturally.",
+      "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png",
+      "backgroundColor": "#E3F2FD",
+      "imageSize": "175%",
+      "imageOffset": 42
+    },
+    {
+      "id": "5",
+      "agentName": "stress",
+      "name": "Stress",
+      "category": "Physical",
+      "description": "I'm your cozy friend for calm days and happy minds.",
+      "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png",
+      "backgroundColor": "#FFE0B2",
+      "imageSize": "275%",
+      "imageOffset": 52
+    },
+    {
+      "id": "6",
+      "agentName": "feces",
+      "name": "Poop",
+      "category": "Available",
+      "description": "I'm your cute buddy for happy, healthy poops!",
+      "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png",
+      "backgroundColor": "#F5E6D3",
+      "imageSize": "225%",
+      "imageOffset": 52
+    }
+  ]
+  
