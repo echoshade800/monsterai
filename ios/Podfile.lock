@@ -24,11 +24,11 @@ PODS:
     - ExpoModulesCore
     - React-Core
   - EXJSONUtils (0.15.0)
-  - EXManifests (1.0.8):
+  - EXManifests (1.0.9):
     - ExpoModulesCore
-  - EXNotifications (0.32.12):
+  - EXNotifications (0.32.13):
     - ExpoModulesCore
-  - Expo (54.0.23):
+  - Expo (54.0.25):
     - boost
     - DoubleConversion
     - ExpoModulesCore
@@ -77,13 +77,13 @@ PODS:
     - ZXingObjC/PDF417
   - ExpoDevice (8.0.9):
     - ExpoModulesCore
-  - ExpoFileSystem (19.0.18):
+  - ExpoFileSystem (19.0.19):
     - ExpoModulesCore
   - ExpoFont (14.0.9):
     - ExpoModulesCore
   - ExpoHaptics (15.0.7):
     - ExpoModulesCore
-  - ExpoHead (6.0.14):
+  - ExpoHead (6.0.15):
     - ExpoModulesCore
     - RNScreens
   - ExpoImage (3.0.10):
@@ -103,14 +103,14 @@ PODS:
     - ExpoModulesCore
   - ExpoLinearGradient (15.0.7):
     - ExpoModulesCore
-  - ExpoLinking (8.0.8):
+  - ExpoLinking (8.0.9):
     - ExpoModulesCore
   - ExpoLocation (19.0.7):
     - ExpoModulesCore
   - ExpoMediaLibrary (18.2.0):
     - ExpoModulesCore
     - React-Core
-  - ExpoModulesCore (3.0.25):
+  - ExpoModulesCore (3.0.26):
     - boost
     - DoubleConversion
     - fast_float
@@ -147,7 +147,9 @@ PODS:
     - ExpoModulesCore
   - ExpoSpeech (14.0.7):
     - ExpoModulesCore
-  - ExpoSplashScreen (31.0.10):
+  - ExpoSplashScreen (31.0.11):
+    - ExpoModulesCore
+  - ExpoSymbols (1.0.7):
     - ExpoModulesCore
   - ExpoSystemUI (6.0.8):
     - ExpoModulesCore
@@ -226,7 +228,6 @@ PODS:
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
-  - FLEX (5.22.10)
   - fmt (11.0.2)
   - glog (0.3.5)
   - GoogleAppMeasurement/Core (12.4.0):
@@ -3168,7 +3169,7 @@ DEPENDENCIES:
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoImageManipulator (from `../node_modules/expo-image-manipulator/ios`)
   - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
-  - ExpoKeepAwake (from `../node_modules/expo/node_modules/expo-keep-awake/ios`)
+  - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
   - ExpoLocation (from `../node_modules/expo-location/ios`)
@@ -3179,6 +3180,7 @@ DEPENDENCIES:
   - ExpoSharing (from `../node_modules/expo-sharing/ios`)
   - ExpoSpeech (from `../node_modules/expo-speech/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
+  - ExpoSymbols (from `../node_modules/expo-symbols/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
@@ -3187,7 +3189,6 @@ DEPENDENCIES:
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
-  - FLEX
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
@@ -3283,7 +3284,6 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreInternal
     - FirebaseInstallations
-    - FLEX
     - GoogleAppMeasurement
     - GoogleSignIn
     - GoogleUtilities
@@ -3355,7 +3355,7 @@ EXTERNAL SOURCES:
   ExpoImagePicker:
     :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
-    :path: "../node_modules/expo/node_modules/expo-keep-awake/ios"
+    :path: "../node_modules/expo-keep-awake/ios"
   ExpoLinearGradient:
     :path: "../node_modules/expo-linear-gradient/ios"
   ExpoLinking:
@@ -3376,6 +3376,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-speech/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
+  ExpoSymbols:
+    :path: "../node_modules/expo-symbols/ios"
   ExpoSystemUI:
     :path: "../node_modules/expo-system-ui/ios"
   ExpoWebBrowser:
@@ -3571,9 +3573,9 @@ SPEC CHECKSUMS:
   EXConstants: fd688cef4e401dcf798a021cfb5d87c890c30ba3
   EXImageLoader: 189e3476581efe3ad4d1d3fb4735b7179eb26f05
   EXJSONUtils: 1d3e4590438c3ee593684186007028a14b3686cd
-  EXManifests: 224345a575fca389073c416297b6348163f28d1a
-  EXNotifications: 7cff475adb5d7a255a9ea46bbd2589cb3b454506
-  Expo: 92029ee79999b8a398d8e4b9a69f9bd4db59dc8b
+  EXManifests: 26e15640538c3d5ef028077ebcaf004b744d4932
+  EXNotifications: a62e1f8e3edd258dc3b155d3caa49f32920f1c6c
+  Expo: 11e97d2efbb1582a027219f70fa32c17cfb46d6d
   ExpoAdapterGoogleSignIn: 5965ec283d2c0f53c483c4e2080ea055a881dfe9
   ExpoAppleAuthentication: bc9de6e9ff3340604213ab9031d4c4f7f802623e
   ExpoAsset: d839c8eae8124470332408427327e8f88beb2dfd
@@ -3581,24 +3583,25 @@ SPEC CHECKSUMS:
   ExpoCalendar: 34fe3956dab6278057a8ad04c648fe43bd642ef5
   ExpoCamera: 2a87c210f8955350ea5c70f1d539520b2fc5d940
   ExpoDevice: 148accb4071873d19fba80a2506c58ffa433d620
-  ExpoFileSystem: a67324b609244372efac5abb599f7f555b6584f0
+  ExpoFileSystem: 77157a101e03150a4ea4f854b4dd44883c93ae0a
   ExpoFont: cf9d90ec1d3b97c4f513211905724c8171f82961
   ExpoHaptics: 807476b0c39e9d82b7270349d6487928ce32df84
-  ExpoHead: e317214fa14edeaf17748d39ec9e550a3d1194fb
+  ExpoHead: 95a6ee0be1142320bccf07961d6a1502ded5d6ac
   ExpoImage: 9c3428921c536ab29e5c6721d001ad5c1f469566
   ExpoImageManipulator: ead6e7cca441603bfaecc898a69a093adef8b4ef
   ExpoImagePicker: d251aab45a1b1857e4156fed88511b278b4eee1c
   ExpoKeepAwake: 1a2e820692e933c94a565ec3fbbe38ac31658ffe
   ExpoLinearGradient: a464898cb95153125e3b81894fd479bcb1c7dd27
-  ExpoLinking: f051f28e50ea9269ff539317c166adec81d9342d
+  ExpoLinking: 77455aa013e9b6a3601de03ecfab09858ee1b031
   ExpoLocation: 93d7faa0c2adbd5a04686af0c1a61bc6ed3ee2f7
   ExpoMediaLibrary: 641a6952299b395159ccd459bd8f5f6764bf55fe
-  ExpoModulesCore: 1a7203932502bfe2817b6b02ccc54d2876633761
+  ExpoModulesCore: 9613dfd4f33c2ab5b29cdabd5c1e71ec7a5f6f9d
   ExpoPrint: 3fa0bd322ea8effa81893a099803c914e59ad46f
   ExpoSensors: c420123b1c0c2a49e86908055742caaefb1f687e
   ExpoSharing: 032c01bb034319e2374badf082ae935be866d2e9
   ExpoSpeech: 18a7f92a932028e16d3df1891377a8b626ab5cc0
-  ExpoSplashScreen: cbb839de72110dea1851dd3e85080b7923af2540
+  ExpoSplashScreen: 268b2f128dc04284c21010540a6c4dd9f95003e3
+  ExpoSymbols: 1ae04ce686de719b9720453b988d8bc5bf776c68
   ExpoSystemUI: 2761aa6875849af83286364811d46e8ed8ea64c7
   ExpoWebBrowser: b973e1351fdcf5fec0c400997b1851f5a8219ec3
   EXStructuredHeaders: c951e77f2d936f88637421e9588c976da5827368
@@ -3612,7 +3615,6 @@ SPEC CHECKSUMS:
   FirebaseCore: bb595f3114953664e3c1dc032f008a244147cfd3
   FirebaseCoreInternal: d7f5a043c2cd01a08103ab586587c1468047bca6
   FirebaseInstallations: ae9f4902cb5bf1d0c5eaa31ec1f4e5495a0714e2
-  FLEX: f21ee4f498eed3f8a1eded66b21939fd3b7a22ce
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   GoogleAppMeasurement: 1e718274b7e015cefd846ac1fcf7820c70dc017d
@@ -3715,6 +3717,6 @@ SPEC CHECKSUMS:
   Yoga: cc4a6600d61e4e9276e860d4d68eebb834a050ba
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: 17d87f22ec0fc77b78c885abbac2c6c2d24f4b82
+PODFILE CHECKSUM: 6e99aa3bc11daba4385d478e3b111017212c0ec4
 
 COCOAPODS: 1.16.2

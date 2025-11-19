@@ -1,7 +1,7 @@
 import Expo
 import React
-import FirebaseCore
 import ReactAppDependencyProvider
+import FirebaseCore
 
 @UIApplicationMain
 public class AppDelegate: ExpoAppDelegate {
