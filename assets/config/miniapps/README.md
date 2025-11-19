@@ -9,5 +9,5 @@ aws s3 cp ./assets/config/miniapps/miniapp_list_config_prod.json s3://vsa-bucket
 
 
 ## 验证方式
-https://dzdbhsix5ppsc.cloudfront.net/monster/miniapp_list_config_debug.json
-https://dzdbhsix5ppsc.cloudfront.net/monster/miniapp_list_config_prod.json
+https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/miniapp_list_config_debug.json
+https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/miniapp_list_config_prod.json

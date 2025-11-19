@@ -6,68 +6,18 @@ import { GameCard } from '../../components/GameCard';
 import { MonsterCard } from '../../components/MonsterCard';
 const { MiniAppLauncher } = NativeModules;
 
-const MONSTERS_DATA = [
-  {
-    id: 'energy',
-    name: 'Energy',
-    category: 'Health',
-    description: 'Stay strong and stress-free.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png',
-    backgroundColor: '#F5E6D3',
-    imageSize: '225%',
-    imageOffset: 52,
-  },
-  {
-    id: 'face',
-    name: 'Face',
-    category: 'Beauty',
-    description: 'I make your skin glow with data.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png',
-    backgroundColor: '#E8F5E9',
-    imageSize: '215%',
-    imageOffset: 50,
-  },
-  {
-    id: 'posture',
-    name: 'Posture',
-    category: 'Body',
-    description: 'I fix your posture, so you feel great all day.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/posture.png',
-    backgroundColor: '#FFE4E1',
-    imageSize: '275%',
-    imageOffset: 112,
-  },
-  {
-    id: 'sleep',
-    name: 'Sleep',
-    category: 'Restful',
-    description: 'I guide you to better sleep, naturally.',
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png',
-    backgroundColor: '#E3F2FD',
-    imageSize: '175%',
-    imageOffset: 42,
-  },
-  {
-    id: 'stress',
-    name: 'Stress',
-    category: 'Physical',
-    description: "I'm your cozy friend for calm days and happy minds.",
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png',
-    backgroundColor: '#FFE0B2',
-    imageSize: '275%',
-    imageOffset: 52,
-  },
-  {
-    id: 'feces',
-    name: 'Poop',
-    category: 'Available',
-    description: "I'm your cute buddy for happy, healthy poops!",
-    imageUrl: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png',
-    backgroundColor: '#F5E6D3',
-    imageSize: '225%',
-    imageOffset: 52,
-  },
-];
+// Monster 数据类型定义
+interface MonsterData {
+  id: string;
+  agentName: string;
+  name: string;
+  category: string;
+  description: string;
+  imageUrl: string;
+  backgroundColor: string;
+  imageSize: string;
+  imageOffset: number;
+}
 
 // API 数据类型定义
 interface MiniAppConfig {
@@ -105,20 +55,54 @@ interface GameData {
 export default function MarketTab() {
   const router = useRouter();
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
+  const [monstersData, setMonstersData] = useState<MonsterData[]>([]);
   const [gamesData, setGamesData] = useState<GameData[]>([]);
   const [miniAppsData, setMiniAppsData] = useState<GameData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMonstersLoading, setIsMonstersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 从 API 获取数据
+  // 从 API 获取 Monsters 数据
+  useEffect(() => {
+    const fetchMonstersData = async () => {
+      try {
+        setIsMonstersLoading(true);
+        // 根据环境选择不同的配置文件
+        const configFile = __DEV__ ? 'agent_list_config_debug.json' : 'agent_list_config_prod.json';
+        // 添加时间戳参数防止缓存
+        const timestamp = Date.now();
+        const response = await fetch(`https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/${configFile}?t=${timestamp}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data: MonsterData[] = await response.json();
+        console.log('Monsters data:', JSON.stringify(data, null, 2));
+        setMonstersData(data);
+      } catch (err) {
+        console.error('获取 Monsters 数据失败:', err);
+        // 发生错误时使用空数组，避免应用崩溃
+        setMonstersData([]);
+      } finally {
+        setIsMonstersLoading(false);
+      }
+    };
+
+    fetchMonstersData();
+  }, []);
+
+  // 从 API 获取 MiniApp 数据
   useEffect(() => {
     const fetchMiniAppData = async () => {
       try {
         setIsLoading(true);
         setError(null);
+        // 根据环境选择不同的配置文件
+        const configFile = __DEV__ ? 'miniapp_list_config_debug.json' : 'miniapp_list_config_prod.json';
         // 添加时间戳参数防止缓存
         const timestamp = Date.now();
-        const response = await fetch(`https://dzdbhsix5ppsc.cloudfront.net/monster/miniapp_list_config_debug.json?t=${timestamp}`);
+        const response = await fetch(`https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/${configFile}?t=${timestamp}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -179,10 +163,11 @@ export default function MarketTab() {
     fetchMiniAppData();
   }, []);
 
-  const handleFingerprintPress = (monsterId: string) => {
+  const handleFingerprintPress = (agentName: string) => {
+    console.log('Fingerprint pressed:', agentName);
     router.push({
       pathname: '/agent-detail',
-      params: { id: monsterId },
+      params: { id: agentName },
     });
   };
 
@@ -401,29 +386,40 @@ export default function MarketTab() {
         </View>
 
         <View style={styles.grid}>
-          {MONSTERS_DATA.map((monster, index) => (
-            <View
-              key={monster.id}
-              style={[
-                styles.cardWrapper,
-                index % 2 === 0 ? styles.cardLeft : styles.cardRight,
-              ]}
-            >
-              <MonsterCard
-                name={monster.name}
-                category={monster.category}
-                description={monster.description}
-                imageUrl={monster.imageUrl}
-                backgroundColor={monster.backgroundColor}
-                onFingerprintPress={() => handleFingerprintPress(monster.id)}
-                onCardPress={() => handleFingerprintPress(monster.id)}
-                onHirePress={() => handleHirePress(monster.id)}
-                imageSize={monster.imageSize}
-                imageOffset={monster.imageOffset}
-                isHired={true}
-              />
+          {isMonstersLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#000000" />
+              <Text style={styles.loadingText}>加载中...</Text>
             </View>
-          ))}
+          ) : monstersData.length > 0 ? (
+            monstersData.map((monster, index) => (
+              <View
+                key={monster.id}
+                style={[
+                  styles.cardWrapper,
+                  index % 2 === 0 ? styles.cardLeft : styles.cardRight,
+                ]}
+              >
+                <MonsterCard
+                  name={monster.name}
+                  category={monster.category}
+                  description={monster.description}
+                  imageUrl={monster.imageUrl}
+                  backgroundColor={monster.backgroundColor}
+                  onFingerprintPress={() => handleFingerprintPress(monster.agentName)}
+                  onCardPress={() => handleFingerprintPress(monster.agentName)}
+                  onHirePress={() => handleHirePress(monster.id)}
+                  imageSize={monster.imageSize}
+                  imageOffset={monster.imageOffset}
+                  isHired={true}
+                />
+              </View>
+            ))
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>暂无数据</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.gamesSection}>
