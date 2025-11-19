@@ -71,7 +71,7 @@ export default function MarketTab() {
         const configFile = __DEV__ ? 'agent_list_config_debug.json' : 'agent_list_config_prod.json';
         // 添加时间戳参数防止缓存
         const timestamp = Date.now();
-        const response = await fetch(`https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/${configFile}?t=${timestamp}`);
+        const response = await fetch(`https://dzdbhsix5ppsc.cloudfront.net/monster/${configFile}?t=${timestamp}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -102,7 +102,7 @@ export default function MarketTab() {
         const configFile = __DEV__ ? 'miniapp_list_config_debug.json' : 'miniapp_list_config_prod.json';
         // 添加时间戳参数防止缓存
         const timestamp = Date.now();
-        const response = await fetch(`https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/${configFile}?t=${timestamp}`);
+        const response = await fetch(`https://dzdbhsix5ppsc.cloudfront.net/monster/${configFile}?t=${timestamp}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
