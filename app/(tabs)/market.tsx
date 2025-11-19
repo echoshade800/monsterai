@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Alert, Image, Modal, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Modal, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GameCard } from '../../components/GameCard';
 import { MonsterCard } from '../../components/MonsterCard';
 const { MiniAppLauncher } = NativeModules;
@@ -69,99 +69,115 @@ const MONSTERS_DATA = [
   },
 ];
 
-const GAMES_DATA = [
-  {
-    id: '2048',
-    name: '2048',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/2048.jpeg',
-    isHot: false,
-    rating: 94,
-  },
-  {
-    id: 'flipmatch',
-    name: 'FlipMatch',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/FlipMatch.jpeg',
-    isHot: true,
-    rating: 92,
-  },
-  {
-    id: 'kidercrush',
-    name: 'Kidercrush',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/kidercrush.jpeg',
-    isHot: true,
-    rating: 90,
-  },
-  {
-    id: 'linker',
-    name: 'Linker',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/linker.png',
-    isHot: false,
-    rating: 96,
-  },
-  {
-    id: 'qblock',
-    name: 'QBlock',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/qblock.jpeg',
-    isHot: true,
-    rating: 87,
-  },
-  {
-    id: 'wordle',
-    name: 'Wordle',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/wordle.jpeg',
-    isHot: true,
-    rating: 95,
-  },
-  {
-    id: 'memory',
-    name: 'Memory',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/memory.jpeg',
-    isHot: false,
-    rating: 89,
-  },
-  {
-    id: 'sudoku',
-    name: 'Sudoku',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/sudoku.jpeg',
-    isHot: false,
-    rating: 93,
-  },
-];
+// API 数据类型定义
+interface MiniAppConfig {
+  id: string;
+  version?: string;
+  name: string;
+  icon: string;
+  color: string;
+  miniAppType: string;
+  host: string;
+  module_name: string;
+  category: string;
+  tags?: string[];
+  score?: string;
+  image: string;
+  releaseUrl: string;
+}
 
-const MINIAPPS_DATA = [
-  {
-    id: 'leaflens',
-    name: 'leaflens',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/miniapp1.jpeg',
-    isHot: false,
-    rating: 92,
-  },
-  {
-    id: 'accounting',
-    name: 'Accounting',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/pocket.jpg',
-    isHot: true,
-    rating: 95,
-  },
-  {
-    id: 'countdownday',
-    name: 'countdown day',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/daysmatter.jpg',
-    isHot: false,
-    rating: 88,
-  },
-  {
-    id: 'todo',
-    name: 'todo',
-    imageUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/miniapp4.png',
-    isHot: true,
-    rating: 91,
-  },
-];
+// 游戏和 MiniApp 数据类型
+interface GameData {
+  id: string;
+  name: string;
+  imageUrl: string;
+  isHot: boolean;
+  rating: number;
+  module_name?: string;
+  miniAppType?: string;
+  host?: string;
+  releaseUrl?: string;
+  version?: string;
+  tags?: string[];
+  score?: string;
+}
 
 export default function MarketTab() {
   const router = useRouter();
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
+  const [gamesData, setGamesData] = useState<GameData[]>([]);
+  const [miniAppsData, setMiniAppsData] = useState<GameData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 从 API 获取数据
+  useEffect(() => {
+    const fetchMiniAppData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        // 添加时间戳参数防止缓存
+        const timestamp = Date.now();
+        const response = await fetch(`https://dzdbhsix5ppsc.cloudfront.net/monster/miniapp_list_config_debug.json?t=${timestamp}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data: MiniAppConfig[] = await response.json();
+        
+        // 将 API 数据映射到现有格式，并同时分类
+        const games: GameData[] = [];
+        const miniApps: GameData[] = [];
+        
+        data.forEach((item) => {
+          // 从 score 字段中提取数字作为 rating（如果 score 存在）
+          let rating = 90; // 默认值
+          if (item.score) {
+            const match = item.score.match(/(\d+)/);
+            if (match) {
+              rating = parseInt(match[1], 10);
+            }
+          }
+          
+          const mappedItem: GameData = {
+            id: item.id,
+            name: item.name,
+            imageUrl: item.image || '',
+            isHot: false, // API 数据中没有此字段，默认为 false
+            rating: rating,
+            module_name: item.module_name,
+            miniAppType: item.miniAppType,
+            host: item.host,
+            releaseUrl: item.releaseUrl,
+            version: item.version,
+            tags: item.tags,
+            score: item.score,
+          };
+          
+          // 根据 category 分类：gaming 类别的是 games，其他是 miniapps
+          if (item.category === 'gaming') {
+            games.push(mappedItem);
+          } else {
+            miniApps.push(mappedItem);
+          }
+        });
+        
+        setGamesData(games);
+        setMiniAppsData(miniApps);
+      } catch (err) {
+        console.error('获取 MiniApp 数据失败:', err);
+        setError(err instanceof Error ? err.message : '未知错误');
+        // 发生错误时使用空数组，避免应用崩溃
+        setGamesData([]);
+        setMiniAppsData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMiniAppData();
+  }, []);
 
   const handleFingerprintPress = (monsterId: string) => {
     router.push({
@@ -185,12 +201,31 @@ export default function MarketTab() {
   };
 
   const handlePlayPress = async (gameId: string) => {
-    const game = GAMES_DATA.find(g => g.id === gameId);
+    const game = gamesData.find(g => g.id === gameId);
     console.log('Playing game:', gameId, 'URL:', game?.imageUrl);
+    
+    if (!game) {
+      Alert.alert('错误', '未找到游戏信息');
+      return;
+    }
+
     try {
+      // 使用从 API 获取的配置
+      const cfg: AppConfig = {
+        module_name: game.module_name || defaultConfig.module_name,
+        name: game.name,
+        miniAppType: game.miniAppType || defaultConfig.miniAppType,
+      };
       
+      // 如果是 H5 类型，直接打开 URL
+      if (cfg.miniAppType === 'H5' && game.host) {
+        console.log('打开 H5 应用:', game.host);
+        // 这里可以添加打开 H5 应用的逻辑
+        Alert.alert('提示', `H5 应用: ${game.host}`);
+        return;
+      }
       
-      const cfg = defaultConfig;
+      // RN 类型，加载本地 bundle
       const documentsDir = FileSystem.documentDirectory;
       const localAppDir = `${documentsDir}${cfg.module_name}/`;
       
@@ -232,10 +267,71 @@ export default function MarketTab() {
     }
   };
 
-  const handleMiniAppPress = (appId: string) => {
-    const app = MINIAPPS_DATA.find(a => a.id === appId);
+  const handleMiniAppPress = async (appId: string) => {
+    const app = miniAppsData.find(a => a.id === appId);
     console.log('Opening mini app:', appId, 'URL:', app?.imageUrl);
-    setShowComingSoonModal(true);
+    
+    if (!app) {
+      Alert.alert('错误', '未找到应用信息');
+      return;
+    }
+
+    try {
+      // 使用从 API 获取的配置
+      const cfg: AppConfig = {
+        module_name: app.module_name || defaultConfig.module_name,
+        name: app.name,
+        miniAppType: app.miniAppType || defaultConfig.miniAppType,
+      };
+      
+      // 如果是 H5 类型，直接打开 URL
+      if (cfg.miniAppType === 'H5' && app.host) {
+        console.log('打开 H5 应用:', app.host);
+        // 这里可以添加打开 H5 应用的逻辑
+        Alert.alert('提示', `H5 应用: ${app.host}`);
+        return;
+      }
+      
+      // RN 类型，加载本地 bundle
+      const documentsDir = FileSystem.documentDirectory;
+      const localAppDir = `${documentsDir}${cfg.module_name}/`;
+      
+      // 检查本地文件夹是否存在
+      const dirInfo = await FileSystem.getInfoAsync(localAppDir);
+      
+      if (!dirInfo.exists) {
+        Alert.alert(
+          '⚠️ 目录不存在',
+          `本地 bundle 目录不存在：\n${localAppDir}\n\n请确保已经下载并解压了应用包。`,
+          [{ text: '确定' }]
+        );
+        return;
+      }
+
+      console.log('加载本地 bundle:', localAppDir);
+      console.log('模块名:', cfg.module_name);
+      console.log('应用名:', cfg.name);
+      console.log('类型:', cfg.miniAppType || 'RN');
+
+      // 调用 MiniAppLauncher 打开本地 bundle
+      MiniAppLauncher.open(
+        localAppDir,
+        cfg.module_name,
+        {
+          title: cfg.name,
+          miniAppType: cfg.miniAppType || 'RN',
+          localBundle: true
+        }
+      );
+
+    } catch (error) {
+      console.error('加载本地 bundle 失败:', error);
+      Alert.alert(
+        '❌ 加载失败',
+        `无法加载本地 bundle：\n${error instanceof Error ? error.message : String(error)}`,
+        [{ text: '确定' }]
+      );
+    }
   };
 
   const handleBannerPress = () => {
@@ -246,14 +342,14 @@ export default function MarketTab() {
     setShowComingSoonModal(false);
   };
 
-  const renderGameRow = (games: typeof GAMES_DATA) => (
+  const renderGameRow = (games: GameData[]) => (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.gamesRow}
       contentContainerStyle={styles.gamesRowContent}
     >
-      {games.map((game) => (
+      {games.map((game: GameData) => (
         <GameCard
           key={game.id}
           id={game.id}
@@ -261,20 +357,22 @@ export default function MarketTab() {
           imageUrl={game.imageUrl}
           isHot={game.isHot}
           rating={game.rating}
+          tags={game.tags}
+          score={game.score}
           onPlayPress={handlePlayPress}
         />
       ))}
     </ScrollView>
   );
 
-  const renderMiniAppRow = (apps: typeof MINIAPPS_DATA) => (
+  const renderMiniAppRow = (apps: GameData[]) => (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.gamesRow}
       contentContainerStyle={styles.gamesRowContent}
     >
-      {apps.map((app) => (
+      {apps.map((app: GameData) => (
         <GameCard
           key={app.id}
           id={app.id}
@@ -282,6 +380,8 @@ export default function MarketTab() {
           imageUrl={app.imageUrl}
           isHot={app.isHot}
           rating={app.rating}
+          tags={app.tags}
+          score={app.score}
           onPlayPress={handleMiniAppPress}
         />
       ))}
@@ -328,12 +428,42 @@ export default function MarketTab() {
 
         <View style={styles.gamesSection}>
           <Text style={styles.gamesSectionTitle}>Game Store</Text>
-          {renderGameRow(GAMES_DATA)}
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#000000" />
+              <Text style={styles.loadingText}>加载中...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>加载失败: {error}</Text>
+            </View>
+          ) : gamesData.length > 0 ? (
+            renderGameRow(gamesData)
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>暂无游戏</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.miniAppsSection}>
           <Text style={styles.gamesSectionTitle}>Mini APPs</Text>
-          {renderMiniAppRow(MINIAPPS_DATA)}
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#000000" />
+              <Text style={styles.loadingText}>加载中...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>加载失败: {error}</Text>
+            </View>
+          ) : miniAppsData.length > 0 ? (
+            renderMiniAppRow(miniAppsData)
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>暂无应用</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.bannerSection}>
@@ -510,5 +640,36 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'Nunito_600SemiBold',
+  },
+  loadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#666666',
+  },
+  errorContainer: {
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#FF0000',
+    textAlign: 'center',
+  },
+  emptyContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: 'Nunito_400Regular',
+    color: '#999999',
   },
 });

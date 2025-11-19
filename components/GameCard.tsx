@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Play } from 'lucide-react-native';
 import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface GameCardProps {
   id: string;
@@ -8,10 +8,12 @@ interface GameCardProps {
   imageUrl: string;
   isHot?: boolean;
   rating: number;
+  tags?: string[];
+  score?: string;
   onPlayPress: (gameId: string) => void;
 }
 
-export function GameCard({ id, name, imageUrl, isHot = false, rating, onPlayPress }: GameCardProps) {
+export function GameCard({ id, name, imageUrl, isHot = false, rating, tags, score, onPlayPress }: GameCardProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
@@ -49,13 +51,22 @@ export function GameCard({ id, name, imageUrl, isHot = false, rating, onPlayPres
         <Text style={styles.gameName}>{name}</Text>
 
         <View style={styles.tagsContainer}>
-          <View style={styles.creatorsBadge}>
-            <Text style={styles.creatorsText}>😍 Creators love</Text>
-          </View>
+          {tags && tags.length > 0 && tags.map((tag, index) => (
+            <View key={index} style={styles.creatorsBadge}>
+              <Text style={styles.creatorsText}>{tag}</Text>
+            </View>
+          ))}
 
-          <View style={styles.ratingBadge}>
-            <Text style={styles.ratingText}>😃 {rating}%</Text>
-          </View>
+          {score && (
+            <View style={styles.ratingBadge}>
+              <Text style={styles.ratingText}>{score}</Text>
+            </View>
+          )}
+          {!score && (
+            <View style={styles.ratingBadge}>
+              <Text style={styles.ratingText}>😃 {rating}%</Text>
+            </View>
+          )}
         </View>
 
         <TouchableOpacity
