@@ -18,8 +18,8 @@ final class MiniAppLauncher: NSObject,RCTBridgeModule {
   var rnvc:MiniAppViewController?
     
   // 打开 MiniApp：在一个原生导航控制器里 present
-  @objc(open:moduleName:params:)
-  func open(baseURL: NSString, moduleName: NSString, params:[String:Any]) {
+  @objc(open:moduleName:versionForFileName:params:)
+  func open(baseURL: NSString, moduleName: NSString, versionForFileName:NSString, params:[String:Any]) {
     DispatchQueue.main.async {
       guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
             let window = scene.windows.first,
@@ -29,13 +29,13 @@ final class MiniAppLauncher: NSObject,RCTBridgeModule {
       let miniAppType = params["miniAppType"] as? String ?? "RN"
       // 如果 localBundle 为 true，则拼接 baseURL 和 moduleName 作为新的 url
       var finalBaseURL = baseURL as String
-      if let localBundle = params["localBundle"] as? Bool, localBundle == true {
-        // 确保 baseURL 以 / 结尾
-        if !finalBaseURL.hasSuffix("/") {
-          finalBaseURL += "/"
-        }
-        finalBaseURL += "ios/rnbundle/main.jsbundle"
-      }
+//      if let localBundle = params["localBundle"] as? Bool, localBundle == true {
+//        // 确保 baseURL 以 / 结尾
+//        if !finalBaseURL.hasSuffix("/") {
+//          finalBaseURL += "/"
+//        }
+//        finalBaseURL += "rnbundle/main.jsbundle"
+//      }
       NSLog("MiniAppLauncher finalBaseURL : \(finalBaseURL)")
       if miniAppType == "RN" {
         self.rnvc = MiniAppViewController(

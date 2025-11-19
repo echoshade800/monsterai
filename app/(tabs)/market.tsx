@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { unzip } from 'react-native-zip-archive';
 import { GameCard } from '../../components/GameCard';
 import { MonsterCard } from '../../components/MonsterCard';
 const { MiniAppLauncher } = NativeModules;
@@ -185,61 +186,118 @@ export default function MarketTab() {
     miniAppType: 'RN', // 或 'H5'
   };
 
-  const handlePlayPress = async (gameId: string) => {
-    const game = gamesData.find(g => g.id === gameId);
-    console.log('Playing game:', gameId, 'URL:', game?.imageUrl);
-    
-    if (!game) {
-      Alert.alert('错误', '未找到游戏信息');
-      return;
-    }
+  // 将版本号从 "1.0.0" 格式转换为 "1_0_0" 格式（用于文件名）
+  const formatVersionForFileName = (version: string): string => {
+    return version.replace(/\./g, '_');
+  };
 
+  // 公共的 MiniApp 启动逻辑
+  const launchMiniApp = async (appData: GameData) => {
     try {
       // 使用从 API 获取的配置
       const cfg: AppConfig = {
-        module_name: game.module_name || defaultConfig.module_name,
-        name: game.name,
-        miniAppType: game.miniAppType || defaultConfig.miniAppType,
+        module_name: appData.module_name || defaultConfig.module_name,
+        name: appData.name,
+        miniAppType: appData.miniAppType || defaultConfig.miniAppType,
       };
       
       // 如果是 H5 类型，直接打开 URL
-      if (cfg.miniAppType === 'H5' && game.host) {
-        console.log('打开 H5 应用:', game.host);
+      if (cfg.miniAppType === 'H5' && appData.host) {
+        console.log('打开 H5 应用:', appData.host);
         // 这里可以添加打开 H5 应用的逻辑
-        Alert.alert('提示', `H5 应用: ${game.host}`);
+        Alert.alert('提示', `H5 应用: ${appData.host}`);
         return;
       }
       
-      // RN 类型，加载本地 bundle
+      // RN 类型，检查是否需要下载
       const documentsDir = FileSystem.documentDirectory;
-      const localAppDir = `${documentsDir}${cfg.module_name}/`;
+      const moduleName = cfg.module_name;
+      const version = appData.version || '1.0.0';
+      const versionForFileName = formatVersionForFileName(version);
+      const targetDir = `${documentsDir}MiniApp/${moduleName}/${versionForFileName}/`;
       
       // 检查本地文件夹是否存在
-      const dirInfo = await FileSystem.getInfoAsync(localAppDir);
+      const dirInfo = await FileSystem.getInfoAsync(targetDir);
       
-      if (!dirInfo.exists) {
+      if (!dirInfo.exists && appData.releaseUrl) {
+        // 需要下载和解压
+        try {
+          Alert.alert('提示', '正在下载应用包，请稍候...');
+          
+          // 下载压缩包
+          const zipFileName = `${moduleName}_${versionForFileName}.zip`;
+          const zipFilePath = `${documentsDir}${zipFileName}`;
+          
+          console.log('开始下载:', appData.releaseUrl);
+          const downloadResult = await FileSystem.downloadAsync(appData.releaseUrl, zipFilePath);
+          
+          if (downloadResult.status !== 200) {
+            throw new Error(`下载失败，状态码: ${downloadResult.status}`);
+          }
+          
+          console.log('下载完成，开始解压:', zipFilePath);
+          
+          // 确保目标目录存在
+          await FileSystem.makeDirectoryAsync(targetDir, { intermediates: true });
+          
+          // 解压到目标目录
+          const unzipPath = await unzip(zipFilePath, targetDir);
+          console.log('解压完成:', unzipPath);
+          
+          // 删除临时 zip 文件
+          await FileSystem.deleteAsync(zipFilePath, { idempotent: true });
+          console.log('临时文件已删除');
+          
+        } catch (downloadError) {
+          console.error('下载或解压失败:', downloadError);
+          Alert.alert(
+            '❌ 下载失败',
+            `无法下载或解压应用包：\n${downloadError instanceof Error ? downloadError.message : String(downloadError)}`,
+            [{ text: '确定' }]
+          );
+          return;
+        }
+      } else if (!dirInfo.exists && !appData.releaseUrl) {
         Alert.alert(
           '⚠️ 目录不存在',
-          `本地 bundle 目录不存在：\n${localAppDir}\n\n请确保已经下载并解压了应用包。`,
+          `本地 bundle 目录不存在：\n${targetDir}\n\n且未提供下载地址。`,
+          [{ text: '确定' }]
+        );
+        return;
+      }
+      
+      // 检查解压后的目录是否存在
+      // 解压后的文件结构为: ios/rnbundle/main.jsbundle
+      const targetDirInfo = await FileSystem.getInfoAsync(targetDir);
+      console.log('targetDirInfo', targetDirInfo);
+      if (!targetDirInfo.exists) {
+        Alert.alert(
+          '⚠️ 目录不存在',
+          `本地 bundle 目录不存在：\n${targetDir}`,
           [{ text: '确定' }]
         );
         return;
       }
 
-      console.log('加载本地 bundle:', localAppDir);
+      // 构建完整路径: {targetDir}ios/rnbundle/main.jsbundle
+      const bundlePath = `${targetDir}ios/rnbundle/main.jsbundle`;
+      
+      console.log('加载本地 bundle:', bundlePath);
       console.log('模块名:', cfg.module_name);
       console.log('应用名:', cfg.name);
       console.log('类型:', cfg.miniAppType || 'RN');
 
       // 调用 MiniAppLauncher 打开本地 bundle
+      const params = {
+        title: cfg.name,
+        miniAppType: cfg.miniAppType || 'RN',
+        localBundle: true,
+      };
       MiniAppLauncher.open(
-        localAppDir,
+        bundlePath,
         cfg.module_name,
-        {
-          title: cfg.name,
-          miniAppType: cfg.miniAppType || 'RN',
-          localBundle: true
-        }
+        versionForFileName,
+        params,
       );
 
     } catch (error) {
@@ -252,6 +310,18 @@ export default function MarketTab() {
     }
   };
 
+  const handlePlayPress = async (gameId: string) => {
+    const game = gamesData.find(g => g.id === gameId);
+    console.log('Playing game:', gameId, 'URL:', game?.imageUrl);
+    
+    if (!game) {
+      Alert.alert('错误', '未找到游戏信息');
+      return;
+    }
+
+    await launchMiniApp(game);
+  };
+
   const handleMiniAppPress = async (appId: string) => {
     const app = miniAppsData.find(a => a.id === appId);
     console.log('Opening mini app:', appId, 'URL:', app?.imageUrl);
@@ -261,62 +331,7 @@ export default function MarketTab() {
       return;
     }
 
-    try {
-      // 使用从 API 获取的配置
-      const cfg: AppConfig = {
-        module_name: app.module_name || defaultConfig.module_name,
-        name: app.name,
-        miniAppType: app.miniAppType || defaultConfig.miniAppType,
-      };
-      
-      // 如果是 H5 类型，直接打开 URL
-      if (cfg.miniAppType === 'H5' && app.host) {
-        console.log('打开 H5 应用:', app.host);
-        // 这里可以添加打开 H5 应用的逻辑
-        Alert.alert('提示', `H5 应用: ${app.host}`);
-        return;
-      }
-      
-      // RN 类型，加载本地 bundle
-      const documentsDir = FileSystem.documentDirectory;
-      const localAppDir = `${documentsDir}${cfg.module_name}/`;
-      
-      // 检查本地文件夹是否存在
-      const dirInfo = await FileSystem.getInfoAsync(localAppDir);
-      
-      if (!dirInfo.exists) {
-        Alert.alert(
-          '⚠️ 目录不存在',
-          `本地 bundle 目录不存在：\n${localAppDir}\n\n请确保已经下载并解压了应用包。`,
-          [{ text: '确定' }]
-        );
-        return;
-      }
-
-      console.log('加载本地 bundle:', localAppDir);
-      console.log('模块名:', cfg.module_name);
-      console.log('应用名:', cfg.name);
-      console.log('类型:', cfg.miniAppType || 'RN');
-
-      // 调用 MiniAppLauncher 打开本地 bundle
-      MiniAppLauncher.open(
-        localAppDir,
-        cfg.module_name,
-        {
-          title: cfg.name,
-          miniAppType: cfg.miniAppType || 'RN',
-          localBundle: true
-        }
-      );
-
-    } catch (error) {
-      console.error('加载本地 bundle 失败:', error);
-      Alert.alert(
-        '❌ 加载失败',
-        `无法加载本地 bundle：\n${error instanceof Error ? error.message : String(error)}`,
-        [{ text: '确定' }]
-      );
-    }
+    await launchMiniApp(app);
   };
 
   const handleBannerPress = () => {
@@ -669,3 +684,4 @@ const styles = StyleSheet.create({
     color: '#999999',
   },
 });
+
