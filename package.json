@@ -8,6 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "ios:device": "npx expo run:ios --device \"Fan's iPhone 16pro\"",
+    "ios:sim": "npx expo run:ios --device \"iPhone17&iOS26.1\"",
     "web": "expo start --web",
     "lint": "expo lint"
   },

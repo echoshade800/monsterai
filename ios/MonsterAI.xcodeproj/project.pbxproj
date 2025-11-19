@@ -22,6 +22,7 @@
 		693C6AEA2ECD7C6100E5783D /* RNLocationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 693C6AE52ECD7C6100E5783D /* RNLocationService.m */; };
 		693C6AEB2ECD7C6100E5783D /* RNLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 693C6AE62ECD7C6100E5783D /* RNLocationService.swift */; };
 		69AD04492ECDABCC00523E82 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 69AD04482ECDABCC00523E82 /* GoogleService-Info.plist */; };
+		69AD044B2ECDB80E00523E82 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 69AD044A2ECDB80E00523E82 /* README.md */; };
 		9577CDC70FEE6FE5E8E27CE6 /* Pods_MonsterAI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C916BD4C4FA2722BE8823A5E /* Pods_MonsterAI.framework */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
@@ -50,6 +51,7 @@
 		693C6AE52ECD7C6100E5783D /* RNLocationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNLocationService.m; sourceTree = "<group>"; };
 		693C6AE62ECD7C6100E5783D /* RNLocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNLocationService.swift; sourceTree = "<group>"; };
 		69AD04482ECDABCC00523E82 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		69AD044A2ECDB80E00523E82 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = MonsterAI/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		C916BD4C4FA2722BE8823A5E /* Pods_MonsterAI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonsterAI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -93,6 +95,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				361715844AF37ADFC730EF27 /* PrivacyInfo.xcprivacy */,
+				69AD044A2ECDB80E00523E82 /* README.md */,
 			);
 			name = MonsterAI;
 			sourceTree = "<group>";
@@ -245,6 +248,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				69AD044B2ECDB80E00523E82 /* README.md in Resources */,
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				69AD04492ECDABCC00523E82 /* GoogleService-Info.plist in Resources */,

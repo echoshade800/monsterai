@@ -1,8 +1,10 @@
+import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Modal, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GameCard } from '../../components/GameCard';
 import { MonsterCard } from '../../components/MonsterCard';
+const { MiniAppLauncher } = NativeModules;
 
 const MONSTERS_DATA = [
   {
@@ -171,11 +173,63 @@ export default function MarketTab() {
   const handleHirePress = (monsterId: string) => {
     console.log('Hired monster:', monsterId);
   };
+  interface AppConfig {
+    module_name: string;
+    name: string;
+    miniAppType?: string;
+  }
+  const defaultConfig: AppConfig = {
+    module_name: 'WordleMiniApp', // 修改为你的模块名
+    name: 'Wordle MiniApp', // 修改为你的应用名
+    miniAppType: 'RN', // 或 'H5'
+  };
 
-  const handlePlayPress = (gameId: string) => {
+  const handlePlayPress = async (gameId: string) => {
     const game = GAMES_DATA.find(g => g.id === gameId);
     console.log('Playing game:', gameId, 'URL:', game?.imageUrl);
-    setShowComingSoonModal(true);
+    try {
+      
+      
+      const cfg = defaultConfig;
+      const documentsDir = FileSystem.documentDirectory;
+      const localAppDir = `${documentsDir}${cfg.module_name}/`;
+      
+      // 检查本地文件夹是否存在
+      const dirInfo = await FileSystem.getInfoAsync(localAppDir);
+      
+      if (!dirInfo.exists) {
+        Alert.alert(
+          '⚠️ 目录不存在',
+          `本地 bundle 目录不存在：\n${localAppDir}\n\n请确保已经下载并解压了应用包。`,
+          [{ text: '确定' }]
+        );
+        return;
+      }
+
+      console.log('加载本地 bundle:', localAppDir);
+      console.log('模块名:', cfg.module_name);
+      console.log('应用名:', cfg.name);
+      console.log('类型:', cfg.miniAppType || 'RN');
+
+      // 调用 MiniAppLauncher 打开本地 bundle
+      MiniAppLauncher.open(
+        localAppDir,
+        cfg.module_name,
+        {
+          title: cfg.name,
+          miniAppType: cfg.miniAppType || 'RN',
+          localBundle: true
+        }
+      );
+
+    } catch (error) {
+      console.error('加载本地 bundle 失败:', error);
+      Alert.alert(
+        '❌ 加载失败',
+        `无法加载本地 bundle：\n${error instanceof Error ? error.message : String(error)}`,
+        [{ text: '确定' }]
+      );
+    }
   };
 
   const handleMiniAppPress = (appId: string) => {
