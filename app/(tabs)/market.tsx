@@ -180,11 +180,6 @@ export default function MarketTab() {
     name: string;
     miniAppType?: string;
   }
-  const defaultConfig: AppConfig = {
-    module_name: 'WordleMiniApp', // 修改为你的模块名
-    name: 'Wordle MiniApp', // 修改为你的应用名
-    miniAppType: 'RN', // 或 'H5'
-  };
 
   // 将版本号从 "1.0.0" 格式转换为 "1_0_0" 格式（用于文件名）
   const formatVersionForFileName = (version: string): string => {
@@ -196,20 +191,22 @@ export default function MarketTab() {
     try {
       // 使用从 API 获取的配置
       const cfg: AppConfig = {
-        module_name: appData.module_name || defaultConfig.module_name,
-        name: appData.name,
-        miniAppType: appData.miniAppType || defaultConfig.miniAppType,
+        module_name: appData.module_name || '',
+        name: appData.name || '',
+        miniAppType: appData.miniAppType,
       };
-      
-      // 如果是 H5 类型，直接打开 URL
+
       if (cfg.miniAppType === 'H5' && appData.host) {
         console.log('打开 H5 应用:', appData.host);
-        // 这里可以添加打开 H5 应用的逻辑
-        Alert.alert('提示', `H5 应用: ${appData.host}`);
+        let params = {
+          title: cfg.name,
+          miniAppType: cfg.miniAppType,
+        };
+        MiniAppLauncher.open(appData.host, cfg.module_name, params);
         return;
       }
       
-      // RN 类型，检查是否需要下载
+      // RN 类型，检查是否需要下载 
       const documentsDir = FileSystem.documentDirectory;
       const moduleName = cfg.module_name;
       const version = appData.version || '1.0.0';
