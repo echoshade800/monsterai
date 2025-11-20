@@ -241,12 +241,29 @@ export default function MarketTab() {
         const version = appConfig.version || '1.0.0';
         const versionForFileName = formatVersionForFileName(version);
         const targetDir = `${documentsDir}MiniApp/${moduleName}/${versionForFileName}/`;
+        const targetModuleName = `${documentsDir}MiniApp/${moduleName}/`;
         // 检查本地文件夹是否存在
         const dirInfo = await FileSystem.getInfoAsync(targetDir);
         
         if (!dirInfo.exists && appConfig.releaseUrl) {
           // 需要下载和解压
           try {
+            // 如果 targetDir 不存在，先删除 targetModuleName 路径下的所有子文件夹
+            const moduleDirInfo = await FileSystem.getInfoAsync(targetModuleName);
+            if (moduleDirInfo.exists && moduleDirInfo.isDirectory) {
+              const subDirs = await FileSystem.readDirectoryAsync(targetModuleName);
+              console.log('发现旧版本文件夹，开始清理:', subDirs);
+              for (const subDir of subDirs) {
+                const subDirPath = `${targetModuleName}${subDir}/`;
+                try {
+                  await FileSystem.deleteAsync(subDirPath, { idempotent: true });
+                  console.log('已删除旧版本文件夹:', subDirPath);
+                } catch (deleteError) {
+                  console.warn('删除旧版本文件夹失败:', subDirPath, deleteError);
+                }
+              }
+            }
+            
             Alert.alert('提示', '正在下载应用包，请稍候...');
             
             // 下载压缩包
@@ -280,7 +297,8 @@ export default function MarketTab() {
             );
             return;
           }
-        } else if (!dirInfo.exists && !appConfig.releaseUrl) {
+        } else if (!dirInfo.exists) {
+          
           Alert.alert(
             '⚠️ 目录不存在',
             `本地 bundle 目录不存在：\n${targetDir}\n\n且未提供下载地址。`,
