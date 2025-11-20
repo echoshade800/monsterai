@@ -67,6 +67,7 @@
     {
       "id": "1010",
       "name": "Decider",
+      "version": "1.0.0",
       "icon": "📌",
       "color": "#000000",
       "miniAppType": "RN",

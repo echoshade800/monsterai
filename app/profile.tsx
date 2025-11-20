@@ -1,5 +1,6 @@
 import { BlurView } from 'expo-blur';
 import Constants from 'expo-constants';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -332,6 +333,47 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleDeleteMiniApps = () => {
+    Alert.alert(
+      'Delete MiniApps',
+      'This will delete all downloaded MiniApp files. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              console.log('[Profile] Starting to delete MiniApps...');
+              
+              const documentsDir = FileSystem.documentDirectory;
+              const miniAppDir = `${documentsDir}MiniApp/`;
+              
+              // 检查 MiniApp 目录是否存在
+              const dirInfo = await FileSystem.getInfoAsync(miniAppDir);
+              
+              if (dirInfo.exists && dirInfo.isDirectory) {
+                // 删除整个 MiniApp 目录
+                await FileSystem.deleteAsync(miniAppDir, { idempotent: true });
+                console.log('[Profile] MiniApps deleted successfully');
+                Alert.alert('Success', 'All MiniApps have been deleted.');
+              } else {
+                console.log('[Profile] MiniApp directory does not exist');
+                Alert.alert('Info', 'No MiniApps found to delete.');
+              }
+            } catch (error: unknown) {
+              console.error('[Profile] Failed to delete MiniApps:', error);
+              Alert.alert(
+                'Error',
+                `Failed to delete MiniApps: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
@@ -364,11 +406,11 @@ export default function ProfileScreen() {
                       // 重置导航栈并跳转到登录页面
                       router.dismissAll();
                       router.replace('/login');
-                    } catch (error) {
+                    } catch (error: unknown) {
                       console.error('[Profile] Failed to delete account:', error);
                       Alert.alert(
                         'Failed to delete account',
-                        error.message || 'Error occurred while deleting account, please try again'
+                        error instanceof Error ? error.message : 'Error occurred while deleting account, please try again'
                       );
                     }
                   },
@@ -470,6 +512,18 @@ export default function ProfileScreen() {
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/privacy-policy')}>
               <Text style={styles.menuItemText}>Privacy Policy</Text>
               <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>MiniApp</Text>
+
+          <View style={styles.card}>
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+
+            <TouchableOpacity style={styles.menuItem} onPress={handleDeleteMiniApps}>
+              <Text style={styles.menuItemText}>Clear MiniApps</Text>
             </TouchableOpacity>
           </View>
         </View>
