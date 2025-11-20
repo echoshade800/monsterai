@@ -89,8 +89,8 @@
   [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(closeTapped)];
   
   // 添加右侧按钮用于写入localStorage数据
-  self.navigationItem.rightBarButtonItem =
-  [[UIBarButtonItem alloc] initWithTitle:@"写入数据" style:UIBarButtonItemStylePlain target:self action:@selector(writeDataTapped)];
+//  self.navigationItem.rightBarButtonItem =
+//  [[UIBarButtonItem alloc] initWithTitle:@"写入数据" style:UIBarButtonItemStylePlain target:self action:@selector(writeDataTapped)];
   // 1) 关闭自动调整
   if (@available(iOS 11.0, *)) {
       self.webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
@@ -138,10 +138,11 @@
   [self getLocalStorageDataBeforeClose];
 }
 
-- (void)writeDataTapped {
-  // 向H5的localStorage写入数据
-  [self writeDataToLocalStorage];
-}
+//
+//- (void)writeDataTapped {
+//  // 向H5的localStorage写入数据
+//  [self writeDataToLocalStorage];
+//}
 
 - (void)getLocalStorageDataBeforeClose {
   // 使用Swift工具类生成JavaScript代码
