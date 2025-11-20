@@ -6,7 +6,7 @@ import { unzip } from 'react-native-zip-archive';
 import { GameCard } from '../../components/GameCard';
 import { MonsterCard } from '../../components/MonsterCard';
 import { api } from '../../src/services/api-clients/client';
-import { API_ENDPOINTS } from '../../src/services/api/api';
+import { API_ENDPOINTS, getBaseUrl, getConfigFileName } from '../../src/services/api/api';
 import storageManager from '../../src/utils/storage';
 const { MiniAppLauncher,NetworkTrigger } = NativeModules;
 const emitter = new NativeEventEmitter(NetworkTrigger);
@@ -126,10 +126,13 @@ export default function MarketTab() {
       try {
         setIsMonstersLoading(true);
         // 根据环境选择不同的配置文件
-        const configFile = __DEV__ ? 'agent_list_config_debug.json' : 'agent_list_config_prod.json';
+        const configFile = getConfigFileName('agent');
         // 添加时间戳参数防止缓存
         const timestamp = Date.now();
-        const response = await fetch(`https://dzdbhsix5ppsc.cloudfront.net/monster/${configFile}?t=${timestamp}`);
+        const cdnBaseUrl = getBaseUrl('cdn');
+        const fullUrl = `${cdnBaseUrl}/${configFile}?t=${timestamp}`
+        console.log('fetchMonstersAgentData fullUrl', fullUrl);
+        const response = await fetch(fullUrl);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -157,10 +160,13 @@ export default function MarketTab() {
         setIsLoading(true);
         setError(null);
         // 根据环境选择不同的配置文件
-        const configFile = __DEV__ ? 'miniapp_list_config_debug.json' : 'miniapp_list_config_prod.json';
+        const configFile = getConfigFileName('miniapp');
         // 添加时间戳参数防止缓存
         const timestamp = Date.now();
-        const response = await fetch(`https://dzdbhsix5ppsc.cloudfront.net/monster/${configFile}?t=${timestamp}`);
+        const cdnBaseUrl = getBaseUrl('cdn');
+        const fullUrl = `${cdnBaseUrl}/${configFile}?t=${timestamp}`;
+        console.log('fetchMiniAppData fullUrl', fullUrl);
+        const response = await fetch(fullUrl);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

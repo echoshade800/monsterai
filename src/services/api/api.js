@@ -15,6 +15,9 @@ const API_CONFIGS = {
   [ENV.DEVELOPMENT]: {
     BASE_URL: 'http://23.20.151.253:8997',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
+    CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
+    AGENT_CONFIG_FILE: 'agent_list_config_debug.json',
+    MINIAPP_CONFIG_FILE: 'miniapp_list_config_debug.json',
     TIMEOUT: 10000,
     HEADERS: {
       'Content-Type': 'application/json',
@@ -23,6 +26,9 @@ const API_CONFIGS = {
   [ENV.STAGING]: {
     BASE_URL: 'http://23.20.151.253:8999',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
+    CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
+    AGENT_CONFIG_FILE: 'agent_list_config_prod.json',
+    MINIAPP_CONFIG_FILE: 'miniapp_list_config_prod.json',
     TIMEOUT: 10000,
     HEADERS: {
       'Content-Type': 'application/json',
@@ -31,6 +37,9 @@ const API_CONFIGS = {
   [ENV.PRODUCTION]: {
     BASE_URL: 'http://23.20.151.253:8999',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
+    CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
+    AGENT_CONFIG_FILE: 'agent_list_config_prod.json',
+    MINIAPP_CONFIG_FILE: 'miniapp_list_config_prod.json',
     TIMEOUT: 10000,
     HEADERS: {
       'Content-Type': 'application/json',
@@ -77,9 +86,25 @@ export const getBaseUrl = (apiType = 'default') => {
   switch (apiType) {
     case 'auth':
       return config.AUTH_BASE_URL;
+    case 'cdn':
+      return config.CDN_BASE_URL;
     case 'default':
     default:
       return config.BASE_URL;
+  }
+};
+
+// 获取配置文件名称
+export const getConfigFileName = (configType) => {
+  const config = API_CONFIGS[CURRENT_ENV];
+  
+  switch (configType) {
+    case 'agent':
+      return config.AGENT_CONFIG_FILE;
+    case 'miniapp':
+      return config.MINIAPP_CONFIG_FILE;
+    default:
+      throw new Error(`Unknown config type: ${configType}`);
   }
 };
 
