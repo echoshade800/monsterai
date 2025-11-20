@@ -1,11 +1,15 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, NativeEventEmitter, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { unzip } from 'react-native-zip-archive';
 import { GameCard } from '../../components/GameCard';
 import { MonsterCard } from '../../components/MonsterCard';
-const { MiniAppLauncher } = NativeModules;
+import { api } from '../../src/services/api-clients/client';
+import { API_ENDPOINTS } from '../../src/services/api/api';
+import storageManager from '../../src/utils/storage';
+const { MiniAppLauncher,NetworkTrigger } = NativeModules;
+const emitter = new NativeEventEmitter(NetworkTrigger);
 
 // Monster 数据类型定义
 interface MonsterData {
@@ -53,6 +57,66 @@ interface GameData {
   score?: string;
 }
 
+export function useNativeTrigger() {
+  console.log('useNativeTrigger 初始化 - 只执行一次');
+  
+  const sub = emitter.addListener('NativeAction', async (evt) => {
+    // 约定 evt 结构，比如 { type: 'request', payload: {...} }
+    console.log('收到原生事件:', evt);
+    if (evt) {
+      if (evt.type === 'miniapp_rn') {
+        console.log('处理 MiniApp 事件:', evt.payload);
+        const mini_app_name = evt.payload.mini_app_name;
+        try {
+          // 从本地取出来数据
+          const data = await storageManager.getMiniAppData(mini_app_name);
+          if (!data) {
+            console.log('本地数据未找到:', mini_app_name);
+            return;
+          }
+          console.log('upload mini app data to server', mini_app_name, data);
+          // 在这里触发网络请求
+          const response = await api.post(API_ENDPOINTS.MINI_APP.UPDATE_DATA, {
+            "appName": mini_app_name,
+            "data": JSON.stringify(data)
+          });
+          console.log('upload mini app data to server success', response);
+        } catch (error) {
+          console.error('处理 MiniApp 事件失败:', error);
+        }
+      } else if (evt.type === 'miniapp_h5') {
+        console.log('处理 MiniApp H5 事件:', evt.payload);
+        const mini_app_name = evt.payload.mini_app_name;
+        try {
+          const data = evt.payload.data;
+          if (!data) {
+            console.log('本地数据未找到:', mini_app_name);
+            return;
+          }
+          console.log('upload mini app data to server', mini_app_name, data);
+          // 在这里触发网络请求
+          const response = await api.post(API_ENDPOINTS.MINI_APP.UPDATE_DATA, {
+            "appName": mini_app_name,
+            "data": JSON.stringify(data)
+          });
+          console.log('upload mini app data to server success', response);
+        } catch (error) {
+          console.error('处理 MiniApp 事件失败:', error);
+        }
+      } else {
+        console.log('处理其他事件:', evt.payload);
+      }
+    }
+  });
+  
+  // 返回清理函数
+  return () => {
+    console.log('清理原生事件监听器');
+    sub.remove();
+  };
+}
+
+
 export default function MarketTab() {
   const router = useRouter();
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
@@ -63,6 +127,12 @@ export default function MarketTab() {
   const [isMonstersLoading, setIsMonstersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 使用单独的 useEffect 来设置原生事件监听器，确保只执行一次
+  useEffect(() => {
+    const cleanup = useNativeTrigger();
+    // 返回清理函数
+    return cleanup;
+  }, []);
   // 从 API 获取 Monsters 数据
   useEffect(() => {
     const fetchMonstersData = async () => {
