@@ -12,7 +12,7 @@
 ### Product机器 DEBUG 方法
 Product 机器上也需要进行调试，确保生产环境正常，具体配置调试的方法
 1. 修改 api.js 中的地址为开发服务地址
-2. 执行 npx react-native bundle --platform ios --dev false --entry-file index.tsx --bundle-output ios/rnbundle/main.jsbundle --assets-dest ios/rnbundle 
+2. 执行 npx react-native bundle --platform ios --dev false --entry-file index.tsx --bundle-output rnbundle/main.jsbundle --assets-dest rnbundle 
 3. AppDelegate 中加载 bundle 的方法强制指定 bundle 位置
 
 ### 打包要注意的事项

@@ -308,7 +308,7 @@ export default function MarketTab() {
         }
         
         // 检查解压后的目录是否存在
-        // 解压后的文件结构为: ios/rnbundle/main.jsbundle
+        // 解压后的文件结构为: rnbundle/main.jsbundle
         const targetDirInfo = await FileSystem.getInfoAsync(targetDir);
         console.log('targetDirInfo', targetDirInfo);
         if (!targetDirInfo.exists) {
@@ -320,8 +320,8 @@ export default function MarketTab() {
           return;
         }
 
-        // 构建完整路径: {targetDir}ios/rnbundle/main.jsbundle
-        const bundlePath = `${targetDir}ios/rnbundle/main.jsbundle`;
+        // 构建完整路径: {targetDir}rnbundle/main.jsbundle
+        const bundlePath = `${targetDir}rnbundle/main.jsbundle`;
         
         console.log('加载本地 bundle:', bundlePath);
         console.log('模块名:', appConfig.module_name);
