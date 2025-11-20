@@ -24,10 +24,11 @@ interface MonsterData {
   imageOffset: number;
 }
 
-// API 数据类型定义
-interface MiniAppConfig {
+// MiniApp 和游戏数据类型（基于 JSON 配置文件结构）
+interface MiniAppData {
+  // JSON 配置文件中的必需字段
   id: string;
-  version?: string;
+  version: string;
   name: string;
   icon: string;
   color: string;
@@ -35,26 +36,12 @@ interface MiniAppConfig {
   host: string;
   module_name: string;
   category: string;
-  tags?: string[];
-  score?: string;
   image: string;
   releaseUrl: string;
-}
-
-// 游戏和 MiniApp 数据类型
-interface GameData {
-  id: string;
-  name: string;
-  imageUrl: string;
-  isHot: boolean;
-  rating: number;
-  module_name?: string;
-  miniAppType?: string;
-  host?: string;
-  releaseUrl?: string;
-  version?: string;
+  // 可选字段（可能在某些配置中存在）
   tags?: string[];
   score?: string;
+  hot: boolean;
 }
 
 export function useNativeTrigger() {
@@ -121,8 +108,8 @@ export default function MarketTab() {
   const router = useRouter();
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
   const [monstersData, setMonstersData] = useState<MonsterData[]>([]);
-  const [gamesData, setGamesData] = useState<GameData[]>([]);
-  const [miniAppsData, setMiniAppsData] = useState<GameData[]>([]);
+  const [gamesData, setGamesData] = useState<MiniAppData[]>([]);
+  const [miniAppsData, setMiniAppsData] = useState<MiniAppData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMonstersLoading, setIsMonstersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,35 +166,15 @@ export default function MarketTab() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data: MiniAppConfig[] = await response.json();
+        const data: MiniAppData[] = await response.json();
         
         // 将 API 数据映射到现有格式，并同时分类
-        const games: GameData[] = [];
-        const miniApps: GameData[] = [];
+        const games: MiniAppData[] = [];
+        const miniApps: MiniAppData[] = [];
         
         data.forEach((item) => {
-          // 从 score 字段中提取数字作为 rating（如果 score 存在）
-          let rating = 90; // 默认值
-          if (item.score) {
-            const match = item.score.match(/(\d+)/);
-            if (match) {
-              rating = parseInt(match[1], 10);
-            }
-          }
-          
-          const mappedItem: GameData = {
-            id: item.id,
-            name: item.name,
-            imageUrl: item.image || '',
-            isHot: false, // API 数据中没有此字段，默认为 false
-            rating: rating,
-            module_name: item.module_name,
-            miniAppType: item.miniAppType,
-            host: item.host,
-            releaseUrl: item.releaseUrl,
-            version: item.version,
-            tags: item.tags,
-            score: item.score,
+          const mappedItem: MiniAppData = {
+            ...item,
           };
           
           // 根据 category 分类：gaming 类别的是 games，其他是 miniapps
@@ -257,7 +224,7 @@ export default function MarketTab() {
   };
 
   // 公共的 MiniApp 启动逻辑
-  const launchMiniApp = async (appData: GameData) => {
+  const launchMiniApp = async (appData: MiniAppData) => {
     try {
       // 使用从 API 获取的配置
       const cfg: AppConfig = {
@@ -380,7 +347,7 @@ export default function MarketTab() {
 
   const handlePlayPress = async (gameId: string) => {
     const game = gamesData.find(g => g.id === gameId);
-    console.log('Playing game:', gameId, 'URL:', game?.imageUrl);
+    console.log('Playing game:', gameId, 'URL:', game?.image);
     
     if (!game) {
       Alert.alert('错误', '未找到游戏信息');
@@ -392,12 +359,14 @@ export default function MarketTab() {
 
   const handleMiniAppPress = async (appId: string) => {
     const app = miniAppsData.find(a => a.id === appId);
-    console.log('Opening mini app:', appId, 'URL:', app?.imageUrl);
+    console.log('Opening mini app:', appId, 'URL:', app?.image);
     
     if (!app) {
       Alert.alert('错误', '未找到应用信息');
       return;
     }
+
+
 
     await launchMiniApp(app);
   };
@@ -410,21 +379,21 @@ export default function MarketTab() {
     setShowComingSoonModal(false);
   };
 
-  const renderGameRow = (games: GameData[]) => (
+  const renderGameRow = (games: MiniAppData[]) => (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.gamesRow}
       contentContainerStyle={styles.gamesRowContent}
     >
-      {games.map((game: GameData) => (
+      {games.map((game: MiniAppData) => (
         <GameCard
           key={game.id}
           id={game.id}
           name={game.name}
-          imageUrl={game.imageUrl}
-          isHot={game.isHot}
-          rating={game.rating}
+          imageUrl={game.image}
+          isHot={game.hot}
+          rating={game.score ? parseInt(game.score.match(/(\d+)/)?.[1] || '0', 10) : 0}
           tags={game.tags}
           score={game.score}
           onPlayPress={handlePlayPress}
@@ -433,21 +402,21 @@ export default function MarketTab() {
     </ScrollView>
   );
 
-  const renderMiniAppRow = (apps: GameData[]) => (
+  const renderMiniAppRow = (apps: MiniAppData[]) => (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.gamesRow}
       contentContainerStyle={styles.gamesRowContent}
     >
-      {apps.map((app: GameData) => (
+      {apps.map((app: MiniAppData) => (
         <GameCard
           key={app.id}
           id={app.id}
           name={app.name}
-          imageUrl={app.imageUrl}
-          isHot={app.isHot}
-          rating={app.rating}
+          imageUrl={app.image}
+          isHot={app.hot}
+          rating={app.score ? parseInt(app.score.match(/(\d+)/)?.[1] || '0', 10) : 0}
           tags={app.tags}
           score={app.score}
           onPlayPress={handleMiniAppPress}

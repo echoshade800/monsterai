@@ -8,6 +8,7 @@
       "host": "https://d3a08sq6vi4p7j.cloudfront.net/",
       "module_name": "PuzzleMiniApp",
       "category": "gaming",
+      "hot": true,
       "image": "https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/sudo_icon.png",
       "releaseUrl": "https://d3a08sq6vi4p7j.cloudfront.net/"
     },
@@ -20,6 +21,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/AwakenMiniApp/ios_1.0.0.zip",
       "module_name": "AwakenMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/AwakenMiniApp/ios_1.0.0.zip"
     },
@@ -32,6 +34,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/WeightMiniApp/ios_1.0.0.zip",
       "module_name": "WeightMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/WeightMiniApp/ios_1.0.0.zip"
     },
@@ -44,6 +47,7 @@
       "host": "http://54.80.146.38:5178/index.bundle?platform=ios&dev=true&minify=false&runModule=true",
       "module_name": "FloMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/flo_icon.png",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/PeriodTracker/ios_1.0.0.zip"
     },
@@ -56,6 +60,7 @@
       "host": "http://100.28.58.186:5180/index.bundle?platform=ios&dev=true&minify=false&runModule=true",
       "module_name": "PocketMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/pocket_icon.png",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Pocket/ios_1.0.0.zip"
     },
@@ -68,6 +73,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/minidecider/ios_1.0.0.zip",
       "module_name": "DeciderMiniApp",
       "category": "gaming",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/MiniDecider/ios_1.0.0.zip"
     },
@@ -80,6 +86,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/CaloTrack/ios_1.0.0.zip",
       "module_name": "CalorieMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/CaloTrack/ios_1.0.0.zip"
     },
@@ -92,6 +99,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Linker/ios_1.0.0.zip",
       "module_name": "LinkerMiniApp",
       "category": "gaming",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Linker/ios_1.0.0.zip"
     },
@@ -104,6 +112,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Wordle/ios_1.0.0.zip",
       "module_name": "WordleMiniApp",
       "category": "gaming",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/WordleMiniApp/ios_1.0.0.zip"
     },
@@ -116,6 +125,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/2048/ios_1.0.0.zip",
       "module_name": "2048MiniApp",
       "category": "gaming",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/2048/ios_1.0.0.zip"
     },
@@ -128,6 +138,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/FlipMatch/ios_1.0.0.zip",
       "module_name": "FlipMatchMiniApp",
       "category": "gaming",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/FlipMatch/ios_1.0.0.zip"
     },
@@ -140,6 +151,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/KidderCrush/ios_1.0.0.zip",
       "module_name": "KidderCrushMiniApp",
       "category": "gaming",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/KidderCrush/ios_1.0.0.zip"
     },
@@ -152,6 +164,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/BlockPuzzleMiniApp/ios_1.0.0.zip",
       "module_name": "BlockPuzzleMiniApp",
       "category": "gaming",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/BlockPuzzleMiniApp/ios_1.0.0.zip"
     },
@@ -164,6 +177,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/AlarmMiniApp/ios_1.0.0.zip",
       "module_name": "AlarmMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/AlarmMiniApp/ios_1.0.0.zip"
     },
@@ -176,6 +190,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/WineLensMiniApp/ios_1.0.0.zip",
       "module_name": "WineLensMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/WineLensMiniApp/ios_1.0.0.zip"
     },
@@ -188,6 +203,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/InvoceKeeperMiniApp/ios_1.0.0.zip",
       "module_name": "InvoceKeeperMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/InvoceKeeperMiniApp/ios_1.0.0.zip"
     },
@@ -200,6 +216,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/TodoMiniApp/ios_1.0.0.zip",
       "module_name": "TodoMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/TodoMiniApp/ios_1.0.0.zip"
     },
@@ -212,6 +229,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/ScannerMiniApp/ios_1.0.0.zip",
       "module_name": "ScannerMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/ScannerMiniApp/ios_1.0.0.zip"
     },
@@ -224,6 +242,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/InvitationMiniApp/ios_1.0.0.zip",
       "module_name": "InvitationMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/InvitationMiniApp/ios_1.0.0.zip"
     },
@@ -236,6 +255,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/RecipeBoxMiniApp/ios_1.0.0.zip",
       "module_name": "RecipeBoxMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/RecipeBoxMiniApp/ios_1.0.0.zip"
     },
@@ -248,6 +268,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/TattooMiniApp/ios_1.0.0.zip",
       "module_name": "TattooMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/TattooMiniApp/ios_1.0.0.zip"
     },
@@ -260,6 +281,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/VoiceMiniApp/ios_1.0.0.zip",
       "module_name": "VoiceMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/VoiceMiniApp/ios_1.0.0.zip"
     },
@@ -272,6 +294,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/SpamShieldMiniApp/ios_1.0.0.zip",
       "module_name": "SpamShieldMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/SpamShieldMiniApp/ios_1.0.0.zip"
     },
@@ -284,6 +307,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/TranslateMiniApp/ios_1.0.0.zip",
       "module_name": "TranslateMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/TranslateMiniApp/ios_1.0.0.zip"
     },
@@ -296,6 +320,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/LeafLensMiniApp/ios_1.0.0.zip",
       "module_name": "LeafLensMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/LeafLensMiniApp/ios_1.0.0.zip"
     },
@@ -308,6 +333,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/MemoraMiniApp/ios_1.0.0.zip",
       "module_name": "MemoraMiniApp",
       "category": "lifestyle",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/MemoraMiniApp/ios_1.0.0.zip"
     },
@@ -320,6 +346,7 @@
       "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/PhotoPuzzle/ios_1.0.0.zip",
       "module_name": "PhotoPuzzleMiniApp",
       "category": "gaming",
+      "hot": false,
       "image": "",
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/PhotoPuzzle/ios_1.0.0.zip"
     }
