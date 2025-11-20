@@ -1,4 +1,3 @@
-import { Audio } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
@@ -11,8 +10,7 @@ import {
   Heart,
   Image as ImageIcon,
   MapPin,
-  Mic,
-  X,
+  X
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -85,7 +83,7 @@ export default function HomeTab() {
     calendar: true,
     photos: true,
     camera: false,
-    microphone: true,
+    // microphone: true,
   });
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
@@ -231,24 +229,24 @@ export default function HomeTab() {
       }
     };
 
-    const syncMicrophonePermission = async () => {
-      try {
-        const permissionResult = await Audio.getPermissionsAsync();
-        setPermissions((prev) => ({
-          ...prev,
-          microphone: permissionResult.granted,
-        }));
-      } catch (error) {
-        console.error('[HomeTab] Failed to check microphone permission:', error);
-      }
-    };
+    // const syncMicrophonePermission = async () => {
+    //   try {
+    //     const permissionResult = await Audio.getPermissionsAsync();
+    //     setPermissions((prev) => ({
+    //       ...prev,
+    //       microphone: permissionResult.granted,
+    //     }));
+    //   } catch (error) {
+    //     console.error('[HomeTab] Failed to check microphone permission:', error);
+    //   }
+    // };
 
     syncLocationPermission();
     syncCalendarPermission();
     syncHealthKitPermission();
     syncPhotosPermission();
     syncCameraPermission();
-    syncMicrophonePermission();
+    // syncMicrophonePermission();
   };
 
   useEffect(() => {
@@ -586,12 +584,12 @@ export default function HomeTab() {
       title: 'Camera',
       enabled: permissions.camera,
     },
-    {
-      id: 'microphone',
-      icon: <Mic size={24} color="#666" />,
-      title: 'Microphone',
-      enabled: permissions.microphone,
-    },
+    // {
+    //   id: 'microphone',
+    //   icon: <Mic size={24} color="#666" />,
+    //   title: 'Microphone',
+    //   enabled: permissions.microphone,
+    // },
   ];
 
   // 计算日期相对于今天的天数差（day 参数）
@@ -723,7 +721,7 @@ export default function HomeTab() {
       calendar: 'Calendar',
       photos: 'Photos',
       camera: 'Camera',
-      microphone: 'Microphone',
+      // microphone: 'Microphone',
     };
     return permissionMap[id] || id;
   };
@@ -1083,62 +1081,62 @@ export default function HomeTab() {
       return;
     }
 
-    if (id === 'microphone') {
-      try {
-        // 请求麦克风权限
-        const permissionResult = await Audio.requestPermissionsAsync();
-        console.log('[HomeTab] Microphone permission request result:', permissionResult);
+    // if (id === 'microphone') {
+    //   try {
+    //     // 请求麦克风权限
+    //     const permissionResult = await Audio.requestPermissionsAsync();
+    //     console.log('[HomeTab] Microphone permission request result:', permissionResult);
         
-        if (permissionResult.granted) {
-          setPermissions((prev) => ({
-            ...prev,
-            microphone: true,
-          }));
-        } else {
-          setPermissions((prev) => ({
-            ...prev,
-            microphone: false,
-          }));
-          Alert.alert(
-            'Microphone permission denied',
-            'Microphone permission is required to use recording function. Please enable microphone permission in settings.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Go to Settings',
-                onPress: async () => {
-                  try {
-                    await Linking.openSettings();
-                  } catch (error) {
-                    console.error('Failed to open settings:', error);
-                  }
-                },
-              },
-            ],
-          );
-        }
-      } catch (error) {
-        console.error('[HomeTab] Failed to request microphone permission:', error);
-        Alert.alert(
-          'Failed to request permission',
-          'Unable to request microphone permission, please try again later. You can also manually enable microphone permission in settings.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Go to Settings',
-              onPress: async () => {
-                try {
-                  await Linking.openSettings();
-                } catch (error) {
-                  console.error('Failed to open settings:', error);
-                }
-              },
-            },
-          ],
-        );
-      }
-      return;
-    }
+    //     if (permissionResult.granted) {
+    //       setPermissions((prev) => ({
+    //         ...prev,
+    //         microphone: true,
+    //       }));
+    //     } else {
+    //       setPermissions((prev) => ({
+    //         ...prev,
+    //         microphone: false,
+    //       }));
+    //       Alert.alert(
+    //         'Microphone permission denied',
+    //         'Microphone permission is required to use recording function. Please enable microphone permission in settings.',
+    //         [
+    //           { text: 'Cancel', style: 'cancel' },
+    //           {
+    //             text: 'Go to Settings',
+    //             onPress: async () => {
+    //               try {
+    //                 await Linking.openSettings();
+    //               } catch (error) {
+    //                 console.error('Failed to open settings:', error);
+    //               }
+    //             },
+    //           },
+    //         ],
+    //       );
+    //     }
+    //   } catch (error) {
+    //     console.error('[HomeTab] Failed to request microphone permission:', error);
+    //     Alert.alert(
+    //       'Failed to request permission',
+    //       'Unable to request microphone permission, please try again later. You can also manually enable microphone permission in settings.',
+    //       [
+    //         { text: 'Cancel', style: 'cancel' },
+    //         {
+    //           text: 'Go to Settings',
+    //           onPress: async () => {
+    //             try {
+    //               await Linking.openSettings();
+    //             } catch (error) {
+    //               console.error('Failed to open settings:', error);
+    //             }
+    //           },
+    //         },
+    //       ],
+    //     );
+    //   }
+    //   return;
+    // }
   };
 
   const formatDate = (date: Date) => {
