@@ -196,112 +196,113 @@ export default function MarketTab() {
         miniAppType: appData.miniAppType,
       };
 
-      if (cfg.miniAppType === 'H5' && appData.host) {
-        console.log('打开 H5 应用:', appData.host);
-        let params = {
+      if (cfg.miniAppType === 'H5') {
+        // 开发环境使用 host，生产环境使用 releaseUrl
+        const h5Url = __DEV__ ? appData.host : appData.releaseUrl;
+        if (!h5Url) {
+          Alert.alert('错误', __DEV__ ? '未找到 H5 应用的 host 地址' : '未找到 H5 应用的 releaseUrl 地址');
+          return;
+        }
+        console.log('打开 H5 应用:', h5Url);
+        const params = {
           title: cfg.name,
           miniAppType: cfg.miniAppType,
         };
-        MiniAppLauncher.open(appData.host, cfg.module_name, params);
+        MiniAppLauncher.open(h5Url, cfg.module_name, '', params);
         return;
-      }
-      
-      // RN 类型，检查是否需要下载 
-      const documentsDir = FileSystem.documentDirectory;
-      const moduleName = cfg.module_name;
-      const version = appData.version || '1.0.0';
-      const versionForFileName = formatVersionForFileName(version);
-      const targetDir = `${documentsDir}MiniApp/${moduleName}/${versionForFileName}/`;
-      
-      // 检查本地文件夹是否存在
-      const dirInfo = await FileSystem.getInfoAsync(targetDir);
-      
-      if (!dirInfo.exists && appData.releaseUrl) {
-        // 需要下载和解压
-        try {
-          Alert.alert('提示', '正在下载应用包，请稍候...');
-          
-          // 下载压缩包
-          const zipFileName = `${moduleName}_${versionForFileName}.zip`;
-          const zipFilePath = `${documentsDir}${zipFileName}`;
-          
-          console.log('开始下载:', appData.releaseUrl);
-          const downloadResult = await FileSystem.downloadAsync(appData.releaseUrl, zipFilePath);
-          
-          if (downloadResult.status !== 200) {
-            throw new Error(`下载失败，状态码: ${downloadResult.status}`);
+      } else {
+        const documentsDir = FileSystem.documentDirectory;
+        const moduleName = cfg.module_name;
+        const version = appData.version || '1.0.0';
+        const versionForFileName = formatVersionForFileName(version);
+        const targetDir = `${documentsDir}MiniApp/${moduleName}/${versionForFileName}/`;
+        // 检查本地文件夹是否存在
+        const dirInfo = await FileSystem.getInfoAsync(targetDir);
+        
+        if (!dirInfo.exists && appData.releaseUrl) {
+          // 需要下载和解压
+          try {
+            Alert.alert('提示', '正在下载应用包，请稍候...');
+            
+            // 下载压缩包
+            const zipFileName = `${moduleName}_${versionForFileName}.zip`;
+            const zipFilePath = `${documentsDir}${zipFileName}`;
+            
+            console.log('开始下载:', appData.releaseUrl);
+            const downloadResult = await FileSystem.downloadAsync(appData.releaseUrl, zipFilePath);
+            
+            if (downloadResult.status !== 200) {
+              throw new Error(`下载失败，状态码: ${downloadResult.status}`);
+            }
+            
+            console.log('下载完成，开始解压:', zipFilePath);
+            
+            // 确保目标目录存在
+            await FileSystem.makeDirectoryAsync(targetDir, { intermediates: true });
+            
+            // 解压到目标目录
+            const unzipPath = await unzip(zipFilePath, targetDir);
+            console.log('解压完成:', unzipPath);
+            // 删除临时 zip 文件
+            await FileSystem.deleteAsync(zipFilePath, { idempotent: true });
+            console.log('临时文件已删除');
+          } catch (downloadError) {
+            console.error('下载或解压失败:', downloadError);
+            Alert.alert(
+              '❌ 下载失败',
+              `无法下载或解压应用包：\n${downloadError instanceof Error ? downloadError.message : String(downloadError)}`,
+              [{ text: '确定' }]
+            );
+            return;
           }
-          
-          console.log('下载完成，开始解压:', zipFilePath);
-          
-          // 确保目标目录存在
-          await FileSystem.makeDirectoryAsync(targetDir, { intermediates: true });
-          
-          // 解压到目标目录
-          const unzipPath = await unzip(zipFilePath, targetDir);
-          console.log('解压完成:', unzipPath);
-          
-          // 删除临时 zip 文件
-          await FileSystem.deleteAsync(zipFilePath, { idempotent: true });
-          console.log('临时文件已删除');
-          
-        } catch (downloadError) {
-          console.error('下载或解压失败:', downloadError);
+        } else if (!dirInfo.exists && !appData.releaseUrl) {
           Alert.alert(
-            '❌ 下载失败',
-            `无法下载或解压应用包：\n${downloadError instanceof Error ? downloadError.message : String(downloadError)}`,
+            '⚠️ 目录不存在',
+            `本地 bundle 目录不存在：\n${targetDir}\n\n且未提供下载地址。`,
             [{ text: '确定' }]
           );
           return;
         }
-      } else if (!dirInfo.exists && !appData.releaseUrl) {
-        Alert.alert(
-          '⚠️ 目录不存在',
-          `本地 bundle 目录不存在：\n${targetDir}\n\n且未提供下载地址。`,
-          [{ text: '确定' }]
+        
+        // 检查解压后的目录是否存在
+        // 解压后的文件结构为: ios/rnbundle/main.jsbundle
+        const targetDirInfo = await FileSystem.getInfoAsync(targetDir);
+        console.log('targetDirInfo', targetDirInfo);
+        if (!targetDirInfo.exists) {
+          Alert.alert(
+            '⚠️ 目录不存在',
+            `本地 bundle 目录不存在：\n${targetDir}`,
+            [{ text: '确定' }]
+          );
+          return;
+        }
+
+        // 构建完整路径: {targetDir}ios/rnbundle/main.jsbundle
+        const bundlePath = `${targetDir}ios/rnbundle/main.jsbundle`;
+        
+        console.log('加载本地 bundle:', bundlePath);
+        console.log('模块名:', cfg.module_name);
+        console.log('应用名:', cfg.name);
+        console.log('类型:', cfg.miniAppType || 'RN');
+
+        // 调用 MiniAppLauncher 打开本地 bundle
+        const params = {
+          title: cfg.name,
+          miniAppType: cfg.miniAppType || 'RN',
+          localBundle: true,
+        };
+        MiniAppLauncher.open(
+          bundlePath,
+          cfg.module_name,
+          versionForFileName,
+          params,
         );
-        return;
       }
-      
-      // 检查解压后的目录是否存在
-      // 解压后的文件结构为: ios/rnbundle/main.jsbundle
-      const targetDirInfo = await FileSystem.getInfoAsync(targetDir);
-      console.log('targetDirInfo', targetDirInfo);
-      if (!targetDirInfo.exists) {
-        Alert.alert(
-          '⚠️ 目录不存在',
-          `本地 bundle 目录不存在：\n${targetDir}`,
-          [{ text: '确定' }]
-        );
-        return;
-      }
-
-      // 构建完整路径: {targetDir}ios/rnbundle/main.jsbundle
-      const bundlePath = `${targetDir}ios/rnbundle/main.jsbundle`;
-      
-      console.log('加载本地 bundle:', bundlePath);
-      console.log('模块名:', cfg.module_name);
-      console.log('应用名:', cfg.name);
-      console.log('类型:', cfg.miniAppType || 'RN');
-
-      // 调用 MiniAppLauncher 打开本地 bundle
-      const params = {
-        title: cfg.name,
-        miniAppType: cfg.miniAppType || 'RN',
-        localBundle: true,
-      };
-      MiniAppLauncher.open(
-        bundlePath,
-        cfg.module_name,
-        versionForFileName,
-        params,
-      );
-
     } catch (error) {
-      console.error('加载本地 bundle 失败:', error);
+      console.error('打开MiniApp失败:', error);
       Alert.alert(
-        '❌ 加载失败',
-        `无法加载本地 bundle：\n${error instanceof Error ? error.message : String(error)}`,
+        '❌ 打开MiniApp失败',
+        `无法打开MiniApp\n${error instanceof Error ? error.message : String(error)}`,
         [{ text: '确定' }]
       );
     }

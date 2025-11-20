@@ -1,17 +1,5 @@
 [
     {
-      "id": "1",
-      "name": "QBlock",
-      "icon": "🟩",
-      "color": "#FF6B8A",
-      "miniAppType": "H5",
-      "host": "http://100.28.58.186:3009/index.html",
-      "module_name": "GameMiniApp",
-      "category": "gaming",
-      "image": "https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/xiaoxiaole_icon.png",
-      "releaseUrl": ""
-    },
-    {
       "id": "2",
       "name": "Sodoku",
       "icon": "🔢",
@@ -21,7 +9,7 @@
       "module_name": "PuzzleMiniApp",
       "category": "gaming",
       "image": "https://vsa-bucket-public-new.s3.us-east-1.amazonaws.com/monster/sudo_icon.png",
-      "releaseUrl": ""
+      "releaseUrl": "https://d3a08sq6vi4p7j.cloudfront.net/"
     },
     {
       "id": "3",
