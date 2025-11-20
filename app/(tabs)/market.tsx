@@ -25,7 +25,7 @@ interface MonsterData {
 }
 
 // MiniApp 和游戏数据类型（基于 JSON 配置文件结构）
-interface MiniAppData {
+interface MiniAppConfig {
   // JSON 配置文件中的必需字段
   id: string;
   version: string;
@@ -108,8 +108,8 @@ export default function MarketTab() {
   const router = useRouter();
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
   const [monstersData, setMonstersData] = useState<MonsterData[]>([]);
-  const [gamesData, setGamesData] = useState<MiniAppData[]>([]);
-  const [miniAppsData, setMiniAppsData] = useState<MiniAppData[]>([]);
+  const [gamesData, setGamesData] = useState<MiniAppConfig[]>([]);
+  const [miniAppsData, setMiniAppsData] = useState<MiniAppConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMonstersLoading, setIsMonstersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -166,14 +166,14 @@ export default function MarketTab() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data: MiniAppData[] = await response.json();
+        const data: MiniAppConfig[] = await response.json();
         
         // 将 API 数据映射到现有格式，并同时分类
-        const games: MiniAppData[] = [];
-        const miniApps: MiniAppData[] = [];
+        const games: MiniAppConfig[] = [];
+        const miniApps: MiniAppConfig[] = [];
         
         data.forEach((item) => {
-          const mappedItem: MiniAppData = {
+          const mappedItem: MiniAppConfig = {
             ...item,
           };
           
@@ -212,11 +212,6 @@ export default function MarketTab() {
   const handleHirePress = (monsterId: string) => {
     console.log('Hired monster:', monsterId);
   };
-  interface AppConfig {
-    module_name: string;
-    name: string;
-    miniAppType?: string;
-  }
 
   // 将版本号从 "1.0.0" 格式转换为 "1_0_0" 格式（用于文件名）
   const formatVersionForFileName = (version: string): string => {
@@ -224,39 +219,32 @@ export default function MarketTab() {
   };
 
   // 公共的 MiniApp 启动逻辑
-  const launchMiniApp = async (appData: MiniAppData) => {
+  const launchMiniApp = async (appConfig: MiniAppConfig) => {
     try {
-      // 使用从 API 获取的配置
-      const cfg: AppConfig = {
-        module_name: appData.module_name || '',
-        name: appData.name || '',
-        miniAppType: appData.miniAppType,
-      };
-
-      if (cfg.miniAppType === 'H5') {
+      if (appConfig.miniAppType === 'H5') {
         // 开发环境使用 host，生产环境使用 releaseUrl
-        const h5Url = __DEV__ ? appData.host : appData.releaseUrl;
+        const h5Url = __DEV__ ? appConfig.host : appConfig.releaseUrl;
         if (!h5Url) {
           Alert.alert('错误', __DEV__ ? '未找到 H5 应用的 host 地址' : '未找到 H5 应用的 releaseUrl 地址');
           return;
         }
         console.log('打开 H5 应用:', h5Url);
         const params = {
-          title: cfg.name,
-          miniAppType: cfg.miniAppType,
+          title: appConfig.name,
+          miniAppType: appConfig.miniAppType,
         };
-        MiniAppLauncher.open(h5Url, cfg.module_name, '', params);
+        MiniAppLauncher.open(h5Url, appConfig.module_name, '', params);
         return;
       } else {
         const documentsDir = FileSystem.documentDirectory;
-        const moduleName = cfg.module_name;
-        const version = appData.version || '1.0.0';
+        const moduleName = appConfig.module_name;
+        const version = appConfig.version || '1.0.0';
         const versionForFileName = formatVersionForFileName(version);
         const targetDir = `${documentsDir}MiniApp/${moduleName}/${versionForFileName}/`;
         // 检查本地文件夹是否存在
         const dirInfo = await FileSystem.getInfoAsync(targetDir);
         
-        if (!dirInfo.exists && appData.releaseUrl) {
+        if (!dirInfo.exists && appConfig.releaseUrl) {
           // 需要下载和解压
           try {
             Alert.alert('提示', '正在下载应用包，请稍候...');
@@ -265,8 +253,8 @@ export default function MarketTab() {
             const zipFileName = `${moduleName}_${versionForFileName}.zip`;
             const zipFilePath = `${documentsDir}${zipFileName}`;
             
-            console.log('开始下载:', appData.releaseUrl);
-            const downloadResult = await FileSystem.downloadAsync(appData.releaseUrl, zipFilePath);
+            console.log('开始下载:', appConfig.releaseUrl);
+            const downloadResult = await FileSystem.downloadAsync(appConfig.releaseUrl, zipFilePath);
             
             if (downloadResult.status !== 200) {
               throw new Error(`下载失败，状态码: ${downloadResult.status}`);
@@ -292,7 +280,7 @@ export default function MarketTab() {
             );
             return;
           }
-        } else if (!dirInfo.exists && !appData.releaseUrl) {
+        } else if (!dirInfo.exists && !appConfig.releaseUrl) {
           Alert.alert(
             '⚠️ 目录不存在',
             `本地 bundle 目录不存在：\n${targetDir}\n\n且未提供下载地址。`,
@@ -318,19 +306,19 @@ export default function MarketTab() {
         const bundlePath = `${targetDir}ios/rnbundle/main.jsbundle`;
         
         console.log('加载本地 bundle:', bundlePath);
-        console.log('模块名:', cfg.module_name);
-        console.log('应用名:', cfg.name);
-        console.log('类型:', cfg.miniAppType || 'RN');
+        console.log('模块名:', appConfig.module_name);
+        console.log('应用名:', appConfig.name);
+        console.log('类型:', appConfig.miniAppType || 'RN');
 
         // 调用 MiniAppLauncher 打开本地 bundle
         const params = {
-          title: cfg.name,
-          miniAppType: cfg.miniAppType || 'RN',
+          title: appConfig.name,
+          miniAppType: appConfig.miniAppType || 'RN',
           localBundle: true,
         };
         MiniAppLauncher.open(
           bundlePath,
-          cfg.module_name,
+          appConfig.module_name,
           versionForFileName,
           params,
         );
@@ -379,14 +367,14 @@ export default function MarketTab() {
     setShowComingSoonModal(false);
   };
 
-  const renderGameRow = (games: MiniAppData[]) => (
+  const renderGameRow = (games: MiniAppConfig[]) => (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.gamesRow}
       contentContainerStyle={styles.gamesRowContent}
     >
-      {games.map((game: MiniAppData) => (
+      {games.map((game: MiniAppConfig) => (
         <GameCard
           key={game.id}
           id={game.id}
@@ -402,14 +390,14 @@ export default function MarketTab() {
     </ScrollView>
   );
 
-  const renderMiniAppRow = (apps: MiniAppData[]) => (
+  const renderMiniAppRow = (apps: MiniAppConfig[]) => (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.gamesRow}
       contentContainerStyle={styles.gamesRowContent}
     >
-      {apps.map((app: MiniAppData) => (
+      {apps.map((app: MiniAppConfig) => (
         <GameCard
           key={app.id}
           id={app.id}
