@@ -12,9 +12,9 @@
       "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/2048/1.0.0.zip",
       "hot": false,
       "tag": [
-        "🤩 Createor Love"
+        "Createor Love"
       ],
-      "score": "😊 95%"
+      "score": "95%"
     },
     {
       "id": "2",
@@ -32,5 +32,141 @@
         "🤩 Createor Love"
       ],
       "score": "😊 93%"
-    }
+    },
+    {
+      "id": "3",
+      "name": "FishyDay",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/FishyDay/1.0.0.zip",
+      "module_name": "FishDayMiniApp",
+      "category": "gaming",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/FishyDay.png",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/FishyDay/1.0.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 96%"
+    },
+    {
+      "id": "4",
+      "name": "FlipMatch",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/FlipMatch/1.0.0.zip",
+      "module_name": "FlipMatchMiniApp",
+      "category": "gaming",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/memory.jpeg",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/FlipMatch/1.0.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 97%"
+    },
+    {
+      "id": "5",
+      "name": "KidderCrush",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/KidderCrush/1.0.0.zip",
+      "module_name": "KidderCrushMiniApp",
+      "category": "gaming",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/kidercrush.jpeg",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/KidderCrush/1.0.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 92%"
+    },
+    {
+      "id": "6",
+      "name": "LeafLens",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/LeafLens/1.0.0.zip",
+      "module_name": "LeafLensMiniApp",
+      "category": "lifestyle",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/LeafLens.jpg",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/LeafLens/1.0.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 90%"
+    },
+    {
+      "id": "7",
+      "name": "Linker",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/Linker/1.0.0.zip",
+      "module_name": "LinkerMiniApp",
+      "category": "gaming",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/linker.png",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/Linker/1.0.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 90%"
+    },
+    {
+      "id": "8",
+      "name": "Monex",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/Monex/0.1.0.zip",
+      "module_name": "MonexMiniApp",
+      "category": "lifestyle",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/monex.png",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/Monex/0.1.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 95%"
+    },
+    {
+      "id": "9",
+      "name": "PhotoPuzzle",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/PhotoPuzzle/1.0.0.zip",
+      "module_name": "PhotoPuzzleMiniApp",
+      "category": "gaming",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/FlipMatch.jpeg",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/PhotoPuzzle/1.0.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 91%"
+    },
+    {
+        "id": "10",
+        "name": "Sudoku",
+        "icon": "🟩",
+        "color": "#FF6B8A",
+        "miniAppType": "H5",
+        "host": "https://d3a08sq6vi4p7j.cloudfront.net/",
+        "module_name": "SudokuMiniApp",
+        "category": "gaming",
+        "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/sudoku.jpeg",
+        "releaseUrl": "https://d3a08sq6vi4p7j.cloudfront.net/",
+        "hot": false,
+        "tag": [
+          "🤩 Createor Love"
+        ],
+        "score": "😊 95%"
+      }
   ]
