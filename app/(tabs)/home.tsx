@@ -727,23 +727,51 @@ export default function HomeTab() {
   };
 
   const togglePermission = async (id: string) => {
+
     const currentValue = permissions[id as keyof typeof permissions];
     const permissionName = getPermissionName(id);
 
-    // 如果尝试关闭权限，跳转到系统设置
+    // 如果尝试关闭权限，跳转到相应的设置页面
     if (currentValue) {
+      // 健康权限跳转到健康应用，其他权限跳转到系统设置
+      const isHealthKit = id === 'healthkit';
+      const settingsText = isHealthKit ? 'Open Health App' : 'Go to Settings';
+      const settingsMessage = isHealthKit 
+        ? `Please disable ${permissionName} permission in Health app.`
+        : `Please disable ${permissionName} permission in system settings.`;
+      
       Alert.alert(
         `Disable ${permissionName} permission`,
-        `Please disable ${permissionName} permission in system settings.`,
+        settingsMessage,
         [
           { text: 'Cancel', style: 'cancel' },
           {
-            text: 'Go to Settings',
+            text: settingsText,
             onPress: async () => {
               try {
-                await Linking.openSettings();
+                if (isHealthKit) {
+                  // Open Health app on iOS
+                  const healthAppUrl = 'x-apple-health://';
+                  const canOpen = await Linking.canOpenURL(healthAppUrl);
+                  if (canOpen) {
+                    await Linking.openURL(healthAppUrl);
+                  } else {
+                    // Fallback to system settings if Health app is not available
+                    await Linking.openSettings();
+                  }
+                } else {
+                  await Linking.openSettings();
+                }
               } catch (error) {
                 console.error('Failed to open settings:', error);
+                // Fallback to system settings if Health app fails
+                if (isHealthKit) {
+                  try {
+                    await Linking.openSettings();
+                  } catch (settingsError) {
+                    console.error('Failed to open settings:', settingsError);
+                  }
+                }
               }
             },
           },
@@ -908,16 +936,30 @@ export default function HomeTab() {
           if (!allAuthorized) {
             Alert.alert(
               'Some permissions not authorized',
-              'Some health data permissions are not authorized. Please enable all HealthKit permissions in system settings.',
+              'Some health data permissions are not authorized. Please enable all HealthKit permissions in Health app.',
               [
                 { text: 'Cancel', style: 'cancel' },
                 {
-                  text: 'Go to Settings',
+                  text: 'Open Health App',
                   onPress: async () => {
                     try {
-                      await Linking.openSettings();
+                      // Open Health app on iOS
+                      const healthAppUrl = 'x-apple-health://';
+                      const canOpen = await Linking.canOpenURL(healthAppUrl);
+                      if (canOpen) {
+                        await Linking.openURL(healthAppUrl);
+                      } else {
+                        // Fallback to system settings if Health app is not available
+                        await Linking.openSettings();
+                      }
                     } catch (error) {
-                      console.error('Failed to open settings:', error);
+                      console.error('Failed to open Health app:', error);
+                      // Fallback to system settings
+                      try {
+                        await Linking.openSettings();
+                      } catch (settingsError) {
+                        console.error('Failed to open settings:', settingsError);
+                      }
                     }
                   },
                 },
@@ -927,16 +969,30 @@ export default function HomeTab() {
         } else {
           Alert.alert(
             'HealthKit permission denied',
-            permissionResult.error || 'HealthKit permission is required to access health data. Please enable HealthKit permission in settings.',
+            permissionResult.error || 'HealthKit permission is required to access health data. Please enable HealthKit permission in Health app.',
             [
               { text: 'Cancel', style: 'cancel' },
               {
-                text: 'Go to Settings',
+                text: 'Open Health App',
                 onPress: async () => {
                   try {
-                    await Linking.openSettings();
+                    // Open Health app on iOS
+                    const healthAppUrl = 'x-apple-health://';
+                    const canOpen = await Linking.canOpenURL(healthAppUrl);
+                    if (canOpen) {
+                      await Linking.openURL(healthAppUrl);
+                    } else {
+                      // Fallback to system settings if Health app is not available
+                      await Linking.openSettings();
+                    }
                   } catch (error) {
-                    console.error('Failed to open settings:', error);
+                    console.error('Failed to open Health app:', error);
+                    // Fallback to system settings
+                    try {
+                      await Linking.openSettings();
+                    } catch (settingsError) {
+                      console.error('Failed to open settings:', settingsError);
+                    }
                   }
                 },
               },
@@ -947,16 +1003,30 @@ export default function HomeTab() {
         console.error('[HomeTab] Failed to request HealthKit permission:', error);
         Alert.alert(
           'Failed to request permission',
-          'Unable to request HealthKit permission, please try again later. You can also manually enable HealthKit permission in settings.',
+          'Unable to request HealthKit permission, please try again later. You can also manually enable HealthKit permission in Health app.',
           [
             { text: 'Cancel', style: 'cancel' },
             {
-              text: 'Go to Settings',
+              text: 'Open Health App',
               onPress: async () => {
                 try {
-                  await Linking.openSettings();
+                  // Open Health app on iOS
+                  const healthAppUrl = 'x-apple-health://';
+                  const canOpen = await Linking.canOpenURL(healthAppUrl);
+                  if (canOpen) {
+                    await Linking.openURL(healthAppUrl);
+                  } else {
+                    // Fallback to system settings if Health app is not available
+                    await Linking.openSettings();
+                  }
                 } catch (error) {
-                  console.error('Failed to open settings:', error);
+                  console.error('Failed to open Health app:', error);
+                  // Fallback to system settings
+                  try {
+                    await Linking.openSettings();
+                  } catch (settingsError) {
+                    console.error('Failed to open settings:', settingsError);
+                  }
                 }
               },
             },

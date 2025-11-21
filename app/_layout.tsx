@@ -90,9 +90,17 @@ async function registerForPushNotificationsAsync() {
       token = await Notifications.getDevicePushTokenAsync();
       console.log('Push token obtained successfully:', token.data);
       return token.data; // 返回 token 字符串
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to get push token:', error);
-      console.error('Error message:', error.message);
+      const errorMessage = error?.message || String(error);
+      console.error('Error message:', errorMessage);
+      
+      // Check if error is related to aps-environment configuration
+      if (errorMessage.includes('aps-environment') || errorMessage.includes('授权字符串')) {
+        console.warn('Push notification configuration issue: aps-environment entitlement may be missing or incorrectly configured in MonsterAI.entitlements file.');
+        console.warn('Please ensure the entitlements file includes: <key>aps-environment</key><string>development</string> (for dev) or <string>production</string> (for prod)');
+      }
+      
       return null;
     }
   } else {
