@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, NativeEventEmitter, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, NativeEventEmitter, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { unzip } from 'react-native-zip-archive';
 import { GameCard } from '../../components/GameCard';
 import { MonsterCard } from '../../components/MonsterCard';
@@ -113,6 +113,7 @@ export default function MarketTab() {
   const [isLoading, setIsLoading] = useState(true);
   const [isMonstersLoading, setIsMonstersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // 使用单独的 useEffect 来设置原生事件监听器，确保只执行一次
   useEffect(() => {
@@ -242,6 +243,7 @@ export default function MarketTab() {
         MiniAppLauncher.open(h5Url, appConfig.module_name, '', params);
         return;
       } else {
+        
         const documentsDir = FileSystem.documentDirectory;
         const moduleName = appConfig.module_name;
         const version = appConfig.version || '1.0.0';
@@ -254,6 +256,9 @@ export default function MarketTab() {
         if (!dirInfo.exists && appConfig.releaseUrl) {
           // 需要下载和解压
           try {
+            // 显示下载 Loading
+            setIsDownloading(true);
+            
             // 如果 targetDir 不存在，先删除 targetModuleName 路径下的所有子文件夹
             const moduleDirInfo = await FileSystem.getInfoAsync(targetModuleName);
             if (moduleDirInfo.exists && moduleDirInfo.isDirectory) {
@@ -269,8 +274,6 @@ export default function MarketTab() {
                 }
               }
             }
-            
-            Alert.alert('Notice', 'Downloading app package, please wait...');
             
             // 下载压缩包
             const zipFileName = `${moduleName}_${versionForFileName}.zip`;
@@ -294,7 +297,12 @@ export default function MarketTab() {
             // 删除临时 zip 文件
             await FileSystem.deleteAsync(zipFilePath, { idempotent: true });
             console.log('临时文件已删除');
+            
+            // 隐藏下载 Loading
+            setIsDownloading(false);
           } catch (downloadError) {
+            // 隐藏下载 Loading
+            setIsDownloading(false);
             console.error('下载或解压失败:', downloadError);
             Alert.alert(
               '❌ Download Failed',
@@ -527,7 +535,7 @@ export default function MarketTab() {
           )}
         </View>
 
-        <View style={styles.bannerSection}>
+        {/* <View style={styles.bannerSection}>
           <TouchableOpacity onPress={handleBannerPress} activeOpacity={0.8}>
             <Image
               source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/spark.png' }}
@@ -535,7 +543,7 @@ export default function MarketTab() {
               resizeMode="cover"
             />
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
 
       <Modal
@@ -568,6 +576,19 @@ export default function MarketTab() {
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={isDownloading}
+        transparent
+        animationType="fade"
+      >
+        <View style={styles.downloadModalOverlay}>
+          <View style={styles.downloadModalContent}>
+            <ActivityIndicator size="large" color="#000000" />
+            <Text style={styles.downloadModalText}>Downloading app package, please wait...</Text>
+          </View>
+        </View>
       </Modal>
     </View>
   );
@@ -732,6 +753,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
     color: '#999999',
+  },
+  downloadModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  downloadModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    width: '80%',
+    maxWidth: 300,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  downloadModalText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: 'Nunito_400Regular',
+    color: '#666666',
+    textAlign: 'center',
   },
 });
 
