@@ -39,7 +39,7 @@ interface MiniAppConfig {
   image: string;
   releaseUrl: string;
   // 可选字段（可能在某些配置中存在）
-  tags?: string[];
+  tag: string[];
   score?: string;
   hot: boolean;
 }
@@ -399,6 +399,7 @@ export default function MarketTab() {
       contentContainerStyle={styles.gamesRowContent}
     >
       {games.map((game: MiniAppConfig) => (
+        console.log('game', game),
         <GameCard
           key={game.id}
           id={game.id}
@@ -406,7 +407,7 @@ export default function MarketTab() {
           imageUrl={game.image}
           isHot={game.hot}
           rating={game.score ? parseInt(game.score.match(/(\d+)/)?.[1] || '0', 10) : 0}
-          tags={game.tags}
+          tags={game.tag}
           score={game.score}
           onPlayPress={handlePlayPress}
         />
@@ -429,7 +430,7 @@ export default function MarketTab() {
           imageUrl={app.image}
           isHot={app.hot}
           rating={app.score ? parseInt(app.score.match(/(\d+)/)?.[1] || '0', 10) : 0}
-          tags={app.tags}
+          tags={app.tag}
           score={app.score}
           onPlayPress={handleMiniAppPress}
         />
