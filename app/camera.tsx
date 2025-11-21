@@ -7,60 +7,79 @@ import { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { uploadImageToS3 } from '../src/utils/function-tools';
 import storageManager from '../src/utils/storage';
+
+// Image mapping for require() - React Native requires static paths
+const IMAGE_MAP: { [key: string]: any } = {
+  'frontsteward.png': require('../assets/images/frontsteward.png'),
+  'backsteward.png': require('../assets/images/backsteward.png'),
+  'frontenergy.png': require('../assets/images/frontenergy.png'),
+  'backenergy.png': require('../assets/images/backenergy.png'),
+  'frontface.png': require('../assets/images/frontface.png'),
+  'backface.png': require('../assets/images/backface.png'),
+  'frontposture.png': require('../assets/images/frontposture.png'),
+  'backposture.png': require('../assets/images/backposture.png'),
+  'frontsleep.png': require('../assets/images/frontsleep.png'),
+  'backsleep.png': require('../assets/images/backsleep.png'),
+  'frontstress.png': require('../assets/images/frontstress.png'),
+  'backstress.png': require('../assets/images/backstress.png'),
+  'frontfeces.png': require('../assets/images/frontfeces.png'),
+  'backfeces.png': require('../assets/images/backfeces.png'),
+};
+
 const AGENTS = [
   {
     id: 'steward',
     name: 'Steward',
-    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontsteward.png',
-    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backsteward.png',
+    frontImage: 'frontsteward.png',
+    backImage: 'backsteward.png',
     prompt: 'Take any picture you want!',
     image_detection_type: 'full',
   },
   {
     id: 'energy',
     name: 'Energy',
-    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontenergy.png',
-    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backenergy.png',
+    frontImage: 'frontenergy.png',
+    backImage: 'backenergy.png',
     prompt: 'Show me your food!',
     image_detection_type: 'food_calorie',
   },
   {
     id: 'face',
     name: 'Face',
-    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontface.png',
-    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backface.png',
+    frontImage: 'frontface.png',
+    backImage: 'backface.png',
     prompt: 'Show me your face!',
     image_detection_type: 'face',
   },
   {
     id: 'posture',
     name: 'Posture',
-    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontposture.png',
-    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backposture.png',
+    frontImage: 'frontposture.png',
+    backImage: 'backposture.png',
     prompt: 'Check your posture!',
     image_detection_type: 'posture',
   },
   {
     id: 'sleep',
     name: 'Sleep',
-    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontsleep.png',
-    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backsleep.png',
+    frontImage: 'frontsleep.png',
+    backImage: 'backsleep.png',
     prompt: 'How did you sleep? Show me!',
     image_detection_type: 'sleep',
   },
   {
     id: 'stress',
     name: 'Stress',
-    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontstress.png',
-    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backstress.png',
+    frontImage: 'frontstress.png',
+    backImage: 'backstress.png',
     prompt: 'How stressed are you? Show me!',
     image_detection_type: 'stress',
   },
   {
     id: 'feces',
     name: 'Feces',
-    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/frontfeces.png',
-    backImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/backfeces.png',
+    frontImage: 'frontfeces.png',
+    backImage: 'backfeces.png',
     prompt: 'Did you poop today?',
     image_detection_type: 'feces',
   },
@@ -365,7 +384,7 @@ export default function CameraScreen() {
               disabled={isUploading}
             >
               <Image
-                source={{ uri: selectedAgentData.backImage }}
+                source={IMAGE_MAP[selectedAgentData.backImage]}
                 style={styles.captureImage}
               />
               <View style={styles.captureOverlay}>
@@ -405,7 +424,7 @@ export default function CameraScreen() {
                     onPress={() => setSelectedAgent(agent.id)}
                   >
                     <Image
-                      source={{ uri: selectedAgent === agent.id ? agent.backImage : agent.frontImage }}
+                      source={IMAGE_MAP[selectedAgent === agent.id ? agent.backImage : agent.frontImage]}
                       style={imageStyle}
                     />
                     {selectedAgent === agent.id && (
