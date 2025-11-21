@@ -3,7 +3,7 @@
  * 统一管理所有健康相关的数据授权和信息获取
  */
 
-import { Platform, NativeModules } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import BrokenHealthKit from 'react-native-health';
 
 const AppleHealthKit = NativeModules.AppleHealthKit;
@@ -169,10 +169,22 @@ class HealthDataManager {
         try {
           AppleHealthKit.initHealthKit(permissions, (err) => {
             if (err) {
-              console.error('[HealthDataManager] ❌ initHealthKit 错误:', err);
+              // HealthKit Code=5 表示权限被拒绝，这是正常的用户行为，使用警告而不是错误
+              const isPermissionDenied = err.code === 5 || 
+                                        (err.message && err.message.includes('Code=5')) ||
+                                        (err.message && err.message.includes('authorization'));
+              
+              if (isPermissionDenied) {
+                console.warn('[HealthDataManager] ⚠️ HealthKit 权限被拒绝（用户可能拒绝了权限请求）');
+                console.warn('[HealthDataManager] 💡 提示：用户可以在"设置 > 健康 > 数据访问权限与设备"中重新授权');
+              } else {
+                console.error('[HealthDataManager] ❌ initHealthKit 错误:', err);
+              }
+              
               resolve({
                 success: false,
                 error: err.message || '权限申请失败',
+                denied: isPermissionDenied, // 标记是否为权限被拒绝
               });
               return;
             }

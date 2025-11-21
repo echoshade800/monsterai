@@ -1,9 +1,9 @@
 import {
-  Nunito_400Regular,
-  Nunito_500Medium,
-  Nunito_600SemiBold,
-  Nunito_700Bold,
-  Nunito_800ExtraBold,
+    Nunito_400Regular,
+    Nunito_500Medium,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
+    Nunito_800ExtraBold,
 } from '@expo-google-fonts/nunito';
 import * as Device from 'expo-device';
 import { useFonts } from 'expo-font';
@@ -17,6 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { analytics } from '../config/firebase';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
+import mobileDataManager from '../src/utils/mobile-data-manager';
 import storageManager from '../src/utils/storage';
 
 // 配置通知处理程序
@@ -156,6 +157,15 @@ export default function Layout() {
             // 已登录：直接上传 device-token
             console.log('User is logged in, uploading device-token directly');
             await uploadDeviceTokenToServer(token);
+            
+            // 上传手机数据
+            try {
+              console.log('Starting mobile data upload...');
+              await mobileDataManager.uploadData({ period: 'today' });
+            } catch (error) {
+              console.error('Failed to upload mobile data:', error);
+              // 不阻塞应用启动，静默失败
+            }
           } else {
             // 未登录：保存到本地
             console.log('User not logged in, saving device-token locally');
