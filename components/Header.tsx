@@ -494,7 +494,7 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
         <Animated.View style={[styles.expandedContainer, backgroundContainerStyle]}>
           <View style={styles.topExtension} />
           <ImageBackground
-            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatbackground.png' }}
+            source={require('../assets/images/chatbackground.png')}
             style={styles.backgroundImage}
             resizeMode="cover"
             imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
@@ -507,7 +507,7 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
             <View style={styles.bannersContainer}>
               <Animated.View style={[styles.monsterImageContainer, monsterImageStyle]}>
                 <Image
-                  source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatteam.png' }}
+                  source={require('../assets/images/chatteam.png')}
                   style={styles.monsterImage}
                   resizeMode="cover"
                 />
@@ -519,7 +519,7 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
                   <View style={styles.breakfastContent}>
                     <View style={styles.breakfastLeft}>
                       <Image
-                        source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatposture.png' }}
+                        source={require('../assets/images/chatposture.png')}
                         style={styles.avatarImage}
                       />
                       <View style={styles.breakfastTextContainer}>
