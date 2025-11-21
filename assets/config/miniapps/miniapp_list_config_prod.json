@@ -1,1 +1,36 @@
-[]
+[
+    {
+      "id": "1",
+      "name": "2048",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/2048/1.0.0.zip",
+      "module_name": "2048MiniApp",
+      "category": "gaming",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/2048.jpeg",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/2048/1.0.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 95%"
+    },
+    {
+      "id": "2",
+      "name": "BlockPuzzle",
+      "icon": "🟩",
+      "color": "#FF6B8A",
+      "miniAppType": "RN",
+      "host": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/BlockPuzzle/1.0.0.zip",
+      "module_name": "BlockPuzzleMiniApp",
+      "category": "gaming",
+      "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/qblock.jpeg",
+      "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/monster/miniapps/BlockPuzzle/1.0.0.zip",
+      "hot": false,
+      "tag": [
+        "🤩 Createor Love"
+      ],
+      "score": "😊 93%"
+    }
+  ]
