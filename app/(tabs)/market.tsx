@@ -195,7 +195,7 @@ export default function MarketTab() {
         setMiniAppsData(miniApps);
       } catch (err) {
         console.error('获取 MiniApp 数据失败:', err);
-        setError(err instanceof Error ? err.message : '未知错误');
+        setError(err instanceof Error ? err.message : 'Unknown error');
         // 发生错误时使用空数组，避免应用崩溃
         setGamesData([]);
         setMiniAppsData([]);
@@ -231,7 +231,7 @@ export default function MarketTab() {
         // 开发环境使用 host，生产环境使用 releaseUrl
         const h5Url = __DEV__ ? appConfig.host : appConfig.releaseUrl;
         if (!h5Url) {
-          Alert.alert('错误', __DEV__ ? '未找到 H5 应用的 host 地址' : '未找到 H5 应用的 releaseUrl 地址');
+          Alert.alert('Error', __DEV__ ? 'H5 app host address not found' : 'H5 app releaseUrl address not found');
           return;
         }
         console.log('打开 H5 应用:', h5Url);
@@ -270,7 +270,7 @@ export default function MarketTab() {
               }
             }
             
-            Alert.alert('提示', '正在下载应用包，请稍候...');
+            Alert.alert('Notice', 'Downloading app package, please wait...');
             
             // 下载压缩包
             const zipFileName = `${moduleName}_${versionForFileName}.zip`;
@@ -280,7 +280,7 @@ export default function MarketTab() {
             const downloadResult = await FileSystem.downloadAsync(appConfig.releaseUrl, zipFilePath);
             
             if (downloadResult.status !== 200) {
-              throw new Error(`下载失败，状态码: ${downloadResult.status}`);
+              throw new Error(`Download failed, status code: ${downloadResult.status}`);
             }
             
             console.log('下载完成，开始解压:', zipFilePath);
@@ -297,18 +297,18 @@ export default function MarketTab() {
           } catch (downloadError) {
             console.error('下载或解压失败:', downloadError);
             Alert.alert(
-              '❌ 下载失败',
-              `无法下载或解压应用包：\n${downloadError instanceof Error ? downloadError.message : String(downloadError)}`,
-              [{ text: '确定' }]
+              '❌ Download Failed',
+              `Unable to download or extract app package:\n${downloadError instanceof Error ? downloadError.message : String(downloadError)}`,
+              [{ text: 'OK' }]
             );
             return;
           }
         } else if (!dirInfo.exists) {
           
           Alert.alert(
-            '⚠️ 目录不存在',
-            `本地 bundle 目录不存在：\n${targetDir}\n\n且未提供下载地址。`,
-            [{ text: '确定' }]
+            '⚠️ Directory Not Found',
+            `Local bundle directory does not exist:\n${targetDir}\n\nAnd no download URL provided.`,
+            [{ text: 'OK' }]
           );
           return;
         }
@@ -319,9 +319,9 @@ export default function MarketTab() {
         console.log('targetDirInfo', targetDirInfo);
         if (!targetDirInfo.exists) {
           Alert.alert(
-            '⚠️ 目录不存在',
-            `本地 bundle 目录不存在：\n${targetDir}`,
-            [{ text: '确定' }]
+            '⚠️ Directory Not Found',
+            `Local bundle directory does not exist:\n${targetDir}`,
+            [{ text: 'OK' }]
           );
           return;
         }
@@ -350,9 +350,9 @@ export default function MarketTab() {
     } catch (error) {
       console.error('打开MiniApp失败:', error);
       Alert.alert(
-        '❌ 打开MiniApp失败',
-        `无法打开MiniApp\n${error instanceof Error ? error.message : String(error)}`,
-        [{ text: '确定' }]
+        '❌ Failed to Open MiniApp',
+        `Unable to open MiniApp\n${error instanceof Error ? error.message : String(error)}`,
+        [{ text: 'OK' }]
       );
     }
   };
@@ -362,7 +362,7 @@ export default function MarketTab() {
     console.log('Playing game:', gameId, 'URL:', game?.image);
     
     if (!game) {
-      Alert.alert('错误', '未找到游戏信息');
+      Alert.alert('Error', 'Game information not found');
       return;
     }
 
@@ -374,7 +374,7 @@ export default function MarketTab() {
     console.log('Opening mini app:', appId, 'URL:', app?.image);
     
     if (!app) {
-      Alert.alert('错误', '未找到应用信息');
+      Alert.alert('Error', 'App information not found');
       return;
     }
 
@@ -454,7 +454,7 @@ export default function MarketTab() {
           {isMonstersLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#000000" />
-              <Text style={styles.loadingText}>加载中...</Text>
+              <Text style={styles.loadingText}>Loading...</Text>
             </View>
           ) : monstersData.length > 0 ? (
             monstersData.map((monster, index) => (
@@ -482,7 +482,7 @@ export default function MarketTab() {
             ))
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>暂无数据</Text>
+              <Text style={styles.emptyText}>No data available</Text>
             </View>
           )}
         </View>
@@ -492,17 +492,17 @@ export default function MarketTab() {
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#000000" />
-              <Text style={styles.loadingText}>加载中...</Text>
+              <Text style={styles.loadingText}>Loading...</Text>
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>加载失败: {error}</Text>
+              <Text style={styles.errorText}>Failed to load: {error}</Text>
             </View>
           ) : gamesData.length > 0 ? (
             renderGameRow(gamesData)
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>暂无游戏</Text>
+              <Text style={styles.emptyText}>No games available</Text>
             </View>
           )}
         </View>
@@ -512,17 +512,17 @@ export default function MarketTab() {
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#000000" />
-              <Text style={styles.loadingText}>加载中...</Text>
+              <Text style={styles.loadingText}>Loading...</Text>
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>加载失败: {error}</Text>
+              <Text style={styles.errorText}>Failed to load: {error}</Text>
             </View>
           ) : miniAppsData.length > 0 ? (
             renderMiniAppRow(miniAppsData)
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>暂无应用</Text>
+              <Text style={styles.emptyText}>No apps available</Text>
             </View>
           )}
         </View>
