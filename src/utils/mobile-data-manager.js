@@ -210,7 +210,7 @@ class MobileDataManager {
       const hourEnd = new Date(hourStart);
       hourEnd.setHours(hourEnd.getHours() + 1);
 
-      const timestamp = hourEnd.getTime().toString();
+      const timestamp = Date.now().toString();
       const startDateStr = hourStart.getTime().toString();
       const endDateStr = hourEnd.getTime().toString();
 
