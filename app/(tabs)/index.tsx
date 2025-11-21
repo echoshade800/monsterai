@@ -63,7 +63,12 @@ export default function EchoTab() {
     };
 
     // 辅助函数：转换单个消息项
-    const convertItem = (item: any, index: number): Message => {
+    const convertItem = (item: any, index: number): Message | null => {
+      // 过滤掉 function_call_output 和 fun_call 类型的消息
+      if (item.msg_type === 'function_call_output' || item.msg_type === 'fun_call') {
+        return null;
+      }
+      
       const type = getMessageType(item);
       // 优先使用 _id 字段作为唯一标识
       const messageId = item._id || item.id || item.trace_id || `msg-${index}-${Date.now()}`;
@@ -92,27 +97,28 @@ export default function EchoTab() {
     
     // 如果返回的是消息数组
     if (Array.isArray(data)) {
-      return data.map(convertItem);
+      return data.map(convertItem).filter((msg: Message | null): msg is Message => msg !== null);
     }
 
     // 如果返回的是包含 messages 字段的对象
     if (data.messages && Array.isArray(data.messages)) {
-      return data.messages.map(convertItem);
+      return data.messages.map(convertItem).filter((msg: Message | null): msg is Message => msg !== null);
     }
 
     // 如果返回的是包含 history 字段的对象
     if (data.history && Array.isArray(data.history)) {
-      return data.history.map(convertItem);
+      return data.history.map(convertItem).filter((msg: Message | null): msg is Message => msg !== null);
     }
 
     // 如果返回的是包含 data 字段的数组
     if (data.data && Array.isArray(data.data)) {
-      return data.data.map(convertItem);
+      return data.data.map(convertItem).filter((msg: Message | null): msg is Message => msg !== null);
     }
 
     // 如果返回的是单个消息对象
     if (data.content || data.text || data.message || data.msg) {
-      return [convertItem(data, 0)];
+      const converted = convertItem(data, 0);
+      return converted ? [converted] : [];
     }
 
     return [];
@@ -280,7 +286,7 @@ export default function EchoTab() {
                       }
                     }
 
-                    // 默认文本消息处理
+                    // 默认文本消息处理（过滤掉 function_call_output 类型的消息）
                     if (responseData.msg_type === 'text') {
                       setMessages(prev => {
                         const filtered = prev.filter(msg => msg.id !== tempMessageId);
@@ -751,7 +757,7 @@ export default function EchoTab() {
         logPrefix: 'Regular message',
         onComplete: (responseData, eventSource) => {
           // 检查 Function Call
-          if (responseData.msg_type === 'fun_call' && responseData.call_res) {
+          if (responseData.msg_type === 'function_call_output' && responseData.call_res) {
             console.log('Function Call detected:', responseData.call_res);
 
             setMessages(prev => {
@@ -881,12 +887,7 @@ export default function EchoTab() {
 
       const messageTimestamp = Date.now().toString();
 
-      // 添加执行结果消息
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        type: 'assistant' as const,
-        content: messageText,
-      }]);
+      // 不添加执行结果消息到界面（function_call_output 类型的消息不显示）
 
       // 检测消息中的 @mention（虽然 function call 结果通常不会有，但为了完整性也检测）
       const mentionedAgent = detectMention(messageText);
