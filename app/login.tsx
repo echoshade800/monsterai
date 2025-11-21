@@ -1,13 +1,31 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, BackHandler, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SvgUri } from 'react-native-svg';
+import { SvgXml } from 'react-native-svg';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import { appleLoginWithUserInfo } from '../src/services/appleAuthService';
 import { googleLoginWithUserInfo } from '../src/services/googleAuthService';
 import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
+
+// SVG content for icons
+const AppleIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Apple--Streamline-Font-Awesome" height="16" width="16">
+  <desc>
+    Apple Streamline Icon: https://streamlinehq.com
+  </desc>
+  <path d="M12.428304166666665 8.446008333333332c-0.007 -1.2847333333333333 0.5741041666666666 -2.2544125 1.7503208333333333 -2.968541666666667 -0.6581208333333333 -0.9416708333333333 -1.6522999999999999 -1.4597666666666664 -2.9650416666666666 -1.5612833333333331 -1.2427249999999999 -0.09801666666666665 -2.6009708333333332 0.7246333333333334 -3.0980624999999997 0.7246333333333334 -0.5250958333333333 0 -1.7293125 -0.6896249999999999 -2.6744875 -0.6896249999999999 -1.9533541666666665 0.031504166666666666 -4.029233333333333 1.5577833333333333 -4.029233333333333 4.662845833333333q0 1.37575 0.5040916666666666 2.8425166666666666c0.4480833333333333 1.2847333333333333 2.0653791666666663 4.435308333333333 3.7526833333333336 4.382795833333333 0.8821625 -0.020999999999999998 1.5052750000000001 -0.6266125 2.653483333333333 -0.6266125 1.1132041666666666 0 1.6908083333333332 0.6266125 2.6744875 0.6266125 1.7013083333333334 -0.024504166666666664 3.1645749999999997 -2.888025 3.591654166666667 -4.176258333333333 -2.2824166666666663 -1.0746958333333332 -2.159895833333333 -3.150570833333333 -2.159895833333333 -3.217083333333333ZM10.446945833333332 2.6979624999999996c0.9556749999999999 -1.1342083333333333 0.8681583333333333 -2.1668958333333332 0.8401541666666665 -2.5379625 -0.8436541666666666 0.04900833333333333 -1.8203333333333334 0.5741041666666666 -2.376933333333333 1.2217208333333334 -0.6126125 0.6931291666666667 -0.9731791666666667 1.5507833333333334 -0.8961625 2.516958333333333 0.9136666666666666 0.07001249999999999 1.7468166666666667 -0.3990708333333333 2.4329416666666663 -1.2007166666666667Z" fill="#000000" stroke-width="0.0417"></path>
+</svg>`;
+
+const GoogleIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="Google-Icon--Streamline-Svg-Logos" height="24" width="24">
+  <desc>
+    Google Icon Streamline Icon: https://streamlinehq.com
+  </desc>
+  <path fill="#4285f4" d="M23.5151 12.2611c0 -0.9661 -0.0784 -1.6711 -0.24805 -2.4022H12.2351v4.3605h6.4755c-0.1305 1.08365 -0.8355 2.7156 -2.4022 3.8122l-0.02195 0.146 3.4881 2.702175 0.24165 0.024125c2.2194 -2.04975 3.4989 -5.0656 3.4989 -8.6428Z" stroke-width="0.25"></path>
+  <path fill="#34a853" d="M12.234975 23.75c3.17245 0 5.83575 -1.0445 7.7811 -2.8461L16.308275 18.031625c-0.9922 0.69195 -2.3239 1.175 -4.0733 1.175 -3.1072 0 -5.7444 -2.049675 -6.6845 -4.882725l-0.137775 0.0117L1.7857125 17.14255l-0.0474325 0.13185C3.670475 21.112725 7.639375 23.75 12.234975 23.75Z" stroke-width="0.25"></path>
+  <path fill="#fbbc05" d="M5.550625 14.3239c-0.248075 -0.7311 -0.391625 -1.5145 -0.391625 -2.3239 0 -0.8095 0.143575 -1.5928 0.378575 -2.3239l-0.006575 -0.1557L1.858565 6.66835l-0.120155 0.05715C0.9420575 8.3183 0.4851075 10.10695 0.4851075 12c0 1.89305 0.45695 3.6816 1.2533025 5.2744l3.812215 -2.9505Z" stroke-width="0.25"></path>
+  <path fill="#eb4335" d="M12.234975 4.7933c2.20635 0 3.69465 0.95305 4.5433 1.7495L20.094375 3.305C18.057775 1.41195 15.407425 0.25 12.234975 0.25 7.639375 0.25 3.670475 2.8872 1.73828 6.7255L5.537425 9.6761c0.95315 -2.83305 3.59035 -4.8828 6.69755 -4.8828Z" stroke-width="0.25"></path>
+</svg>`;
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -248,14 +266,14 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/linker/dim.png' }}
+        source={require('../assets/images/dim.png')}
         style={styles.background}
       />
 
       <View style={styles.content}>
         <View style={styles.header}>
           <Image
-            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/icon.png' }}
+            source={require('../assets/images/icon.png')}
             style={styles.appIcon}
             resizeMode="contain"
           />
@@ -270,8 +288,8 @@ export default function LoginScreen() {
             disabled={isAppleLoading}
           >
             <View style={styles.buttonContent}>
-              <SvgUri
-                uri="https://dzdbhsix5ppsc.cloudfront.net/monster/materials/Appleicon.svg"
+              <SvgXml
+                xml={AppleIconSvg}
                 width={24}
                 height={24}
               />
@@ -287,8 +305,8 @@ export default function LoginScreen() {
             disabled={isGoogleLoading}
           >
             <View style={styles.buttonContent}>
-              <SvgUri
-                uri="https://dzdbhsix5ppsc.cloudfront.net/monster/materials/Googleicon.svg"
+              <SvgXml
+                xml={GoogleIconSvg}
                 width={24}
                 height={24}
               />
@@ -400,5 +418,9 @@ const styles = StyleSheet.create({
   },
   loginButtonDisabled: {
     opacity: 0.6,
+  },
+  icon: {
+    width: 24,
+    height: 24,
   },
 });
