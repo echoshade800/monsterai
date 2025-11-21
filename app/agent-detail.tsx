@@ -1,8 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Switch, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Target, TrendingUp, Camera, Heart, Activity, ImageIcon, Bell, Waves, Utensils } from 'lucide-react-native';
-import { useState, useEffect, useRef } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { ArrowLeft, Bell, Camera, Heart, ImageIcon, Target, TrendingUp, Utensils, Waves } from 'lucide-react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Image, Linking, Platform, ScrollView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import calendarManager from '../src/utils/calendar-manager';
+import healthDataManager, { HealthDataType } from '../src/utils/health-data-manager';
+import locationManager from '../src/utils/location-manager';
 
 interface AgentData {
   name: string;
@@ -318,9 +322,21 @@ const ScrollingMindBanner = ({ logs }: { logs: string[] }) => {
   );
 };
 
-const PermissionToggle = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => {
-  const [isEnabled, setIsEnabled] = useState(true);
-
+const PermissionToggle = ({ 
+  icon, 
+  title, 
+  subtitle, 
+  permissionId,
+  enabled,
+  onToggle 
+}: { 
+  icon: React.ReactNode; 
+  title: string; 
+  subtitle: string;
+  permissionId: string;
+  enabled: boolean;
+  onToggle: (id: string) => void;
+}) => {
   return (
     <View style={styles.permissionRow}>
       <View style={styles.permissionIcon}>{icon}</View>
@@ -332,8 +348,8 @@ const PermissionToggle = ({ icon, title, subtitle }: { icon: React.ReactNode; ti
         trackColor={{ false: '#D1D1D6', true: '#34C759' }}
         thumbColor="#FFFFFF"
         ios_backgroundColor="#D1D1D6"
-        onValueChange={setIsEnabled}
-        value={isEnabled}
+        onValueChange={() => onToggle(permissionId)}
+        value={enabled}
       />
     </View>
   );
@@ -344,8 +360,387 @@ export default function AgentDetailPage() {
   const params = useLocalSearchParams();
   const agentId = params.id as string;
   const [isHired, setIsHired] = useState(true);
+  const [permissions, setPermissions] = useState({
+    camera: false,
+    photos: false,
+    healthkit: false,
+    calendar: false,
+    location: false,
+    notifications: false,
+  });
 
   const agent = AGENTS_DATA[agentId];
+
+  // 同步权限状态
+  const syncAllPermissions = async () => {
+    try {
+      // Camera
+      const cameraPermission = await ImagePicker.getCameraPermissionsAsync();
+      setPermissions(prev => ({ ...prev, camera: cameraPermission.granted }));
+
+      // Photos
+      const photosPermission = await ImagePicker.getMediaLibraryPermissionsAsync();
+      setPermissions(prev => ({ ...prev, photos: photosPermission.granted }));
+
+      // HealthKit
+      const isAvailable = await healthDataManager.isAvailable();
+      if (isAvailable) {
+        const requiredPermissions = [
+          HealthDataType.STEP_COUNT,
+          HealthDataType.HEART_RATE,
+          HealthDataType.SLEEP_ANALYSIS,
+          HealthDataType.ACTIVE_ENERGY,
+          HealthDataType.HEIGHT,
+          HealthDataType.WEIGHT,
+          HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
+          HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+        ];
+        const authorizedPermissions = healthDataManager.getAuthorizedPermissions();
+        const allAuthorized = requiredPermissions.every(perm => 
+          authorizedPermissions.includes(perm)
+        );
+        setPermissions(prev => ({ ...prev, healthkit: allAuthorized }));
+      }
+
+      // Calendar
+      const calendarResult = await calendarManager.checkPermission();
+      setPermissions(prev => ({ ...prev, calendar: calendarResult.granted }));
+
+      // Location
+      const locationResult = await locationManager.checkLocationPermission('foreground');
+      setPermissions(prev => ({ ...prev, location: locationResult.success }));
+    } catch (error) {
+      console.error('Failed to sync permissions:', error);
+    }
+  };
+
+  useEffect(() => {
+    syncAllPermissions();
+  }, []);
+
+  // 当页面聚焦时同步权限状态
+  useFocusEffect(
+    useCallback(() => {
+      syncAllPermissions();
+    }, [])
+  );
+
+  // 权限切换逻辑（与 home.tsx 保持一致）
+  const togglePermission = async (id: string) => {
+    const currentValue = permissions[id as keyof typeof permissions];
+    const permissionName = id === 'healthkit' ? 'HealthKit' : 
+                          id === 'camera' ? 'Camera' :
+                          id === 'photos' ? 'Photos' :
+                          id === 'calendar' ? 'Calendar' :
+                          id === 'location' ? 'Location' :
+                          id === 'notifications' ? 'Notifications' : id;
+
+    // 如果尝试关闭权限，跳转到相应的设置页面
+    if (currentValue) {
+      const isHealthKit = id === 'healthkit';
+      const settingsText = isHealthKit ? 'Open Health App' : 'Go to Settings';
+      const settingsMessage = isHealthKit 
+        ? `Please disable ${permissionName} permission in Health app.`
+        : `Please disable ${permissionName} permission in system settings.`;
+      
+      Alert.alert(
+        `Disable ${permissionName} permission`,
+        settingsMessage,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: settingsText,
+            onPress: async () => {
+              try {
+                if (isHealthKit) {
+                  const healthAppUrl = 'x-apple-health://';
+                  const canOpen = await Linking.canOpenURL(healthAppUrl);
+                  if (canOpen) {
+                    await Linking.openURL(healthAppUrl);
+                  } else {
+                    await Linking.openSettings();
+                  }
+                } else {
+                  await Linking.openSettings();
+                }
+              } catch (error) {
+                console.error('Failed to open settings:', error);
+                if (isHealthKit) {
+                  try {
+                    await Linking.openSettings();
+                  } catch (settingsError) {
+                    console.error('Failed to open settings:', settingsError);
+                  }
+                }
+              }
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    // 开启权限的逻辑
+    if (id === 'camera') {
+      try {
+        const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+        if (permissionResult.granted) {
+          setPermissions(prev => ({ ...prev, camera: true }));
+        } else {
+          Alert.alert(
+            'Camera permission denied',
+            'Camera permission is required to use camera function. Please enable camera permission in settings.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Go to Settings',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('Failed to open settings:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('Failed to request camera permission:', error);
+      }
+      return;
+    }
+
+    if (id === 'photos') {
+      try {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permissionResult.granted) {
+          setPermissions(prev => ({ ...prev, photos: true }));
+        } else {
+          Alert.alert(
+            'Photo library permission denied',
+            'Photo library permission is required to access photos. Please enable photo library permission in settings.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Go to Settings',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('Failed to open settings:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('Failed to request photo library permission:', error);
+      }
+      return;
+    }
+
+    if (id === 'healthkit') {
+      try {
+        const isAvailable = await healthDataManager.isAvailable();
+        if (!isAvailable) {
+          Alert.alert(
+            'HealthKit unavailable',
+            'HealthKit is only available on iOS devices and requires device support.',
+            [{ text: 'OK', style: 'default' }],
+          );
+          return;
+        }
+
+        const permissionResult = await healthDataManager.requestAllCommonPermissions();
+        if (permissionResult.success) {
+          const requiredPermissions = [
+            HealthDataType.STEP_COUNT,
+            HealthDataType.HEART_RATE,
+            HealthDataType.SLEEP_ANALYSIS,
+            HealthDataType.ACTIVE_ENERGY,
+            HealthDataType.HEIGHT,
+            HealthDataType.WEIGHT,
+            HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
+            HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+          ];
+          const authorizedPermissions = healthDataManager.getAuthorizedPermissions();
+          const allAuthorized = requiredPermissions.every(perm => 
+            authorizedPermissions.includes(perm)
+          );
+          setPermissions(prev => ({ ...prev, healthkit: allAuthorized }));
+
+          if (!allAuthorized) {
+            Alert.alert(
+              'Some permissions not authorized',
+              'Some health data permissions are not authorized. Please enable all HealthKit permissions in Health app.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Open Health App',
+                  onPress: async () => {
+                    try {
+                      const healthAppUrl = 'x-apple-health://';
+                      const canOpen = await Linking.canOpenURL(healthAppUrl);
+                      if (canOpen) {
+                        await Linking.openURL(healthAppUrl);
+                      } else {
+                        await Linking.openSettings();
+                      }
+                    } catch (error) {
+                      console.error('Failed to open Health app:', error);
+                      try {
+                        await Linking.openSettings();
+                      } catch (settingsError) {
+                        console.error('Failed to open settings:', settingsError);
+                      }
+                    }
+                  },
+                },
+              ],
+            );
+          }
+        } else {
+          Alert.alert(
+            'HealthKit permission denied',
+            permissionResult.error || 'HealthKit permission is required to access health data. Please enable HealthKit permission in Health app.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Open Health App',
+                onPress: async () => {
+                  try {
+                    const healthAppUrl = 'x-apple-health://';
+                    const canOpen = await Linking.canOpenURL(healthAppUrl);
+                    if (canOpen) {
+                      await Linking.openURL(healthAppUrl);
+                    } else {
+                      await Linking.openSettings();
+                    }
+                  } catch (error) {
+                    console.error('Failed to open Health app:', error);
+                    try {
+                      await Linking.openSettings();
+                    } catch (settingsError) {
+                      console.error('Failed to open settings:', settingsError);
+                    }
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('Failed to request HealthKit permission:', error);
+      }
+      return;
+    }
+
+    if (id === 'calendar') {
+      try {
+        const permissionResult = await calendarManager.requestPermission();
+        if (permissionResult.success) {
+          setPermissions(prev => ({ ...prev, calendar: true }));
+        } else {
+          Alert.alert(
+            'Calendar permission denied',
+            permissionResult.error || 'Calendar permission is required to access calendar events. Please enable calendar permission in settings.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Go to Settings',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('Failed to open settings:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('Failed to request calendar permission:', error);
+      }
+      return;
+    }
+
+    if (id === 'location') {
+      try {
+        const isServiceAvailable = await locationManager.isLocationServiceAvailable();
+        if (!isServiceAvailable) {
+          Alert.alert(
+            'Location service unavailable',
+            'Please enable location service in device settings',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Go to Settings',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('Failed to open settings:', error);
+                  }
+                },
+              },
+            ],
+          );
+          return;
+        }
+
+        const permissionResult = await locationManager.requestLocationPermission('foreground');
+        if (permissionResult.success) {
+          setPermissions(prev => ({ ...prev, location: true }));
+        } else {
+          Alert.alert(
+            'Location permission denied',
+            permissionResult.error || 'Location permission is required to use location service. Please enable location permission in settings.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Go to Settings',
+                onPress: async () => {
+                  try {
+                    await Linking.openSettings();
+                  } catch (error) {
+                    console.error('Failed to open settings:', error);
+                  }
+                },
+              },
+            ],
+          );
+        }
+      } catch (error) {
+        console.error('Failed to request location permission:', error);
+      }
+      return;
+    }
+
+    if (id === 'notifications') {
+      // Notifications are handled globally, just show a message
+      Alert.alert(
+        'Notifications',
+        'Notification permissions are managed in system settings. Please enable notifications in Settings > Notifications.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Go to Settings',
+            onPress: async () => {
+              try {
+                await Linking.openSettings();
+              } catch (error) {
+                console.error('Failed to open settings:', error);
+              }
+            },
+          },
+        ],
+      );
+      return;
+    }
+  };
 
   if (!agent) {
     return (
@@ -462,16 +857,25 @@ export default function AgentDetailPage() {
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
                     title="Camera Access"
                     subtitle="emotion tracking"
+                    permissionId="camera"
+                    enabled={permissions.camera}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Heart size={24} color="#000000" strokeWidth={2} />}
                     title="Health API Access"
                     subtitle="stress & heart rate"
+                    permissionId="healthkit"
+                    enabled={permissions.healthkit}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Bell size={24} color="#000000" strokeWidth={2} />}
                     title="Notifications"
                     subtitle="mood alerts & reminders"
+                    permissionId="notifications"
+                    enabled={permissions.notifications}
+                    onToggle={togglePermission}
                   />
                 </>
               ) : isEnergyAgent ? (
@@ -480,21 +884,33 @@ export default function AgentDetailPage() {
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
                     title="Camera Access"
                     subtitle="analyze your food"
+                    permissionId="camera"
+                    enabled={permissions.camera}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<ImageIcon size={24} color="#000000" strokeWidth={2} />}
                     title="Photos"
                     subtitle="scan meal history"
+                    permissionId="photos"
+                    enabled={permissions.photos}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Heart size={24} color="#000000" strokeWidth={2} />}
                     title="Health API Access"
                     subtitle="weight trend & activity"
+                    permissionId="healthkit"
+                    enabled={permissions.healthkit}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Bell size={24} color="#000000" strokeWidth={2} />}
                     title="Notifications"
                     subtitle="meal reminders & alerts"
+                    permissionId="notifications"
+                    enabled={permissions.notifications}
+                    onToggle={togglePermission}
                   />
                 </>
               ) : isFaceAgent ? (
@@ -503,16 +919,25 @@ export default function AgentDetailPage() {
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
                     title="Camera Access"
                     subtitle="for skin tracking"
+                    permissionId="camera"
+                    enabled={permissions.camera}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Heart size={24} color="#000000" strokeWidth={2} />}
                     title="Health API"
                     subtitle="for sleep & stress correlation"
+                    permissionId="healthkit"
+                    enabled={permissions.healthkit}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Bell size={24} color="#000000" strokeWidth={2} />}
                     title="Notifications"
                     subtitle="daily glow reminders"
+                    permissionId="notifications"
+                    enabled={permissions.notifications}
+                    onToggle={togglePermission}
                   />
                 </>
               ) : isPostureAgent ? (
@@ -521,16 +946,25 @@ export default function AgentDetailPage() {
                     icon={<Camera size={24} color="#000000" strokeWidth={2} />}
                     title="Camera Access"
                     subtitle="posture scan"
+                    permissionId="camera"
+                    enabled={permissions.camera}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Waves size={24} color="#000000" strokeWidth={2} />}
                     title="Motion Access"
                     subtitle="sitting & movement detection"
+                    permissionId="location"
+                    enabled={permissions.location}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Bell size={24} color="#000000" strokeWidth={2} />}
                     title="Notifications"
                     subtitle="alignment reminders"
+                    permissionId="notifications"
+                    enabled={permissions.notifications}
+                    onToggle={togglePermission}
                   />
                 </>
               ) : isSleepAgent ? (
@@ -539,16 +973,25 @@ export default function AgentDetailPage() {
                     icon={<Heart size={24} color="#000000" strokeWidth={2} />}
                     title="Health API Access"
                     subtitle="sleep records"
+                    permissionId="healthkit"
+                    enabled={permissions.healthkit}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Waves size={24} color="#000000" strokeWidth={2} />}
                     title="Motion Access"
                     subtitle="night movement tracking"
+                    permissionId="location"
+                    enabled={permissions.location}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Bell size={24} color="#000000" strokeWidth={2} />}
                     title="Notifications"
                     subtitle="bedtime reminders & morning insights"
+                    permissionId="notifications"
+                    enabled={permissions.notifications}
+                    onToggle={togglePermission}
                   />
                 </>
               ) : (
@@ -557,21 +1000,33 @@ export default function AgentDetailPage() {
                     icon={<ImageIcon size={24} color="#000000" strokeWidth={2} />}
                     title="Photos Access"
                     subtitle="stool tracking"
+                    permissionId="photos"
+                    enabled={permissions.photos}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Heart size={24} color="#000000" strokeWidth={2} />}
                     title="Health API Access"
                     subtitle="hydration & sleep correlation"
+                    permissionId="healthkit"
+                    enabled={permissions.healthkit}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Utensils size={24} color="#000000" strokeWidth={2} />}
                     title="Food Logs Access"
                     subtitle="digestion pattern analysis"
+                    permissionId="calendar"
+                    enabled={permissions.calendar}
+                    onToggle={togglePermission}
                   />
                   <PermissionToggle
                     icon={<Bell size={24} color="#000000" strokeWidth={2} />}
                     title="Notifications"
                     subtitle="daily gut check & alerts"
+                    permissionId="notifications"
+                    enabled={permissions.notifications}
+                    onToggle={togglePermission}
                   />
                 </>
               )}
