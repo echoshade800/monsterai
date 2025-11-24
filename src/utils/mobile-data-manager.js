@@ -13,6 +13,8 @@ import storageManager from './storage';
 class MobileDataManager {
   constructor() {
     this.isCollecting = false;
+    this.collectStartTime = null;
+    this.COLLECT_TIMEOUT = 5 * 60 * 1000; // 5分钟超时
   }
 
   /**
@@ -22,15 +24,25 @@ class MobileDataManager {
    * @returns {Promise<{success: boolean, data?: Object, error?: string}>}
    */
   async collectAllData(options = {}) {
+    // 检查是否正在收集
     if (this.isCollecting) {
-      console.log('[MobileDataManager] ⚠️ 数据收集中，请稍候...');
-      return {
-        success: false,
-        error: '数据收集中，请稍候',
-      };
+      // 如果收集时间超过超时时间，强制重置（可能是之前的收集卡住了）
+      if (this.collectStartTime && Date.now() - this.collectStartTime > this.COLLECT_TIMEOUT) {
+        console.warn('[MobileDataManager] ⚠️ 数据收集超时，强制重置状态');
+        this.isCollecting = false;
+        this.collectStartTime = null;
+      } else {
+        const elapsed = this.collectStartTime ? Math.round((Date.now() - this.collectStartTime) / 1000) : 0;
+        console.log(`[MobileDataManager] ⚠️ 数据收集中，请稍候... (已用时: ${elapsed}秒)`);
+        return {
+          success: false,
+          error: '数据收集中，请稍候',
+        };
+      }
     }
 
     this.isCollecting = true;
+    this.collectStartTime = Date.now();
     console.log('[MobileDataManager] 📱 开始收集手机数据...');
 
     try {
@@ -44,13 +56,32 @@ class MobileDataManager {
       if (!uid) {
         console.log('[MobileDataManager] ⚠️ 未找到用户ID，无法上传数据');
         this.isCollecting = false;
+        this.collectStartTime = null;
         return {
           success: false,
           error: '未找到用户ID',
         };
       }
 
-      // 并行收集所有数据
+      // 为每个数据收集方法添加超时保护（30秒）
+      const withTimeout = (promise, timeoutMs = 30 * 1000, methodName = 'unknown') => {
+        return Promise.race([
+          promise,
+          new Promise((_, reject) => {
+            setTimeout(() => {
+              console.warn(`[MobileDataManager] ⚠️ ${methodName} 超时（${timeoutMs / 1000}秒）`);
+              reject(new Error(`${methodName} 超时`));
+            }, timeoutMs);
+          }),
+        ]).catch(error => {
+          // 超时或错误时返回空数据，不阻塞其他数据收集
+          console.warn(`[MobileDataManager] ⚠️ ${methodName} 失败:`, error.message);
+          return { success: true, data: [] };
+        });
+      };
+
+      // 并行收集所有数据，使用 Promise.allSettled 确保单个失败不阻塞整体
+      // 每个方法都有独立的超时保护
       const [
         stepCountResult,
         heartRateResult,
@@ -72,25 +103,25 @@ class MobileDataManager {
         calendarResult,
         gyroscopeResult,
       ] = await Promise.all([
-        this._getStepCount(startDate, endDate),
-        this._getHeartRate(startDate, endDate),
-        this._getRestingHeartRate(startDate, endDate),
-        this._getHeartRateVariability(startDate, endDate),
-        this._getWalkingHeartRate(startDate, endDate),
-        this._getActiveEnergy(startDate, endDate),
-        this._getBasalEnergy(startDate, endDate),
-        this._getActivitySummary(startDate, endDate),
-        this._getFlightsClimbed(startDate, endDate),
-        this._getDistance(startDate, endDate),
-        this._getSleepAnalysis(startDate, endDate),
-        this._getMindfulSession(startDate, endDate),
-        this._getEnergyConsumed(startDate, endDate),
-        this._getProtein(startDate, endDate),
-        this._getCarbohydrates(startDate, endDate),
-        this._getSugar(startDate, endDate),
-        this._getWater(startDate, endDate),
-        this._getCalendarEvents(startDate, endDate),
-        this._getGyroscopeData(),
+        withTimeout(this._getStepCount(startDate, endDate), 30000, '步数'),
+        withTimeout(this._getHeartRate(startDate, endDate), 30000, '心率'),
+        withTimeout(this._getRestingHeartRate(startDate, endDate), 30000, '静息心率'),
+        withTimeout(this._getHeartRateVariability(startDate, endDate), 30000, '心率变异性'),
+        withTimeout(this._getWalkingHeartRate(startDate, endDate), 30000, '步行心率'),
+        withTimeout(this._getActiveEnergy(startDate, endDate), 30000, '活动能量'),
+        withTimeout(this._getBasalEnergy(startDate, endDate), 30000, '基础能量'),
+        withTimeout(this._getActivitySummary(startDate, endDate), 30000, '活动摘要'),
+        withTimeout(this._getFlightsClimbed(startDate, endDate), 30000, '楼层'),
+        withTimeout(this._getDistance(startDate, endDate), 30000, '距离'),
+        withTimeout(this._getSleepAnalysis(startDate, endDate), 30000, '睡眠'),
+        withTimeout(this._getMindfulSession(startDate, endDate), 30000, '正念'),
+        withTimeout(this._getEnergyConsumed(startDate, endDate), 30000, '能量消耗'),
+        withTimeout(this._getProtein(startDate, endDate), 30000, '蛋白质'),
+        withTimeout(this._getCarbohydrates(startDate, endDate), 30000, '碳水化合物'),
+        withTimeout(this._getSugar(startDate, endDate), 30000, '糖分'),
+        withTimeout(this._getWater(startDate, endDate), 30000, '水分'),
+        withTimeout(this._getCalendarEvents(startDate, endDate), 30000, '日历'),
+        withTimeout(this._getGyroscopeData(), 10000, '陀螺仪'), // 陀螺仪数据较快，10秒超时
       ]);
 
       // 格式化数据为所需结构
@@ -117,22 +148,26 @@ class MobileDataManager {
         calendarEvents: calendarResult.data || [],
         gyroscope: gyroscopeResult.data || null,
       });
-
+      console.log('[MobileDataManager] 📱 收集手机数据完成，共', formattedData.length, '条记录');
       const result = {
         uid,
         data: formattedData,
       };
 
-      console.log('[MobileDataManager] ✅ 数据收集完成，共', formattedData.length, '条记录');
+      const elapsed = Math.round((Date.now() - this.collectStartTime) / 1000);
+      console.log(`[MobileDataManager] ✅ 数据收集完成，结果是`, result, `(用时: ${elapsed}秒)`);
       this.isCollecting = false;
+      this.collectStartTime = null;
 
       return {
         success: true,
         data: result,
       };
     } catch (error) {
-      console.error('[MobileDataManager] ❌ 数据收集失败:', error);
+      const elapsed = this.collectStartTime ? Math.round((Date.now() - this.collectStartTime) / 1000) : 0;
+      console.error(`[MobileDataManager] ❌ 数据收集失败 (用时: ${elapsed}秒):`, error);
       this.isCollecting = false;
+      this.collectStartTime = null;
       return {
         success: false,
         error: error.message || '数据收集失败',
@@ -147,6 +182,16 @@ class MobileDataManager {
    * @returns {Promise<{success: boolean, error?: string}>}
    */
   async uploadData(options = {}) {
+    // 如果正在收集数据，跳过本次上传
+    if (this.isCollecting) {
+      const elapsed = this.collectStartTime ? Math.round((Date.now() - this.collectStartTime) / 1000) : 0;
+      console.log(`[MobileDataManager] ⏭️ 跳过上传，数据收集中... (已用时: ${elapsed}秒)`);
+      return {
+        success: false,
+        error: '数据收集中，跳过本次上传',
+      };
+    }
+
     console.log('[MobileDataManager] 📤 开始上传手机数据...');
 
     try {
@@ -154,8 +199,11 @@ class MobileDataManager {
       const collectResult = await this.collectAllData(options);
       
       if (!collectResult.success) {
+        console.log('[MobileDataManager] ❌ 数据收集失败，结果是', collectResult);
         return collectResult;
       }
+
+      console.log('[MobileDataManager] 📱 数据收集成功，结果是', collectResult);
 
       const dataToUpload = collectResult.data;
 

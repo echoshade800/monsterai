@@ -165,8 +165,7 @@ const request = async (url, options = {}) => {
       setTimeout(() => reject(new ApiError('TIMEOUT', 'Request timeout')), timeout);
     });
 
-    console.log('url', `${baseUrl}${url}`);
-    console.log('requestConfig', requestConfig);
+    console.log('url', `${baseUrl}${url}; `, 'request body', JSON.stringify(requestConfig.body));
 
     // 发起请求
     const responsePromise = fetch(`${baseUrl}${url}`, requestConfig);

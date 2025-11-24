@@ -209,8 +209,8 @@ export default function Layout() {
         }
 
         console.log('[DataUpload] Starting scheduled mobile data upload...');
-        await mobileDataManager.uploadData({ period: 'today' });
-        console.log('[DataUpload] Scheduled data upload completed successfully');
+        const uploadResult = await mobileDataManager.uploadData({ period: 'today' });
+        console.log('[DataUpload] Scheduled data upload completed, result is', uploadResult);
       } catch (error) {
         console.error('[DataUpload] Failed to upload mobile data:', error);
         // 静默失败，不影响应用运行
@@ -228,7 +228,7 @@ export default function Layout() {
       }
     });
 
-    // 设置定时上传（每30分钟上传一次）
+    // 设置定时上传（每5分钟上传一次）
     const UPLOAD_INTERVAL = 5 * 60 * 1000; // 5分钟（毫秒）
     
     // 立即执行一次（延迟5秒，确保应用完全启动）
