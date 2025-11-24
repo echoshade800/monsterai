@@ -31,6 +31,7 @@ export default function EchoTab() {
   const processedPhotoRef = useRef<string | null>(null);
   const historyInitializedRef = useRef<boolean>(false);
   const permissionsRequestedRef = useRef<boolean>(false);
+  const uploadTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -164,7 +165,24 @@ export default function EchoTab() {
       try {
         await healthDataManager.requestAllCommonPermissions();
         console.log('[EchoTab] ✅ Health data permissions requested');
+        
+        // 立即执行一次上传
         await mobileDataManager.uploadData({ period: 'today' });
+        
+        // 启动定时器，每5分钟执行一次上传
+        if (uploadTimerRef.current) {
+          clearInterval(uploadTimerRef.current);
+        }
+        uploadTimerRef.current = setInterval(async () => {
+          try {
+            console.log('[EchoTab] ⏰ Scheduled upload: uploading data...');
+            await mobileDataManager.uploadData({ period: 'today' });
+            console.log('[EchoTab] ✅ Scheduled upload completed');
+          } catch (error) {
+            console.error('[EchoTab] ❌ Scheduled upload failed:', error);
+          }
+        }, 5 * 60 * 1000); // 5分钟 = 5 * 60 * 1000 毫秒
+        console.log('[EchoTab] ⏰ Started scheduled upload timer (every 5 minutes)');
       } catch (error) {
         console.error('[EchoTab] ❌ Failed to request health data permissions:', error);
       }
@@ -217,7 +235,15 @@ export default function EchoTab() {
       requestAllPermissions();
     }, 500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // 清理上传定时器
+      if (uploadTimerRef.current) {
+        clearInterval(uploadTimerRef.current);
+        uploadTimerRef.current = null;
+        console.log('[EchoTab] 🛑 Stopped scheduled upload timer');
+      }
+    };
   }, [requestAllPermissions]);
 
   // 生成唯一ID
