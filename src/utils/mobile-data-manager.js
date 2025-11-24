@@ -871,7 +871,7 @@ class MobileDataManager {
   async _getActiveEnergy(startDate, endDate) {
     try {
       const result = await this._withHealthKitTimeout(
-        healthDataManager.getActiveEnergyBurned({ startDate, endDate }),
+        healthDataManager.getActiveEnergy({ startDate, endDate }),
         '获取活动能量'
       );
       if (!result.success) {
@@ -892,7 +892,7 @@ class MobileDataManager {
   async _getBasalEnergy(startDate, endDate) {
     try {
       const result = await this._withHealthKitTimeout(
-        healthDataManager.getBasalEnergyBurned({ startDate, endDate }),
+        healthDataManager.getBasalEnergy({ startDate, endDate }),
         '获取基础能量'
       );
       if (!result.success) {
