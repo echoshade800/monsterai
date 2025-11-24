@@ -137,7 +137,7 @@ class MobileDataManager {
       });
       let timestamp = Date.now().toString();
 
-      // 格式化需要聚合的健康数据
+      // 格式化需要聚合的健康数据，并传入已处理的非聚合数据
       const formattedData = this._formatData({
         timestamp,
         startDate,
@@ -159,17 +159,17 @@ class MobileDataManager {
         carbohydrates: carbohydratesResult.data || [],
         sugar: sugarResult.data || [],
         water: waterResult.data || [],
-        calendarEvents: calendarResult.data || [],
-        gyroscope: gyroscopeResult.data || null,
-        location: locationResult || null,
+        // 使用已处理的非聚合数据
+        calendar_events: nonAggregatedData.calendar_events || [],
+        gyroscope: nonAggregatedData.gyroscope || null,
+        location: nonAggregatedData.location || null,
       });
-      console.log('[MobileDataManager] 📱 收集手机数据完成，共', formattedData.length, '条记录');
+      console.log('[MobileDataManager] 📱 收集手机数据完成，内容是', JSON.stringify(formattedData));
       
       // 在外部构建最终数据结构：将聚合的健康数据和非聚合的数据组合
       const result = {
         uid,
-        data: formattedData,
-        ...nonAggregatedData,
+        data: formattedData
       };
 
       const elapsed = Math.round((Date.now() - this.collectStartTime) / 1000);
@@ -265,8 +265,11 @@ class MobileDataManager {
 
     // 聚合所有健康数据（累计值）
     const stepCount = this._sumValues(this._ensureArray(rawData.stepCount));
+    console.log('rawData', rawData, 'fetched stepCount', stepCount);
     const activeEnergyBurned = this._sumValues(this._ensureArray(rawData.activeEnergy));
+    console.log('fetched activeEnergyBurned', activeEnergyBurned);
     const basalEnergyBurned = this._sumValues(this._ensureArray(rawData.basalEnergy));
+    console.log('fetched basalEnergyBurned', basalEnergyBurned);
     const flightsClimbed = this._sumValues(this._ensureArray(rawData.flightsClimbed));
     const distanceWalkingRunning = this._sumValues(this._ensureArray(rawData.distance));
 
@@ -292,8 +295,13 @@ class MobileDataManager {
     // 正念会话（保留所有记录）
     const mindfulSession = this._ensureArray(rawData.mindfulSession);
 
+    // 从 nonAggregatedData 中获取已处理的日历、陀螺仪和位置数据
+    const calendar_events = rawData.calendar_events || [];
+    const gyroscope = rawData.gyroscope || null;
+    const location = rawData.location || null;
+
     // 构建单条累计数据记录
-    return [{
+    const record = {
       timestamp,
       step_count: Math.round(stepCount),
       startDate: startDateStr,
@@ -331,7 +339,20 @@ class MobileDataManager {
         endDate: item.endDate,
         value: item.value || 0,
       })),
-    }];
+    };
+
+    // 添加非聚合数据（如果存在）
+    if (calendar_events.length > 0) {
+      record.calendar_events = calendar_events;
+    }
+    if (gyroscope) {
+      record.gyroscope = gyroscope;
+    }
+    if (location) {
+      record.location = location;
+    }
+
+    return [record];
   }
 
   /**
@@ -360,7 +381,6 @@ class MobileDataManager {
               x: gyroscope.rotation_rate_degrees.x || 0,
               y: gyroscope.rotation_rate_degrees.y || 0,
               z: gyroscope.rotation_rate_degrees.z || 0,
-              timestamp: gyroscope.rotation_rate_degrees.timestamp || gyroscope.timestamp || null,
             },
             is_rotating: gyroscope.is_rotating !== undefined ? gyroscope.is_rotating : false,
             timestamp: String(gyroscope.timestamp || Date.now()),

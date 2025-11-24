@@ -165,7 +165,23 @@ const request = async (url, options = {}) => {
       setTimeout(() => reject(new ApiError('TIMEOUT', 'Request timeout')), timeout);
     });
 
-    console.log('url', `${baseUrl}${url}; `, 'request body', JSON.stringify(requestConfig.body));
+    // 美化日志输出
+    console.group(`📤 API Request [${method}]`);
+    console.log('URL:', `${baseUrl}${url}`);
+    if (requestConfig.headers && Object.keys(requestConfig.headers).length > 0) {
+      console.log('Headers:', JSON.stringify(requestConfig.headers, null, 2));
+    }
+    if (requestConfig.body) {
+      try {
+        const bodyObj = typeof requestConfig.body === 'string' 
+          ? JSON.parse(requestConfig.body) 
+          : requestConfig.body;
+        console.log('Body:', JSON.stringify(bodyObj, null, 2));
+      } catch (e) {
+        console.log('Body:', requestConfig.body);
+      }
+    }
+    console.groupEnd();
 
     // 发起请求
     const responsePromise = fetch(`${baseUrl}${url}`, requestConfig);
