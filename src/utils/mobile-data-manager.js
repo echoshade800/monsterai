@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from '../services/api/api';
 import calendarManager from './calendar-manager';
 import deviceInfoManager, { SensorType } from './device-info-manager';
 import healthDataManager, { TimePeriod } from './health-data-manager';
+import locationManager from './location-manager';
 import storageManager from './storage';
 
 class MobileDataManager {
@@ -102,6 +103,7 @@ class MobileDataManager {
         waterResult,
         calendarResult,
         gyroscopeResult,
+        locationResult,
       ] = await Promise.all([
         withTimeout(this._getStepCount(startDate, endDate), 30000, '步数'),
         withTimeout(this._getHeartRate(startDate, endDate), 30000, '心率'),
@@ -122,6 +124,7 @@ class MobileDataManager {
         withTimeout(this._getWater(startDate, endDate), 30000, '水分'),
         withTimeout(this._getCalendarEvents(startDate, endDate), 30000, '日历'),
         withTimeout(this._getGyroscopeData(), 10000, '陀螺仪'), // 陀螺仪数据较快，10秒超时
+        withTimeout(this._getLocationData(), 20000, '位置'), // 位置数据，20秒超时
       ]);
 
       // 格式化数据为所需结构
@@ -147,6 +150,7 @@ class MobileDataManager {
         water: waterResult.data || [],
         calendarEvents: calendarResult.data || [],
         gyroscope: gyroscopeResult.data || null,
+        location: locationResult.data || null,
       });
       console.log('[MobileDataManager] 📱 收集手机数据完成，共', formattedData.length, '条记录');
       const result = {
@@ -333,6 +337,7 @@ class MobileDataManager {
         carbohydrates: Math.round(carbohydrates),
         sugar: Math.round(sugar),
         water: Math.round(water),
+        location: hourData.location || rawData.location || null,
         sleep_analysis: sleepAnalysis.map(item => ({
           startDate: item.startDate,
           endDate: item.endDate,
@@ -531,6 +536,14 @@ class MobileDataManager {
       const hourKey = this._getHourKey(now);
       if (!grouped[hourKey]) grouped[hourKey] = {};
       grouped[hourKey].gyroscope = rawData.gyroscope;
+    }
+
+    // 位置数据（全局，添加到当前小时）
+    if (rawData.location) {
+      const now = new Date();
+      const hourKey = this._getHourKey(now);
+      if (!grouped[hourKey]) grouped[hourKey] = {};
+      grouped[hourKey].location = rawData.location;
     }
 
     return grouped;
@@ -839,6 +852,43 @@ class MobileDataManager {
     } catch (error) {
       console.warn('[MobileDataManager] ⚠️ 获取陀螺仪数据失败:', error);
       return { success: false, data: null };
+    }
+  }
+
+  async _getLocationData() {
+    try {
+      // 获取当前位置（包含地址信息）
+      const locationResult = await locationManager.getCurrentLocation({
+        includeAddress: true,
+        timeout: 15000, // 15秒超时
+        maximumAge: 60000, // 允许使用1分钟内的缓存位置
+      });
+
+      if (locationResult.success && locationResult.data) {
+        // 格式化位置数据
+        const locationData = {
+          latitude: locationResult.data.latitude,
+          longitude: locationResult.data.longitude,
+          accuracy: locationResult.data.accuracy,
+          altitude: locationResult.data.altitude || null,
+          altitudeAccuracy: locationResult.data.altitudeAccuracy || null,
+          speed: locationResult.data.speed || null,
+          heading: locationResult.data.heading || null,
+          timestamp: String(locationResult.data.rawTimestamp || Date.now()),
+          address: locationResult.data.address || null,
+        };
+
+        return {
+          success: true,
+          data: locationData,
+        };
+      } else {
+        console.log('[MobileDataManager] ℹ️ 位置数据获取失败或权限被拒绝');
+        return { success: true, data: null };
+      }
+    } catch (error) {
+      console.warn('[MobileDataManager] ⚠️ 获取位置数据失败:', error);
+      return { success: true, data: null };
     }
   }
 }
