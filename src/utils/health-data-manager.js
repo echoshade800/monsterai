@@ -99,22 +99,52 @@ class HealthDataManager {
         console.log('[HealthDataManager] ❌ AppleHealthKit 模块未加载');
         return false;
       }
+      
+      console.log('[HealthDataManager] 🔍 AppleHealthKit 模块已加载');
+      
+      // 检查 isAvailable 方法是否存在
+      if (typeof AppleHealthKit.isAvailable !== 'function') {
+        console.warn('[HealthDataManager] ⚠️ AppleHealthKit.isAvailable 方法不存在，尝试直接返回 true');
+        console.log('[HealthDataManager] 💡 可用的方法:', Object.keys(AppleHealthKit).slice(0, 10));
+        // 如果模块已加载但方法不存在，假设 HealthKit 可用
+        return true;
+      }
 
+      // 添加超时保护（3秒）
       return new Promise((resolve) => {
+        let resolved = false;
+        
+        const timeoutId = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            console.warn('[HealthDataManager] ⚠️ isAvailable 回调超时（3秒），假设 HealthKit 可用');
+            resolve(true); // 超时时假设可用，让后续方法自己处理
+          }
+        }, 3000);
+
         try {
           AppleHealthKit.isAvailable((err, available) => {
-            if (err) {
-              console.log('[HealthDataManager] ❌ HealthKit isAvailable 错误:', err);
-              resolve(false);
-              return;
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeoutId);
+              
+              if (err) {
+                console.log('[HealthDataManager] ❌ HealthKit isAvailable 错误:', err);
+                resolve(false);
+                return;
+              }
+              const isAvailable = available === true;
+              console.log('[HealthDataManager] ✅ HealthKit 可用性检查完成:', isAvailable);
+              resolve(isAvailable);
             }
-            const isAvailable = available === true;
-            console.log('[HealthDataManager] ✅ HealthKit 可用性检查完成:', isAvailable);
-            resolve(isAvailable);
           });
         } catch (e) {
-          console.log('[HealthDataManager] ❌ HealthKit isAvailable 异常:', e);
-          resolve(false);
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            console.log('[HealthDataManager] ❌ HealthKit isAvailable 异常:', e);
+            resolve(false);
+          }
         }
       });
     } catch (error) {
@@ -164,46 +194,79 @@ class HealthDataManager {
 
       console.log('[HealthDataManager] 📤 请求权限中...');
       
-      // 请求权限
+      // 检查 initHealthKit 方法是否存在
+      if (typeof AppleHealthKit.initHealthKit !== 'function') {
+        console.error('[HealthDataManager] ❌ AppleHealthKit.initHealthKit 方法不存在');
+        console.log('[HealthDataManager] 💡 可用的方法:', Object.keys(AppleHealthKit).slice(0, 10));
+        return {
+          success: false,
+          error: 'initHealthKit 方法不存在，原生模块可能未正确链接',
+        };
+      }
+      
+      // 请求权限（添加超时保护：30秒）
       return new Promise((resolve) => {
+        let resolved = false;
+        
+        const timeoutId = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            console.error('[HealthDataManager] ❌ initHealthKit 回调超时（30秒），权限申请可能失败');
+            console.warn('[HealthDataManager] 💡 提示：这通常意味着原生模块桥接有问题或权限弹窗未显示');
+            resolve({
+              success: false,
+              error: 'initHealthKit 回调超时，原生桥接可能有问题',
+            });
+          }
+        }, 30000);
+
         try {
           AppleHealthKit.initHealthKit(permissions, (err) => {
-            if (err) {
-              // HealthKit Code=5 表示权限被拒绝，这是正常的用户行为，使用警告而不是错误
-              const isPermissionDenied = err.code === 5 || 
-                                        (err.message && err.message.includes('Code=5')) ||
-                                        (err.message && err.message.includes('authorization'));
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeoutId);
               
-              if (isPermissionDenied) {
-                console.warn('[HealthDataManager] ⚠️ HealthKit 权限被拒绝（用户可能拒绝了权限请求）');
-                console.warn('[HealthDataManager] 💡 提示：用户可以在"设置 > 健康 > 数据访问权限与设备"中重新授权');
-              } else {
-                console.error('[HealthDataManager] ❌ initHealthKit 错误:', err);
+              if (err) {
+                // HealthKit Code=5 表示权限被拒绝，这是正常的用户行为，使用警告而不是错误
+                const isPermissionDenied = err.code === 5 || 
+                                          (err.message && err.message.includes('Code=5')) ||
+                                          (err.message && err.message.includes('authorization'));
+                
+                if (isPermissionDenied) {
+                  console.warn('[HealthDataManager] ⚠️ HealthKit 权限被拒绝（用户可能拒绝了权限请求）');
+                  console.warn('[HealthDataManager] 💡 提示：用户可以在"设置 > 健康 > 数据访问权限与设备"中重新授权');
+                } else {
+                  console.error('[HealthDataManager] ❌ initHealthKit 错误:', err);
+                }
+                
+                resolve({
+                  success: false,
+                  error: err.message || '权限申请失败',
+                  denied: isPermissionDenied, // 标记是否为权限被拒绝
+                });
+                return;
               }
-              
-              resolve({
-                success: false,
-                error: err.message || '权限申请失败',
-                denied: isPermissionDenied, // 标记是否为权限被拒绝
-              });
-              return;
-            }
 
-            // 记录已授权的权限
-            readPermissions.forEach(perm => this.authorizedPermissions.add(perm));
-            writePermissions.forEach(perm => this.authorizedPermissions.add(perm));
-            
-            this.isInitialized = true;
-            console.log('[HealthDataManager] ✅ 权限申请成功');
-            console.log('[HealthDataManager] 📊 当前已授权权限:', Array.from(this.authorizedPermissions));
-            resolve({ success: true });
+              // 记录已授权的权限
+              readPermissions.forEach(perm => this.authorizedPermissions.add(perm));
+              writePermissions.forEach(perm => this.authorizedPermissions.add(perm));
+              
+              this.isInitialized = true;
+              console.log('[HealthDataManager] ✅ 权限申请成功');
+              console.log('[HealthDataManager] 📊 当前已授权权限:', Array.from(this.authorizedPermissions));
+              resolve({ success: true });
+            }
           });
         } catch (e) {
-          console.error('[HealthDataManager] ❌ initHealthKit 异常:', e);
-          resolve({
-            success: false,
-            error: e.message || '权限申请异常',
-          });
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            console.error('[HealthDataManager] ❌ initHealthKit 异常:', e);
+            resolve({
+              success: false,
+              error: e.message || '权限申请异常',
+            });
+          }
         }
       });
     } catch (error) {
@@ -220,18 +283,77 @@ class HealthDataManager {
    * @returns {Promise<{success: boolean, error?: string}>}
    */
   async requestAllCommonPermissions() {
+    console.log('[HealthDataManager] 🔐 开始申请所有常用健康数据权限...');
+    
+    // iOS 建议：一次性申请所有需要的权限，用户可以在一个界面中选择授权
+    // 注意：包含最常用的 STEP_COUNT 和 HEART_RATE
     const commonReadPermissions = [
+      // 最基础和常用的权限
+      HealthDataType.STEP_COUNT,
+      HealthDataType.HEART_RATE,
+      
+      // 心率相关
+      HealthDataType.RESTING_HEART_RATE,
+      HealthDataType.HEART_RATE_VARIABILITY,
+      HealthDataType.WALKING_HEART_RATE_AVERAGE,
+      
+      // 活动和运动
+      HealthDataType.ACTIVE_ENERGY,
+      HealthDataType.BASAL_ENERGY,
+      HealthDataType.ACTIVITY_SUMMARY,
+      HealthDataType.FLIGHTS_CLIMBED,
+      HealthDataType.DISTANCE_WALKING_RUNNING,
+      HealthDataType.WORKOUT,
+      HealthDataType.APPLE_STAND_TIME,
+      
+      // 睡眠和正念
+      HealthDataType.SLEEP_ANALYSIS,
+      HealthDataType.MINDFUL_SESSION,
+      
+      // 营养数据
+      HealthDataType.ENERGY_CONSUMED,
+      HealthDataType.PROTEIN,
+      HealthDataType.CARBOHYDRATES,
+      HealthDataType.SUGAR,
+      HealthDataType.WATER, 
+      HealthDataType.CAFFEINE,
+      
+      // 身体测量
+      HealthDataType.HEIGHT,
+      HealthDataType.WEIGHT,
+      
+      // 生命体征（如果用户有相关设备）
+      HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
+      HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+      HealthDataType.BLOOD_GLUCOSE,
+      HealthDataType.BODY_TEMPERATURE,
+      HealthDataType.RESPIRATORY_RATE,
+      HealthDataType.OXYGEN_SATURATION,
+    ];
+
+    console.log('[HealthDataManager] 📊 申请 %d 项权限', commonReadPermissions.length);
+    console.log('[HealthDataManager] 💡 iOS 会在一个界面中显示所有权限，用户可以选择性授权');
+
+    return await this.initHealthKit(commonReadPermissions, []);
+  }
+
+  /**
+   * 申请核心健康数据权限（步数、心率、睡眠、活动）
+   * 如果一次性申请太多权限导致问题，可以使用此方法只申请核心权限
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async requestCorePermissions() {
+    console.log('[HealthDataManager] 🔐 申请核心健康数据权限...');
+    const corePermissions = [
       HealthDataType.STEP_COUNT,
       HealthDataType.HEART_RATE,
       HealthDataType.SLEEP_ANALYSIS,
       HealthDataType.ACTIVE_ENERGY,
-      HealthDataType.HEIGHT,
-      HealthDataType.WEIGHT,
-      HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
-      HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+      HealthDataType.DISTANCE_WALKING_RUNNING,
+      HealthDataType.FLIGHTS_CLIMBED,
     ];
 
-    return await this.initHealthKit(commonReadPermissions, []);
+    return await this.initHealthKit(corePermissions, []);
   }
 
   /**

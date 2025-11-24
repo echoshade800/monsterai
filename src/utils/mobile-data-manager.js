@@ -50,6 +50,97 @@ class MobileDataManager {
       const period = options.period || TimePeriod.TODAY;
       const { startDate, endDate } = healthDataManager.getDateRange(period);
 
+      // 先确保 HealthKit 已初始化
+      console.log('[MobileDataManager] 🔐 检查 HealthKit 初始化状态...');
+      const isHealthKitAvailable = await Promise.race([
+        healthDataManager.isAvailable(),
+        new Promise((resolve) => {
+          setTimeout(() => {
+            console.warn('[MobileDataManager] ⚠️ HealthKit 可用性检查超时（5秒）');
+            resolve(false);
+          }, 5000);
+        }),
+      ]);
+
+      if (!isHealthKitAvailable) {
+        console.warn('[MobileDataManager] ⚠️ HealthKit 不可用，所有健康数据将返回空数组');
+        // 如果 HealthKit 不可用，直接返回空数据，不等待超时
+        const userData = await storageManager.getUserData();
+        const uid = userData?.uid || null;
+        if (!uid) {
+          this.isCollecting = false;
+          this.collectStartTime = null;
+          return {
+            success: false,
+            error: '未找到用户ID',
+          };
+        }
+        
+        // 返回空数据，但包含非健康数据（日历、陀螺仪、位置）
+        const dayStart = new Date(startDate);
+        dayStart.setHours(0, 0, 0, 0);
+        const now = new Date(endDate);
+        
+        const emptyHealthData = {
+          timestamp: Date.now().toString(),
+          startDate: dayStart.getTime().toString(),
+          endDate: now.getTime().toString(),
+          step_count: 0,
+          basal_energy_burned: 0,
+          active_energy_burned: 0,
+          activity_summary: [],
+          flights_climbed: 0,
+          distance_walking_running: 0,
+          heart_rate: 0,
+          resting_heart_rate: 0,
+          heart_rate_variability: 0,
+          walking_heart_rate_average: 0,
+          energy_consumed: 0,
+          protein: 0,
+          carbohydrates: 0,
+          sugar: 0,
+          water: 0,
+          sleep_analysis: [],
+          mindful_session: [],
+        };
+
+        // 仍然尝试获取非健康数据
+        const [calendarResult, gyroscopeResult, locationResult] = await Promise.allSettled([
+          withTimeout(this._getCalendarEvents(startDate, endDate), 30000, '日历'),
+          withTimeout(this._getGyroscopeData(), 10000, '陀螺仪'),
+          withTimeout(this._getLocationData(), 20000, '位置'),
+        ]);
+
+        const nonAggregatedData = this._extractNonAggregatedData({
+          calendarEvents: calendarResult.status === 'fulfilled' ? (calendarResult.value?.data || []) : [],
+          gyroscope: gyroscopeResult.status === 'fulfilled' ? (gyroscopeResult.value?.data || null) : null,
+          location: locationResult.status === 'fulfilled' ? (locationResult.value?.data || null) : null,
+        });
+
+        const record = { ...emptyHealthData };
+        if (nonAggregatedData.calendar_events?.length > 0) {
+          record.calendar_events = nonAggregatedData.calendar_events;
+        }
+        if (nonAggregatedData.gyroscope) {
+          record.gyroscope = nonAggregatedData.gyroscope;
+        }
+        if (nonAggregatedData.location) {
+          record.location = nonAggregatedData.location;
+        }
+
+        this.isCollecting = false;
+        this.collectStartTime = null;
+        return {
+          success: true,
+          data: {
+            uid,
+            data: [record],
+          },
+        };
+      } else {
+        console.log('[MobileDataManager] ✅ HealthKit 可用');
+      }
+
       // 获取用户ID
       const userData = await storageManager.getUserData();
       const uid = userData?.uid || null;
@@ -105,29 +196,51 @@ class MobileDataManager {
         gyroscopeResult,
         locationResult,
       ] = await Promise.all([
-        withTimeout(this._getStepCount(startDate, endDate), 30000, '步数'),
-        withTimeout(this._getHeartRate(startDate, endDate), 30000, '心率'),
-        withTimeout(this._getRestingHeartRate(startDate, endDate), 30000, '静息心率'),
-        withTimeout(this._getHeartRateVariability(startDate, endDate), 30000, '心率变异性'),
-        withTimeout(this._getWalkingHeartRate(startDate, endDate), 30000, '步行心率'),
-        withTimeout(this._getActiveEnergy(startDate, endDate), 30000, '活动能量'),
-        withTimeout(this._getBasalEnergy(startDate, endDate), 30000, '基础能量'),
-        withTimeout(this._getActivitySummary(startDate, endDate), 30000, '活动摘要'),
-        withTimeout(this._getFlightsClimbed(startDate, endDate), 30000, '楼层'),
-        withTimeout(this._getDistance(startDate, endDate), 30000, '距离'),
-        withTimeout(this._getSleepAnalysis(startDate, endDate), 30000, '睡眠'),
-        withTimeout(this._getMindfulSession(startDate, endDate), 30000, '正念'),
-        withTimeout(this._getEnergyConsumed(startDate, endDate), 30000, '能量消耗'),
-        withTimeout(this._getProtein(startDate, endDate), 30000, '蛋白质'),
-        withTimeout(this._getCarbohydrates(startDate, endDate), 30000, '碳水化合物'),
-        withTimeout(this._getSugar(startDate, endDate), 30000, '糖分'),
-        withTimeout(this._getWater(startDate, endDate), 30000, '水分'),
+        this._getStepCount(startDate, endDate),
+        this._getHeartRate(startDate, endDate),
+        this._getRestingHeartRate(startDate, endDate),
+        this._getHeartRateVariability(startDate, endDate),
+        this._getWalkingHeartRate(startDate, endDate),
+        this._getActiveEnergy(startDate, endDate),
+        this._getBasalEnergy(startDate, endDate),
+        this._getActivitySummary(startDate, endDate),
+        this._getFlightsClimbed(startDate, endDate),
+        this._getDistance(startDate, endDate),
+        this._getSleepAnalysis(startDate, endDate),
+        this._getMindfulSession(startDate, endDate),
+        this._getEnergyConsumed(startDate, endDate),
+        this._getProtein(startDate, endDate),
+        this._getCarbohydrates(startDate, endDate),
+        this._getSugar(startDate, endDate),
+        this._getWater(startDate, endDate),
         withTimeout(this._getCalendarEvents(startDate, endDate), 30000, '日历'),
         withTimeout(this._getGyroscopeData(), 10000, '陀螺仪'), // 陀螺仪数据较快，10秒超时
         withTimeout(this._getLocationData(), 20000, '位置'), // 位置数据，20秒超时
       ]);
 
-      console.log('locationResult.data', locationResult.data);
+      // 汇总健康数据获取情况
+      console.group('[MobileDataManager] 📊 健康数据获取汇总');
+      console.log('步数:', stepCountResult.success ? `✅ ${Array.isArray(stepCountResult.data) ? stepCountResult.data.length : 0} 条` : `❌ ${stepCountResult.error || '失败'}`);
+      console.log('心率:', heartRateResult.success ? `✅ ${Array.isArray(heartRateResult.data) ? heartRateResult.data.length : 0} 条` : `❌ ${heartRateResult.error || '失败'}`);
+      console.log('静息心率:', restingHeartRateResult.success ? `✅ ${Array.isArray(restingHeartRateResult.data) ? restingHeartRateResult.data.length : 0} 条` : `❌ ${restingHeartRateResult.error || '失败'}`);
+      console.log('心率变异性:', heartRateVariabilityResult.success ? `✅ ${Array.isArray(heartRateVariabilityResult.data) ? heartRateVariabilityResult.data.length : 0} 条` : `❌ ${heartRateVariabilityResult.error || '失败'}`);
+      console.log('步行心率:', walkingHeartRateResult.success ? `✅ ${Array.isArray(walkingHeartRateResult.data) ? walkingHeartRateResult.data.length : 0} 条` : `❌ ${walkingHeartRateResult.error || '失败'}`);
+      console.log('活动能量:', activeEnergyResult.success ? `✅ ${Array.isArray(activeEnergyResult.data) ? activeEnergyResult.data.length : 0} 条` : `❌ ${activeEnergyResult.error || '失败'}`);
+      console.log('基础能量:', basalEnergyResult.success ? `✅ ${Array.isArray(basalEnergyResult.data) ? basalEnergyResult.data.length : 0} 条` : `❌ ${basalEnergyResult.error || '失败'}`);
+      console.log('活动摘要:', activitySummaryResult.success ? `✅ ${Array.isArray(activitySummaryResult.data) ? activitySummaryResult.data.length : 0} 条` : `❌ ${activitySummaryResult.error || '失败'}`);
+      console.log('楼层:', flightsClimbedResult.success ? `✅ ${Array.isArray(flightsClimbedResult.data) ? flightsClimbedResult.data.length : 0} 条` : `❌ ${flightsClimbedResult.error || '失败'}`);
+      console.log('距离:', distanceResult.success ? `✅ ${Array.isArray(distanceResult.data) ? distanceResult.data.length : 0} 条` : `❌ ${distanceResult.error || '失败'}`);
+      console.log('睡眠:', sleepResult.success ? `✅ ${Array.isArray(sleepResult.data) ? sleepResult.data.length : 0} 条` : `❌ ${sleepResult.error || '失败'}`);
+      console.log('正念:', mindfulSessionResult.success ? `✅ ${Array.isArray(mindfulSessionResult.data) ? mindfulSessionResult.data.length : 0} 条` : `❌ ${mindfulSessionResult.error || '失败'}`);
+      console.log('能量消耗:', energyConsumedResult.success ? `✅ ${Array.isArray(energyConsumedResult.data) ? energyConsumedResult.data.length : 0} 条` : `❌ ${energyConsumedResult.error || '失败'}`);
+      console.log('蛋白质:', proteinResult.success ? `✅ ${Array.isArray(proteinResult.data) ? proteinResult.data.length : 0} 条` : `❌ ${proteinResult.error || '失败'}`);
+      console.log('碳水化合物:', carbohydratesResult.success ? `✅ ${Array.isArray(carbohydratesResult.data) ? carbohydratesResult.data.length : 0} 条` : `❌ ${carbohydratesResult.error || '失败'}`);
+      console.log('糖分:', sugarResult.success ? `✅ ${Array.isArray(sugarResult.data) ? sugarResult.data.length : 0} 条` : `❌ ${sugarResult.error || '失败'}`);
+      console.log('水分:', waterResult.success ? `✅ ${Array.isArray(waterResult.data) ? waterResult.data.length : 0} 条` : `❌ ${waterResult.error || '失败'}`);
+      console.log('日历:', calendarResult.success ? `✅ ${Array.isArray(calendarResult.data) ? calendarResult.data.length : 0} 条` : `❌ ${calendarResult.error || '失败'}`);
+      console.log('陀螺仪:', gyroscopeResult.success ? (gyroscopeResult.data ? '✅ 有数据' : 'ℹ️ 无数据') : `❌ ${gyroscopeResult.error || '失败'}`);
+      console.log('位置:', locationResult.success ? (locationResult.data ? '✅ 有数据' : 'ℹ️ 无数据') : `❌ ${locationResult.error || '失败'}`);
+      console.groupEnd();
 
       // 提取不需要聚合的数据（在格式化之前处理）
       const nonAggregatedData = this._extractNonAggregatedData({
@@ -262,10 +375,10 @@ class MobileDataManager {
     const timestamp = Date.now().toString();
     const startDateStr = dayStart.getTime().toString();
     const endDateStr = now.getTime().toString();
-
+    console.log('原始数据 rawData', rawData);
     // 聚合所有健康数据（累计值）
-    const stepCount = this._sumValues(this._ensureArray(rawData.stepCount));
-    console.log('rawData', rawData, 'fetched stepCount', stepCount);
+    const stepCount = this._sumStepCount(this._ensureArray(rawData.stepCount));
+    console.log('fetched stepCount', stepCount);
     const activeEnergyBurned = this._sumValues(this._ensureArray(rawData.activeEnergy));
     console.log('fetched activeEnergyBurned', activeEnergyBurned);
     const basalEnergyBurned = this._sumValues(this._ensureArray(rawData.basalEnergy));
@@ -312,10 +425,10 @@ class MobileDataManager {
         date: item.startDate || item.date,
         activeEnergyBurned: item.activeEnergyBurned || item.activeEnergy || 0,
         activeEnergyBurnedGoal: item.activeEnergyBurnedGoal || 0,
-        exerciseTime: item.exerciseTime || 0,
-        exerciseTimeGoal: item.exerciseTimeGoal || 0,
-        standHours: item.standHours || 0,
-        standHoursGoal: item.standHoursGoal || 0,
+        appleExerciseTime: item.exerciseTime || 0,
+        appleExerciseTimeGoal: item.exerciseTimeGoal || 0,
+        appleStandHours: item.standHours || 0,
+        appleStandHoursGoal: item.standHoursGoal || 0,
       })),
       flights_climbed: Math.round(flightsClimbed),
       distance_walking_running: Math.round(distanceWalkingRunning),
@@ -603,6 +716,13 @@ class MobileDataManager {
   }
 
   /**
+   * 步数求和
+   * @private
+   */
+  _sumStepCount(stepCount) {
+    return stepCount.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+  } 
+  /**
    * 求和
    * @private
    */
@@ -621,226 +741,380 @@ class MobileDataManager {
     return sum / values.length;
   }
 
+  /**
+   * 为健康数据获取方法添加超时保护的辅助函数
+   * @private
+   */
+  _withHealthKitTimeout(promise, methodName, timeoutMs = 25000) {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`${methodName} 超时：AppleHealthKit 回调未触发`));
+      }, timeoutMs);
+    });
+
+    return Promise.race([promise, timeoutPromise]).catch(error => {
+      console.warn(`[MobileDataManager] ⚠️ ${methodName} 超时或失败:`, error.message || error);
+      return { success: true, data: [] };
+    });
+  }
+
   // 私有方法：获取各种健康数据
   async _getStepCount(startDate, endDate) {
     try {
-      const result = await healthDataManager.getStepCount({ startDate, endDate });
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getStepCount({ startDate, endDate }),
+        '获取步数'
+      );
+      
       // 如果权限被拒绝，返回空数据而不是错误
-      if (!result.success && result.denied) {
-        console.log('[MobileDataManager] ℹ️ 步数权限被拒绝，返回空数据');
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 步数权限被拒绝，返回空数据');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取步数失败:', result.error || '未知错误', result);
+        }
         return { success: true, data: [] };
       }
+      console.log('[MobileDataManager] ✅ 获取步数成功，数据量:', Array.isArray(result.data) ? result.data.length : 0);
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取步数失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取步数异常:', error.message || error);
       return { success: true, data: [] };
     }
   }
 
   async _getHeartRate(startDate, endDate) {
     try {
-      const result = await healthDataManager.getHeartRate({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getHeartRate({ startDate, endDate }),
+        '获取心率'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 心率权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取心率失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取心率失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取心率异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getRestingHeartRate(startDate, endDate) {
     try {
-      const result = await healthDataManager.getRestingHeartRate({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getRestingHeartRate({ startDate, endDate }),
+        '获取静息心率'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 静息心率权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取静息心率失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取静息心率失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取静息心率异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getHeartRateVariability(startDate, endDate) {
     try {
-      const result = await healthDataManager.getHeartRateVariability({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getHeartRateVariability({ startDate, endDate }),
+        '获取心率变异性'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 心率变异性权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取心率变异性失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取心率变异性失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取心率变异性异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getWalkingHeartRate(startDate, endDate) {
     try {
-      const result = await healthDataManager.getWalkingHeartRateAverage({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getWalkingHeartRateAverage({ startDate, endDate }),
+        '获取步行心率'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 步行心率权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取步行心率失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取步行心率失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取步行心率异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getActiveEnergy(startDate, endDate) {
     try {
-      const result = await healthDataManager.getActiveEnergyBurned({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getActiveEnergyBurned({ startDate, endDate }),
+        '获取活动能量'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 活动能量权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取活动能量失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取活动能量失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取活动能量异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getBasalEnergy(startDate, endDate) {
     try {
-      const result = await healthDataManager.getBasalEnergyBurned({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getBasalEnergyBurned({ startDate, endDate }),
+        '获取基础能量'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 基础能量权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取基础能量失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取基础能量失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取基础能量异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getActivitySummary(startDate, endDate) {
     try {
-      const result = await healthDataManager.getActivitySummary({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getActivitySummary({ startDate, endDate }),
+        '获取活动摘要'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 活动摘要权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取活动摘要失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取活动摘要失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取活动摘要异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getFlightsClimbed(startDate, endDate) {
     try {
-      const result = await healthDataManager.getFlightsClimbed({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getFlightsClimbed({ startDate, endDate }),
+        '获取楼层'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 楼层权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取楼层失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取楼层失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取楼层异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getDistance(startDate, endDate) {
     try {
-      const result = await healthDataManager.getDistanceWalkingRunning({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getDistanceWalkingRunning({ startDate, endDate }),
+        '获取距离'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 距离权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取距离失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取距离失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取距离异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getSleepAnalysis(startDate, endDate) {
     try {
-      const result = await healthDataManager.getSleepAnalysis({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getSleepAnalysis({ startDate, endDate }),
+        '获取睡眠分析'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 睡眠分析权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取睡眠分析失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取睡眠分析失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取睡眠分析异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getMindfulSession(startDate, endDate) {
     try {
-      const result = await healthDataManager.getMindfulSession({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getMindfulSession({ startDate, endDate }),
+        '获取正念会话'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 正念会话权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取正念会话失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取正念会话失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取正念会话异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getEnergyConsumed(startDate, endDate) {
     try {
-      const result = await healthDataManager.getEnergyConsumed({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getEnergyConsumed({ startDate, endDate }),
+        '获取能量消耗'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 能量消耗权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取能量消耗失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取能量消耗失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取能量消耗异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getProtein(startDate, endDate) {
     try {
-      const result = await healthDataManager.getProtein({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getProtein({ startDate, endDate }),
+        '获取蛋白质'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 蛋白质权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取蛋白质失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取蛋白质失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取蛋白质异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getCarbohydrates(startDate, endDate) {
     try {
-      const result = await healthDataManager.getCarbohydrates({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getCarbohydrates({ startDate, endDate }),
+        '获取碳水化合物'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 碳水化合物权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取碳水化合物失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取碳水化合物失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取碳水化合物异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getSugar(startDate, endDate) {
     try {
-      const result = await healthDataManager.getSugar({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getSugar({ startDate, endDate }),
+        '获取糖分'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 糖分权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取糖分失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取糖分失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取糖分异常:', error);
       return { success: true, data: [] };
     }
   }
 
   async _getWater(startDate, endDate) {
     try {
-      const result = await healthDataManager.getWater({ startDate, endDate });
-      if (!result.success && result.denied) {
+      const result = await this._withHealthKitTimeout(
+        healthDataManager.getWater({ startDate, endDate }),
+        '获取水分'
+      );
+      if (!result.success) {
+        if (result.denied) {
+          console.log('[MobileDataManager] ℹ️ 水分权限被拒绝');
+        } else {
+          console.warn('[MobileDataManager] ⚠️ 获取水分失败:', result.error || '未知错误');
+        }
         return { success: true, data: [] };
       }
       return result;
     } catch (error) {
-      console.warn('[MobileDataManager] ⚠️ 获取水分失败:', error);
+      console.warn('[MobileDataManager] ⚠️ 获取水分异常:', error);
       return { success: true, data: [] };
     }
   }

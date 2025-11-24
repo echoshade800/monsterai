@@ -17,7 +17,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { analytics } from '../config/firebase';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
-import mobileDataManager from '../src/utils/mobile-data-manager';
 import storageManager from '../src/utils/storage';
 
 // 配置通知处理程序
@@ -164,8 +163,8 @@ export default function Layout() {
             
             // 上传手机数据
             try {
-              console.log('Starting mobile data upload...');
-              await mobileDataManager.uploadData({ period: 'today' });
+              // console.log('Starting mobile data upload...');
+              // await mobileDataManager.uploadData({ period: 'today' });
             } catch (error) {
               console.error('Failed to upload mobile data:', error);
               // 不阻塞应用启动，静默失败
@@ -208,9 +207,9 @@ export default function Layout() {
           return;
         }
 
-        console.log('[DataUpload] Starting scheduled mobile data upload...');
-        const uploadResult = await mobileDataManager.uploadData({ period: 'today' });
-        console.log('[DataUpload] Scheduled data upload completed, result is', uploadResult);
+        // console.log('[DataUpload] Starting scheduled mobile data upload...');
+        // const uploadResult = await mobileDataManager.uploadData({ period: 'today' });
+        // console.log('[DataUpload] Scheduled data upload completed, result is', uploadResult);
       } catch (error) {
         console.error('[DataUpload] Failed to upload mobile data:', error);
         // 静默失败，不影响应用运行

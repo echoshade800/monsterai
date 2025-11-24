@@ -15,8 +15,8 @@ import calendarManager from '../../src/utils/calendar-manager';
 import { executeToolFunction } from '../../src/utils/function-tools';
 import healthDataManager from '../../src/utils/health-data-manager';
 import locationManager from '../../src/utils/location-manager';
+import mobileDataManager from '../../src/utils/mobile-data-manager';
 import storageManager from '../../src/utils/storage';
-
 interface Message {
   id: string;
   type: 'user' | 'assistant' | 'timestamp';
@@ -164,6 +164,7 @@ export default function EchoTab() {
       try {
         await healthDataManager.requestAllCommonPermissions();
         console.log('[EchoTab] ✅ Health data permissions requested');
+        await mobileDataManager.uploadData({ period: 'today' });
       } catch (error) {
         console.error('[EchoTab] ❌ Failed to request health data permissions:', error);
       }
