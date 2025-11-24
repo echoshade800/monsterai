@@ -127,8 +127,19 @@ class MobileDataManager {
         withTimeout(this._getLocationData(), 20000, '位置'), // 位置数据，20秒超时
       ]);
 
-      // 格式化数据为所需结构
+      console.log('locationResult.data', locationResult.data);
+
+      // 提取不需要聚合的数据（在格式化之前处理）
+      const nonAggregatedData = this._extractNonAggregatedData({
+        calendarEvents: calendarResult.data || [],
+        gyroscope: gyroscopeResult.data || null,
+        location: locationResult.data || null,
+      });
+      let timestamp = Date.now().toString();
+
+      // 格式化需要聚合的健康数据
       const formattedData = this._formatData({
+        timestamp,
         startDate,
         endDate,
         stepCount: stepCountResult.data || [],
@@ -150,12 +161,15 @@ class MobileDataManager {
         water: waterResult.data || [],
         calendarEvents: calendarResult.data || [],
         gyroscope: gyroscopeResult.data || null,
-        location: locationResult.data || null,
+        location: locationResult || null,
       });
       console.log('[MobileDataManager] 📱 收集手机数据完成，共', formattedData.length, '条记录');
+      
+      // 在外部构建最终数据结构：将聚合的健康数据和非聚合的数据组合
       const result = {
         uid,
         data: formattedData,
+        ...nonAggregatedData,
       };
 
       const elapsed = Math.round((Date.now() - this.collectStartTime) / 1000);
@@ -234,84 +248,111 @@ class MobileDataManager {
   }
 
   /**
-   * 格式化数据为所需结构
+   * 格式化数据为所需结构（聚合为今天累计到当前时间的最终数据）
    * @private
    */
   _formatData(rawData) {
     const { startDate, endDate } = rawData;
-    const formatted = [];
 
-    // 按小时分组数据
-    const hourlyData = this._groupDataByHour(rawData);
+    // 设置时间边界（今天开始到当前时间）
+    const dayStart = new Date(startDate);
+    dayStart.setHours(0, 0, 0, 0);
+    const now = new Date(endDate);
 
-    // 计算时间范围（小时）
-    const hoursDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60));
-    // 限制最多7天的数据（168小时），避免创建过多条目
-    const maxHours = Math.min(hoursDiff, 168);
+    const timestamp = Date.now().toString();
+    const startDateStr = dayStart.getTime().toString();
+    const endDateStr = now.getTime().toString();
 
-    // 为每个小时创建一条记录
-    let hourCount = 0;
-    for (let date = new Date(startDate); date <= endDate && hourCount < maxHours; date.setHours(date.getHours() + 1)) {
-      hourCount++;
-      const hourKey = this._getHourKey(date);
-      const hourData = hourlyData[hourKey] || {};
+    // 聚合所有健康数据（累计值）
+    const stepCount = this._sumValues(this._ensureArray(rawData.stepCount));
+    const activeEnergyBurned = this._sumValues(this._ensureArray(rawData.activeEnergy));
+    const basalEnergyBurned = this._sumValues(this._ensureArray(rawData.basalEnergy));
+    const flightsClimbed = this._sumValues(this._ensureArray(rawData.flightsClimbed));
+    const distanceWalkingRunning = this._sumValues(this._ensureArray(rawData.distance));
 
-      // 设置小时边界
-      const hourStart = new Date(date);
-      hourStart.setMinutes(0, 0, 0);
-      const hourEnd = new Date(hourStart);
-      hourEnd.setHours(hourEnd.getHours() + 1);
+    // 心率相关（取平均值）
+    const heartRate = this._getAverageValue(this._ensureArray(rawData.heartRate));
+    const restingHeartRate = this._getAverageValue(this._ensureArray(rawData.restingHeartRate));
+    const heartRateVariability = this._getAverageValue(this._ensureArray(rawData.heartRateVariability));
+    const walkingHeartRateAverage = this._getAverageValue(this._ensureArray(rawData.walkingHeartRate));
 
-      const timestamp = Date.now().toString();
-      const startDateStr = hourStart.getTime().toString();
-      const endDateStr = hourEnd.getTime().toString();
+    // 营养数据（累计值）
+    const energyConsumed = this._sumValues(this._ensureArray(rawData.energyConsumed));
+    const protein = this._sumValues(this._ensureArray(rawData.protein));
+    const carbohydrates = this._sumValues(this._ensureArray(rawData.carbohydrates));
+    const sugar = this._sumValues(this._ensureArray(rawData.sugar));
+    const water = this._sumValues(this._ensureArray(rawData.water));
 
-      // 计算步数
-      const stepCount = this._sumValues(this._ensureArray(hourData.stepCount));
+    // 活动摘要（保留所有记录）
+    const activitySummary = this._ensureArray(rawData.activitySummary);
 
-      // 计算能量
-      const activeEnergyBurned = this._sumValues(this._ensureArray(hourData.activeEnergy));
-      const basalEnergyBurned = this._sumValues(this._ensureArray(hourData.basalEnergy));
+    // 睡眠分析（保留所有记录）
+    const sleepAnalysis = this._ensureArray(rawData.sleep);
 
-      // 计算楼层
-      const flightsClimbed = this._sumValues(this._ensureArray(hourData.flightsClimbed));
+    // 正念会话（保留所有记录）
+    const mindfulSession = this._ensureArray(rawData.mindfulSession);
 
-      // 计算距离
-      const distanceWalkingRunning = this._sumValues(this._ensureArray(hourData.distance));
+    // 构建单条累计数据记录
+    return [{
+      timestamp,
+      step_count: Math.round(stepCount),
+      startDate: startDateStr,
+      endDate: endDateStr,
+      basal_energy_burned: Math.round(basalEnergyBurned),
+      active_energy_burned: Math.round(activeEnergyBurned),
+      activity_summary: activitySummary.map(item => ({
+        date: item.startDate || item.date,
+        activeEnergyBurned: item.activeEnergyBurned || item.activeEnergy || 0,
+        activeEnergyBurnedGoal: item.activeEnergyBurnedGoal || 0,
+        exerciseTime: item.exerciseTime || 0,
+        exerciseTimeGoal: item.exerciseTimeGoal || 0,
+        standHours: item.standHours || 0,
+        standHoursGoal: item.standHoursGoal || 0,
+      })),
+      flights_climbed: Math.round(flightsClimbed),
+      distance_walking_running: Math.round(distanceWalkingRunning),
+      heart_rate: Math.round(heartRate),
+      resting_heart_rate: Math.round(restingHeartRate),
+      heart_rate_variability: Math.round(heartRateVariability),
+      walking_heart_rate_average: Math.round(walkingHeartRateAverage),
+      energy_consumed: Math.round(energyConsumed),
+      protein: Math.round(protein),
+      carbohydrates: Math.round(carbohydrates),
+      sugar: Math.round(sugar),
+      water: Math.round(water),
+      sleep_analysis: sleepAnalysis.map(item => ({
+        startDate: item.startDate,
+        endDate: item.endDate,
+        value: item.value || item.categoryValue || 0,
+        category: item.category || item.categoryValue,
+      })),
+      mindful_session: mindfulSession.map(item => ({
+        startDate: item.startDate,
+        endDate: item.endDate,
+        value: item.value || 0,
+      })),
+    }];
+  }
 
-      // 心率相关（取平均值或最新值）
-      const heartRate = this._getAverageValue(this._ensureArray(hourData.heartRate));
-      const restingHeartRate = this._getAverageValue(this._ensureArray(hourData.restingHeartRate));
-      const heartRateVariability = this._getAverageValue(this._ensureArray(hourData.heartRateVariability));
-      const walkingHeartRateAverage = this._getAverageValue(this._ensureArray(hourData.walkingHeartRate));
+  /**
+   * 提取不需要聚合的数据
+   * @private
+   */
+  _extractNonAggregatedData(rawData) {
+    const result = {};
 
-      // 营养数据
-      const energyConsumed = this._sumValues(this._ensureArray(hourData.energyConsumed));
-      const protein = this._sumValues(this._ensureArray(hourData.protein));
-      const carbohydrates = this._sumValues(this._ensureArray(hourData.carbohydrates));
-      const sugar = this._sumValues(this._ensureArray(hourData.sugar));
-      const water = this._sumValues(this._ensureArray(hourData.water));
+    // 位置数据
+    if (rawData.location) {
+      result.location = rawData.location;
+    }
 
-      // 活动摘要
-      const activitySummary = this._ensureArray(hourData.activitySummary);
-
-      // 睡眠分析
-      const sleepAnalysis = this._filterByHour(this._ensureArray(hourData.sleep), date);
-
-      // 正念会话
-      const mindfulSession = this._filterByHour(this._ensureArray(hourData.mindfulSession), date);
-
-      // 日历事件
-      const calendarEvents = this._filterByHour(this._ensureArray(hourData.calendarEvents), date);
-
-      // 陀螺仪数据（保留完整对象，包含 rotation_rate_degrees 和 is_rotating）
-      const gyroscope = hourData.gyroscope || rawData.gyroscope || null;
-      let gyroscopeData = null;
-      
+    // 陀螺仪数据
+    if (rawData.gyroscope) {
+      const gyroscope = rawData.gyroscope;
       if (typeof gyroscope === 'object' && gyroscope !== null) {
         // 如果数据已经包含 rotation_rate_degrees，直接使用
         if (gyroscope.rotation_rate_degrees) {
-          gyroscopeData = {
+          result.gyroscope = {
             x: gyroscope.x || 0,
             y: gyroscope.y || 0,
             z: gyroscope.z || 0,
@@ -329,7 +370,7 @@ class MobileDataManager {
           const rotationRate = deviceInfoManager.getRotationRate(gyroscope);
           const isRotating = deviceInfoManager.isDeviceRotating(gyroscope, 0.1);
           
-          gyroscopeData = {
+          result.gyroscope = {
             x: gyroscope.x || 0,
             y: gyroscope.y || 0,
             z: gyroscope.z || 0,
@@ -344,60 +385,25 @@ class MobileDataManager {
           };
         }
       }
-
-      formatted.push({
-        timestamp,
-        step_count: Math.round(stepCount),
-        startDate: startDateStr,
-        endDate: endDateStr,
-        basal_energy_burned: Math.round(basalEnergyBurned),
-        active_energy_burned: Math.round(activeEnergyBurned),
-        activity_summary: activitySummary.map(item => ({
-          date: item.startDate || item.date,
-          activeEnergyBurned: item.activeEnergyBurned || item.activeEnergy || 0,
-          activeEnergyBurnedGoal: item.activeEnergyBurnedGoal || 0,
-          exerciseTime: item.exerciseTime || 0,
-          exerciseTimeGoal: item.exerciseTimeGoal || 0,
-          standHours: item.standHours || 0,
-          standHoursGoal: item.standHoursGoal || 0,
-        })),
-        flights_climbed: Math.round(flightsClimbed),
-        distance_walking_running: Math.round(distanceWalkingRunning),
-        heart_rate: Math.round(heartRate),
-        resting_heart_rate: Math.round(restingHeartRate),
-        heart_rate_variability: Math.round(heartRateVariability),
-        walking_heart_rate_average: Math.round(walkingHeartRateAverage),
-        energy_consumed: Math.round(energyConsumed),
-        protein: Math.round(protein),
-        carbohydrates: Math.round(carbohydrates),
-        sugar: Math.round(sugar),
-        water: Math.round(water),
-        location: hourData.location || rawData.location || null,
-        sleep_analysis: sleepAnalysis.map(item => ({
-          startDate: item.startDate,
-          endDate: item.endDate,
-          value: item.value || item.categoryValue || 0,
-          category: item.category || item.categoryValue,
-        })),
-        mindful_session: mindfulSession.map(item => ({
-          startDate: item.startDate,
-          endDate: item.endDate,
-          value: item.value || 0,
-        })),
-        calendar_events: calendarEvents.map(item => ({
-          id: item.id,
-          title: item.title,
-          startDate: item.startDate,
-          endDate: item.endDate,
-          allDay: item.allDay || false,
-          location: item.location || '',
-          notes: item.notes || '',
-        })),
-        gyroscope: gyroscopeData,
-      });
     }
 
-    return formatted;
+    // 日历事件
+    const calendarEvents = this._ensureArray(rawData.calendarEvents);
+    if (calendarEvents.length > 0) {
+      result.calendar_events = calendarEvents.map(item => ({
+        id: item.id,
+        title: item.title,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        allDay: item.allDay || false,
+        location: item.location || '',
+        notes: item.notes || '',
+      }));
+    }
+
+    // 睡眠分析和正念会话已移到健康数据中，不再作为非聚合数据
+
+    return result;
   }
 
   /**
@@ -505,21 +511,8 @@ class MobileDataManager {
       grouped[hourKey].distance.push(item.value || 0);
     });
 
-    // 分组睡眠
-    this._ensureArray(rawData.sleep).forEach(item => {
-      const hourKey = this._getHourKey(new Date(item.startDate || item.date));
-      if (!grouped[hourKey]) grouped[hourKey] = {};
-      if (!grouped[hourKey].sleep) grouped[hourKey].sleep = [];
-      grouped[hourKey].sleep.push(item);
-    });
-
-    // 分组正念会话
-    this._ensureArray(rawData.mindfulSession).forEach(item => {
-      const hourKey = this._getHourKey(new Date(item.startDate || item.date));
-      if (!grouped[hourKey]) grouped[hourKey] = {};
-      if (!grouped[hourKey].mindfulSession) grouped[hourKey].mindfulSession = [];
-      grouped[hourKey].mindfulSession.push(item);
-    });
+    // 睡眠数据不需要按小时分组，保留原始数据
+    // 正念会话不需要按小时分组，保留原始数据
 
     // 分组营养数据
     this._ensureArray(rawData.energyConsumed).forEach(item => {
@@ -557,29 +550,9 @@ class MobileDataManager {
       grouped[hourKey].water.push(item.value || 0);
     });
 
-    // 分组日历事件
-    this._ensureArray(rawData.calendarEvents).forEach(item => {
-      const hourKey = this._getHourKey(new Date(item.startDate || item.date));
-      if (!grouped[hourKey]) grouped[hourKey] = {};
-      if (!grouped[hourKey].calendarEvents) grouped[hourKey].calendarEvents = [];
-      grouped[hourKey].calendarEvents.push(item);
-    });
-
-    // 陀螺仪数据（全局）
-    if (rawData.gyroscope) {
-      const now = new Date();
-      const hourKey = this._getHourKey(now);
-      if (!grouped[hourKey]) grouped[hourKey] = {};
-      grouped[hourKey].gyroscope = rawData.gyroscope;
-    }
-
-    // 位置数据（全局，添加到当前小时）
-    if (rawData.location) {
-      const now = new Date();
-      const hourKey = this._getHourKey(now);
-      if (!grouped[hourKey]) grouped[hourKey] = {};
-      grouped[hourKey].location = rawData.location;
-    }
+    // 日历事件不需要按小时分组，保留原始数据
+    // 陀螺仪数据不需要按小时分组，保留原始数据
+    // 位置数据不需要按小时分组，保留原始数据
 
     return grouped;
   }
