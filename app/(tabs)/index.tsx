@@ -1,4 +1,5 @@
 
+import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
@@ -10,7 +11,10 @@ import { AGENTS } from '../../components/MentionSelector';
 import { getAppVersion, getDeviceId, getTimezone } from '../../src/services/api-clients/client';
 import { API_ENDPOINTS, getApiConfig, getHeadersWithPassId } from '../../src/services/api/api';
 import conversationService from '../../src/services/conversationService';
+import calendarManager from '../../src/utils/calendar-manager';
 import { executeToolFunction } from '../../src/utils/function-tools';
+import healthDataManager from '../../src/utils/health-data-manager';
+import locationManager from '../../src/utils/location-manager';
 import storageManager from '../../src/utils/storage';
 
 interface Message {
@@ -26,6 +30,7 @@ export default function EchoTab() {
   const params = useLocalSearchParams();
   const processedPhotoRef = useRef<string | null>(null);
   const historyInitializedRef = useRef<boolean>(false);
+  const permissionsRequestedRef = useRef<boolean>(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,6 +129,64 @@ export default function EchoTab() {
     return [];
   };
 
+  // 请求所有数据权限（首次进入时）
+  const requestAllPermissions = useCallback(async () => {
+    // 如果已经请求过权限，跳过
+    if (permissionsRequestedRef.current) {
+      console.log('[EchoTab] Permissions already requested, skipping...');
+      return;
+    }
+
+    console.log('[EchoTab] 🔐 Requesting all data permissions on first entry...');
+    permissionsRequestedRef.current = true;
+
+    try {
+      // 1. 请求日历权限
+      console.log('[EchoTab] 📅 Requesting calendar permission...');
+      try {
+        await calendarManager.requestPermission();
+        console.log('[EchoTab] ✅ Calendar permission requested');
+      } catch (error) {
+        console.error('[EchoTab] ❌ Failed to request calendar permission:', error);
+      }
+
+      // 2. 请求地理位置权限
+      console.log('[EchoTab] 📍 Requesting location permission...');
+      try {
+        await locationManager.requestLocationPermission('foreground');
+        console.log('[EchoTab] ✅ Location permission requested');
+      } catch (error) {
+        console.error('[EchoTab] ❌ Failed to request location permission:', error);
+      }
+
+      // 3. 请求健康数据权限
+      console.log('[EchoTab] ❤️ Requesting health data permissions...');
+      try {
+        await healthDataManager.requestAllCommonPermissions();
+        console.log('[EchoTab] ✅ Health data permissions requested');
+      } catch (error) {
+        console.error('[EchoTab] ❌ Failed to request health data permissions:', error);
+      }
+
+      // 4. 请求相册权限
+      console.log('[EchoTab] 📷 Requesting photo library permission...');
+      try {
+        const photoPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (photoPermission.granted) {
+          console.log('[EchoTab] ✅ Photo library permission granted');
+        } else {
+          console.log('[EchoTab] ⚠️ Photo library permission denied');
+        }
+      } catch (error) {
+        console.error('[EchoTab] ❌ Failed to request photo library permission:', error);
+      }
+
+      console.log('[EchoTab] ✅ All permissions requested');
+    } catch (error) {
+      console.error('[EchoTab] ❌ Error requesting permissions:', error);
+    }
+  }, []);
+
   // 初始化用户数据（从本地存储获取真实数据）
   useEffect(() => {
     const initUserData = async () => {
@@ -145,6 +208,16 @@ export default function EchoTab() {
     };
     initUserData();
   }, []);
+
+  // 首次进入时请求所有权限
+  useEffect(() => {
+    // 延迟一点时间，确保用户数据已加载
+    const timer = setTimeout(() => {
+      requestAllPermissions();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [requestAllPermissions]);
 
   // 生成唯一ID
   const generateTraceId = () => {
