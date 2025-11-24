@@ -6,7 +6,7 @@
 import api from '../services/api-clients/client';
 import { API_ENDPOINTS } from '../services/api/api';
 import calendarManager from './calendar-manager';
-import deviceInfoManager, { SensorType } from './device-info-manager';
+import deviceInfoManager from './device-info-manager';
 import healthDataManager, { TimePeriod } from './health-data-manager';
 import locationManager from './location-manager';
 import storageManager from './storage';
@@ -304,11 +304,46 @@ class MobileDataManager {
       // 日历事件
       const calendarEvents = this._filterByHour(this._ensureArray(hourData.calendarEvents), date);
 
-      // 陀螺仪数据（取平均值或最新值）
-      const gyroscope = hourData.gyroscope || rawData.gyroscope || 0;
-      const gyroscopeValue = typeof gyroscope === 'object' && gyroscope !== null
-        ? Math.sqrt((gyroscope.x || 0) ** 2 + (gyroscope.y || 0) ** 2 + (gyroscope.z || 0) ** 2)
-        : (typeof gyroscope === 'number' ? gyroscope : 0);
+      // 陀螺仪数据（保留完整对象，包含 rotation_rate_degrees 和 is_rotating）
+      const gyroscope = hourData.gyroscope || rawData.gyroscope || null;
+      let gyroscopeData = null;
+      
+      if (typeof gyroscope === 'object' && gyroscope !== null) {
+        // 如果数据已经包含 rotation_rate_degrees，直接使用
+        if (gyroscope.rotation_rate_degrees) {
+          gyroscopeData = {
+            x: gyroscope.x || 0,
+            y: gyroscope.y || 0,
+            z: gyroscope.z || 0,
+            rotation_rate_degrees: {
+              x: gyroscope.rotation_rate_degrees.x || 0,
+              y: gyroscope.rotation_rate_degrees.y || 0,
+              z: gyroscope.rotation_rate_degrees.z || 0,
+              timestamp: gyroscope.rotation_rate_degrees.timestamp || gyroscope.timestamp || null,
+            },
+            is_rotating: gyroscope.is_rotating !== undefined ? gyroscope.is_rotating : false,
+            timestamp: String(gyroscope.timestamp || Date.now()),
+          };
+        } else {
+          // 如果没有 rotation_rate_degrees，从原始 xyz 计算
+          const rotationRate = deviceInfoManager.getRotationRate(gyroscope);
+          const isRotating = deviceInfoManager.isDeviceRotating(gyroscope, 0.1);
+          
+          gyroscopeData = {
+            x: gyroscope.x || 0,
+            y: gyroscope.y || 0,
+            z: gyroscope.z || 0,
+            rotation_rate_degrees: rotationRate ? {
+              x: rotationRate.x || 0,
+              y: rotationRate.y || 0,
+              z: rotationRate.z || 0,
+              timestamp: rotationRate.timestamp || gyroscope.timestamp || null,
+            } : null,
+            is_rotating: isRotating,
+            timestamp: String(gyroscope.timestamp || Date.now()),
+          };
+        }
+      }
 
       formatted.push({
         timestamp,
@@ -358,7 +393,7 @@ class MobileDataManager {
           location: item.location || '',
           notes: item.notes || '',
         })),
-        gyroscope: Math.round(gyroscopeValue * 100) / 100, // 保留2位小数
+        gyroscope: gyroscopeData,
       });
     }
 
@@ -829,6 +864,7 @@ class MobileDataManager {
         startDate,
         endDate,
       });
+      console.log('[MobileDataManager] 📱 获取日历事件成功，结果是', result);
 
       return result;
     } catch (error) {
@@ -842,16 +878,82 @@ class MobileDataManager {
       // 初始化设备信息管理器
       await deviceInfoManager.initialize();
 
-      // 获取最后一次陀螺仪数据
-      const gyroscopeData = deviceInfoManager.getLastData(SensorType.GYROSCOPE);
+      // 检查陀螺仪是否可用
+      const availability = deviceInfoManager.getSensorAvailability();
+      if (!availability.gyroscope) {
+        console.log('[MobileDataManager] ℹ️ 陀螺仪不可用');
+        return { success: true, data: null };
+      }
 
-      return {
-        success: true,
-        data: gyroscopeData,
-      };
+      // 订阅陀螺仪数据并等待数据更新
+      return new Promise((resolve) => {
+        let dataReceived = false;
+        let timeoutId = null;
+
+        // 设置超时（2秒）
+        timeoutId = setTimeout(() => {
+          if (!dataReceived) {
+            console.warn('[MobileDataManager] ⚠️ 陀螺仪数据获取超时');
+            deviceInfoManager.unsubscribeFromGyroscope();
+            resolve({ success: true, data: null });
+          }
+        }, 2000);
+
+        // 订阅陀螺仪，等待第一个数据点
+        const subscribeResult = deviceInfoManager.subscribeToGyroscope((data) => {
+          if (!dataReceived) {
+            dataReceived = true;
+            clearTimeout(timeoutId);
+            
+            // 获取数据后立即取消订阅
+            setTimeout(() => {
+              deviceInfoManager.unsubscribeFromGyroscope();
+            }, 100);
+
+            // 计算 rotation_rate_degrees（弧度转度）
+            const rotationRate = deviceInfoManager.getRotationRate(data);
+            // 检测是否在旋转
+            const isRotating = deviceInfoManager.isDeviceRotating(data, 0.1);
+
+            // 构建完整的陀螺仪数据对象
+            const gyroscopeData = {
+              x: data.x || 0,
+              y: data.y || 0,
+              z: data.z || 0,
+              rotation_rate_degrees: rotationRate ? {
+                x: rotationRate.x || 0,
+                y: rotationRate.y || 0,
+                z: rotationRate.z || 0,
+                timestamp: rotationRate.timestamp || data.timestamp || null,
+              } : null,
+              is_rotating: isRotating,
+              timestamp: String(data.timestamp || Date.now()),
+            };
+
+            console.log('[MobileDataManager] 📱 获取陀螺仪数据成功，结果是', gyroscopeData);
+            resolve({
+              success: true,
+              data: gyroscopeData,
+            });
+          }
+        }, 100); // 100ms 更新间隔
+
+        // 如果订阅失败
+        if (!subscribeResult.success) {
+          clearTimeout(timeoutId);
+          console.warn('[MobileDataManager] ⚠️ 陀螺仪订阅失败:', subscribeResult.error);
+          resolve({ success: true, data: null });
+        }
+      });
     } catch (error) {
       console.warn('[MobileDataManager] ⚠️ 获取陀螺仪数据失败:', error);
-      return { success: false, data: null };
+      // 确保取消订阅
+      try {
+        deviceInfoManager.unsubscribeFromGyroscope();
+      } catch (e) {
+        // 忽略取消订阅的错误
+      }
+      return { success: true, data: null };
     }
   }
 
