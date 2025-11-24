@@ -377,14 +377,14 @@ class MobileDataManager {
     const endDateStr = now.getTime().toString();
     console.log('原始数据 rawData', rawData);
     // 聚合所有健康数据（累计值）
-    const stepCount = this._sumStepCount(this._ensureArray(rawData.stepCount));
-    console.log('fetched stepCount', stepCount);
-    const activeEnergyBurned = this._sumValues(this._ensureArray(rawData.activeEnergy));
+    const stepCount = this._sumValueCount(this._ensureArray(rawData.stepCount));
+    console.log('fetched stepCount value', stepCount);
+    const activeEnergyBurned = this._sumValueCount(this._ensureArray(rawData.activeEnergy));
     console.log('fetched activeEnergyBurned', activeEnergyBurned);
-    const basalEnergyBurned = this._sumValues(this._ensureArray(rawData.basalEnergy));
+    const basalEnergyBurned = this._sumValueCount(this._ensureArray(rawData.basalEnergy));
     console.log('fetched basalEnergyBurned', basalEnergyBurned);
-    const flightsClimbed = this._sumValues(this._ensureArray(rawData.flightsClimbed));
-    const distanceWalkingRunning = this._sumValues(this._ensureArray(rawData.distance));
+    const flightsClimbed = this._sumValueCount(this._ensureArray(rawData.flightsClimbed));
+    const distanceWalkingRunning = this._sumValueCount(this._ensureArray(rawData.distance));
 
     // 心率相关（取平均值）
     const heartRate = this._getAverageValue(this._ensureArray(rawData.heartRate));
@@ -393,11 +393,16 @@ class MobileDataManager {
     const walkingHeartRateAverage = this._getAverageValue(this._ensureArray(rawData.walkingHeartRate));
 
     // 营养数据（累计值）
-    const energyConsumed = this._sumValues(this._ensureArray(rawData.energyConsumed));
-    const protein = this._sumValues(this._ensureArray(rawData.protein));
-    const carbohydrates = this._sumValues(this._ensureArray(rawData.carbohydrates));
-    const sugar = this._sumValues(this._ensureArray(rawData.sugar));
-    const water = this._sumValues(this._ensureArray(rawData.water));
+    const energyConsumed = this._sumValueCount(this._ensureArray(rawData.energyConsumed));
+    const protein = this._sumValueCount(this._ensureArray(rawData.protein));
+    const carbohydrates = this._sumValueCount(this._ensureArray(rawData.carbohydrates));
+    const sugar = this._sumValueCount(this._ensureArray(rawData.sugar));
+    const water = this._sumValueCount(this._ensureArray(rawData.water))
+    console.log('fetched energyConsumed', energyConsumed);
+    console.log('fetched protein', protein);
+    console.log('fetched carbohydrates', carbohydrates);
+    console.log('fetched sugar', sugar);
+    console.log('fetched water', water);
 
     // 活动摘要（保留所有记录）
     const activitySummary = this._ensureArray(rawData.activitySummary);
@@ -430,17 +435,17 @@ class MobileDataManager {
         appleStandHours: item.standHours || 0,
         appleStandHoursGoal: item.standHoursGoal || 0,
       })),
-      flights_climbed: Math.round(flightsClimbed),
-      distance_walking_running: Math.round(distanceWalkingRunning),
-      heart_rate: Math.round(heartRate),
-      resting_heart_rate: Math.round(restingHeartRate),
-      heart_rate_variability: Math.round(heartRateVariability),
-      walking_heart_rate_average: Math.round(walkingHeartRateAverage),
-      energy_consumed: Math.round(energyConsumed),
-      protein: Math.round(protein),
-      carbohydrates: Math.round(carbohydrates),
-      sugar: Math.round(sugar),
-      water: Math.round(water),
+      flights_climbed: parseFloat(flightsClimbed),
+      distance_walking_running: parseFloat(distanceWalkingRunning),
+      heart_rate: parseFloat(heartRate),
+      resting_heart_rate: parseFloat(restingHeartRate),
+      heart_rate_variability: parseFloat(heartRateVariability),
+      walking_heart_rate_average: parseFloat(walkingHeartRateAverage),
+      energy_consumed: parseFloat(energyConsumed),
+      protein: parseFloat(protein),
+      carbohydrates: parseFloat(carbohydrates),
+      sugar: parseFloat(sugar),
+      water: parseFloat(water),
       sleep_analysis: sleepAnalysis.map(item => ({
         startDate: item.startDate,
         endDate: item.endDate,
@@ -716,20 +721,16 @@ class MobileDataManager {
   }
 
   /**
-   * 步数求和
-   * @private
+   * 数值求和（支持整数和小数）
+   * @ "water": [{"endDate": "2025-11-24T17:28:00.000+0800", "id": "D80222C7-EB2E-46B7-B2A2-7CC43E44B1D4", "metadata": [Object], "sourceId": "com.apple.Health", "sourceName": "健康", "startDate": "2025-11-24T17:28:00.000+0800", "value": 0.5}]
+   * "stepCount": [{"endDate": "2025-11-24T17:00:00.000+0800", "metadata": [Array], "startDate": "2025-11-24T16:00:00.000+0800", "value": 332}, {"endDate": "2025-11-24T16:00:00.000+0800", "metadata": [Array], "startDate": "2025-11-24T15:00:00.000+0800", "value": 20}, {"endDate": "2025-11-24T15:00:00.000+0800", "metadata": [Array], "startDate": "2025-11-24T14:00:00.000+0800", "value": 349}, {"endDate": "2025-11-24T14:00:00.000+0800", "metadata": [Array], "startDate": "2025-11-24T13:00:00.000+0800", "value": 1161}, {"endDate": "2025-11-24T13:00:00.000+0800", "metadata": [Array], "startDate": "2025-11-24T12:00:00.000+0800", "value": 919}, {"endDate": "2025-11-24T12:00:00.000+0800", "metadata": [Array], "startDate": "2025-11-24T11:00:00.000+0800", "value": 148}, {"endDate": "2025-11-24T11:00:00.000+0800", "metadata": [Array], "startDate": "2025-11-24T10:00:00.000+0800", "value": 920}]
    */
-  _sumStepCount(stepCount) {
-    return stepCount.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+  _sumValueCount(stepCount) {
+    return stepCount.reduce((sum, item) => {
+      const value = parseFloat(item.value) || 0;
+      return sum + value;
+    }, 0);
   } 
-  /**
-   * 求和
-   * @private
-   */
-  _sumValues(values) {
-    if (!Array.isArray(values)) return 0;
-    return values.reduce((sum, val) => sum + (Number(val) || 0), 0);
-  }
 
   /**
    * 求平均值
@@ -737,7 +738,7 @@ class MobileDataManager {
    */
   _getAverageValue(values) {
     if (!Array.isArray(values) || values.length === 0) return 0;
-    const sum = this._sumValues(values);
+    const sum = this._sumValueCount(values);
     return sum / values.length;
   }
 
