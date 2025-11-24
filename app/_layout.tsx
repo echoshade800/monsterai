@@ -1,17 +1,17 @@
 import {
-    Nunito_400Regular,
-    Nunito_500Medium,
-    Nunito_600SemiBold,
-    Nunito_700Bold,
-    Nunito_800ExtraBold,
+  Nunito_400Regular,
+  Nunito_500Medium,
+  Nunito_600SemiBold,
+  Nunito_700Bold,
+  Nunito_800ExtraBold,
 } from '@expo-google-fonts/nunito';
 import * as Device from 'expo-device';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router/stack';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { AppState, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { analytics } from '../config/firebase';
@@ -119,6 +119,10 @@ export default function Layout() {
     Nunito_800ExtraBold,
   });
 
+  // 用于存储定时器和应用状态的 ref
+  const uploadIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const appStateRef = useRef(AppState.currentState);
+
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
@@ -182,6 +186,73 @@ export default function Layout() {
     }).catch(error => {
       console.error('Error registering push notifications:', error);
     });
+  }, []);
+
+  // 定时上传数据
+  useEffect(() => {
+    // 执行数据上传的函数
+    const performDataUpload = async () => {
+      try {
+        // 检查用户是否已登录
+        const userData = await storageManager.getUserData();
+        const hasPassId = userData && userData.passId;
+
+        if (!hasPassId) {
+          console.log('[DataUpload] User not logged in, skipping data upload');
+          return;
+        }
+
+        // 检查应用是否在前台
+        if (appStateRef.current !== 'active') {
+          console.log('[DataUpload] App is not active, skipping data upload');
+          return;
+        }
+
+        console.log('[DataUpload] Starting scheduled mobile data upload...');
+        await mobileDataManager.uploadData({ period: 'today' });
+        console.log('[DataUpload] Scheduled data upload completed successfully');
+      } catch (error) {
+        console.error('[DataUpload] Failed to upload mobile data:', error);
+        // 静默失败，不影响应用运行
+      }
+    };
+
+    // 监听应用状态变化
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      appStateRef.current = nextAppState;
+
+      if (nextAppState === 'active') {
+        // 应用从后台返回前台时，立即上传一次数据
+        console.log('[DataUpload] App became active, uploading data immediately');
+        performDataUpload();
+      }
+    });
+
+    // 设置定时上传（每30分钟上传一次）
+    const UPLOAD_INTERVAL = 5 * 60 * 1000; // 5分钟（毫秒）
+    
+    // 立即执行一次（延迟5秒，确保应用完全启动）
+    const initialTimeout = setTimeout(() => {
+      performDataUpload();
+    }, 5000);
+
+    // 设置定时器
+    uploadIntervalRef.current = setInterval(() => {
+      performDataUpload();
+    }, UPLOAD_INTERVAL);
+
+    console.log(`[DataUpload] Scheduled data upload initialized, interval: ${UPLOAD_INTERVAL / 1000 / 60} minutes`);
+
+    // 清理函数
+    return () => {
+      console.log('[DataUpload] Cleaning up data upload timer');
+      if (uploadIntervalRef.current) {
+        clearInterval(uploadIntervalRef.current);
+        uploadIntervalRef.current = null;
+      }
+      clearTimeout(initialTimeout);
+      subscription?.remove();
+    };
   }, []);
 
   if (!fontsLoaded && !fontError) {
