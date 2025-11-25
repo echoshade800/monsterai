@@ -18,7 +18,7 @@ const API_CONFIGS = {
     CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
     AGENT_CONFIG_FILE: 'agent_list_config_debug.json',
     MINIAPP_CONFIG_FILE: 'miniapp_list_config_debug.json',
-    TIMEOUT: 10000,
+    TIMEOUT: 60000,
     HEADERS: {
       'Content-Type': 'application/json',
     },
@@ -29,7 +29,7 @@ const API_CONFIGS = {
     CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
     AGENT_CONFIG_FILE: 'agent_list_config_prod.json',
     MINIAPP_CONFIG_FILE: 'miniapp_list_config_prod.json',
-    TIMEOUT: 10000,
+    TIMEOUT: 60000,
     HEADERS: {
       'Content-Type': 'application/json',
     },
@@ -40,7 +40,7 @@ const API_CONFIGS = {
     CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
     AGENT_CONFIG_FILE: 'agent_list_config_prod.json',
     MINIAPP_CONFIG_FILE: 'miniapp_list_config_prod.json',
-    TIMEOUT: 10000,
+    TIMEOUT: 60000,
     HEADERS: {
       'Content-Type': 'application/json',
     },
@@ -110,6 +110,9 @@ export const getConfigFileName = (configType) => {
 
 // API端点
 export const API_ENDPOINTS = {
+  DATA_AGENT: {
+    LAUNCH: '/data-agent/launch',
+  },
   // 认证相关
   AUTH: {
     LOGIN_BY_EMAIL: '/login/by/email',

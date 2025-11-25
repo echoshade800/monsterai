@@ -8,7 +8,7 @@ import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
 import { InputField } from '../../components/InputField';
 import { AGENTS } from '../../components/MentionSelector';
-import { getAppVersion, getDeviceId, getTimezone } from '../../src/services/api-clients/client';
+import api, { getAppVersion, getDeviceId, getTimezone } from '../../src/services/api-clients/client';
 import { API_ENDPOINTS, getApiConfig, getHeadersWithPassId } from '../../src/services/api/api';
 import conversationService from '../../src/services/conversationService';
 import calendarManager from '../../src/utils/calendar-manager';
@@ -32,6 +32,7 @@ export default function EchoTab() {
   const historyInitializedRef = useRef<boolean>(false);
   const permissionsRequestedRef = useRef<boolean>(false);
   const uploadTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const launchApiCalledRef = useRef<boolean>(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,6 +130,31 @@ export default function EchoTab() {
 
     return [];
   };
+
+  // 调用 data-agent/launch 接口（首次进入时，fire-and-forget）
+  const callLaunchApi = useCallback(async () => {
+    // 如果已经调用过，跳过
+    if (launchApiCalledRef.current) {
+      console.log('[EchoTab] Launch API already called, skipping...');
+      return;
+    }
+
+    launchApiCalledRef.current = true;
+    console.log('[EchoTab] 🚀 Calling data-agent/launch API...');
+
+    try {
+      // 发起 POST 请求（fire-and-forget，不等待响应）
+      api.post(API_ENDPOINTS.DATA_AGENT.LAUNCH, {}, {
+        requireAuth: false,
+      }).catch((error) => {
+        console.error('[EchoTab] ❌ Failed to call launch API:', error);
+      });
+      
+      console.log('[EchoTab] ✅ Launch API called (fire-and-forget)');
+    } catch (error) {
+      console.error('[EchoTab] ❌ Error getting passId for launch API:', error);
+    }
+  }, []);
 
   // 请求所有数据权限（首次进入时）
   const requestAllPermissions = useCallback(async () => {
@@ -228,11 +254,13 @@ export default function EchoTab() {
     initUserData();
   }, []);
 
-  // 首次进入时请求所有权限
+  // 首次进入时请求所有权限和调用 launch API
   useEffect(() => {
     // 延迟一点时间，确保用户数据已加载
     const timer = setTimeout(() => {
       requestAllPermissions();
+      // 调用 launch API（fire-and-forget）
+      callLaunchApi();
     }, 500);
 
     return () => {
@@ -244,7 +272,7 @@ export default function EchoTab() {
         console.log('[EchoTab] 🛑 Stopped scheduled upload timer');
       }
     };
-  }, [requestAllPermissions]);
+  }, [requestAllPermissions, callLaunchApi]);
 
   // 生成唯一ID
   const generateTraceId = () => {
