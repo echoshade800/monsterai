@@ -1,13 +1,26 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ReminderCard } from './ReminderCard';
+
+interface ReminderItem {
+  time: string;
+  title: string;
+}
+
+interface ReminderCardData {
+  title: string;
+  monster: string;
+  reminders: ReminderItem[];
+}
 
 interface Message {
   id: string;
-  type: 'user' | 'assistant' | 'timestamp';
+  type: 'user' | 'assistant' | 'timestamp' | 'reminderCard';
   content: string;
   avatar?: string;
   photoUri?: string;
+  reminderCardData?: ReminderCardData;
 }
 
 interface ConversationSectionProps {
@@ -231,6 +244,20 @@ export function ConversationSection({
           return (
             <View key={message.id} style={styles.timestampContainer}>
               <Text style={styles.timestamp}>{message.content}</Text>
+            </View>
+          );
+        }
+
+        if (message.type === 'reminderCard') {
+          return (
+            <View key={message.id} style={styles.reminderCardContainer}>
+              {message.reminderCardData && (
+                <ReminderCard
+                  title={message.reminderCardData.title}
+                  monster={message.reminderCardData.monster}
+                  reminders={message.reminderCardData.reminders}
+                />
+              )}
             </View>
           );
         }
@@ -473,5 +500,9 @@ const styles = StyleSheet.create({
     color: '#999999',
     fontStyle: 'italic',
     flexShrink: 0,
+  },
+  reminderCardContainer: {
+    marginBottom: 15,
+    width: '100%',
   },
 });
