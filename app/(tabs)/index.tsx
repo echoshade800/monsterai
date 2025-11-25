@@ -33,6 +33,7 @@ export default function EchoTab() {
   const permissionsRequestedRef = useRef<boolean>(false);
   const uploadTimerRef = useRef<NodeJS.Timeout | null>(null);
   const launchApiCalledRef = useRef<boolean>(false);
+  const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,10 +150,31 @@ export default function EchoTab() {
       }).catch((error) => {
         console.error('[EchoTab] ❌ Failed to call launch API:', error);
       });
-      
       console.log('[EchoTab] ✅ Launch API called (fire-and-forget)');
     } catch (error) {
       console.error('[EchoTab] ❌ Error getting passId for launch API:', error);
+    }
+  }, []);
+
+  // 心跳请求（每10秒发送一次）
+  const sendHeartbeat = useCallback(async () => {
+    try {
+      const deviceId = await getDeviceId();
+      const timestamp = Date.now().toString();
+      console.log('[EchoTab] 🔄 Sending heartbeat...');
+      api.post(API_ENDPOINTS.HEALTH_DATA.HEARTBEAT, {
+        device_id: deviceId,
+        timestamp: timestamp,
+      }, {
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('[EchoTab] ✅ Heartbeat sent successfully');
+    } catch (error) {
+      console.error('[EchoTab] ❌ Failed to send heartbeat:', error);
+      // 静默处理错误，不阻塞其他功能
     }
   }, []);
 
@@ -273,6 +295,34 @@ export default function EchoTab() {
       }
     };
   }, [requestAllPermissions, callLaunchApi]);
+
+  // 启动心跳定时器（每10秒发送一次心跳）
+  useEffect(() => {
+    console.log('[EchoTab] 🚀 Starting heartbeat timer (every 10 seconds)');
+
+    // 立即发送第一次心跳
+    sendHeartbeat();
+
+    // 设置定时器，每10秒发送一次心跳
+    heartbeatTimerRef.current = setInterval(async () => {
+      try {
+        console.log('[EchoTab] ⏰ Scheduled heartbeat: sending heartbeat...');
+        await sendHeartbeat();
+        console.log('[EchoTab] ✅ Scheduled heartbeat completed');
+      } catch (error) {
+        console.error('[EchoTab] ❌ Scheduled heartbeat failed:', error);
+      }
+    }, 10 * 1000); // 10秒 = 10 * 1000 毫秒
+
+    return () => {
+      // 清理心跳定时器
+      if (heartbeatTimerRef.current) {
+        clearInterval(heartbeatTimerRef.current);
+        heartbeatTimerRef.current = null;
+        console.log('[EchoTab] 🛑 Stopped heartbeat timer');
+      }
+    };
+  }, [sendHeartbeat]);
 
   // 生成唯一ID
   const generateTraceId = () => {

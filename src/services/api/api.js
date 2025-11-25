@@ -113,6 +113,9 @@ export const API_ENDPOINTS = {
   DATA_AGENT: {
     LAUNCH: '/data-agent/launch',
   },
+  HEALTH_DATA: {
+    HEARTBEAT: '/health-data/heartbeat',
+  },
   // 认证相关
   AUTH: {
     LOGIN_BY_EMAIL: '/login/by/email',
