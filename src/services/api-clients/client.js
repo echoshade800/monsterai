@@ -173,8 +173,8 @@ const request = async (url, options = {}) => {
     }
     if (requestConfig.body) {
       try {
-        const bodyObj = typeof requestConfig.body === 'string' 
-          ? JSON.parse(requestConfig.body) 
+        const bodyObj = typeof requestConfig.body === 'string'
+          ? JSON.parse(requestConfig.body)
           : requestConfig.body;
         console.log('Body:', JSON.stringify(bodyObj, null, 2));
       } catch (e) {

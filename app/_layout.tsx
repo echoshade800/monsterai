@@ -1,3 +1,25 @@
+// 重写 console.log 以添加时间戳
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleInfo = console.info;
+
+const addTimestamp = (originalMethod: (...args: any[]) => void, level: string) => {
+  return (...args: any[]) => {
+    const timestamp = new Date().toISOString();
+    // 如果第一个参数已经包含时间戳，则不重复添加
+    if (args.length > 0 && typeof args[0] === 'string' && args[0].startsWith('[') && args[0].includes('T') && args[0].endsWith(']')) {
+      return originalMethod(...args);
+    }
+    return originalMethod(`[${timestamp}]`, ...args);
+  };
+};
+
+console.log = addTimestamp(originalConsoleLog, 'LOG');
+console.error = addTimestamp(originalConsoleError, 'ERROR');
+console.warn = addTimestamp(originalConsoleWarn, 'WARN');
+console.info = addTimestamp(originalConsoleInfo, 'INFO');
+
 import {
   Nunito_400Regular,
   Nunito_500Medium,
@@ -33,7 +55,7 @@ Notifications.setNotificationHandler({
 SplashScreen.preventAutoHideAsync();
 
 // 上传设备 Token 到服务器
-async function uploadDeviceTokenToServer(deviceToken) {
+async function uploadDeviceTokenToServer(deviceToken: string) {
   try {
     const response = await api.post(
       API_ENDPOINTS.DEVICE_TOKEN.SET,
