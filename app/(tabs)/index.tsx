@@ -1197,9 +1197,9 @@ export default function EchoTab() {
         title: "Need a reminder, boss?",
         monster: "poop",
         reminders: [
-          { time: "9:00 AM", title: "Drink warm water" },
-          { time: "12:00 PM", title: "Eat a banana" },
-          { time: "4:00 PM", title: "Sip electrolytes" }
+          { time: "09:00", title: "Drink warm water" },
+          { time: "12:00", title: "Eat a banana" },
+          { time: "16:00", title: "Sip electrolytes" }
         ]
       }
     };

@@ -66,7 +66,8 @@ function ReminderItemRow({ time, title, onTimeChange }: ReminderItemRowProps) {
     setShowTimePicker(true);
   };
 
-  const handleTimeSave = (newTime: string) => {
+  const handleTimeSave = (newTime: string, enabled: boolean) => {
+    // For ReminderCard, we don't use the enabled param (no toggle shown)
     setCurrentTime(newTime);
     onTimeChange(newTime);
     setShowTimePicker(false);

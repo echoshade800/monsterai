@@ -6,85 +6,43 @@ import {
     Modal,
     Pressable,
     StyleSheet,
-    Switch,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { MonsterTimePicker } from './MonsterTimePicker';
+import { WeightPicker } from './WeightPicker';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-const SHEET_HEIGHT = 500; // Approximate height of the sheet
+const SHEET_HEIGHT = 500;
 
-interface TimePickerModalProps {
+type WeightUnit = 'kg' | 'lbs';
+
+interface WeightPickerModalProps {
   visible: boolean;
-  initialTime: string; // Format: "HH:mm" or "OFF"
-  initialEnabled?: boolean; // Whether the reminder is enabled
+  initialWeight: number; // Weight in kg
   onClose: () => void;
-  onSave: (newTime: string, enabled: boolean) => void;
-  showToggle?: boolean; // Whether to show the ON/OFF toggle
+  onSave: (weight: number) => void;
 }
 
-export function TimePickerModal({ 
-  visible, 
-  initialTime, 
-  initialEnabled = true,
-  onClose, 
-  onSave,
-  showToggle = false,
-}: TimePickerModalProps) {
-  const [selectedHour, setSelectedHour] = useState(12);
-  const [selectedMinute, setSelectedMinute] = useState(0);
-  const [isEnabled, setIsEnabled] = useState(initialEnabled);
+// Conversion functions
+const kgToLbs = (kg: number) => kg * 2.20462;
+const lbsToKg = (lbs: number) => lbs / 2.20462;
+
+export function WeightPickerModal({ visible, initialWeight, onClose, onSave }: WeightPickerModalProps) {
+  const [unit, setUnit] = useState<WeightUnit>('kg');
+  const [weightInKg, setWeightInKg] = useState(initialWeight);
 
   // Animation values
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const sheetTranslateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
 
-  // Parse initial time string to hour/minute (24-hour format)
+  // Reset weight when modal opens
   useEffect(() => {
     if (visible) {
-      // Reset enabled state from initialEnabled prop
-      setIsEnabled(initialEnabled);
-
-      if (initialTime) {
-        // Check if time is OFF
-        if (initialTime.toUpperCase() === 'OFF') {
-          setIsEnabled(false);
-          setSelectedHour(8); // Default breakfast time
-          setSelectedMinute(0);
-          return;
-        }
-
-        // Try to parse 12-hour format first (for backward compatibility)
-        const time12Match = initialTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
-        if (time12Match) {
-          let hours = parseInt(time12Match[1], 10);
-          const minutes = parseInt(time12Match[2], 10);
-          const meridiem = time12Match[3].toUpperCase();
-          
-          // Convert 12-hour to 24-hour
-          if (meridiem === 'PM' && hours !== 12) {
-            hours += 12;
-          } else if (meridiem === 'AM' && hours === 12) {
-            hours = 0;
-          }
-          
-          setSelectedHour(hours);
-          setSelectedMinute(minutes);
-        } else {
-          // Try 24-hour format
-          const time24Match = initialTime.match(/(\d+):(\d+)/);
-          if (time24Match) {
-            const hours = parseInt(time24Match[1], 10);
-            const minutes = parseInt(time24Match[2], 10);
-            setSelectedHour(hours);
-            setSelectedMinute(minutes);
-          }
-        }
-      }
+      setWeightInKg(initialWeight);
+      setUnit('kg');
     }
-  }, [initialTime, initialEnabled, visible]);
+  }, [initialWeight, visible]);
 
   // Animation effect
   useEffect(() => {
@@ -121,17 +79,29 @@ export function TimePickerModal({
   }, [visible]);
 
   const handleSave = () => {
-    if (isEnabled) {
-      // Format to "HH:mm" (24-hour format)
-      const formattedTime = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
-      onSave(formattedTime, true);
+    onSave(weightInKg);
+  };
+
+  const handleWeightChange = (weight: number) => {
+    if (unit === 'kg') {
+      setWeightInKg(weight);
     } else {
-      onSave('OFF', false);
+      // Convert lbs to kg
+      setWeightInKg(lbsToKg(weight));
     }
   };
 
-  const getCurrentTimeDisplay = () => {
-    return `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+  const handleUnitToggle = (newUnit: WeightUnit) => {
+    setUnit(newUnit);
+  };
+
+  const getCurrentWeight = () => {
+    return unit === 'kg' ? weightInKg : kgToLbs(weightInKg);
+  };
+
+  const getCurrentWeightDisplay = () => {
+    const weight = getCurrentWeight();
+    return `${weight.toFixed(1)} ${unit}`;
   };
 
   if (!visible) return null;
@@ -170,42 +140,45 @@ export function TimePickerModal({
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Edit reminder time</Text>
+            <Text style={styles.title}>Edit weight</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <X size={24} color="#666666" strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
-          {/* ON/OFF Toggle (only show if showToggle is true) */}
-          {showToggle && (
-            <View style={styles.toggleContainer}>
-              <Text style={styles.toggleLabel}>Reminder</Text>
-              <Switch
-                value={isEnabled}
-                onValueChange={setIsEnabled}
-                trackColor={{ false: '#E9EDF0', true: '#4CCB5E' }}
-                thumbColor={'#FFFFFF'}
-                ios_backgroundColor="#E9EDF0"
-              />
-            </View>
-          )}
+          {/* Unit Toggle (kg / lbs) */}
+          <View style={styles.unitToggleContainer}>
+            <TouchableOpacity
+              style={[styles.unitButton, unit === 'kg' && styles.unitButtonActive]}
+              onPress={() => handleUnitToggle('kg')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.unitButtonText, unit === 'kg' && styles.unitButtonTextActive]}>
+                kg
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.unitButton, unit === 'lbs' && styles.unitButtonActive]}
+              onPress={() => handleUnitToggle('lbs')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.unitButtonText, unit === 'lbs' && styles.unitButtonTextActive]}>
+                lbs
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Current Time Display */}
-          {isEnabled && (
-            <Text style={styles.currentTime}>
-              Current time: {getCurrentTimeDisplay()}
-            </Text>
-          )}
+          {/* Current Weight Display */}
+          <Text style={styles.currentWeight}>
+            Current weight: {getCurrentWeightDisplay()}
+          </Text>
 
-          {/* Custom Time Picker (only show when enabled) */}
-          {isEnabled && (
-            <MonsterTimePicker
-              initialHour={selectedHour}
-              initialMinute={selectedMinute}
-              onHourChange={setSelectedHour}
-              onMinuteChange={setSelectedMinute}
-            />
-          )}
+          {/* Weight Picker */}
+          <WeightPicker
+            initialWeight={getCurrentWeight()}
+            unit={unit}
+            onWeightChange={handleWeightChange}
+          />
 
           {/* Save Button */}
           <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.8}>
@@ -251,7 +224,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
     position: 'relative',
   },
   title: {
@@ -266,23 +239,39 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
   },
-  toggleContainer: {
+  unitToggleContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
     backgroundColor: '#F5F7FA',
     borderRadius: 12,
+    padding: 4,
     marginBottom: 16,
   },
-  toggleLabel: {
+  unitButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unitButtonActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  unitButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000',
+    color: '#999999',
     fontFamily: 'Nunito',
   },
-  currentTime: {
+  unitButtonTextActive: {
+    color: '#000000',
+  },
+  currentWeight: {
     fontSize: 15,
     color: '#666666',
     textAlign: 'center',

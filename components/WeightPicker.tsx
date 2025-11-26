@@ -1,82 +1,101 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-interface MonsterTimePickerProps {
-  initialHour: number;      // 0-23 (24-hour format)
-  initialMinute: number;    // 0-59
-  onHourChange: (hour: number) => void;
-  onMinuteChange: (minute: number) => void;
+interface WeightPickerProps {
+  initialWeight: number; // Weight value (e.g., 58.4)
+  unit: 'kg' | 'lbs';
+  onWeightChange: (weight: number) => void;
 }
 
 const ITEM_HEIGHT = 40;
 const VISIBLE_ITEMS = 5;
 const CONTAINER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 
-export function MonsterTimePicker({
-  initialHour,
-  initialMinute,
-  onHourChange,
-  onMinuteChange,
-}: MonsterTimePickerProps) {
-  const hourScrollRef = useRef<ScrollView>(null);
-  const minuteScrollRef = useRef<ScrollView>(null);
+export function WeightPicker({
+  initialWeight,
+  unit,
+  onWeightChange,
+}: WeightPickerProps) {
+  const integerScrollRef = useRef<ScrollView>(null);
+  const decimalScrollRef = useRef<ScrollView>(null);
 
-  const [selectedHour, setSelectedHour] = useState(initialHour);
-  const [selectedMinute, setSelectedMinute] = useState(initialMinute);
+  // Split weight into integer and decimal parts
+  const initialInteger = Math.floor(initialWeight);
+  const initialDecimal = Math.round((initialWeight - initialInteger) * 10);
 
-  // Generate data arrays - 24 hour format
-  const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23
-  const minutes = Array.from({ length: 60 }, (_, i) => i);
+  const [selectedInteger, setSelectedInteger] = useState(initialInteger);
+  const [selectedDecimal, setSelectedDecimal] = useState(initialDecimal);
 
-  // Scroll to initial position on mount
+  // Generate data arrays based on unit
+  const minWeight = unit === 'kg' ? 30 : 66; // 30kg or 66lbs
+  const maxWeight = unit === 'kg' ? 200 : 440; // 200kg or 440lbs
+  
+  const integers = Array.from({ length: maxWeight - minWeight + 1 }, (_, i) => minWeight + i);
+  const decimals = Array.from({ length: 10 }, (_, i) => i); // 0-9 for .0 to .9
+
+  // Scroll to initial position on mount or when unit changes
   useEffect(() => {
     setTimeout(() => {
-      const hourIndex = initialHour; // 0-23, directly use as index
-      const minuteIndex = initialMinute;
+      const integerIndex = integers.indexOf(selectedInteger);
+      const decimalIndex = selectedDecimal;
 
-      if (hourScrollRef.current && hourIndex >= 0) {
-        hourScrollRef.current.scrollTo({ y: hourIndex * ITEM_HEIGHT, animated: false });
+      if (integerScrollRef.current && integerIndex >= 0) {
+        integerScrollRef.current.scrollTo({ y: integerIndex * ITEM_HEIGHT, animated: false });
       }
-      if (minuteScrollRef.current && minuteIndex >= 0) {
-        minuteScrollRef.current.scrollTo({ y: minuteIndex * ITEM_HEIGHT, animated: false });
+      if (decimalScrollRef.current && decimalIndex >= 0) {
+        decimalScrollRef.current.scrollTo({ y: decimalIndex * ITEM_HEIGHT, animated: false });
       }
     }, 100);
-  }, []);
+  }, [unit]);
 
   const handleScroll = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
     data: number[],
-    setter: (value: any) => void,
-    callback: (value: any) => void
+    setter: (value: number) => void,
+    onChange: (value: number) => void
   ) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const index = Math.round(offsetY / ITEM_HEIGHT);
     const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
     const value = data[clampedIndex];
-    
     setter(value);
-    callback(value);
+    onChange(value);
   };
 
   const handleScrollEnd = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
     scrollRef: React.RefObject<ScrollView>,
-    data: number[] | ('AM' | 'PM')[]
+    data: number[]
   ) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const index = Math.round(offsetY / ITEM_HEIGHT);
     const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
     
-    scrollRef.current?.scrollTo({ y: clampedIndex * ITEM_HEIGHT, animated: true });
+    scrollRef.current?.scrollTo({
+      y: clampedIndex * ITEM_HEIGHT,
+      animated: true,
+    });
+  };
+
+  const handleIntegerChange = (value: number) => {
+    setSelectedInteger(value);
+    const weight = value + selectedDecimal / 10;
+    onWeightChange(weight);
+  };
+
+  const handleDecimalChange = (value: number) => {
+    setSelectedDecimal(value);
+    const weight = selectedInteger + value / 10;
+    onWeightChange(weight);
   };
 
   const renderColumn = (
-    data: (number | 'AM' | 'PM')[],
-    selectedValue: number | 'AM' | 'PM',
+    data: number[],
+    selectedValue: number,
     scrollRef: React.RefObject<ScrollView>,
     onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void,
     onScrollEnd: (event: NativeSyntheticEvent<NativeScrollEvent>) => void,
-    formatValue?: (value: number | string) => string
+    isInteger: boolean = true
   ) => {
     return (
       <ScrollView
@@ -95,7 +114,7 @@ export function MonsterTimePicker({
         
         {data.map((value, index) => {
           const isSelected = value === selectedValue;
-          const displayValue = formatValue ? formatValue(value) : String(value);
+          const displayValue = isInteger ? String(value) : `.${value}`;
           
           return (
             <View key={index} style={styles.item}>
@@ -118,27 +137,27 @@ export function MonsterTimePicker({
       <View style={styles.selectionIndicator} />
       
       <View style={styles.columnsContainer}>
-        {/* Hour column */}
+        {/* Integer column */}
         {renderColumn(
-          hours,
-          selectedHour,
-          hourScrollRef,
-          (e) => handleScroll(e, hours, setSelectedHour, onHourChange),
-          (e) => handleScrollEnd(e, hourScrollRef, hours),
-          (value) => String(value).padStart(2, '0')
+          integers,
+          selectedInteger,
+          integerScrollRef,
+          (e) => handleScroll(e, integers, setSelectedInteger, handleIntegerChange),
+          (e) => handleScrollEnd(e, integerScrollRef, integers),
+          true
         )}
 
-        {/* Separator */}
-        <Text style={styles.separator}>:</Text>
+        {/* Decimal point */}
+        <Text style={styles.separator}>.</Text>
 
-        {/* Minute column */}
+        {/* Decimal column */}
         {renderColumn(
-          minutes,
-          selectedMinute,
-          minuteScrollRef,
-          (e) => handleScroll(e, minutes, setSelectedMinute, onMinuteChange),
-          (e) => handleScrollEnd(e, minuteScrollRef, minutes),
-          (value) => String(value).padStart(2, '0')
+          decimals,
+          selectedDecimal,
+          decimalScrollRef,
+          (e) => handleScroll(e, decimals, setSelectedDecimal, handleDecimalChange),
+          (e) => handleScrollEnd(e, decimalScrollRef, decimals),
+          false
         )}
       </View>
     </View>
@@ -172,7 +191,7 @@ const styles = StyleSheet.create({
     height: CONTAINER_HEIGHT,
   },
   column: {
-    width: 70,
+    width: 80,
     height: CONTAINER_HEIGHT,
   },
   scrollContent: {
@@ -200,7 +219,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#000000',
     fontWeight: '600',
-    marginHorizontal: 8,
+    marginHorizontal: 4,
     fontFamily: 'Nunito',
   },
 });

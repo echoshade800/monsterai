@@ -1,7 +1,8 @@
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
-import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ArrowLeft, ArrowRight, ChevronRight } from 'lucide-react-native';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -9,9 +10,14 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { EatingWindowPickerModal } from '../components/EatingWindowPickerModal';
+import { EatingWindowTimeline } from '../components/EatingWindowTimeline';
 import { TimePickerModal } from '../components/TimePickerModal';
+import { WeightPickerModal } from '../components/WeightPickerModal';
+import { getStrategyById } from '../constants/strategies';
 
 // Mock data interfaces
 interface ReminderItem {
@@ -28,17 +34,29 @@ interface MealItem {
 
 export default function EnergyDetailScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   
   // States
   const [expandedMealPlan, setExpandedMealPlan] = useState(false);
+  const [currentStrategyId, setCurrentStrategyId] = useState<string | null>(null);
   const [reminders, setReminders] = useState<ReminderItem[]>([
     { id: '1', name: 'Breakfast Reminder', time: 'OFF', enabled: false },
-    { id: '2', name: 'Lunch Reminder', time: '12:00', enabled: true },
+    { id: '2', name: 'Lunch Reminder', time: '13:00', enabled: true },
     { id: '3', name: 'Dinner Reminder', time: '19:30', enabled: true },
     { id: '4', name: 'Eating Window', time: '12:00 – 20:00', enabled: true },
   ]);
   const [selectedReminderId, setSelectedReminderId] = useState<string | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  
+  // Weight states
+  const [currentWeight, setCurrentWeight] = useState(58.4);
+  const [goalWeight, setGoalWeight] = useState(52.0);
+  const [showWeightPicker, setShowWeightPicker] = useState(false);
+  const [weightPickerType, setWeightPickerType] = useState<'current' | 'goal'>('current');
+
+  // Eating Window state
+  const [showEatingWindowPicker, setShowEatingWindowPicker] = useState(false);
 
   // Today's meals
   const todayMeals: MealItem[] = [
@@ -46,6 +64,70 @@ export default function EnergyDetailScreen() {
     { type: 'Lunch', description: 'Quinoa bowl with grilled veggies & chickpeas' },
     { type: 'Dinner', description: 'Baked salmon + sweet potato + steamed greens' },
   ];
+
+  // Helper function to create a Date from time string (e.g., "13:00")
+  const createTimeToday = (hour: number, minute: number = 0): Date => {
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+    return date;
+  };
+
+  // Helper function to parse time string like "13:00" to Date
+  const parseTimeString = (timeStr: string): Date => {
+    const match = timeStr.match(/(\d+):(\d+)/);
+    if (match) {
+      const hour = parseInt(match[1], 10);
+      const minute = parseInt(match[2], 10);
+      return createTimeToday(hour, minute);
+    }
+    return createTimeToday(12, 0); // fallback
+  };
+
+  // Helper function to parse eating window time range like "12:00 – 20:00"
+  const parseEatingWindowRange = (timeRange: string): { start: Date; end: Date } => {
+    const match = timeRange.match(/(\d+):(\d+)\s*[–-]\s*(\d+):(\d+)/);
+    if (match) {
+      const startHour = parseInt(match[1], 10);
+      const startMinute = parseInt(match[2], 10);
+      const endHour = parseInt(match[3], 10);
+      const endMinute = parseInt(match[4], 10);
+      return {
+        start: createTimeToday(startHour, startMinute),
+        end: createTimeToday(endHour, endMinute),
+      };
+    }
+    return { start: createTimeToday(12, 0), end: createTimeToday(20, 0) }; // fallback
+  };
+
+  // Dynamically calculate eating window data based on reminders
+  const eatingWindowData = useMemo(() => {
+    const eatingWindowReminder = reminders.find(r => r.name === 'Eating Window');
+    const lunchReminder = reminders.find(r => r.name === 'Lunch Reminder');
+    const dinnerReminder = reminders.find(r => r.name === 'Dinner Reminder');
+
+    const eatingWindowRange = eatingWindowReminder 
+      ? parseEatingWindowRange(eatingWindowReminder.time)
+      : { start: createTimeToday(12, 0), end: createTimeToday(20, 0) };
+
+    const lunchTime = lunchReminder && lunchReminder.time !== 'OFF'
+      ? parseTimeString(lunchReminder.time)
+      : createTimeToday(13, 0);
+
+    const dinnerTime = dinnerReminder && dinnerReminder.time !== 'OFF'
+      ? parseTimeString(dinnerReminder.time)
+      : createTimeToday(19, 30);
+
+    return {
+      eatingWindowStart: eatingWindowRange.start,
+      eatingWindowEnd: eatingWindowRange.end,
+      lunchTime: lunchTime,
+      dinnerTime: dinnerTime,
+      eatingSlots: [
+        { start: createTimeToday(12, 10), end: createTimeToday(14, 0) },   // Lunch eating slot
+        { start: createTimeToday(19, 0), end: createTimeToday(19, 45) },   // Dinner eating slot
+      ],
+    };
+  }, [reminders]); // Recalculate when reminders change
 
   // Inside My Mind data
   const insideMindData = [
@@ -58,16 +140,24 @@ export default function EnergyDetailScreen() {
 
   const handleReminderPress = (id: string) => {
     const reminder = reminders.find(r => r.id === id);
-    if (reminder && reminder.enabled && reminder.time !== 'OFF') {
-      setSelectedReminderId(id);
-      setShowTimePicker(true);
+    if (reminder) {
+      if (reminder.id === '4') {
+        // Eating Window - open special picker
+        setShowEatingWindowPicker(true);
+      } else {
+        // Regular reminder - open time picker
+        setSelectedReminderId(id);
+        setShowTimePicker(true);
+      }
     }
   };
 
-  const handleTimeSave = (newTime: string) => {
+  const handleTimeSave = (newTime: string, enabled: boolean) => {
     if (selectedReminderId) {
       setReminders(prev => prev.map(r => 
-        r.id === selectedReminderId ? { ...r, time: newTime } : r
+        r.id === selectedReminderId 
+          ? { ...r, time: enabled ? newTime : 'OFF', enabled } 
+          : r
       ));
     }
     setShowTimePicker(false);
@@ -75,11 +165,56 @@ export default function EnergyDetailScreen() {
   };
 
   const handleStrategyPress = () => {
-    router.push('/energy-strategy-selection');
+    router.push({
+      pathname: '/energy-strategy-list',
+      params: { currentStrategyId: currentStrategyId || '' },
+    });
   };
+
+  // Handle strategy selection from params
+  useEffect(() => {
+    if (params.selectedStrategyId) {
+      setCurrentStrategyId(params.selectedStrategyId as string);
+    }
+  }, [params.selectedStrategyId]);
 
   const handleWeeklyReportPress = () => {
     router.push('/energy-weekly-report');
+  };
+
+  const handleWeightPress = (type: 'current' | 'goal') => {
+    setWeightPickerType(type);
+    setShowWeightPicker(true);
+  };
+
+  const handleWeightSave = (weight: number) => {
+    if (weightPickerType === 'current') {
+      setCurrentWeight(weight);
+    } else {
+      setGoalWeight(weight);
+    }
+    setShowWeightPicker(false);
+  };
+
+  const handleEatingWindowSave = (startTime: string, endTime: string, enabled: boolean) => {
+    setReminders(prev => prev.map(r => 
+      r.id === '4' 
+        ? { 
+            ...r, 
+            time: enabled ? `${startTime} – ${endTime}` : 'OFF', 
+            enabled 
+          } 
+        : r
+    ));
+    setShowEatingWindowPicker(false);
+  };
+
+  const handleChatWithMe = () => {
+    // Navigate to Echo page (main chat) with @energy pre-filled
+    router.push({
+      pathname: '/(tabs)',
+      params: { mentionAgent: 'energy' },
+    });
   };
 
   return (
@@ -87,7 +222,7 @@ export default function EnergyDetailScreen() {
       <StatusBar barStyle="dark-content" />
       
       {/* Navigation Bar */}
-      <View style={styles.navBar}>
+      <View style={[styles.navBar, { paddingTop: insets.top }]}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => router.back()}
@@ -112,12 +247,6 @@ export default function EnergyDetailScreen() {
             source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/energy/energylay.png' }}
             style={styles.heroImage}
             resizeMode="cover"
-          />
-          {/* Bottom gradient overlay - only at the very bottom */}
-          <LinearGradient
-            colors={['rgba(235, 237, 245, 0)', 'rgba(235, 237, 245, 1)']}
-            style={styles.heroGradient}
-            pointerEvents="none"
           />
         </View>
 
@@ -187,16 +316,14 @@ export default function EnergyDetailScreen() {
             </Text>
           </View>
 
-          {/* Time Axis */}
-          <View style={styles.timeAxis}>
-            <View style={styles.timeAxisBar}>
-              <Text style={styles.timeAxisLabel}>12:00</Text>
-              <View style={styles.timeAxisLine}>
-                <View style={styles.timeAxisActive} />
-              </View>
-              <Text style={styles.timeAxisLabel}>20:00</Text>
-            </View>
-          </View>
+          {/* Eating Window Timeline */}
+          <EatingWindowTimeline
+            eatingWindowStart={eatingWindowData.eatingWindowStart}
+            eatingWindowEnd={eatingWindowData.eatingWindowEnd}
+            lunchTime={eatingWindowData.lunchTime}
+            dinnerTime={eatingWindowData.dinnerTime}
+            eatingSlots={eatingWindowData.eatingSlots}
+          />
 
           {/* Today's Meals */}
           <View style={styles.mealsSection}>
@@ -235,12 +362,122 @@ export default function EnergyDetailScreen() {
             <Text style={styles.expandArrow}>{expandedMealPlan ? '▲' : '▼'}</Text>
           </TouchableOpacity>
 
-          {/* Expanded Content */}
+          {/* Expanded Content - Next 3 Days */}
           {expandedMealPlan && (
             <View style={styles.expandedContent}>
-              <Text style={styles.expandedText}>Monday: Light meals with vegetables</Text>
-              <Text style={styles.expandedText}>Tuesday: Protein-rich breakfast and lunch</Text>
-              <Text style={styles.expandedText}>Wednesday: Balanced meals throughout the day</Text>
+              {/* November 26 (Wednesday) */}
+              <View style={styles.expandedDaySection}>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealsSectionTitle}>November 26</Text>
+                    <Text style={styles.mealDaySubtitle}>(wednesday)</Text>
+                  </View>
+                  <View style={styles.mealContent} />
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🍳</Text>
+                    <Text style={styles.mealType}>Breakfast</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Greek yogurt + banana + almonds</Text>
+                  </View>
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🥗</Text>
+                    <Text style={styles.mealType}>Lunch</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Whole-wheat wrap with hummus & veggies</Text>
+                  </View>
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🍽️</Text>
+                    <Text style={styles.mealType}>Dinner</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Tofu stir-fry + brown rice + bok choy</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* November 27 (Thursday) */}
+              <View style={styles.expandedDaySection}>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealsSectionTitle}>November 27</Text>
+                    <Text style={styles.mealDaySubtitle}>(thursday)</Text>
+                  </View>
+                  <View style={styles.mealContent} />
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🍳</Text>
+                    <Text style={styles.mealType}>Breakfast</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Smoothie: spinach, mango, flaxseed</Text>
+                  </View>
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🥗</Text>
+                    <Text style={styles.mealType}>Lunch</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Lentil soup + whole-grain toast</Text>
+                  </View>
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🍽️</Text>
+                    <Text style={styles.mealType}>Dinner</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Grilled cod + quinoa + roasted zucchini</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* November 28 (Friday) */}
+              <View style={styles.expandedDaySection}>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealsSectionTitle}>November 28</Text>
+                    <Text style={styles.mealDaySubtitle}>(friday)</Text>
+                  </View>
+                  <View style={styles.mealContent} />
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🍳</Text>
+                    <Text style={styles.mealType}>Breakfast</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Scrambled eggs + whole-wheat toast</Text>
+                  </View>
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🥗</Text>
+                    <Text style={styles.mealType}>Lunch</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Mediterranean salad with feta</Text>
+                  </View>
+                </View>
+                <View style={styles.mealRow}>
+                  <View style={styles.mealLabel}>
+                    <Text style={styles.mealIcon}>🍽️</Text>
+                    <Text style={styles.mealType}>Dinner</Text>
+                  </View>
+                  <View style={styles.mealContent}>
+                    <Text style={styles.mealDescription}>Chicken breast + roasted vegetables</Text>
+                  </View>
+                </View>
+              </View>
             </View>
           )}
 
@@ -271,55 +508,89 @@ export default function EnergyDetailScreen() {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeaderTitle}>🧠 Inside My Mind</Text>
           <View style={styles.insideMindCard}>
-          <View style={styles.insideMindContent}>
-            {insideMindData.map((item, index) => (
-              <View key={index} style={styles.insideMindRow}>
-                <Text style={styles.insideMindTime}>{item.time}</Text>
-                <Text style={styles.insideMindText}> {item.text}</Text>
-              </View>
-            ))}
+            <ScrollView 
+              style={styles.insideMindScrollView}
+              contentContainerStyle={styles.insideMindContent}
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+            >
+              {insideMindData.map((item, index) => (
+                <View key={index} style={styles.insideMindRow}>
+                  <Text style={styles.insideMindTime}>{item.time}</Text>
+                  <Text style={styles.insideMindText}> {item.text}</Text>
+                </View>
+              ))}
+            </ScrollView>
           </View>
-        </View>
         </View>
 
         {/* Current Strategy */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeaderTitle}>Current Strategy</Text>
           <View style={styles.strategyCard}>
-          <View style={styles.ipHeader}>
-            <Image
-              source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/energy/energyspeak.png' }}
-              style={styles.ipHeaderAvatar}
-            />
-            <Text style={styles.ipHeaderText}>
-              Fuel in 8 hours—supports fat burn.
-            </Text>
-          </View>
+            <View style={styles.ipHeader}>
+              <Image
+                source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/energy/energyspeak.png' }}
+                style={styles.ipHeaderAvatar}
+              />
+              <Text style={styles.ipHeaderText}>
+                {currentStrategyId 
+                  ? "Fuel in 8 hours—supports fat burn."
+                  : "Choose a method that fits your lifestyle 🍽️"
+                }
+              </Text>
+            </View>
 
-          <TouchableOpacity 
-            style={styles.strategyRow}
-            onPress={handleStrategyPress}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.strategyTitle}>Intermittent Fasting (16/8)</Text>
-            <Text style={styles.strategyArrow}>›</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.strategyRow}
+              onPress={handleStrategyPress}
+              activeOpacity={0.7}
+            >
+              {currentStrategyId ? (
+                <>
+                  <Text style={styles.strategyTitle}>
+                    {getStrategyById(currentStrategyId)?.name || 'Unknown Strategy'}
+                  </Text>
+                  <ChevronRight size={20} color="#666666" strokeWidth={2} />
+                </>
+              ) : (
+                <View style={styles.strategyEmptyState}>
+                  <View style={styles.strategyEmptyTextContainer}>
+                    <Text style={styles.strategyEmptyTitle}>
+                      Choose your weight management method
+                    </Text>
+                    <Text style={styles.strategyEmptySubtitle}>
+                      Pick a style that matches how you like to eat.
+                    </Text>
+                  </View>
+                  <ChevronRight size={20} color="#666666" strokeWidth={2} />
+                </View>
+              )}
+            </TouchableOpacity>
 
-          <View style={styles.strategyDataRows}>
-            <View style={styles.strategyDataRow}>
-              <Text style={styles.strategyDataLabel}>Current Weight</Text>
-              <Text style={styles.strategyDataValue}>58.4kg</Text>
-            </View>
-            <View style={styles.strategyDataRow}>
-              <Text style={styles.strategyDataLabel}>Goal Weight</Text>
-              <Text style={styles.strategyDataValue}>52kg</Text>
-            </View>
-            <View style={styles.strategyDataRow}>
-              <Text style={styles.strategyDataLabel}>Weekly Goal</Text>
-              <Text style={styles.strategyDataValue}>Lose 1kg per week</Text>
+            <View style={styles.strategyDataRows}>
+              <TouchableOpacity 
+                style={styles.strategyDataRow}
+                onPress={() => handleWeightPress('current')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.strategyDataLabel}>Current Weight</Text>
+                <Text style={styles.strategyDataValue}>{currentWeight.toFixed(1)}kg</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.strategyDataRow}
+                onPress={() => handleWeightPress('goal')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.strategyDataLabel}>Goal Weight</Text>
+                <Text style={styles.strategyDataValue}>{goalWeight.toFixed(1)}kg</Text>
+              </TouchableOpacity>
+              <View style={styles.strategyDataRow}>
+                <Text style={styles.strategyDataLabel}>Weekly Goal</Text>
+                <Text style={styles.strategyDataValue}>Lose 1kg per week</Text>
+              </View>
             </View>
           </View>
-        </View>
         </View>
 
         {/* Basic Info */}
@@ -394,18 +665,73 @@ export default function EnergyDetailScreen() {
         </View>
       </ScrollView>
 
+      {/* Chat with me Button - Fixed at bottom - Double Layer Capsule */}
+      <View style={[styles.chatButtonContainer, { bottom: insets.bottom + 16 }]}>
+        {/* Outer Layer - Gradient Border with White Border */}
+        <View style={styles.chatButtonOuterWrapper}>
+          <LinearGradient
+            colors={['rgba(255, 140, 51, 0.15)', 'rgba(255, 255, 255, 0)', 'rgba(46, 70, 255, 0.15)']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            locations={[0, 0.49, 1]}
+            style={styles.chatButtonOuter}
+          >
+            {/* Inner Layer - Frosted Glass Capsule */}
+            <TouchableOpacity
+              style={styles.chatButtonInner}
+              onPress={handleChatWithMe}
+              activeOpacity={0.85}
+            >
+              <BlurView intensity={60} tint="light" style={styles.chatButtonBlur}>
+                <LinearGradient
+                  colors={['rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0.9)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.chatButtonInnerGradient}
+                >
+                  <View style={styles.chatButtonContent}>
+                    <Text style={styles.chatButtonText}>Chat with me</Text>
+                    <ArrowRight size={20} color="#000000" strokeWidth={2.5} />
+                  </View>
+                </LinearGradient>
+              </BlurView>
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+      </View>
+
       {/* Time Picker Modal */}
       {showTimePicker && selectedReminderId && (
         <TimePickerModal
           visible={showTimePicker}
-          initialTime={reminders.find(r => r.id === selectedReminderId)?.time || '12:00 AM'}
+          initialTime={reminders.find(r => r.id === selectedReminderId)?.time || '12:00'}
+          initialEnabled={reminders.find(r => r.id === selectedReminderId)?.enabled ?? true}
           onClose={() => {
             setShowTimePicker(false);
             setSelectedReminderId(null);
           }}
           onSave={handleTimeSave}
+          showToggle={true}
         />
       )}
+
+      {/* Weight Picker Modal */}
+      <WeightPickerModal
+        visible={showWeightPicker}
+        initialWeight={weightPickerType === 'current' ? currentWeight : goalWeight}
+        onClose={() => setShowWeightPicker(false)}
+        onSave={handleWeightSave}
+      />
+
+      {/* Eating Window Picker Modal */}
+      <EatingWindowPickerModal
+        visible={showEatingWindowPicker}
+        startTime={reminders.find(r => r.id === '4')?.time.split(' – ')[0] || '12:00'}
+        endTime={reminders.find(r => r.id === '4')?.time.split(' – ')[1] || '20:00'}
+        enabled={reminders.find(r => r.id === '4')?.enabled ?? true}
+        onClose={() => setShowEatingWindowPicker(false)}
+        onSave={handleEatingWindowSave}
+      />
     </View>
   );
 }
@@ -455,24 +781,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 120, // Extra space for fixed button
   },
   heroContainer: {
     width: '100%',
     height: 150,
     overflow: 'hidden',
-    position: 'relative',
   },
   heroImage: {
     width: '100%',
     height: '100%',
-  },
-  heroGradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 50,
   },
   dataBanner: {
     backgroundColor: '#FFFFFF',
@@ -600,31 +918,6 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontFamily: 'Nunito',
   },
-  timeAxis: {
-    marginBottom: 20,
-  },
-  timeAxisBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  timeAxisLabel: {
-    fontSize: 12,
-    color: '#666666',
-    fontFamily: 'Nunito',
-  },
-  timeAxisLine: {
-    flex: 1,
-    height: 4,
-    backgroundColor: '#E9EDF0',
-    marginHorizontal: 12,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  timeAxisActive: {
-    width: '60%',
-    height: '100%',
-    backgroundColor: '#FF9F66',
-  },
   mealsSection: {
     marginBottom: 16,
   },
@@ -689,14 +982,10 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
   expandedContent: {
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingTop: 12,
   },
-  expandedText: {
-    fontSize: 13,
-    color: '#666666',
-    marginBottom: 8,
-    fontFamily: 'Nunito',
+  expandedDaySection: {
+    marginBottom: 16,
   },
   remindersSection: {
     marginTop: 16,
@@ -736,9 +1025,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     padding: 16,
     borderRadius: 16,
+    maxHeight: 300, // Set maximum height for scrolling
+  },
+  insideMindScrollView: {
+    maxHeight: 268, // Card maxHeight (300) - padding (16*2)
   },
   insideMindContent: {
     gap: 12,
+    paddingBottom: 8, // Extra padding at bottom for better scroll experience
   },
   insideMindRow: {
     flexDirection: 'row',
@@ -780,6 +1074,29 @@ const styles = StyleSheet.create({
   strategyArrow: {
     fontSize: 24,
     color: '#666666',
+  },
+  strategyEmptyState: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  strategyEmptyTextContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  strategyEmptyTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 4,
+    fontFamily: 'Nunito',
+  },
+  strategyEmptySubtitle: {
+    fontSize: 13,
+    color: '#666666',
+    lineHeight: 18,
+    fontFamily: 'Nunito',
   },
   strategyDataRows: {
     gap: 12,
@@ -849,6 +1166,60 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
+    fontFamily: 'Nunito',
+  },
+  chatButtonContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  chatButtonOuterWrapper: {
+    width: 218,
+    height: 59,
+    borderRadius: 60,
+    borderWidth: 0.5,
+    borderColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  chatButtonOuter: {
+    flex: 1,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  chatButtonInner: {
+    width: 202,
+    height: 42,
+    borderRadius: 60,
+    overflow: 'hidden',
+  },
+  chatButtonBlur: {
+    flex: 1,
+    borderRadius: 60,
+    overflow: 'hidden',
+  },
+  chatButtonInnerGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chatButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  chatButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
     fontFamily: 'Nunito',
   },
 });
