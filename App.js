@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { analytics, auth } from './config/firebase';
+r
 
 // 配置通知处理程序
 Notifications.setNotificationHandler({

@@ -17,12 +17,24 @@ import healthDataManager from '../../src/utils/health-data-manager';
 import locationManager from '../../src/utils/location-manager';
 import mobileDataManager from '../../src/utils/mobile-data-manager';
 import storageManager from '../../src/utils/storage';
+interface ReminderItem {
+  time: string;
+  title: string;
+}
+
+interface ReminderCardData {
+  title: string;
+  monster: string;
+  reminders: ReminderItem[];
+}
+
 interface Message {
   id: string;
-  type: 'user' | 'assistant' | 'timestamp';
+  type: 'user' | 'assistant' | 'timestamp' | 'reminderCard';
   content: string;
   avatar?: string;
   photoUri?: string;
+  reminderCardData?: ReminderCardData;
 }
 
 export default function EchoTab() {
@@ -1175,6 +1187,26 @@ export default function EchoTab() {
     Keyboard.dismiss();
   }, []);
 
+  // Test reminder function - inserts a reminder card into the chat
+  const handleTestReminder = useCallback(() => {
+    const reminderMessage: Message = {
+      id: `reminder_${Date.now()}`,
+      type: 'reminderCard',
+      content: '',
+      reminderCardData: {
+        title: "Need a reminder, boss?",
+        monster: "poop",
+        reminders: [
+          { time: "9:00 AM", title: "Drink warm water" },
+          { time: "12:00 PM", title: "Eat a banana" },
+          { time: "4:00 PM", title: "Sip electrolytes" }
+        ]
+      }
+    };
+    
+    setMessages(prev => [...prev, reminderMessage]);
+  }, []);
+
   return (
     <View style={styles.container}>
       <TouchableWithoutFeedback onPress={dismissKeyboard}>
@@ -1183,6 +1215,7 @@ export default function EchoTab() {
           isCollapsed={isCollapsed}
           onCollapse={handleCollapse}
           refreshTrigger={refreshTrigger}
+          onTestReminder={handleTestReminder}
         />
           <ConversationSection
             messages={messages}

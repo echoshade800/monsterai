@@ -5,13 +5,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Image, ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  Extrapolate,
-  interpolate,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
+    Extrapolate,
+    interpolate,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withTiming,
 } from 'react-native-reanimated';
 import { api, getTimezone } from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
@@ -21,6 +21,7 @@ interface HeaderProps {
   isCollapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
   refreshTrigger?: number; // 当这个值变化时，触发刷新 AgentLogs
+  onTestReminder?: () => void; // Test reminder button callback
 }
 
 const EXPANDED_HEIGHT_WITH_TODO = 600;
@@ -77,7 +78,7 @@ interface TodoItem {
   done: boolean;
 }
 
-export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: HeaderProps) {
+export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTestReminder }: HeaderProps) {
   const [isDone, setIsDone] = useState(false);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
@@ -453,6 +454,15 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
     };
   });
 
+  const sharedTestButtonStyle = useAnimatedStyle(() => {
+    return {
+      position: 'absolute',
+      right: 72,
+      top: Platform.OS === 'ios' ? 126 : (StatusBar.currentHeight || 0) + 76,
+      zIndex: 1001,
+    };
+  });
+
   const sharedTitleStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
@@ -480,6 +490,15 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger }: Head
         <Animated.View style={sharedTitleStyle}>
           <Text style={styles.titleText}>MonsterAI</Text>
         </Animated.View>
+
+        {/* Shared Test Button - Always mounted */}
+        {onTestReminder && (
+          <Animated.View style={sharedTestButtonStyle}>
+            <TouchableOpacity onPress={onTestReminder} style={styles.testButton}>
+              <Text style={styles.testButtonText}>Test</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
         {/* Shared Profile Button - Always mounted */}
         <Animated.View style={sharedProfileStyle}>
@@ -907,5 +926,17 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: 'Nunito_700Bold',
     color: '#000000',
+  },
+  testButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  testButtonText: {
+    fontSize: 13,
+    fontFamily: 'Nunito_400Regular',
+    color: '#B5B5B5',
   },
 });

@@ -2752,6 +2752,34 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - RNDateTimePicker (8.5.1):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RNFBAnalytics (23.5.0):
     - FirebaseAnalytics/Core (= 12.4.0)
     - FirebaseAnalytics/IdentitySupport (= 12.4.0)
@@ -3262,6 +3290,7 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
+  - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - "RNFBAnalytics (from `../node_modules/@react-native-firebase/analytics`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -3539,6 +3568,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-clipboard/clipboard"
   RNCPicker:
     :path: "../node_modules/@react-native-picker/picker"
+  RNDateTimePicker:
+    :path: "../node_modules/@react-native-community/datetimepicker"
   RNFBAnalytics:
     :path: "../node_modules/@react-native-firebase/analytics"
   RNFBApp:
@@ -3698,6 +3729,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: fd44f4b03e007e642e98df6726737bc66e9ba609
   RNCClipboard: e560338bf6cc4656a09ff90610b62ddc0dbdad65
   RNCPicker: 70fd0622147f0ca1b9c5e1be2069a4fb2e8ec461
+  RNDateTimePicker: 97a3b0fe0de31eca826f8fc75bb9a84bb5af1fc2
   RNFBAnalytics: 3b2503534454382973877bf0c5ee8daa20643204
   RNFBApp: 78d866e12b98c79b7cb141fcdcdf9813eae09b15
   RNGestureHandler: b8d2e75c2e88fc2a1f6be3b3beeeed80b88fa37d

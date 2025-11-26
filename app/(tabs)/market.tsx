@@ -210,10 +210,15 @@ export default function MarketTab() {
 
   const handleFingerprintPress = (agentName: string) => {
     console.log('Fingerprint pressed:', agentName);
-    router.push({
-      pathname: '/agent-detail',
-      params: { id: agentName },
-    });
+    // Special handling for Energy agent
+    if (agentName === 'energy') {
+      router.push('/energy-detail');
+    } else {
+      router.push({
+        pathname: '/agent-detail',
+        params: { id: agentName },
+      });
+    }
   };
 
   const handleHirePress = (monsterId: string) => {
