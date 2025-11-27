@@ -6,100 +6,47 @@ import {
     Modal,
     Pressable,
     StyleSheet,
-    Switch,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { MonsterTimePicker } from './MonsterTimePicker';
+import { HeightPicker } from './HeightPicker';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-const SHEET_HEIGHT = 500; // Approximate height of the sheet
+const SHEET_HEIGHT = 500;
 
-interface TimePickerModalProps {
+type HeightUnit = 'cm' | 'ft';
+
+interface HeightPickerModalProps {
   visible: boolean;
-  initialTime: string; // Format: "HH:mm" or "OFF"
-  initialEnabled?: boolean; // Whether the reminder is enabled
+  initialHeight: number; // Height in cm
   onClose: () => void;
-  onSave: (newTime: string, enabled: boolean) => void;
-  showToggle?: boolean; // Whether to show the ON/OFF toggle
+  onSave: (height: number) => void;
 }
 
-// Helper function to parse time string to hour/minute
-const parseTimeString = (timeStr: string): { hour: number; minute: number } => {
-  // Default to 12:00 if parsing fails
-  let hour = 12;
-  let minute = 0;
-
-  if (timeStr && timeStr.toUpperCase() !== 'OFF') {
-    // Try to parse 12-hour format first (for backward compatibility)
-    const time12Match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-    if (time12Match) {
-      let hours = parseInt(time12Match[1], 10);
-      const minutes = parseInt(time12Match[2], 10);
-      const meridiem = time12Match[3].toUpperCase();
-      
-      // Convert 12-hour to 24-hour
-      if (meridiem === 'PM' && hours !== 12) {
-        hours += 12;
-      } else if (meridiem === 'AM' && hours === 12) {
-        hours = 0;
-      }
-      
-      hour = hours;
-      minute = minutes;
-    } else {
-      // Try 24-hour format
-      const time24Match = timeStr.match(/(\d+):(\d+)/);
-      if (time24Match) {
-        hour = parseInt(time24Match[1], 10);
-        minute = parseInt(time24Match[2], 10);
-      }
-    }
-  }
-
-  return { hour, minute };
+// Conversion functions
+const cmToFeet = (cm: number) => {
+  const totalInches = cm / 2.54;
+  const feet = Math.floor(totalInches / 12);
+  const inches = Math.round(totalInches % 12);
+  return { feet, inches };
 };
 
-export function TimePickerModal({ 
-  visible, 
-  initialTime, 
-  initialEnabled = true,
-  onClose, 
-  onSave,
-  showToggle = false,
-}: TimePickerModalProps) {
-  // Parse initial time to get default hour and minute
-  const parsedTime = parseTimeString(initialTime);
-  const [selectedHour, setSelectedHour] = useState(parsedTime.hour);
-  const [selectedMinute, setSelectedMinute] = useState(parsedTime.minute);
-  const [isEnabled, setIsEnabled] = useState(initialEnabled);
+export function HeightPickerModal({ visible, initialHeight, onClose, onSave }: HeightPickerModalProps) {
+  const [unit, setUnit] = useState<HeightUnit>('cm');
+  const [heightInCm, setHeightInCm] = useState(initialHeight);
 
   // Animation values
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const sheetTranslateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
 
-  // Update time when initialTime changes (e.g., when modal opens with different reminder)
+  // Reset height when modal opens
   useEffect(() => {
     if (visible) {
-      // Reset enabled state from initialEnabled prop
-      setIsEnabled(initialEnabled);
-
-      if (initialTime) {
-        // Check if time is OFF
-        if (initialTime.toUpperCase() === 'OFF') {
-          setIsEnabled(false);
-          setSelectedHour(8); // Default breakfast time
-          setSelectedMinute(0);
-          return;
-        }
-
-        const parsed = parseTimeString(initialTime);
-        setSelectedHour(parsed.hour);
-        setSelectedMinute(parsed.minute);
-      }
+      setHeightInCm(initialHeight);
+      setUnit('cm');
     }
-  }, [initialTime, initialEnabled, visible]);
+  }, [initialHeight, visible]);
 
   // Animation effect
   useEffect(() => {
@@ -136,17 +83,28 @@ export function TimePickerModal({
   }, [visible]);
 
   const handleSave = () => {
-    if (isEnabled) {
-      // Format to "HH:mm" (24-hour format)
-      const formattedTime = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
-      onSave(formattedTime, true);
-    } else {
-      onSave('OFF', false);
-    }
+    onSave(heightInCm);
   };
 
-  const getCurrentTimeDisplay = () => {
-    return `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+  const handleHeightChange = (height: number) => {
+    setHeightInCm(height);
+  };
+
+  const handleUnitToggle = (newUnit: HeightUnit) => {
+    setUnit(newUnit);
+  };
+
+  const getCurrentHeight = () => {
+    return heightInCm;
+  };
+
+  const getCurrentHeightDisplay = () => {
+    if (unit === 'cm') {
+      return `${heightInCm} cm`;
+    } else {
+      const { feet, inches } = cmToFeet(heightInCm);
+      return `${feet}' ${inches}"`;
+    }
   };
 
   if (!visible) return null;
@@ -185,42 +143,45 @@ export function TimePickerModal({
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Edit reminder time</Text>
+            <Text style={styles.title}>Edit height</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <X size={24} color="#666666" strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
-          {/* ON/OFF Toggle (only show if showToggle is true) */}
-          {showToggle && (
-            <View style={styles.toggleContainer}>
-              <Text style={styles.toggleLabel}>Reminder</Text>
-              <Switch
-                value={isEnabled}
-                onValueChange={setIsEnabled}
-                trackColor={{ false: '#E9EDF0', true: '#4CCB5E' }}
-                thumbColor={'#FFFFFF'}
-                ios_backgroundColor="#E9EDF0"
-              />
-            </View>
-          )}
+          {/* Unit Toggle (cm / ft) */}
+          <View style={styles.unitToggleContainer}>
+            <TouchableOpacity
+              style={[styles.unitButton, unit === 'ft' && styles.unitButtonActive]}
+              onPress={() => handleUnitToggle('ft')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.unitButtonText, unit === 'ft' && styles.unitButtonTextActive]}>
+                feet / inches
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.unitButton, unit === 'cm' && styles.unitButtonActive]}
+              onPress={() => handleUnitToggle('cm')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.unitButtonText, unit === 'cm' && styles.unitButtonTextActive]}>
+                centimeters
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Current Time Display */}
-          {isEnabled && (
-            <Text style={styles.currentTime}>
-              Current time: {getCurrentTimeDisplay()}
-            </Text>
-          )}
+          {/* Current Height Display */}
+          <Text style={styles.currentHeight}>
+            Current height: {getCurrentHeightDisplay()}
+          </Text>
 
-          {/* Custom Time Picker (only show when enabled) */}
-          {isEnabled && (
-            <MonsterTimePicker
-              initialHour={selectedHour}
-              initialMinute={selectedMinute}
-              onHourChange={setSelectedHour}
-              onMinuteChange={setSelectedMinute}
-            />
-          )}
+          {/* Height Picker */}
+          <HeightPicker
+            initialHeight={getCurrentHeight()}
+            unit={unit}
+            onHeightChange={handleHeightChange}
+          />
 
           {/* Save Button */}
           <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.8}>
@@ -266,7 +227,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
     position: 'relative',
   },
   title: {
@@ -281,23 +242,39 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
   },
-  toggleContainer: {
+  unitToggleContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
     backgroundColor: '#F5F7FA',
     borderRadius: 12,
+    padding: 4,
     marginBottom: 16,
   },
-  toggleLabel: {
-    fontSize: 16,
+  unitButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unitButtonActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  unitButtonText: {
+    fontSize: 15,
     fontWeight: '600',
-    color: '#000000',
+    color: '#999999',
     fontFamily: 'Nunito',
   },
-  currentTime: {
+  unitButtonTextActive: {
+    color: '#000000',
+  },
+  currentHeight: {
     fontSize: 15,
     color: '#666666',
     textAlign: 'center',

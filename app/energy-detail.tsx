@@ -2,7 +2,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, ChevronRight } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -13,8 +13,13 @@ import {
   View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityLevelPickerModal } from '../components/ActivityLevelPickerModal';
+import { AgePickerModal } from '../components/AgePickerModal';
+import { DietPreferenceModal } from '../components/DietPreferenceModal';
 import { EatingWindowPickerModal } from '../components/EatingWindowPickerModal';
 import { EatingWindowTimeline } from '../components/EatingWindowTimeline';
+import { GenderPickerModal } from '../components/GenderPickerModal';
+import { HeightPickerModal } from '../components/HeightPickerModal';
 import { TimePickerModal } from '../components/TimePickerModal';
 import { WeightPickerModal } from '../components/WeightPickerModal';
 import { getStrategyById } from '../constants/strategies';
@@ -36,6 +41,8 @@ export default function EnergyDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const strategyCardRef = useRef<View>(null);
   
   // States
   const [expandedMealPlan, setExpandedMealPlan] = useState(false);
@@ -57,6 +64,18 @@ export default function EnergyDetailScreen() {
 
   // Eating Window state
   const [showEatingWindowPicker, setShowEatingWindowPicker] = useState(false);
+
+  // Basic Info states
+  const [height, setHeight] = useState(175); // cm
+  const [age, setAge] = useState(28);
+  const [gender, setGender] = useState<'Male' | 'Female' | 'Non-binary'>('Male');
+  const [activityLevel, setActivityLevel] = useState<'Not Very Active' | 'Lightly Active' | 'Active' | 'Very Active'>('Lightly Active');
+  const [dietPreference, setDietPreference] = useState('Light flavors, low spice, no dairy');
+  const [showHeightPicker, setShowHeightPicker] = useState(false);
+  const [showAgePicker, setShowAgePicker] = useState(false);
+  const [showGenderPicker, setShowGenderPicker] = useState(false);
+  const [showActivityLevelPicker, setShowActivityLevelPicker] = useState(false);
+  const [showDietPreferenceModal, setShowDietPreferenceModal] = useState(false);
 
   // Today's meals
   const todayMeals: MealItem[] = [
@@ -102,30 +121,51 @@ export default function EnergyDetailScreen() {
   // Dynamically calculate eating window data based on reminders
   const eatingWindowData = useMemo(() => {
     const eatingWindowReminder = reminders.find(r => r.name === 'Eating Window');
+    const breakfastReminder = reminders.find(r => r.name === 'Breakfast Reminder');
     const lunchReminder = reminders.find(r => r.name === 'Lunch Reminder');
     const dinnerReminder = reminders.find(r => r.name === 'Dinner Reminder');
 
+    // Eating Window is the source of truth for timeline range
     const eatingWindowRange = eatingWindowReminder 
       ? parseEatingWindowRange(eatingWindowReminder.time)
       : { start: createTimeToday(12, 0), end: createTimeToday(20, 0) };
 
-    const lunchTime = lunchReminder && lunchReminder.time !== 'OFF'
-      ? parseTimeString(lunchReminder.time)
-      : createTimeToday(13, 0);
+    // Calculate eating slots: 2h after each meal reminder time (only if enabled)
+    const eatingSlots: { start: Date; end: Date }[] = [];
+    
+    // Breakfast slot: 2h after breakfast reminder
+    if (breakfastReminder && breakfastReminder.enabled && breakfastReminder.time !== 'OFF') {
+      const breakfastTime = parseTimeString(breakfastReminder.time);
+      const breakfastEnd = new Date(breakfastTime);
+      breakfastEnd.setHours(breakfastEnd.getHours() + 2);
+      eatingSlots.push({ start: breakfastTime, end: breakfastEnd });
+    }
 
-    const dinnerTime = dinnerReminder && dinnerReminder.time !== 'OFF'
-      ? parseTimeString(dinnerReminder.time)
-      : createTimeToday(19, 30);
+    // Lunch slot: 2h after lunch reminder
+    if (lunchReminder && lunchReminder.enabled && lunchReminder.time !== 'OFF') {
+      const lunchTime = parseTimeString(lunchReminder.time);
+      const lunchEnd = new Date(lunchTime);
+      lunchEnd.setHours(lunchEnd.getHours() + 2);
+      eatingSlots.push({ start: lunchTime, end: lunchEnd });
+    }
+
+    // Dinner slot: 2h after dinner reminder
+    if (dinnerReminder && dinnerReminder.enabled && dinnerReminder.time !== 'OFF') {
+      const dinnerTime = parseTimeString(dinnerReminder.time);
+      const dinnerEnd = new Date(dinnerTime);
+      dinnerEnd.setHours(dinnerEnd.getHours() + 2);
+      eatingSlots.push({ start: dinnerTime, end: dinnerEnd });
+    }
 
     return {
       eatingWindowStart: eatingWindowRange.start,
       eatingWindowEnd: eatingWindowRange.end,
-      lunchTime: lunchTime,
-      dinnerTime: dinnerTime,
-      eatingSlots: [
-        { start: createTimeToday(12, 10), end: createTimeToday(14, 0) },   // Lunch eating slot
-        { start: createTimeToday(19, 0), end: createTimeToday(19, 45) },   // Dinner eating slot
-      ],
+      reminders: [
+        breakfastReminder,
+        lunchReminder,
+        dinnerReminder,
+      ].filter(r => r !== undefined) as ReminderItem[],
+      eatingSlots,
     };
   }, [reminders]); // Recalculate when reminders change
 
@@ -136,6 +176,14 @@ export default function EnergyDetailScreen() {
     { time: '[6:35pm]', text: 'Suggest: Eat fiber-rich salad to slow digestion.' },
     { time: '[11:00am]', text: 'User logged "coffee + donut".' },
     { time: '[11:07am]', text: 'Sugar spike detected → energy surge in 20min.' },
+    { time: '[9:15am]', text: 'Fasting window ended. Ready to eat.' },
+    { time: '[9:20am]', text: 'User logged "scrambled eggs + avocado toast".' },
+    { time: '[9:25am]', text: 'Good protein start → stable blood sugar expected.' },
+    { time: '[2:45pm]', text: 'User logged "apple + handful of almonds".' },
+    { time: '[2:47pm]', text: 'Light snack → won\'t disrupt dinner appetite.' },
+    { time: '[8:00pm]', text: 'Eating window closing soon. Plan tomorrow\'s first meal.' },
+    { time: '[8:15pm]', text: 'User inactive for 3 hours → may have skipped dinner.' },
+    { time: '[10:30pm]', text: 'Sleep pattern analysis: 7.2 hours average this week.' },
   ];
 
   const handleReminderPress = (id: string) => {
@@ -175,6 +223,17 @@ export default function EnergyDetailScreen() {
   useEffect(() => {
     if (params.selectedStrategyId) {
       setCurrentStrategyId(params.selectedStrategyId as string);
+      
+      // Scroll to Current Strategy section after a short delay
+      setTimeout(() => {
+        strategyCardRef.current?.measureLayout(
+          scrollViewRef.current as any,
+          (x, y) => {
+            scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
+          },
+          () => {}
+        );
+      }, 300);
     }
   }, [params.selectedStrategyId]);
 
@@ -209,6 +268,31 @@ export default function EnergyDetailScreen() {
     setShowEatingWindowPicker(false);
   };
 
+  const handleHeightSave = (newHeight: number) => {
+    setHeight(newHeight);
+    setShowHeightPicker(false);
+  };
+
+  const handleAgeSave = (newAge: number) => {
+    setAge(newAge);
+    setShowAgePicker(false);
+  };
+
+  const handleGenderSave = (newGender: 'Male' | 'Female' | 'Non-binary') => {
+    setGender(newGender);
+    setShowGenderPicker(false);
+  };
+
+  const handleActivityLevelSave = (newActivityLevel: 'Not Very Active' | 'Lightly Active' | 'Active' | 'Very Active') => {
+    setActivityLevel(newActivityLevel);
+    setShowActivityLevelPicker(false);
+  };
+
+  const handleDietPreferenceSave = (newPreference: string) => {
+    setDietPreference(newPreference);
+    setShowDietPreferenceModal(false);
+  };
+
   const handleChatWithMe = () => {
     // Navigate to Echo page (main chat) with @energy pre-filled
     router.push({
@@ -237,6 +321,7 @@ export default function EnergyDetailScreen() {
       </View>
 
       <ScrollView 
+        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -320,8 +405,7 @@ export default function EnergyDetailScreen() {
           <EatingWindowTimeline
             eatingWindowStart={eatingWindowData.eatingWindowStart}
             eatingWindowEnd={eatingWindowData.eatingWindowEnd}
-            lunchTime={eatingWindowData.lunchTime}
-            dinnerTime={eatingWindowData.dinnerTime}
+            reminders={eatingWindowData.reminders}
             eatingSlots={eatingWindowData.eatingSlots}
           />
 
@@ -527,7 +611,7 @@ export default function EnergyDetailScreen() {
         {/* Current Strategy */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeaderTitle}>Current Strategy</Text>
-          <View style={styles.strategyCard}>
+          <View ref={strategyCardRef} style={styles.strategyCard}>
             <View style={styles.ipHeader}>
               <Image
                 source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/energy/energyspeak.png' }}
@@ -535,7 +619,7 @@ export default function EnergyDetailScreen() {
               />
               <Text style={styles.ipHeaderText}>
                 {currentStrategyId 
-                  ? "Fuel in 8 hours—supports fat burn."
+                  ? "You're on track to hit your goal by Apr 6, 2026."
                   : "Choose a method that fits your lifestyle 🍽️"
                 }
               </Text>
@@ -585,10 +669,6 @@ export default function EnergyDetailScreen() {
                 <Text style={styles.strategyDataLabel}>Goal Weight</Text>
                 <Text style={styles.strategyDataValue}>{goalWeight.toFixed(1)}kg</Text>
               </TouchableOpacity>
-              <View style={styles.strategyDataRow}>
-                <Text style={styles.strategyDataLabel}>Weekly Goal</Text>
-                <Text style={styles.strategyDataValue}>Lose 1kg per week</Text>
-              </View>
             </View>
           </View>
         </View>
@@ -612,30 +692,48 @@ export default function EnergyDetailScreen() {
               <Text style={styles.infoLabel}>TDEE (kcal/day)</Text>
               <Text style={styles.infoValue}>2,130</Text>
             </View>
-            <View style={styles.infoRow}>
+            <TouchableOpacity 
+              style={styles.infoRow}
+              onPress={() => setShowHeightPicker(true)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.infoLabel}>Height</Text>
-              <Text style={styles.infoValue}>168 cm</Text>
-            </View>
-            <View style={styles.infoRow}>
+              <Text style={styles.infoValue}>{height} cm</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.infoRow}
+              onPress={() => setShowAgePicker(true)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.infoLabel}>Age</Text>
-              <Text style={styles.infoValue}>29</Text>
-            </View>
-            <View style={styles.infoRow}>
+              <Text style={styles.infoValue}>{age}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.infoRow}
+              onPress={() => setShowGenderPicker(true)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.infoLabel}>Gender</Text>
-              <Text style={styles.infoValue}>Female</Text>
-            </View>
-            <View style={styles.infoRow}>
+              <Text style={styles.infoValue}>{gender}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.infoRow}
+              onPress={() => setShowActivityLevelPicker(true)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.infoLabel}>Activity Level</Text>
-              <Text style={styles.infoValue}>Moderately Active</Text>
-            </View>
-            <View style={styles.infoRow}>
+              <Text style={styles.infoValue}>{activityLevel}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.infoRow}
+              onPress={() => setShowDietPreferenceModal(true)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.infoLabel}>Diet Preferences</Text>
-              <Text style={styles.infoValue}>Light flavors, low spice, no dairy</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Units</Text>
-              <Text style={styles.infoValue}>kg, cm</Text>
-            </View>
+              <Text style={[styles.infoValue, styles.infoValueMultiline]} numberOfLines={2}>
+                {dietPreference}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         </View>
@@ -732,6 +830,46 @@ export default function EnergyDetailScreen() {
         onClose={() => setShowEatingWindowPicker(false)}
         onSave={handleEatingWindowSave}
       />
+
+      {/* Height Picker Modal */}
+      <HeightPickerModal
+        visible={showHeightPicker}
+        initialHeight={height}
+        onClose={() => setShowHeightPicker(false)}
+        onSave={handleHeightSave}
+      />
+
+      {/* Age Picker Modal */}
+      <AgePickerModal
+        visible={showAgePicker}
+        initialAge={age}
+        onClose={() => setShowAgePicker(false)}
+        onSave={handleAgeSave}
+      />
+
+      {/* Gender Picker Modal */}
+      <GenderPickerModal
+        visible={showGenderPicker}
+        initialGender={gender}
+        onClose={() => setShowGenderPicker(false)}
+        onSave={handleGenderSave}
+      />
+
+      {/* Activity Level Picker Modal */}
+      <ActivityLevelPickerModal
+        visible={showActivityLevelPicker}
+        initialActivityLevel={activityLevel}
+        onClose={() => setShowActivityLevelPicker(false)}
+        onSave={handleActivityLevelSave}
+      />
+
+      {/* Diet Preference Modal */}
+      <DietPreferenceModal
+        visible={showDietPreferenceModal}
+        initialPreference={dietPreference}
+        onClose={() => setShowDietPreferenceModal(false)}
+        onSave={handleDietPreferenceSave}
+      />
     </View>
   );
 }
@@ -746,8 +884,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
+    paddingBottom: 12,
     backgroundColor: '#EBEDF5',
   },
   backButton: {
@@ -850,8 +987,9 @@ const styles = StyleSheet.create({
   },
   macrosRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: 24,
   },
   macroItem: {
     flexDirection: 'row',
@@ -968,7 +1106,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 8,
-    marginTop: 4,
+    marginTop: -8,
   },
   expandButtonText: {
     fontSize: 14,
@@ -1146,6 +1284,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 16,
     fontFamily: 'Nunito',
+  },
+  infoValueMultiline: {
+    lineHeight: 18,
   },
   weeklyReportCard: {
     backgroundColor: '#FFFFFF',

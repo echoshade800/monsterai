@@ -1,15 +1,14 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { AtSign, Camera, Send, PenLine } from 'lucide-react-native';
+import { AtSign, Camera, PenLine, Send } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
 } from 'react-native-reanimated';
-import { Text } from 'react-native';
 import { MentionSelector } from './MentionSelector';
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -19,9 +18,11 @@ interface InputFieldProps {
   onSend?: (message: string) => void;
   isSending?: boolean;
   disabled?: boolean;
+  initialText?: string;
+  autoFocus?: boolean;
 }
 
-export function InputField({ onFocus, onSend, isSending = false, disabled = false }: InputFieldProps) {
+export function InputField({ onFocus, onSend, isSending = false, disabled = false, initialText = '', autoFocus = false }: InputFieldProps) {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [showMentionSelector, setShowMentionSelector] = useState(false);
@@ -52,6 +53,18 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
       keyboardWillHide.remove();
     };
   }, []);
+
+  // Handle initial text and auto focus
+  useEffect(() => {
+    if (initialText) {
+      setText(initialText);
+      if (autoFocus) {
+        setTimeout(() => {
+          textInputRef.current?.focus();
+        }, 300);
+      }
+    }
+  }, [initialText, autoFocus]);
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
     const expanded = keyboardHeight.value > 0 ? 1 : 0;

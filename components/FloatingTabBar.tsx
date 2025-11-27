@@ -1,8 +1,8 @@
-import { BlurView } from 'expo-blur';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Platform, StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 import { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 60,
-    marginTop: -2,
+    marginTop: -4,
   },
   tabContentFocused: {
   },
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#666666',
     opacity: 0.8,
-    marginTop: -11,
+    marginTop: -13,
   },
   labelFocused: {
     fontWeight: '700',

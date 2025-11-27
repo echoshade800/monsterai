@@ -56,7 +56,7 @@ export default function StrategyListScreen() {
               {/* Selected Indicator */}
               {isSelected && (
                 <View style={styles.checkmarkContainer}>
-                  <Check size={20} color="#4CCB5E" strokeWidth={2.5} />
+                  <Check size={20} color="#000000" strokeWidth={2.5} />
                 </View>
               )}
             </TouchableOpacity>
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 16,
+    paddingBottom: 12,
     backgroundColor: '#EBEDF5',
     borderBottomWidth: 0,
   },
@@ -108,8 +108,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   strategyCardSelected: {
-    borderColor: '#4CCB5E',
-    backgroundColor: '#F0FFF4',
+    borderColor: '#000000',
+    backgroundColor: '#F5F7FA',
   },
   iconContainer: {
     width: 48,

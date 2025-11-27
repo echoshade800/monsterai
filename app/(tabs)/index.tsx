@@ -54,7 +54,21 @@ export default function EchoTab() {
   const [userData, setUserData] = useState<any>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [initialInputText, setInitialInputText] = useState('');
+  const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
   const apiConfig = getApiConfig();
+
+  // Handle mentionAgent parameter from navigation
+  useEffect(() => {
+    if (params.mentionAgent) {
+      const agentName = params.mentionAgent as string;
+      setInitialInputText(`@${agentName} `);
+      setShouldAutoFocus(true);
+      
+      // Clear the param after processing to avoid re-triggering
+      router.setParams({ mentionAgent: undefined });
+    }
+  }, [params.mentionAgent]);
 
   // 将 API 返回的数据转换为 Message 格式
   const convertToMessages = (data: any): Message[] => {
@@ -1232,6 +1246,8 @@ export default function EchoTab() {
         onSend={sendMessage}
         isSending={isSending}
         disabled={!userData}
+        initialText={initialInputText}
+        autoFocus={shouldAutoFocus}
       />
     </View>
   );

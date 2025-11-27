@@ -1,24 +1,29 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 type EatingSlot = {
   start: Date;
   end: Date;
 };
 
+type ReminderItem = {
+  id: string;
+  name: string;
+  time: string;
+  enabled: boolean;
+};
+
 type EatingWindowTimelineProps = {
   eatingWindowStart: Date;
   eatingWindowEnd: Date;
-  lunchTime: Date;
-  dinnerTime: Date;
+  reminders: ReminderItem[];
   eatingSlots: EatingSlot[];
 };
 
 export function EatingWindowTimeline({
   eatingWindowStart,
   eatingWindowEnd,
-  lunchTime,
-  dinnerTime,
+  reminders,
   eatingSlots,
 }: EatingWindowTimelineProps) {
   // Calculate total duration in milliseconds
@@ -37,53 +42,87 @@ export function EatingWindowTimeline({
     return `${hours}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  // Calculate positions for alarm icons
-  const alarmPositions = [
-    { time: eatingWindowStart, label: 'Start', ratio: 0, icon: '🔔' },
-    { time: lunchTime, label: 'Lunch', ratio: getPositionRatio(lunchTime), icon: '⏰' },
-    { time: dinnerTime, label: 'Dinner', ratio: getPositionRatio(dinnerTime), icon: '⏰' },
-    { time: eatingWindowEnd, label: 'End', ratio: 1, icon: '🔔' },
-  ];
+  // Parse time string like "13:00" to Date
+  const parseTimeString = (timeStr: string): Date => {
+    const match = timeStr.match(/(\d+):(\d+)/);
+    if (match) {
+      const hour = parseInt(match[1], 10);
+      const minute = parseInt(match[2], 10);
+      const date = new Date();
+      date.setHours(hour, minute, 0, 0);
+      return date;
+    }
+    return new Date();
+  };
 
-  console.log('Eating Window Timeline Data:', {
-    windowStart: formatTime(eatingWindowStart),
-    windowEnd: formatTime(eatingWindowEnd),
-    lunchTime: formatTime(lunchTime),
-    dinnerTime: formatTime(dinnerTime),
-    alarmPositions: alarmPositions.map(a => ({
-      label: a.label,
-      time: formatTime(a.time),
-      ratio: a.ratio,
-    })),
+  // Get current time and calculate its position on the timeline
+  const getCurrentTimePosition = (): number | null => {
+    const now = new Date();
+    const nowTime = now.getTime();
+    const windowStartTime = eatingWindowStart.getTime();
+    const windowEndTime = eatingWindowEnd.getTime();
+
+    // If current time is outside the eating window, clamp it
+    if (nowTime < windowStartTime) {
+      return 0; // Clamp to start
+    }
+    if (nowTime > windowEndTime) {
+      return 1; // Clamp to end
+    }
+
+    // Calculate ratio within the window
+    return getPositionRatio(now);
+  };
+
+  // Filter reminders to only show Breakfast, Lunch, Dinner (exclude Eating Window)
+  const mealReminders = reminders.filter(
+    r => r.name !== 'Eating Window' && r.enabled && r.time !== 'OFF'
+  );
+
+  // Calculate positions for reminder alarm icons
+  const alarmPositions = mealReminders.map((reminder) => {
+    const reminderTime = parseTimeString(reminder.time);
+    const ratio = getPositionRatio(reminderTime);
+
+    return {
+      reminder,
+      time: reminderTime,
+      ratio,
+      icon: '⏰', // All reminders use the same icon
+    };
   });
+
+  const currentTimeRatio = getCurrentTimePosition();
 
   return (
     <View style={styles.container}>
-      {/* Alarm Icons Row */}
-      <View style={styles.alarmsContainer}>
-        {alarmPositions.map((alarm, index) => (
-          <View
-            key={index}
-            style={[
-              styles.alarmIconWrapper,
-              { left: `${alarm.ratio * 100}%` },
-            ]}
-          >
-            <Text style={styles.alarmIcon}>{alarm.icon}</Text>
-          </View>
-        ))}
-      </View>
+      {/* Alarm Icons Row - Only show reminders, not window boundaries */}
+      {alarmPositions.length > 0 && (
+        <View style={styles.alarmsContainer}>
+          {alarmPositions.map((alarm, index) => (
+            <View
+              key={alarm.reminder.id}
+              style={[
+                styles.alarmIconWrapper,
+                { left: `${alarm.ratio * 100}%` },
+              ]}
+            >
+              <Text style={styles.alarmIcon}>{alarm.icon}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Timeline Track */}
       <View style={styles.timelineTrack}>
-        {/* Base track (light gray) */}
+        {/* Base track (light gray) - represents full eating window */}
         <View style={styles.baseTrack} />
 
-        {/* Orange eating slots */}
+        {/* Orange eating slots - 2h after each meal reminder */}
         {eatingSlots.map((slot, index) => {
           const startRatio = getPositionRatio(slot.start);
           const endRatio = getPositionRatio(slot.end);
-          const width = (endRatio - startRatio) * 100;
+          const width = Math.max(0, (endRatio - startRatio) * 100);
 
           return (
             <View
@@ -98,9 +137,21 @@ export function EatingWindowTimeline({
             />
           );
         })}
+
+        {/* Current time indicator - stickman image */}
+        {currentTimeRatio !== null && (
+          <Image
+            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/user/stickman.png' }}
+            style={[
+              styles.currentTimeIndicator,
+              { left: `${currentTimeRatio * 100}%` },
+            ]}
+            resizeMode="contain"
+          />
+        )}
       </View>
 
-      {/* Time Labels */}
+      {/* Time Labels - Match Eating Window start/end */}
       <View style={styles.timeLabelsContainer}>
         <Text style={styles.timeLabel}>{formatTime(eatingWindowStart)}</Text>
         <Text style={styles.timeLabel}>{formatTime(eatingWindowEnd)}</Text>
@@ -116,7 +167,7 @@ const styles = StyleSheet.create({
   alarmsContainer: {
     position: 'relative',
     height: 24,
-    marginBottom: 8,
+    marginBottom: 2,
   },
   alarmIconWrapper: {
     position: 'absolute',
@@ -146,6 +197,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF9F66',
     borderRadius: 5,
   },
+  currentTimeIndicator: {
+    position: 'absolute',
+    width: 36,
+    height: 36,
+    top: -13, // Position above the track to center it (track is 10px, so -13px centers 36px image)
+    transform: [{ translateX: -18 }], // Center horizontally (half of 36px)
+    zIndex: 10,
+  },
   timeLabelsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -156,4 +215,3 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito',
   },
 });
-

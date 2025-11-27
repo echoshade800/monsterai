@@ -28,20 +28,26 @@ export function MonsterTimePicker({
   const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23
   const minutes = Array.from({ length: 60 }, (_, i) => i);
 
-  // Scroll to initial position on mount
+  // Update state when initialHour/initialMinute change
+  useEffect(() => {
+    setSelectedHour(initialHour);
+    setSelectedMinute(initialMinute);
+  }, [initialHour, initialMinute]);
+
+  // Scroll to initial position on mount and when initialHour/initialMinute change
   useEffect(() => {
     setTimeout(() => {
       const hourIndex = initialHour; // 0-23, directly use as index
       const minuteIndex = initialMinute;
 
-      if (hourScrollRef.current && hourIndex >= 0) {
+      if (hourScrollRef.current && hourIndex >= 0 && hourIndex < 24) {
         hourScrollRef.current.scrollTo({ y: hourIndex * ITEM_HEIGHT, animated: false });
       }
-      if (minuteScrollRef.current && minuteIndex >= 0) {
+      if (minuteScrollRef.current && minuteIndex >= 0 && minuteIndex < 60) {
         minuteScrollRef.current.scrollTo({ y: minuteIndex * ITEM_HEIGHT, animated: false });
       }
     }, 100);
-  }, []);
+  }, [initialHour, initialMinute]);
 
   const handleScroll = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
