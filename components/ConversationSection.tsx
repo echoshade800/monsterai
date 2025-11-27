@@ -31,6 +31,102 @@ interface ConversationSectionProps {
   keyboardHeight?: number;
 }
 
+// Monster 颜色映射表（统一管理）
+const MONSTER_COLORS: Record<string, string> = {
+  foodie: '#F38319',
+  moodie: '#7A4DBA',
+  sleeper: '#206BDB',
+  poopy: '#844E02',
+  posture: '#32C25F',
+  facey: '#FF4FB0',
+  butler: '#666666',
+};
+
+// Monster 头像 URL 映射表
+const MONSTER_AVATARS: Record<string, string> = {
+  foodie: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png',
+  moodie: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png',
+  sleeper: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png',
+  poopy: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilepoop.png',
+  posture: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png',
+  facey: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
+  butler: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesteward.png',
+};
+
+// 统一渲染函数：给所有 [MonsterName] 标签加颜色，并在标签前显示头像
+const renderMonsterColoredText = (text: string) => {
+  if (!text) return null;
+
+  // 使用 split 分割文本，保留标签作为独立元素
+  // 正则 /(\[[^\]]+\])/g 会匹配所有 [MonsterName] 标签，并保留在结果数组中
+  const parts = text.split(/(\[[^\]]+\])/g);
+
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      {parts.map((part, index) => {
+        // 跳过空字符串（split 可能在开头/结尾产生空字符串）
+        if (part.length === 0) {
+          return null;
+        }
+
+        // 检查是否是标签格式 [MonsterName]
+        const tagMatch = part.match(/^\[([^\]]+)\]$/);
+        if (tagMatch) {
+          const name = tagMatch[1].trim().toLowerCase();
+          const color = MONSTER_COLORS[name] ?? '#000000';
+          const avatarUrl = MONSTER_AVATARS[name];
+          
+          return (
+            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4 }}>
+              {avatarUrl && (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
+                  resizeMode="cover"
+                />
+              )}
+              <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
+                {tagMatch[1]}
+              </Text>
+            </View>
+          );
+        }
+
+        // 普通文本（包括冒号、空格、换行符等）
+        // 如果紧跟在标签后面，删除开头的冒号（中文冒号：或英文冒号:）和多余的空行
+        let displayText = part;
+        if (index > 0) {
+          const prevPart = parts[index - 1];
+          // 检查前一个部分是否是标签
+          if (prevPart && prevPart.match(/^\[([^\]]+)\]$/)) {
+            // 删除开头的冒号（中文或英文）
+            displayText = part.replace(/^[：:]\s*/, '');
+            // 如果紧跟在标签后面且只包含换行符和空白字符，删除所有换行符
+            if (displayText.match(/^[\s\n]*$/)) {
+              displayText = displayText.replace(/[\n\s]+/g, '');
+            } else {
+              // 否则只删除开头的换行符
+              displayText = displayText.replace(/^\n+/, '');
+            }
+          }
+        }
+        // 如果是消息开头且只包含换行符和空白字符，删除它
+        if (index === 0 && displayText.match(/^[\s\n]*$/)) {
+          return null;
+        }
+        // 将多个连续的换行符压缩为单个换行符（但保留文本内容）
+        displayText = displayText.replace(/\n{2,}/g, '\n');
+
+        return (
+          <Text key={index} style={{ fontSize: 15, fontFamily: 'Nunito_400Regular', lineHeight: 22 }}>
+            {displayText}
+          </Text>
+        );
+      })}
+    </View>
+  );
+};
+
 // 图片组件，带加载和错误处理
 function MessageImage({ uri }: { uri: string }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -265,15 +361,11 @@ export function ConversationSection({
         if (message.type === 'assistant') {
           return (
             <View key={message.id} style={styles.assistantMessageContainer}>
-              <Image
-                source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatposture.png' }}
-                style={styles.assistantAvatar}
-              />
               <Pressable
                 onLongPress={() => handleCopyMessage(message.content)}
                 style={styles.assistantTextWrapper}
               >
-                <Text style={styles.assistantText}>{message.content}</Text>
+                {renderMonsterColoredText(message.content)}
               </Pressable>
             </View>
           );
@@ -303,10 +395,6 @@ export function ConversationSection({
       {/* 显示正在响应的状态 */}
       {isSending && !currentResponse && (
         <View style={styles.assistantMessageContainer} key="typing-indicator">
-          <Image
-            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatposture.png' }}
-            style={styles.assistantAvatar}
-          />
           <View style={styles.typingIndicatorWrapper}>
             <View style={styles.typingIndicator}>
               <Animated.View 
@@ -372,7 +460,7 @@ const styles = StyleSheet.create({
   assistantMessageContainer: {
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    marginBottom: 15,
+    marginBottom: 0,
     alignItems: 'flex-start',
   },
   assistantAvatar: {
@@ -387,6 +475,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Nunito_400Regular',
     color: '#000000',
+    lineHeight: 22,
+  },
+  monsterTag: {
+    fontSize: 15,
+    fontFamily: 'Nunito_600SemiBold',
     lineHeight: 22,
   },
   userMessageContainer: {
