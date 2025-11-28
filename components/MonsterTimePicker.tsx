@@ -28,10 +28,10 @@ export function MonsterTimePicker({
   const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23
   const minutes = Array.from({ length: 60 }, (_, i) => i);
 
-  // Update state when initialHour/initialMinute change
+  // Update state when initialHour/initialMinute change (only if different)
   useEffect(() => {
-    setSelectedHour(initialHour);
-    setSelectedMinute(initialMinute);
+    setSelectedHour((prev) => prev !== initialHour ? initialHour : prev);
+    setSelectedMinute((prev) => prev !== initialMinute ? initialMinute : prev);
   }, [initialHour, initialMinute]);
 
   // Scroll to initial position on mount and when initialHour/initialMinute change
@@ -52,7 +52,24 @@ export function MonsterTimePicker({
   const handleScroll = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
     data: number[],
-    setter: (value: any) => void,
+    setter: (value: any) => void
+  ) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const index = Math.round(offsetY / ITEM_HEIGHT);
+    const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
+    const value = data[clampedIndex];
+    
+    // 只在值真正改变时才更新状态，避免频繁更新导致闪烁
+    // 滚动过程中不调用回调，只在滚动结束时调用（在 handleScrollEnd 中）
+    setter((prev: any) => {
+      return prev !== value ? value : prev;
+    });
+  };
+
+  const handleScrollEnd = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+    scrollRef: React.RefObject<ScrollView>,
+    data: number[] | ('AM' | 'PM')[],
     callback: (value: any) => void
   ) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -60,20 +77,10 @@ export function MonsterTimePicker({
     const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
     const value = data[clampedIndex];
     
-    setter(value);
-    callback(value);
-  };
-
-  const handleScrollEnd = (
-    event: NativeSyntheticEvent<NativeScrollEvent>,
-    scrollRef: React.RefObject<ScrollView>,
-    data: number[] | ('AM' | 'PM')[]
-  ) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / ITEM_HEIGHT);
-    const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
-    
     scrollRef.current?.scrollTo({ y: clampedIndex * ITEM_HEIGHT, animated: true });
+    
+    // 滚动结束时才调用回调，避免频繁更新
+    callback(value);
   };
 
   const renderColumn = (
@@ -93,7 +100,7 @@ export function MonsterTimePicker({
         decelerationRate="fast"
         onScroll={onScroll}
         onMomentumScrollEnd={onScrollEnd}
-        scrollEventThrottle={16}
+        scrollEventThrottle={100}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Top padding */}
@@ -129,8 +136,8 @@ export function MonsterTimePicker({
           hours,
           selectedHour,
           hourScrollRef,
-          (e) => handleScroll(e, hours, setSelectedHour, onHourChange),
-          (e) => handleScrollEnd(e, hourScrollRef, hours),
+          (e) => handleScroll(e, hours, setSelectedHour),
+          (e) => handleScrollEnd(e, hourScrollRef, hours, onHourChange),
           (value) => String(value).padStart(2, '0')
         )}
 
@@ -142,8 +149,8 @@ export function MonsterTimePicker({
           minutes,
           selectedMinute,
           minuteScrollRef,
-          (e) => handleScroll(e, minutes, setSelectedMinute, onMinuteChange),
-          (e) => handleScrollEnd(e, minuteScrollRef, minutes),
+          (e) => handleScroll(e, minutes, setSelectedMinute),
+          (e) => handleScrollEnd(e, minuteScrollRef, minutes, onMinuteChange),
           (value) => String(value).padStart(2, '0')
         )}
       </View>
