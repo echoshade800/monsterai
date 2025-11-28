@@ -593,22 +593,18 @@ export default function HomeTab() {
   ];
 
   // 计算日期相对于今天的天数差（day 参数）
-  // 0 = 今天，1 = 昨天，2 = 前天，以此类推
+  // 0 = 今天，-1 = 昨天，-2 = 前天，以此类推
   const calculateDayOffset = (date: Date): number => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
     
-    // 如果目标日期是今天，直接返回 0
-    if (targetDate.getTime() === today.getTime()) {
-      return 0;
-    }
-    
-    // 计算今天减去目标日期的天数差
-    // 如果目标日期是昨天，结果为 1
-    // 如果目标日期是前天，结果为 2
-    const diffTime = today.getTime() - targetDate.getTime();
+    // 计算目标日期减去今天的天数差
+    // 如果目标日期是今天，结果为 0
+    // 如果目标日期是昨天，结果为 -1
+    // 如果目标日期是前天，结果为 -2
+    const diffTime = targetDate.getTime() - today.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
