@@ -27,6 +27,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
   const [isFocused, setIsFocused] = useState(false);
   const [showMentionSelector, setShowMentionSelector] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
+  const lastInitialTextRef = useRef<string>('');
   const keyboardHeight = useSharedValue(0);
   const router = useRouter();
   const textInputRef = useRef<TextInput>(null);
@@ -35,6 +36,8 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
     if (text.trim() && onSend && !isSending && !disabled) {
       onSend(text);
       setText('');
+      // 发送后，标记当前的 initialText 已被使用
+      lastInitialTextRef.current = initialText;
     }
   };
 
@@ -56,13 +59,19 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
 
   // Handle initial text and auto focus
   useEffect(() => {
-    if (initialText) {
+    // 只有当 initialText 变化了（且不为空），且不是已经使用过的值时，才设置
+    if (initialText && initialText !== lastInitialTextRef.current) {
       setText(initialText);
+      lastInitialTextRef.current = initialText;
       if (autoFocus) {
         setTimeout(() => {
           textInputRef.current?.focus();
         }, 300);
       }
+    }
+    // 如果 initialText 变为空字符串，重置引用，允许下次使用新的 initialText
+    if (!initialText) {
+      lastInitialTextRef.current = '';
     }
   }, [initialText, autoFocus]);
 

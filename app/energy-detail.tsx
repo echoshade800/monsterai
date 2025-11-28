@@ -1,16 +1,16 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, ArrowRight, ChevronRight } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, Brain, Calendar, ChevronRight, ClipboardList, Target, User } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Image,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Image,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityLevelPickerModal } from '../components/ActivityLevelPickerModal';
@@ -388,7 +388,10 @@ export default function EnergyDetailScreen() {
 
         {/* Meal Plan Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeaderTitle}>Meal Plan</Text>
+          <View style={styles.sectionHeader}>
+            <ClipboardList size={20} color="#000000" style={styles.sectionIcon} />
+            <Text style={styles.sectionHeaderTitle}>Meal Plan</Text>
+          </View>
           <View style={styles.mealPlanCard}>
           {/* IP Header */}
           <View style={styles.ipHeader}>
@@ -590,7 +593,10 @@ export default function EnergyDetailScreen() {
 
         {/* Inside My Mind */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeaderTitle}>🧠 Inside My Mind</Text>
+          <View style={styles.sectionHeader}>
+            <Brain size={20} color="#000000" style={styles.sectionIcon} />
+            <Text style={styles.sectionHeaderTitle}>Inside My Mind</Text>
+          </View>
           <View style={styles.insideMindCard}>
             <ScrollView 
               style={styles.insideMindScrollView}
@@ -610,7 +616,10 @@ export default function EnergyDetailScreen() {
 
         {/* Current Strategy */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeaderTitle}>Current Strategy</Text>
+          <View style={styles.sectionHeader}>
+            <Target size={20} color="#000000" style={styles.sectionIcon} />
+            <Text style={styles.sectionHeaderTitle}>Current Strategy</Text>
+          </View>
           <View ref={strategyCardRef} style={styles.strategyCard}>
             <View style={styles.ipHeader}>
               <Image
@@ -675,7 +684,10 @@ export default function EnergyDetailScreen() {
 
         {/* Basic Info */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeaderTitle}>Basic Info</Text>
+          <View style={styles.sectionHeader}>
+            <User size={20} color="#000000" style={styles.sectionIcon} />
+            <Text style={styles.sectionHeaderTitle}>Basic Info</Text>
+          </View>
           <View style={styles.basicInfoCard}>
           <View style={styles.ipHeader}>
             <Image
@@ -740,7 +752,10 @@ export default function EnergyDetailScreen() {
 
         {/* Weekly Report */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeaderTitle}>Your Week in Review</Text>
+          <View style={styles.sectionHeader}>
+            <Calendar size={20} color="#000000" style={styles.sectionIcon} />
+            <Text style={styles.sectionHeaderTitle}>Your Week in Review</Text>
+          </View>
           <View style={styles.weeklyReportCard}>
             <View style={styles.ipHeader}>
               <Image
@@ -1021,12 +1036,19 @@ const styles = StyleSheet.create({
   sectionContainer: {
     marginTop: 20,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 16,
+    marginBottom: 8,
+  },
+  sectionIcon: {
+    marginRight: 8,
+  },
   sectionHeaderTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#000000',
-    marginLeft: 12,
-    marginBottom: 8,
     fontFamily: 'Nunito',
   },
   mealPlanCard: {

@@ -47,7 +47,7 @@ const MONSTER_AVATARS: Record<string, string> = {
   foodie: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png',
   moodie: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png',
   sleeper: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png',
-  poopy: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilepoop.png',
+  poopy: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png',
   posture: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png',
   facey: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
   butler: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesteward.png',
@@ -485,6 +485,7 @@ const styles = StyleSheet.create({
   userMessageContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    marginTop: 12,
     marginBottom: 15,
   },
   userBubble: {
