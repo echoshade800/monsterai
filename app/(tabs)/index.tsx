@@ -9,7 +9,7 @@ import { Header } from '../../components/Header';
 import { InputField } from '../../components/InputField';
 import { AGENTS } from '../../components/MentionSelector';
 import api, { getAppVersion, getDeviceId, getTimezone } from '../../src/services/api-clients/client';
-import { API_ENDPOINTS, getApiConfig, getHeadersWithPassId } from '../../src/services/api/api';
+import { API_ENDPOINTS, CURRENT_ENV, ENV, getApiConfig, getHeadersWithPassId } from '../../src/services/api/api';
 import conversationService from '../../src/services/conversationService';
 import calendarManager from '../../src/utils/calendar-manager';
 import { executeToolFunction } from '../../src/utils/function-tools';
@@ -329,6 +329,10 @@ export default function EchoTab() {
 
     // 立即发送第一次心跳
     sendHeartbeat();
+    let interval = 10 * 1000; // 10秒 = 10 * 1000 毫秒
+    if (CURRENT_ENV === ENV.DEVELOPMENT) {
+      interval = 100 * 1000;
+    }
 
     // 设置定时器，每10秒发送一次心跳
     heartbeatTimerRef.current = setInterval(async () => {
@@ -339,7 +343,7 @@ export default function EchoTab() {
       } catch (error) {
         console.error('[EchoTab] ❌ Scheduled heartbeat failed:', error);
       }
-    }, 10 * 1000); // 10秒 = 10 * 1000 毫秒
+    }, interval); 
 
     return () => {
       // 清理心跳定时器
