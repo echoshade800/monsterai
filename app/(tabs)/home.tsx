@@ -94,7 +94,7 @@ export default function HomeTab() {
   type TimelineItem = {
     id?: string;
     time: string;
-    type: 'reminder' | 'prediction' | 'action';
+    type: 'reminder' | 'prediction' | 'action' | 'unknown';
     title?: string;
     subtitle?: string;
     agentTag?: string;
@@ -350,10 +350,8 @@ export default function HomeTab() {
         title: titleMap[reminderType] || `${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)} Reminder`,
         toggleEnabled: !record.cancel, // cancel: false 表示启用
       };
-    }
-
-    // 处理 prediction 类型
-    if (['sleep', 'getup', 'breakfast', 'lunch', 'dinner'].includes(type)) {
+    } else if (['sleep', 'getup', 'breakfast', 'lunch', 'dinner'].includes(type)) {
+      // 处理 prediction 类型
       const titleMap: Record<string, { title: string; subtitle: string }> = {
         sleep: { title: 'Sleep', subtitle: 'You sleep around this time.' },
         getup: { title: 'Wake-up', subtitle: 'You usually wake around this time. Ready to rise?' },
@@ -368,10 +366,8 @@ export default function HomeTab() {
         title: mapped.title,
         subtitle: mapped.subtitle,
       };
-    }
-
-    // 处理 action 类型（*_done）
-    if (type.endsWith('_done')) {
+    } else if (type.endsWith('_done')) {
+      // 处理 action 类型（*_done）
       const actionType = type.replace('_done', '');
       const agentTagMap: Record<string, string> = {
         breakfast: 'Food',
@@ -393,9 +389,14 @@ export default function HomeTab() {
         agentTag: agentTagMap[actionType] || 'Activity',
         description: descriptionMap[actionType] || `You completed ${actionType}.`,
       };
+    } else {
+      return {
+        time,
+        type: 'unknown',
+        title: type,
+        subtitle: `${type}.`,
+      };
     }
-
-    return null;
   };
 
   // 从 API 获取 timeline 数据
