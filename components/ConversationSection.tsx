@@ -327,6 +327,14 @@ export function ConversationSection({
   // Calculate dynamic padding based on keyboard height
   const dynamicPaddingBottom = keyboardHeight > 0 ? keyboardHeight + 80 : 200;
 
+  // 找到所有 reminderCard 类型的消息，确定最后一条的索引
+  const reminderCardIndices = messages
+    .map((msg, index) => msg.type === 'reminderCard' ? index : -1)
+    .filter(index => index !== -1);
+  const lastReminderCardIndex = reminderCardIndices.length > 0 
+    ? reminderCardIndices[reminderCardIndices.length - 1] 
+    : -1;
+
   return (
     <ScrollView
       ref={scrollViewRef}
@@ -336,7 +344,7 @@ export function ConversationSection({
       keyboardShouldPersistTaps="always"
       keyboardDismissMode="on-drag"
     >
-      {messages.map((message) => {
+      {messages.map((message, index) => {
         if (message.type === 'timestamp') {
           return (
             <View key={message.id} style={styles.timestampContainer}>
@@ -346,13 +354,20 @@ export function ConversationSection({
         }
 
         if (message.type === 'reminderCard') {
+          // 只有最后一条 reminderCard 可以交互
+          const isLastReminderCard = index === lastReminderCardIndex;
           return (
-            <View key={message.id} style={styles.reminderCardContainer}>
+            <View 
+              key={message.id} 
+              style={styles.reminderCardContainer}
+              collapsable={false}
+            >
               {message.reminderCardData && (
                 <ReminderCard
                   title={message.reminderCardData.title}
                   monster={message.reminderCardData.monster}
                   reminders={message.reminderCardData.reminders}
+                  disabled={!isLastReminderCard}
                 />
               )}
             </View>

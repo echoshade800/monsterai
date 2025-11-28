@@ -16,6 +16,7 @@ interface ReminderCardProps {
   title: string;
   monster: string;
   reminders: ReminderItem[];
+  disabled?: boolean;
 }
 
 interface ReminderItemRowProps {
@@ -23,9 +24,10 @@ interface ReminderItemRowProps {
   title: string;
   task_type: string;
   onTimeChange: (newTime: string) => void;
+  disabled?: boolean;
 }
 
-function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemRowProps) {
+function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = false }: ReminderItemRowProps) {
   const [selected, setSelected] = useState<'yes' | 'no' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [currentTime, setCurrentTime] = useState(time);
@@ -34,6 +36,10 @@ function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemR
   const scaleAnimNo = useRef(new Animated.Value(1)).current;
 
   const handleYesPress = async () => {
+    // 如果被禁用，直接返回
+    if (disabled) {
+      return;
+    }
     // 如果已经提交，显示提示并返回
     if (isSubmitted) {
       Alert.alert('Notice', 'You have already submitted your selection and cannot modify it again.');
@@ -97,6 +103,10 @@ function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemR
   };
 
   const handleNoPress = () => {
+    // 如果被禁用，直接返回
+    if (disabled) {
+      return;
+    }
     // 如果已经提交，显示提示并返回
     if (isSubmitted) {
       Alert.alert('提示', '您已经提交过选择，无法再次修改');
@@ -124,6 +134,10 @@ function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemR
   };
 
   const handleEditPress = () => {
+    // 如果被禁用，直接返回
+    if (disabled) {
+      return;
+    }
     // 如果已经提交，显示提示并返回
     if (isSubmitted) {
       Alert.alert('Notice', 'You have already submitted your selection and cannot modify the time again.');
@@ -154,12 +168,12 @@ function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemR
               <TouchableOpacity 
                 style={styles.editButton}
                 onPress={handleEditPress}
-                activeOpacity={isSubmitted ? 0.3 : 0.7}
-                disabled={isSubmitted}
+                activeOpacity={(disabled || isSubmitted) ? 0.3 : 0.7}
+                disabled={disabled || isSubmitted}
               >
                 <Edit2 
                   size={14} 
-                  color={isSubmitted ? "#CCCCCC" : "#999999"} 
+                  color={(disabled || isSubmitted) ? "#CCCCCC" : "#999999"} 
                   strokeWidth={2} 
                 />
               </TouchableOpacity>
@@ -170,21 +184,21 @@ function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemR
         <View style={styles.buttonGroup}>
         <TouchableOpacity
           onPress={handleNoPress}
-          activeOpacity={isSubmitted ? 0.3 : 1}
-          disabled={isSubmitted}
+          activeOpacity={(disabled || isSubmitted) ? 0.3 : 1}
+          disabled={disabled || isSubmitted}
         >
           <Animated.View
             style={[
               styles.button,
               selected === 'no' && styles.buttonNo,
-              isSubmitted && selected !== 'no' && styles.buttonDisabled,
+              (disabled || (isSubmitted && selected !== 'no')) && styles.buttonDisabled,
               { transform: [{ scale: scaleAnimNo }] }
             ]}
           >
             <Text style={[
               styles.buttonText,
               selected === 'no' && styles.buttonTextActive,
-              isSubmitted && selected !== 'no' && styles.buttonTextDisabled,
+              (disabled || (isSubmitted && selected !== 'no')) && styles.buttonTextDisabled,
             ]}>
               No
             </Text>
@@ -192,21 +206,21 @@ function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemR
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleYesPress}
-          activeOpacity={isSubmitted ? 0.3 : 1}
-          disabled={isSubmitted}
+          activeOpacity={(disabled || isSubmitted) ? 0.3 : 1}
+          disabled={disabled || isSubmitted}
         >
           <Animated.View
             style={[
               styles.button,
               selected === 'yes' && styles.buttonYes,
-              isSubmitted && selected !== 'yes' && styles.buttonDisabled,
+              (disabled || (isSubmitted && selected !== 'yes')) && styles.buttonDisabled,
               { transform: [{ scale: scaleAnimYes }] }
             ]}
           >
             <Text style={[
               styles.buttonText,
               selected === 'yes' && styles.buttonTextActive,
-              isSubmitted && selected !== 'yes' && styles.buttonTextDisabled,
+              (disabled || (isSubmitted && selected !== 'yes')) && styles.buttonTextDisabled,
             ]}>
               Yes
             </Text>
@@ -225,7 +239,7 @@ function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemR
   );
 }
 
-export function ReminderCard({ title, monster, reminders }: ReminderCardProps) {
+export function ReminderCard({ title, monster, reminders, disabled = false }: ReminderCardProps) {
   const [reminderTimes, setReminderTimes] = useState<string[]>(
     reminders.map(r => r.time)
   );
@@ -239,7 +253,7 @@ export function ReminderCard({ title, monster, reminders }: ReminderCardProps) {
   };
 
   return (
-    <View style={styles.containerWrapper}>
+    <View style={styles.containerWrapper} collapsable={false}>
       {/* Liquid Glass Background */}
       <BlurView intensity={20} tint="light" style={StyleSheet.absoluteFill} />
       
@@ -247,7 +261,7 @@ export function ReminderCard({ title, monster, reminders }: ReminderCardProps) {
       <View style={styles.borderOverlay} />
       
       {/* Content */}
-      <View style={styles.contentContainer}>
+      <View style={styles.contentContainer} collapsable={false}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{title}</Text>
           <Image
@@ -262,11 +276,12 @@ export function ReminderCard({ title, monster, reminders }: ReminderCardProps) {
           <View style={styles.remindersList}>
             {reminders.map((reminder, index) => (
               <ReminderItemRow
-                key={index}
+                key={`${reminder.time}-${reminder.title}-${index}`}
                 time={reminderTimes[index]}
                 title={reminder.title}
                 task_type={reminder.task_type || 'meal'}
                 onTimeChange={(newTime) => handleTimeChange(index, newTime)}
+                disabled={disabled}
               />
             ))}
           </View>
