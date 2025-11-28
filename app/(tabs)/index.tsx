@@ -20,6 +20,7 @@ import storageManager from '../../src/utils/storage';
 interface ReminderItem {
   time: string;
   title: string;
+  task_type?: string;
 }
 
 interface ReminderCardData {
@@ -1171,7 +1172,8 @@ export default function EchoTab() {
           // 转换任务数据为 ReminderCard 格式
           const reminders: ReminderItem[] = resultData.tasks.map((task: any) => ({
             time: task.time || '12:00',
-            title: task.title || 'Task'
+            title: task.title || 'Task',
+            task_type: task.task_type || 'meal'
           }));
 
           // 添加 ReminderCard 消息到界面
@@ -1180,7 +1182,7 @@ export default function EchoTab() {
             type: 'reminderCard',
             content: '',
             reminderCardData: {
-              title: '📋 任务提醒',
+              title: '📋 Reminder',
               monster: 'default',
               reminders: reminders
             }

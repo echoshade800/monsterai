@@ -6,6 +6,7 @@ import { ReminderCard } from './ReminderCard';
 interface ReminderItem {
   time: string;
   title: string;
+  task_type: string;
 }
 
 interface ReminderCardData {

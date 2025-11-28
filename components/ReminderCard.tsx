@@ -2,11 +2,14 @@ import { BlurView } from 'expo-blur';
 import { Edit2 } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import { Animated, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import api from '../src/services/api-clients/client';
+import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
 import { TimePickerModal } from './TimePickerModal';
 
 interface ReminderItem {
   time: string;
   title: string;
+  task_type?: string;
 }
 
 interface ReminderCardProps {
@@ -18,17 +21,18 @@ interface ReminderCardProps {
 interface ReminderItemRowProps {
   time: string;
   title: string;
+  task_type: string;
   onTimeChange: (newTime: string) => void;
 }
 
-function ReminderItemRow({ time, title, onTimeChange }: ReminderItemRowProps) {
+function ReminderItemRow({ time, title, task_type, onTimeChange }: ReminderItemRowProps) {
   const [selected, setSelected] = useState<'yes' | 'no' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [currentTime, setCurrentTime] = useState(time);
   const scaleAnimYes = useRef(new Animated.Value(1)).current;
   const scaleAnimNo = useRef(new Animated.Value(1)).current;
 
-  const handleYesPress = () => {
+  const handleYesPress = async () => {
     setSelected('yes');
     // Trigger scale animation
     Animated.sequence([
@@ -43,6 +47,35 @@ function ReminderItemRow({ time, title, onTimeChange }: ReminderItemRowProps) {
         useNativeDriver: true,
       }),
     ]).start();
+
+    try {
+      // 获取 headers
+      const headers = await getHeadersWithPassId();
+      console.log('task_type', task_type, 'title', title, 'time', time);
+
+      // 发送 POST 请求
+      const response = await api.post(API_ENDPOINTS.DATA_AGENT.USER_TIME_SCHEDULE_SMART_UPDATE, {
+        task_type: task_type,
+        title: title,
+        time: time,
+      }, {
+        headers: {
+          'accept': 'application/json',
+          'passid': (headers as any).passid || (headers as any).passId,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Smart update response:', response);
+
+      if (response.isSuccess()) {
+        console.log('Successfully updated user time schedule');
+      } else {
+        console.error('Failed to update user time schedule:', response);
+      }
+    } catch (error) {
+      console.error('Error updating user time schedule:', error);
+    }
   };
 
   const handleNoPress = () => {
@@ -188,6 +221,7 @@ export function ReminderCard({ title, monster, reminders }: ReminderCardProps) {
                 key={index}
                 time={reminderTimes[index]}
                 title={reminder.title}
+                task_type={reminder.task_type || 'meal'}
                 onTimeChange={(newTime) => handleTimeChange(index, newTime)}
               />
             ))}
