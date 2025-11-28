@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   // 可以添加更多存储键
   SETTINGS: 'settings',
   CACHE: 'cache',
+  REMINDER_SELECTIONS: 'reminderSelections', // Reminder 选择结果
 };
 
 // 用户数据结构
@@ -422,6 +423,77 @@ class StorageManager {
       return true;
     } catch (error) {
       console.error('Failed to clear device token:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 保存 Reminder 选择结果
+   * @param {string} reminderId - Reminder 唯一标识 (messageId + index)
+   * @param {string} selection - 选择结果 ('yes' | 'no')
+   * @returns {Promise<boolean>} 保存是否成功
+   */
+  async setReminderSelection(reminderId, selection) {
+    try {
+      const selections = await this.getReminderSelections();
+      selections[reminderId] = selection;
+      await AsyncStorage.setItem(STORAGE_KEYS.REMINDER_SELECTIONS, JSON.stringify(selections));
+      console.log('Reminder selection saved:', reminderId, selection);
+      return true;
+    } catch (error) {
+      console.error('Failed to save reminder selection:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取 Reminder 选择结果
+   * @param {string} reminderId - Reminder 唯一标识 (messageId + index)
+   * @returns {Promise<string|null>} 选择结果 ('yes' | 'no') 或 null
+   */
+  async getReminderSelection(reminderId) {
+    try {
+      const selections = await this.getReminderSelections();
+      return selections[reminderId] || null;
+    } catch (error) {
+      console.error('Failed to get reminder selection:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 获取所有 Reminder 选择结果
+   * @returns {Promise<Object>} 所有选择结果对象
+   */
+  async getReminderSelections() {
+    try {
+      const selectionsString = await AsyncStorage.getItem(STORAGE_KEYS.REMINDER_SELECTIONS);
+      return selectionsString ? JSON.parse(selectionsString) : {};
+    } catch (error) {
+      console.error('Failed to get reminder selections:', error);
+      return {};
+    }
+  }
+
+  /**
+   * 清除 Reminder 选择结果
+   * @param {string} reminderId - Reminder 唯一标识 (可选，如果不提供则清除所有)
+   * @returns {Promise<boolean>} 清除是否成功
+   */
+  async clearReminderSelection(reminderId) {
+    try {
+      if (reminderId) {
+        const selections = await this.getReminderSelections();
+        delete selections[reminderId];
+        await AsyncStorage.setItem(STORAGE_KEYS.REMINDER_SELECTIONS, JSON.stringify(selections));
+        console.log('Reminder selection cleared:', reminderId);
+      } else {
+        await AsyncStorage.removeItem(STORAGE_KEYS.REMINDER_SELECTIONS);
+        console.log('All reminder selections cleared');
+      }
+      return true;
+    } catch (error) {
+      console.error('Failed to clear reminder selection:', error);
       return false;
     }
   }

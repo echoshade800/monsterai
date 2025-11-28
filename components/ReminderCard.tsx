@@ -1,9 +1,10 @@
 import { BlurView } from 'expo-blur';
 import { Edit2 } from 'lucide-react-native';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
+import storageManager from '../src/utils/storage';
 import { TimePickerModal } from './TimePickerModal';
 
 interface ReminderItem {
@@ -17,6 +18,7 @@ interface ReminderCardProps {
   monster: string;
   reminders: ReminderItem[];
   disabled?: boolean;
+  messageId?: string; // 消息 ID，用于唯一标识 ReminderCard
 }
 
 interface ReminderItemRowProps {
@@ -25,15 +27,33 @@ interface ReminderItemRowProps {
   task_type: string;
   onTimeChange: (newTime: string) => void;
   disabled?: boolean;
+  reminderId: string; // Reminder 唯一标识 (messageId + index)
 }
 
-function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = false }: ReminderItemRowProps) {
+function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = false, reminderId }: ReminderItemRowProps) {
   const [selected, setSelected] = useState<'yes' | 'no' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [currentTime, setCurrentTime] = useState(time);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const scaleAnimYes = useRef(new Animated.Value(1)).current;
   const scaleAnimNo = useRef(new Animated.Value(1)).current;
+
+  // 从本地存储加载选择结果
+  useEffect(() => {
+    const loadSelection = async () => {
+      try {
+        const savedSelection = await storageManager.getReminderSelection(reminderId);
+        if (savedSelection === 'yes' || savedSelection === 'no') {
+          setSelected(savedSelection);
+          setIsSubmitted(true);
+          console.log('Loaded reminder selection from storage:', reminderId, savedSelection);
+        }
+      } catch (error) {
+        console.error('Failed to load reminder selection:', error);
+      }
+    };
+    loadSelection();
+  }, [reminderId]);
 
   const handleYesPress = async () => {
     // 如果被禁用，直接返回
@@ -48,6 +68,9 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
 
     setSelected('yes');
     setIsSubmitted(true);
+    
+    // 保存选择结果到本地存储
+    await storageManager.setReminderSelection(reminderId, 'yes');
     
     // Trigger scale animation
     Animated.sequence([
@@ -92,6 +115,8 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
         // 如果失败，允许重新提交
         setIsSubmitted(false);
         setSelected(null);
+        // 清除本地存储的选择结果
+        await storageManager.clearReminderSelection(reminderId);
       }
     } catch (error) {
       console.error('Error updating user time schedule:', error);
@@ -99,22 +124,27 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
       // 如果出错，允许重新提交
       setIsSubmitted(false);
       setSelected(null);
+      // 清除本地存储的选择结果
+      await storageManager.clearReminderSelection(reminderId);
     }
   };
 
-  const handleNoPress = () => {
+  const handleNoPress = async () => {
     // 如果被禁用，直接返回
     if (disabled) {
       return;
     }
     // 如果已经提交，显示提示并返回
     if (isSubmitted) {
-      Alert.alert('提示', '您已经提交过选择，无法再次修改');
+      Alert.alert('Notice', 'You have already submitted your selection and cannot modify it again.');
       return;
     }
 
     setSelected('no');
     setIsSubmitted(true);
+    
+    // 保存选择结果到本地存储
+    await storageManager.setReminderSelection(reminderId, 'no');
     
     // Trigger scale animation
     Animated.sequence([
@@ -130,7 +160,7 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
       }),
     ]).start();
 
-    Alert.alert('已记录', '您的选择已记录');
+    Alert.alert('Recorded', 'Your selection has been recorded.');
   };
 
   const handleEditPress = () => {
@@ -239,7 +269,7 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
   );
 }
 
-export function ReminderCard({ title, monster, reminders, disabled = false }: ReminderCardProps) {
+export function ReminderCard({ title, monster, reminders, disabled = false, messageId }: ReminderCardProps) {
   const [reminderTimes, setReminderTimes] = useState<string[]>(
     reminders.map(r => r.time)
   );
@@ -274,16 +304,21 @@ export function ReminderCard({ title, monster, reminders, disabled = false }: Re
         {/* White Content Area */}
         <View style={styles.whiteContentArea}>
           <View style={styles.remindersList}>
-            {reminders.map((reminder, index) => (
-              <ReminderItemRow
-                key={`${reminder.time}-${reminder.title}-${index}`}
-                time={reminderTimes[index]}
-                title={reminder.title}
-                task_type={reminder.task_type || 'meal'}
-                onTimeChange={(newTime) => handleTimeChange(index, newTime)}
-                disabled={disabled}
-              />
-            ))}
+            {reminders.map((reminder, index) => {
+              // 生成唯一标识符：messageId + index
+              const reminderId = messageId ? `${messageId}_${index}` : `reminder_${Date.now()}_${index}`;
+              return (
+                <ReminderItemRow
+                  key={`${reminder.time}-${reminder.title}-${index}`}
+                  time={reminderTimes[index]}
+                  title={reminder.title}
+                  task_type={reminder.task_type || 'meal'}
+                  onTimeChange={(newTime) => handleTimeChange(index, newTime)}
+                  disabled={disabled}
+                  reminderId={reminderId}
+                />
+              );
+            })}
           </View>
         </View>
       </View>

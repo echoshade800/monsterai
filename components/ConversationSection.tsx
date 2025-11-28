@@ -368,6 +368,7 @@ export function ConversationSection({
                   monster={message.reminderCardData.monster}
                   reminders={message.reminderCardData.reminders}
                   disabled={!isLastReminderCard}
+                  messageId={message.id}
                 />
               )}
             </View>
