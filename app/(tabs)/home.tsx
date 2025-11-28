@@ -409,9 +409,9 @@ export default function HomeTab() {
       const targetDate = date || selectedDate;
       const day = calculateDayOffset(targetDate);
       
-      // 构建请求 URL，添加 day 查询参数
-      const url = `${API_ENDPOINTS.TIMELINE.INFO}?day=${day}`;
-      
+      const reminderEndpoint = API_ENDPOINTS.TIMELINE.REMINDER;
+      const url = `${reminderEndpoint}?day=${day}`;
+      console.log('fetchTimelineInfo url', url);
       const response = await api.get(url, {
         headers: {
           'accept': 'application/json',
@@ -419,7 +419,7 @@ export default function HomeTab() {
         },
       });
 
-      console.log('fetchTimelineInfo response', response);
+      console.log('fetchTimelineInfo response', response, "response data", JSON.stringify(response.data, null, 2));
 
       if (response.isSuccess() && response.data) {
         // API 返回格式: { code: 0, msg: "success", data: { records: [...], ... } }

@@ -1,11 +1,11 @@
-  
 // API配置文件
+import storageManager from '../../utils/storage';
+
 const ENV = {
   DEVELOPMENT: 'development',
   PRODUCTION: 'production',
   STAGING: 'staging',
 };
-import storageManager from '../../utils/storage';
 
 // 当前环境 - 通过 __DEV__ 变量判断
 const CURRENT_ENV = __DEV__ ? ENV.DEVELOPMENT : ENV.PRODUCTION;
@@ -170,6 +170,7 @@ export const API_ENDPOINTS = {
   TIMELINE: {
     INFO: '/timeline/info',
     SAVE: '/timeline/save',
+    REMINDER: '/timeline/reminder',
   },
 
   DEVICE_TOKEN: {

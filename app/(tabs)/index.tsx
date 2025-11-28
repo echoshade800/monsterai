@@ -228,7 +228,7 @@ export default function EchoTab() {
       api.post(API_ENDPOINTS.DATA_AGENT.LAUNCH, {}, {
         requireAuth: false,
       }).catch((error) => {
-        console.error('[EchoTab] ❌ Failed to call launch API:', error);
+        //
       });
       console.log('[EchoTab] ✅ Launch API called (fire-and-forget)');
     } catch (error) {

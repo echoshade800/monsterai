@@ -54,11 +54,76 @@ export class UserData {
 
 // 自定义错误类
 export class ApiError extends Error {
-  constructor(code, message, data = null) {
+  constructor(code, message, data = null, url = null, method = null, status = null) {
     super(message);
     this.code = code;
     this.data = data;
     this.name = 'ApiError';
+    this.url = url;
+    this.method = method;
+    this.status = status;
+    this.timestamp = new Date().toISOString();
+    
+    // 创建更详细的错误消息
+    let detailedMessage = `[${code}] ${message}`;
+    if (url) {
+      detailedMessage += `\nURL: ${method || 'GET'} ${url}`;
+    }
+    if (status) {
+      detailedMessage += `\nHTTP Status: ${status}`;
+    }
+    if (data) {
+      try {
+        detailedMessage += `\nResponse Data: ${JSON.stringify(data, null, 2)}`;
+      } catch (e) {
+        detailedMessage += `\nResponse Data: ${String(data)}`;
+      }
+    }
+    this.detailedMessage = detailedMessage;
+  }
+  
+  // 获取详细的错误信息
+  getDetailedMessage() {
+    return this.detailedMessage;
+  }
+  
+  // 获取错误摘要（用于日志）
+  getSummary() {
+    // 安全地序列化 data，避免循环引用或不可序列化的对象
+    let safeData = null;
+    if (this.data !== null && this.data !== undefined) {
+      try {
+        // 尝试序列化，如果失败则使用字符串表示
+        JSON.stringify(this.data);
+        safeData = this.data;
+      } catch (e) {
+        // 如果序列化失败，尝试提取基本信息
+        try {
+          if (typeof this.data === 'object') {
+            safeData = {
+              _error: 'Data cannot be serialized',
+              _type: typeof this.data,
+              _constructor: this.data.constructor?.name || 'Unknown',
+              _keys: Object.keys(this.data).slice(0, 10), // 只取前10个键
+            };
+          } else {
+            safeData = String(this.data);
+          }
+        } catch (e2) {
+          safeData = '[Unable to serialize error data]';
+        }
+      }
+    }
+    
+    return {
+      code: this.code,
+      message: this.message,
+      url: this.url,
+      method: this.method,
+      status: this.status,
+      timestamp: this.timestamp,
+      data: safeData,
+    };
   }
 }
 
@@ -112,7 +177,9 @@ const request = async (url, options = {}) => {
   
   // 根据API类型获取正确的base URL
   const baseUrl = getBaseUrl(apiType);
-  console.log('request url', `${baseUrl}${url}`);
+  if (__DEV__) {
+    console.log('request url', `${baseUrl}${url}`);
+  }
 
   // 获取通用请求头所需的数据
   const deviceId = await getDeviceId();
@@ -165,23 +232,25 @@ const request = async (url, options = {}) => {
       setTimeout(() => reject(new ApiError('TIMEOUT', 'Request timeout')), timeout);
     });
 
-    // 美化日志输出
-    console.group(`📤 API Request [${method}]`);
-    console.log('URL:', `${baseUrl}${url}`);
-    if (requestConfig.headers && Object.keys(requestConfig.headers).length > 0) {
-      console.log('Headers:', JSON.stringify(requestConfig.headers, null, 2));
-    }
-    if (requestConfig.body) {
-      try {
-        const bodyObj = typeof requestConfig.body === 'string'
-          ? JSON.parse(requestConfig.body)
-          : requestConfig.body;
-        console.log('Body:', JSON.stringify(bodyObj, null, 2));
-      } catch (e) {
-        console.log('Body:', requestConfig.body);
+    // 美化日志输出（仅在开发环境）
+    if (__DEV__) {
+      console.group(`📤 API Request [${method}]`);
+      console.log('URL:', `${baseUrl}${url}`);
+      if (requestConfig.headers && Object.keys(requestConfig.headers).length > 0) {
+        console.log('Headers:', JSON.stringify(requestConfig.headers, null, 2));
       }
+      if (requestConfig.body) {
+        try {
+          const bodyObj = typeof requestConfig.body === 'string'
+            ? JSON.parse(requestConfig.body)
+            : requestConfig.body;
+          console.log('Body:', JSON.stringify(bodyObj, null, 2));
+        } catch (e) {
+          console.log('Body:', requestConfig.body);
+        }
+      }
+      console.groupEnd();
     }
-    console.groupEnd();
 
     // 发起请求
     const responsePromise = fetch(`${baseUrl}${url}`, requestConfig);
@@ -198,36 +267,47 @@ const request = async (url, options = {}) => {
         if (contentType && contentType.includes('application/json')) {
           errorData = await response.json();
           errorMessage = errorData.msg || errorData.message || errorMessage;
-          console.error('HTTP Error Response:', {
-            status: response.status,
-            statusText: response.statusText,
-            url: `${baseUrl}${url}`,
-            responseData: errorData,
-          });
+          if (__DEV__) {
+            console.error('HTTP Error Response:', {
+              status: response.status,
+              statusText: response.statusText,
+              url: `${baseUrl}${url}`,
+              responseData: errorData,
+            });
+          }
         } else {
           const textData = await response.text();
-          console.error('HTTP Error Response (text):', {
-            status: response.status,
-            statusText: response.statusText,
-            url: `${baseUrl}${url}`,
-            responseText: textData,
-          });
+          if (__DEV__) {
+            console.error('HTTP Error Response (text):', {
+              status: response.status,
+              statusText: response.statusText,
+              url: `${baseUrl}${url}`,
+              responseText: textData,
+            });
+          }
           errorData = { raw: textData };
         }
       } catch (parseError) {
-        console.error('Failed to parse error response:', parseError);
+        if (__DEV__) {
+          console.error('Failed to parse error response:', parseError);
+        }
       }
       
       throw new ApiError(
         response.status.toString(),
         errorMessage,
-        errorData
+        errorData,
+        `${baseUrl}${url}`,
+        method,
+        response.status
       );
     }
 
     // 解析响应数据
     const responseData = await response.json();
-    console.log('responseData', responseData);
+    if (__DEV__) {
+      console.log('responseData', responseData);
+    }
     
     // 检查业务状态码
     // 支持多种格式：
@@ -241,17 +321,22 @@ const request = async (url, options = {}) => {
                       responseData.msg === 'success';
     
     if (!isSuccess) {
-      console.error('Business Error Response:', {
-        url: `${baseUrl}${url}`,
-        code: responseData.code,
-        msg: responseData.msg,
-        data: responseData.data,
-        fullResponse: responseData,
-      });
+      if (__DEV__) {
+        console.error('Business Error Response:', {
+          url: `${baseUrl}${url}`,
+          code: responseData.code,
+          msg: responseData.msg,
+          data: responseData.data,
+          fullResponse: responseData,
+        });
+      }
       throw new ApiError(
         responseData.code || 'UNKNOWN',
         responseData.msg || 'Request failed',
-        responseData.data
+        responseData.data,
+        `${baseUrl}${url}`,
+        method,
+        null
       );
     }
 
@@ -260,11 +345,54 @@ const request = async (url, options = {}) => {
     return new ApiResponse(code, responseData.msg, responseData.data);
   } catch (error) {
     if (error instanceof ApiError) {
+      // 如果是 ApiError，确保包含 URL 和 method 信息（如果还没有）
+      if (!error.url) {
+        error.url = `${baseUrl}${url}`;
+      }
+      if (!error.method) {
+        error.method = method;
+      }
       throw error;
     }
     
-    // 网络错误或其他错误
-    throw new ApiError('NETWORK_ERROR', error.message || 'Network request failed');
+    // 网络错误或其他错误 - 添加更详细的错误信息
+    const errorMessage = error.message || 'Network request failed';
+    const errorStack = error.stack || '';
+    const errorName = error.name || 'UnknownError';
+    
+    // 构建详细的错误数据
+    const errorData = {
+      originalError: {
+        name: errorName,
+        message: errorMessage,
+        stack: errorStack,
+      },
+      requestInfo: {
+        url: `${baseUrl}${url}`,
+        method: method,
+        headers: requestConfig.headers,
+        body: requestConfig.body,
+      },
+    };
+    
+    if (__DEV__) {
+      console.error('Network/Request Error Details:', {
+        errorName,
+        errorMessage,
+        url: `${baseUrl}${url}`,
+        method: method,
+        errorStack: errorStack.split('\n').slice(0, 5).join('\n'), // 只显示前5行堆栈
+      });
+    }
+    
+    throw new ApiError(
+      'NETWORK_ERROR',
+      `${errorName}: ${errorMessage}`,
+      errorData,
+      `${baseUrl}${url}`,
+      method,
+      null
+    );
   }
 };
 
