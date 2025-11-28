@@ -20,7 +20,7 @@ import storageManager from '../../src/utils/storage';
 interface ReminderItem {
   time: string;
   title: string;
-  task_type?: string;
+  task_type: string;
 }
 
 interface ReminderCardData {
@@ -71,6 +71,34 @@ export default function EchoTab() {
     }
   }, [params.mentionAgent]);
 
+  // 将 extract_user_task 的 tasks 数据转换为 ReminderCard Message
+  const createReminderCardFromTasks = (tasks: any[], messageId?: string): Message | null => {
+    if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+      return null;
+    }
+
+    // 转换任务数据为 ReminderCard 格式
+    // 注意：确保 task_type 总是有值，以匹配 ConversationSection 的类型要求
+    const reminders: ReminderItem[] = tasks.map((task: any) => ({
+      time: task.time || '12:00',
+      title: task.title || 'Task',
+      task_type: task.task_type || 'meal'
+    } as ReminderItem));
+
+    // 创建 ReminderCard 消息
+    const id = messageId || `reminder_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return {
+      id,
+      type: 'reminderCard' as const,
+      content: '',
+      reminderCardData: {
+        title: '📋 Reminder',
+        monster: 'default',
+        reminders: reminders
+      }
+    };
+  };
+
   // 将 API 返回的数据转换为 Message 格式
   const convertToMessages = (data: any): Message[] => {
     if (!data) return [];
@@ -101,6 +129,31 @@ export default function EchoTab() {
     const convertItem = (item: any, index: number): Message | null => {
       // 过滤掉 function_call_output 和 fun_call 类型的消息
       if (item.msg_type === 'function_call_output' || item.msg_type === 'fun_call') {
+        return null;
+      }
+      
+      // 处理 function_call 类型的消息，特别是 extract_user_task
+      if (item.msg_type === 'function_call' && item.call_res) {
+        const callRes = item.call_res;
+        // 如果是 extract_user_task，转换为 ReminderCard 消息
+        if (callRes.name === 'extract_user_task' && callRes.arguments) {
+          try {
+            // 解析 arguments JSON 字符串
+            const args = JSON.parse(callRes.arguments);
+            
+            // 使用公共函数创建 ReminderCard 消息
+            const messageId = item._id || item.id || item.trace_id || `reminder_${index}_${Date.now()}`;
+            const reminderCard = createReminderCardFromTasks(args.tasks, messageId);
+            if (reminderCard) {
+              return reminderCard;
+            }
+          } catch (parseError) {
+            console.error('Failed to parse extract_user_task arguments:', parseError);
+            // 解析失败时，返回 null 过滤掉这条消息
+            return null;
+          }
+        }
+        // 其他 function_call 类型的消息，暂时过滤掉
         return null;
       }
       
@@ -144,7 +197,7 @@ export default function EchoTab() {
     if (data.history && Array.isArray(data.history)) {
       return data.history.map(convertItem).filter((msg: Message | null): msg is Message => msg !== null);
     }
-
+    
     // 如果返回的是包含 data 字段的数组
     if (data.data && Array.isArray(data.data)) {
       return data.data.map(convertItem).filter((msg: Message | null): msg is Message => msg !== null);
@@ -1172,26 +1225,9 @@ export default function EchoTab() {
         const resultData = JSON.parse(executionResult.result);
         console.log('Parsed extract_user_task result:', resultData);
 
-        if (resultData.tasks && Array.isArray(resultData.tasks) && resultData.tasks.length > 0) {
-          // 转换任务数据为 ReminderCard 格式
-          const reminders: ReminderItem[] = resultData.tasks.map((task: any) => ({
-            time: task.time || '12:00',
-            title: task.title || 'Task',
-            task_type: task.task_type || 'meal'
-          }));
-
-          // 添加 ReminderCard 消息到界面
-          const reminderCardMessage: Message = {
-            id: `reminder_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-            type: 'reminderCard',
-            content: '',
-            reminderCardData: {
-              title: '📋 Reminder',
-              monster: 'default',
-              reminders: reminders
-            }
-          };
-
+        // 使用公共函数创建 ReminderCard 消息
+        const reminderCardMessage = createReminderCardFromTasks(resultData.tasks);
+        if (reminderCardMessage) {
           setMessages(prev => [...prev, reminderCardMessage]);
           console.log('Added ReminderCard message for extracted tasks');
         }
@@ -1253,9 +1289,9 @@ export default function EchoTab() {
         title: "Need a reminder, boss?",
         monster: "poop",
         reminders: [
-          { time: "09:00", title: "Drink warm water" },
-          { time: "12:00", title: "Eat a banana" },
-          { time: "16:00", title: "Sip electrolytes" }
+          { time: "09:00", title: "Drink warm water", task_type: "meal" },
+          { time: "12:00", title: "Eat a banana", task_type: "meal" },
+          { time: "16:00", title: "Sip electrolytes", task_type: "meal" }
         ]
       }
     };
