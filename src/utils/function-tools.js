@@ -710,8 +710,216 @@ export const FUNCTION_TOOLS = [
       required: ["title", "startDate"]
     }
   },
-  
+  {
+    type: "function",
+    name: "extract_user_task",
+    description: "Choose when the user mentions tasks, schedules, plans, or activities they want to track or remember. This includes meal times, exercise schedules, appointments, reminders, or any planned activities.",
+    parameters: {
+      type: "object",
+      properties: {
+        text: {
+          type: "string",
+          description: "The user's input text containing task information to be extracted"
+        },
+        tasks: {
+          type: "array",
+          description: "Pre-extracted tasks array (optional, if provided, will be returned directly)",
+          items: {
+            type: "object",
+            properties: {
+              task_type: { type: "string" },
+              title: { type: "string" },
+              time: { type: "string" },
+              original_text: { type: "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+
 ];
+
+/**
+ * 提取用户任务功能
+ * @param {Object} args - 参数对象
+ * @param {string} args.text - 用户输入的文本内容
+ * @returns {Promise<string>} 提取的任务信息JSON字符串
+ */
+export const extractUserTask = async (args) => {
+  console.log('Starting to extract user tasks:', args);
+
+  try {
+    // 支持两种输入格式：text（需要解析）或 tasks（直接返回）
+    const { text, tasks: preExtractedTasks } = args;
+
+    // 如果直接提供了 tasks 数组，直接返回
+    if (preExtractedTasks && Array.isArray(preExtractedTasks)) {
+      console.log('Received pre-extracted tasks:', preExtractedTasks);
+      return JSON.stringify({ tasks: preExtractedTasks });
+    }
+
+    console.log('Input text to extract tasks from:', text);
+
+    if (!text || typeof text !== 'string') {
+      return JSON.stringify({ tasks: [] });
+    }
+
+    const tasks = [];
+
+    // 中文时间关键词映射
+    const timeKeywords = {
+      '早上': '09:00',
+      '上午': '09:00',
+      '中午': '12:00',
+      '午餐': '12:00',
+      '下午': '15:00',
+      '晚上': '18:00',
+      '晚餐': '18:00',
+      '宵夜': '21:00'
+    };
+
+    // 餐食关键词映射
+    const mealKeywords = {
+      '早餐': '早餐',
+      '早饭': '早餐',
+      '午餐': '午餐',
+      '午饭': '午餐',
+      '晚餐': '晚餐',
+      '晚饭': '晚餐',
+      '宵夜': '宵夜',
+      '吃饭': '吃饭',
+      '吃': '吃'
+    };
+
+    // 解析文本中的任务
+    const lines = text.split(/[。！？\n]/).filter(line => line.trim());
+    console.log('Split lines:', lines);
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) continue;
+      console.log('Processing line:', trimmedLine);
+
+      let taskType = null;
+      let title = '';
+      let time = null;
+
+      // 检查是否包含餐食关键词
+      for (const [keyword, mealType] of Object.entries(mealKeywords)) {
+        if (trimmedLine.includes(keyword)) {
+          taskType = 'meal';
+          title = `吃${mealType}`;
+          console.log('Found meal keyword:', keyword, 'mealType:', mealType);
+          break;
+        }
+      }
+
+      // 如果找到餐食任务，尝试提取时间
+      if (taskType === 'meal') {
+        for (const [timeKeyword, timeValue] of Object.entries(timeKeywords)) {
+          if (trimmedLine.includes(timeKeyword)) {
+            time = timeValue;
+            break;
+          }
+        }
+
+        // 如果没找到时间关键词，尝试匹配具体时间格式 (如 "9点", "12:00", "上午9:00")
+        if (!time) {
+          const timePatterns = [
+            /(\d{1,2})[:：](\d{2})/,  // 12:00, 9:30
+            /(\d{1,2})点(?:(\d{2})?)/, // 9点, 12点30
+            /(上午|下午|晚上)(\d{1,2})[:：]?(\d{2})?/, // 上午9:00
+          ];
+
+          for (const pattern of timePatterns) {
+            const match = trimmedLine.match(pattern);
+            if (match) {
+              let hours = parseInt(match[1]);
+              let minutes = match[2] ? parseInt(match[2]) : 0;
+
+              // 处理上午/下午
+              if (match[0].includes('下午') && hours < 12) {
+                hours += 12;
+              } else if (match[0].includes('晚上') && hours < 12) {
+                hours += 12;
+              }
+
+              time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+              break;
+            }
+          }
+        }
+
+        // 如果还是没找到时间，使用默认时间
+        if (!time) {
+          time = '12:00'; // 默认中午12点
+        }
+
+        tasks.push({
+          task_type: taskType,
+          title: title,
+          time: time,
+          original_text: trimmedLine
+        });
+        console.log('Added task:', { taskType, title, time, original_text: trimmedLine });
+      }
+    }
+
+    // 如果没有找到任何任务，尝试更宽泛的匹配
+    if (tasks.length === 0) {
+      console.log('No tasks found with strict matching, trying broader patterns...');
+
+      // 检查是否包含任何与吃饭相关的内容
+      const mealIndicators = ['吃', '吃饭', '早餐', '午餐', '晚餐', '早饭', '午饭', '晚饭', '宵夜'];
+      const hasMealContent = mealIndicators.some(indicator => text.includes(indicator));
+
+      if (hasMealContent) {
+        console.log('Found meal-related content, creating default task');
+        tasks.push({
+          task_type: 'meal',
+          title: '吃饭',
+          time: '12:00',
+          original_text: text
+        });
+      } else {
+        // 如果没有任何餐食相关内容，但用户提到了任务相关的内容，创建一个通用任务
+        const taskIndicators = ['提醒', '任务', '计划', 'schedule', 'remind', 'task'];
+        const hasTaskContent = taskIndicators.some(indicator => text.includes(indicator));
+
+        if (hasTaskContent) {
+          console.log('Found task-related content but no specific tasks, creating generic task');
+          tasks.push({
+            task_type: 'general',
+            title: '待办任务',
+            time: '12:00',
+            original_text: text
+          });
+        }
+      }
+    }
+
+    // 如果仍然没有任务，创建一个默认任务用于测试
+    if (tasks.length === 0) {
+      console.log('No tasks found, creating a default test task');
+      tasks.push({
+        task_type: 'meal',
+        title: '测试任务',
+        time: '12:00',
+        original_text: text || '默认测试文本'
+      });
+    }
+
+    console.log('Extracted tasks:', tasks);
+    const result = JSON.stringify({ tasks });
+    console.log('Final result:', result);
+    return result;
+
+  } catch (error) {
+    console.error('Failed to extract user tasks:', error);
+    return JSON.stringify({ tasks: [] });
+  }
+};
 
 // ==================== 工具路由 ====================
 
@@ -720,6 +928,7 @@ export const FUNCTION_TOOLS = [
  * 将工具名称映射到具体的实现函数
  */
 export const TOOL_HANDLERS = {
+  'extract_user_task': extractUserTask,
   // 'select_from_gallery': selectFromGallery,
   // 'get_step_count': getStepCount,
   // 'create_calendar_event': createCalendarEvent,

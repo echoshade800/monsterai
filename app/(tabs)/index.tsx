@@ -787,10 +787,10 @@ export default function EchoTab() {
   const fetchConversationHistory = useCallback(async () => {
     try {
       setIsLoading(true);
-      const result = await conversationService.getConversationHistory();
-      
+      const result: any = await conversationService.getConversationHistory();
+
       let historyMessages: Message[] = [];
-      
+
       if (result.success && result.data) {
         const convertedMessages = convertToMessages(result.data);
         // 反转消息数组，使最旧的消息在前，最新的在后
@@ -961,17 +961,17 @@ export default function EchoTab() {
         logPrefix: 'Regular message',
         onComplete: (responseData, eventSource) => {
           // 检查 Function Call
-          if (responseData.msg_type === 'function_call_output' && responseData.call_res) {
+          if ((responseData.msg_type === 'function_call_output' || responseData.msg_type === 'fun_call') && responseData.call_res) {
             console.log('Function Call detected:', responseData.call_res);
 
-            setMessages(prev => {
-              const filtered = prev.filter(msg => msg.id !== 'temp_ai_response');
-              return [...filtered, {
-                id: Date.now().toString(),
-                type: 'assistant' as const,
-                content: `Executing function: ${responseData.call_res.name}...`,
-              }];
-            });
+            // setMessages(prev => {
+            //   const filtered = prev.filter(msg => msg.id !== 'temp_ai_response');
+            //   return [...filtered, {
+            //     id: Date.now().toString(),
+            //     type: 'assistant' as const,
+            //     content: `Executing function: ${responseData.call_res.name}...`,
+            //   }];
+            // });
 
             if (eventSource) {
               eventSource.close();
@@ -1151,20 +1151,56 @@ export default function EchoTab() {
       return;
     }
 
-    console.log(`Executing function: ${name}, parameters:`, args);
+    console.log(`extract tool function: ${name}, parameters:`, args);
+    console.log('Parameters for extract_user_task:', JSON.stringify(args, null, 2));
 
     // 使用统一的工具执行器
     const executionResult = await executeToolFunction(name, args);
 
-    console.log(`Function execution result:`, executionResult);
+    console.log(`tool function execution result:`, executionResult);
 
-    // 检查执行结果
-    if (executionResult.success) {
-      await sendFunctionCallResult(call_id, name, executionResult.result);
-    } else {
-      const errorMessage = executionResult.error || `Unknown error occurred while executing function ${name}`;
-      await sendFunctionCallResult(call_id, name, errorMessage);
+    // 特殊处理 extract_user_task 函数
+    if (name === 'extract_user_task' && executionResult.success) {
+      try {
+        console.log('extract_user_task execution result:', executionResult);
+        console.log('Raw result string:', executionResult.result);
+        const resultData = JSON.parse(executionResult.result);
+        console.log('Parsed extract_user_task result:', resultData);
+
+        if (resultData.tasks && Array.isArray(resultData.tasks) && resultData.tasks.length > 0) {
+          // 转换任务数据为 ReminderCard 格式
+          const reminders: ReminderItem[] = resultData.tasks.map((task: any) => ({
+            time: task.time || '12:00',
+            title: task.title || 'Task'
+          }));
+
+          // 添加 ReminderCard 消息到界面
+          const reminderCardMessage: Message = {
+            id: `reminder_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            type: 'reminderCard',
+            content: '',
+            reminderCardData: {
+              title: '📋 任务提醒',
+              monster: 'default',
+              reminders: reminders
+            }
+          };
+
+          setMessages(prev => [...prev, reminderCardMessage]);
+          console.log('Added ReminderCard message for extracted tasks');
+        }
+      } catch (parseError) {
+        console.error('Failed to parse extract_user_task result:', parseError);
+      }
     }
+    // 20251126 目前不需要回传function call 结果
+    // // 检查执行结果
+    // if (executionResult.success) {
+    //   await sendFunctionCallResult(call_id, name, executionResult.result);
+    // } else {
+    //   const errorMessage = executionResult.error || `Unknown error occurred while executing function ${name}`;
+    //   await sendFunctionCallResult(call_id, name, errorMessage);
+    // }
   }, [sendFunctionCallResult]);
 
   // 发送消息
