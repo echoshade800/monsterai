@@ -350,7 +350,7 @@ export default function HomeTab() {
         title: titleMap[reminderType] || `${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)} Reminder`,
         toggleEnabled: !record.cancel, // cancel: false 表示启用
       };
-    } else if (['sleep', 'getup', 'breakfast', 'lunch', 'dinner'].includes(type)) {
+    } else if (['sleep', 'getup', 'breakfast', 'lunch', 'dinner', 'wake up', 'wakeup'].includes(type)) {
       // 处理 prediction 类型
       const titleMap: Record<string, { title: string; subtitle: string }> = {
         sleep: { title: 'Sleep', subtitle: 'You sleep around this time.' },
