@@ -12,26 +12,9 @@
     "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/2048/1.0.0.zip",
     "hot": false,
     "tag": [
-      "Createor Love"
+      "🤩 Createor Love"
     ],
-    "score": "98%"
-  },
-  {
-    "id": "2",
-    "name": "BlockPuzzleMiniApp",
-    "icon": "🟩",
-    "color": "#FF6B8A",
-    "miniAppType": "RN",
-    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/BlockPuzzleMiniApp/1.0.0.zip",
-    "module_name": "BlockPuzzleMiniApp",
-    "category": "gaming",
-    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/qblock.jpeg",
-    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/BlockPuzzleMiniApp/1.0.0.zip",
-    "hot": false,
-    "tag": [
-      "Createor Love"
-    ],
-    "score": "95%"
+    "score": "😊 95%"
   },
   {
     "id": "3",
@@ -48,7 +31,7 @@
     "tag": [
       "🤩 Createor Love"
     ],
-    "score": "😊 92%"
+    "score": "😊 97%"
   },
   {
     "id": "4",
@@ -185,5 +168,56 @@
       "Createor Love"
     ],
     "score": "95%"
+  },
+  {
+    "id": "12",
+    "name": "BlockPuzzle",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/BlockPuzzle/1.0.0.zip",
+    "module_name": "BlockPuzzleMiniApp",
+    "category": "gaming",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/qblock.jpeg",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/BlockPuzzle/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 93%"
+  },
+  {
+    "id": "13",
+    "name": "Todo",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Todo/1.0.0.zip",
+    "module_name": "TodoMiniApp",
+    "category": "lifestyle",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/todo.jpg",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Todo/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 95%"
+  },
+  {
+    "id": "14",
+    "name": "PopPoop",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/PopPoop/1.0.0.zip",
+    "module_name": "PopPoopMiniApp",
+    "category": "lifestyle",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/poppoop1.jpg",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/PopPoop/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 95%"
   }
 ]

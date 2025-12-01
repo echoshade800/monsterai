@@ -322,9 +322,35 @@ export default function HomeTab() {
     }
   }, []);
 
+  // 根据 type 或 prompt 生成标题的辅助函数
+  const getTitleFromTypeOrPrompt = (type: string, prompt?: string): string => {
+    // 优先使用 prompt（如果有且不为空）
+    if (prompt && prompt.trim()) {
+      return prompt;
+    }
+    
+    // 使用 type 映射表
+    const typeMap: Record<string, string> = {
+      meal: 'Meal',
+      breakfast: 'Breakfast',
+      lunch: 'Lunch',
+      dinner: 'Dinner',
+      snack: 'Snack',
+      sleep: 'Sleep',
+      getup: 'Wake Up',
+      wakeup: 'Wake Up',
+      exercise: 'Exercise',
+      water: 'Drink Water',
+      medication: 'Medication',
+    };
+    
+    const key = (type || '').toLowerCase();
+    return typeMap[key] || type || 'Task';
+  };
+
   // 将 API 响应映射到 TimelineItem
   const mapApiRecordToTimelineItem = (record: any): TimelineItem | null => {
-    const { time, type } = record;
+    const { time, type, prompt } = record;
     
     if (!time || !type) {
       return null;
@@ -342,15 +368,16 @@ export default function HomeTab() {
         breakfast: 'Breakfast Reminder',
         lunch: 'Lunch Reminder',
         dinner: 'Dinner Reminder',
+        meal: 'Meal Reminder',
       };
       return {
         id: recordId,
         time,
         type: 'reminder',
-        title: titleMap[reminderType] || `${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)} Reminder`,
+        title: titleMap[reminderType] || getTitleFromTypeOrPrompt(reminderType, prompt) + ' Reminder',
         toggleEnabled: !record.cancel, // cancel: false 表示启用
       };
-    } else if (['sleep', 'getup', 'breakfast', 'lunch', 'dinner', 'wake up', 'wakeup'].includes(type)) {
+    } else if (['sleep', 'getup', 'breakfast', 'lunch', 'dinner', 'wake up', 'wakeup', 'meal'].includes(type)) {
       // 处理 prediction 类型
       const titleMap: Record<string, { title: string; subtitle: string }> = {
         sleep: { title: 'Sleep', subtitle: 'You sleep around this time.' },
@@ -358,8 +385,12 @@ export default function HomeTab() {
         breakfast: { title: 'Breakfast', subtitle: 'You tend to have breakfast around this time.' },
         lunch: { title: 'Lunch', subtitle: 'You tend to eat around this time.' },
         dinner: { title: 'Dinner', subtitle: 'You tend to have dinner around this time.' },
+        meal: { title: 'Meal', subtitle: 'You tend to have a meal around this time.' },
       };
-      const mapped = titleMap[type] || { title: type.charAt(0).toUpperCase() + type.slice(1), subtitle: '' };
+      const mapped = titleMap[type] || { 
+        title: getTitleFromTypeOrPrompt(type, prompt), 
+        subtitle: '' 
+      };
       return {
         time,
         type: 'prediction',
@@ -373,6 +404,7 @@ export default function HomeTab() {
         breakfast: 'Food',
         lunch: 'Food',
         dinner: 'Food',
+        meal: 'Food',
         getup: 'Energy',
         sleep: 'Sleep',
       };
@@ -380,6 +412,7 @@ export default function HomeTab() {
         breakfast: 'You had breakfast. Good start! 🥞',
         lunch: 'You ate! Stable energy level detected.',
         dinner: 'You had dinner. Evening meal completed.',
+        meal: 'You had a meal. Good nutrition! 🍽️',
         getup: 'You got out of bed! Morning boost started.',
         sleep: 'You fell asleep. Sweet dreams! 🌙',
       };
@@ -390,11 +423,14 @@ export default function HomeTab() {
         description: descriptionMap[actionType] || `You completed ${actionType}.`,
       };
     } else {
+      // 处理其他类型，使用 prompt 或 type 生成标题
+      const title = getTitleFromTypeOrPrompt(type, prompt);
+      console.log('mapApiRecordToTimelineItem unknown type', time, type, prompt, '-> title:', title);
       return {
         time,
         type: 'unknown',
-        title: type,
-        subtitle: `${type}.`,
+        title: title,
+        subtitle: `${title}.`,
       };
     }
   };
@@ -1429,6 +1465,17 @@ export default function HomeTab() {
                       </View>
                       <Text style={styles.timelineActionDescription}>{item.description}</Text>
                     </View>
+                  )}
+                  {item.type === 'unknown' && (
+                    <>
+                      <View style={styles.timelineHeader}>
+                        <Text style={styles.timelineTime}>{item.time}</Text>
+                        <Text style={styles.timelinePredictionTitle}>{item.title || 'Unknown'}</Text>
+                      </View>
+                      {item.subtitle && (
+                        <Text style={styles.timelinePredictionSubtitle}>{item.subtitle}</Text>
+                      )}
+                    </>
                   )}
                 </View>
               </View>
