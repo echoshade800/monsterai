@@ -7,8 +7,8 @@
  *   node scripts/test_push.js <device_token> [options]
  * 
  * 示例:
- *   node scripts/test_push.js "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" --key-path ./AuthKey_XXXXXXXXXX.p8 --key-id XXXXXXXXXX --team-id XXXXXXXXXX
- *   node scripts/test_push.js "xxxxxxxx..." --key-path ./AuthKey.p8 --key-id ABC123 --team-id DEF456 --bundle-id com.fanthus.monsterai.debug
+ *   node scripts/test_push.js "你的device_token" --prod --title "重要通知" --body "请查看"
+ *   node scripts/test_push.js "你的device_token" --dev --title "重要通知" --body "请查看"
  */
 
 const http2 = require('http2');
@@ -124,15 +124,25 @@ function parseArgs() {
     console.log('  --badge <数字>        应用角标数字 (默认: 1)');
     console.log('  --priority <优先级>   推送优先级: 10 (立即) 或 5 (省电) (默认: 10)');
     console.log('  --environment <环境>  推送环境: development 或 production (默认: development)');
+    console.log('  --prod / --production 快速切换到生产环境 (等同于 --environment production)');
+    console.log('  --dev / --development 快速切换到开发环境 (等同于 --environment development)');
     console.log('  --data <JSON>         自定义数据 (JSON 字符串)');
     console.log('  --content-available   启用 content-available (后台更新)');
     console.log('  --mutable-content     启用 mutable-content (通知扩展)');
     console.log('\n示例:');
-    console.log('  # 使用默认配置（最简单）');
+    console.log('  # 使用默认配置（开发环境）');
     console.log('  node scripts/test_push.js "xxxxxxxx..."');
+    console.log('');
+    console.log('  # 使用生产环境');
+    console.log('  node scripts/test_push.js "xxxxxxxx..." --prod');
+    console.log('  # 或');
+    console.log('  node scripts/test_push.js "xxxxxxxx..." --environment production');
     console.log('');
     console.log('  # 自定义推送内容');
     console.log('  node scripts/test_push.js "xxxxxxxx..." --title "提醒" --body "您有新消息"');
+    console.log('');
+    console.log('  # 生产环境 + 自定义内容');
+    console.log('  node scripts/test_push.js "xxxxxxxx..." --prod --title "重要通知" --body "请查看"');
     console.log('');
     console.log('  # 覆盖默认认证信息');
     console.log('  node scripts/test_push.js "xxxxxxxx..." \\');
@@ -154,11 +164,33 @@ function parseArgs() {
   }
   
   // 解析选项
-  for (let i = 1; i < args.length; i += 2) {
+  for (let i = 1; i < args.length; i++) {
     const key = args[i];
     const value = args[i + 1];
     
-    if (!value && !key.startsWith('--content-available') && !key.startsWith('--mutable-content')) {
+    // 处理不需要值的标志参数
+    if (key === '--prod' || key === '--production') {
+      config.environment = 'production';
+      continue;
+    }
+    
+    if (key === '--dev' || key === '--development') {
+      config.environment = 'development';
+      continue;
+    }
+    
+    if (key === '--content-available') {
+      config.contentAvailable = true;
+      continue;
+    }
+    
+    if (key === '--mutable-content') {
+      config.mutableContent = true;
+      continue;
+    }
+    
+    // 需要值的参数
+    if (!value || value.startsWith('--')) {
       console.error(`❌ 错误: 选项 ${key} 缺少值`);
       process.exit(1);
     }
@@ -166,24 +198,31 @@ function parseArgs() {
     switch (key) {
       case '--key-path':
         config.keyPath = path.resolve(value);
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--key-id':
         config.keyId = value;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--team-id':
         config.teamId = value;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--bundle-id':
         config.bundleId = value;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--title':
         config.title = value;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--body':
         config.body = value;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--sound':
         config.sound = value;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--badge':
         const badge = parseInt(value, 10);
@@ -192,6 +231,7 @@ function parseArgs() {
           process.exit(1);
         }
         config.badge = badge;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--priority':
         const priority = parseInt(value, 10);
@@ -200,6 +240,7 @@ function parseArgs() {
           process.exit(1);
         }
         config.priority = priority;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--environment':
         if (value !== 'development' && value !== 'production') {
@@ -207,6 +248,7 @@ function parseArgs() {
           process.exit(1);
         }
         config.environment = value;
+        i++; // 跳过下一个参数（已使用）
         break;
       case '--data':
         try {
@@ -215,14 +257,7 @@ function parseArgs() {
           console.error(`❌ 错误: --data 必须是有效的 JSON 字符串`);
           process.exit(1);
         }
-        break;
-      case '--content-available':
-        config.contentAvailable = true;
-        i--; // 不需要读取下一个参数
-        break;
-      case '--mutable-content':
-        config.mutableContent = true;
-        i--; // 不需要读取下一个参数
+        i++; // 跳过下一个参数（已使用）
         break;
       default:
         console.warn(`⚠️  警告: 未知选项 ${key}`);
