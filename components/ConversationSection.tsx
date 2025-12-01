@@ -32,8 +32,9 @@ interface ConversationSectionProps {
   keyboardHeight?: number;
 }
 
-// Monster 颜色映射表（统一管理）
+// Monster 颜色映射表（统一管理，包含新旧名称）
 const MONSTER_COLORS: Record<string, string> = {
+  // 新名称
   foodie: '#F38319',
   moodie: '#7A4DBA',
   sleeper: '#206BDB',
@@ -41,10 +42,17 @@ const MONSTER_COLORS: Record<string, string> = {
   posture: '#32C25F',
   facey: '#FF4FB0',
   butler: '#666666',
+  // 旧名称映射
+  energy: '#F38319', // foodie
+  stress: '#7A4DBA', // moodie
+  sleep: '#206BDB', // sleeper
+  feces: '#844E02', // poopy
+  face: '#FF4FB0', // facey
 };
 
-// Monster 头像 URL 映射表
+// Monster 头像 URL 映射表（包含新旧名称）
 const MONSTER_AVATARS: Record<string, string> = {
+  // 新名称
   foodie: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png',
   moodie: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png',
   sleeper: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png',
@@ -52,30 +60,119 @@ const MONSTER_AVATARS: Record<string, string> = {
   posture: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png',
   facey: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
   butler: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesteward.png',
+  // 旧名称映射
+  energy: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png',
+  stress: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png',
+  sleep: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png',
+  feces: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png',
+  face: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
 };
 
-// 统一渲染函数：给所有 [MonsterName] 标签加颜色，并在标签前显示头像
+// 统一渲染函数：给所有 [MonsterName] 标签或直接出现的 MonsterName 加颜色，并在标签前显示头像
 const renderMonsterColoredText = (text: string) => {
   if (!text) return null;
 
-  // 使用 split 分割文本，保留标签作为独立元素
-  // 正则 /(\[[^\]]+\])/g 会匹配所有 [MonsterName] 标签，并保留在结果数组中
-  const parts = text.split(/(\[[^\]]+\])/g);
+  // 构建所有可能的 monster 名字列表（包括新旧名称）
+  const monsterNames = [
+    'foodie', 'energy', 'moodie', 'stress', 'sleeper', 'sleep',
+    'poopy', 'feces', 'posture', 'facey', 'face', 'butler'
+  ];
+  
+  // 创建匹配模式：优先匹配带括号的 [MonsterName]，然后匹配不带括号的（单词边界）
+  // 使用非捕获组和单词边界确保准确匹配
+  const monsterPattern = `(\\[(${monsterNames.join('|')})\\]|(?<!\\[)\\b(${monsterNames.join('|')})\\b(?![\\]]))`;
+  
+  // 由于 JavaScript 不支持后向断言，我们使用两步处理
+  // 第一步：处理带括号的格式
+  let processedText = text;
+  const parts: Array<{ type: 'text' | 'tag' | 'name', content: string, monsterName?: string }> = [];
+  let lastIndex = 0;
+  
+  // 先匹配所有带括号的标签
+  const bracketRegex = new RegExp(`\\[(${monsterNames.join('|')})\\]`, 'gi');
+  let match;
+  const bracketMatches: Array<{ index: number, name: string, fullMatch: string }> = [];
+  
+  while ((match = bracketRegex.exec(text)) !== null) {
+    bracketMatches.push({
+      index: match.index,
+      name: match[1].toLowerCase(),
+      fullMatch: match[0]
+    });
+  }
+  
+  // 再匹配所有不带括号的名字（但要排除已经在括号内的）
+  const nameRegex = new RegExp(`\\b(${monsterNames.join('|')})\\b`, 'gi');
+  const nameMatches: Array<{ index: number, name: string, fullMatch: string }> = [];
+  
+  while ((match = nameRegex.exec(text)) !== null) {
+    // 检查这个匹配是否在某个括号匹配的范围内
+    const isInBracket = bracketMatches.some(bm => 
+      match!.index >= bm.index && match!.index < bm.index + bm.fullMatch.length
+    );
+    if (!isInBracket) {
+      nameMatches.push({
+        index: match.index,
+        name: match[1].toLowerCase(),
+        fullMatch: match[0]
+      });
+    }
+  }
+  
+  // 合并所有匹配并按位置排序
+  const allMatches = [
+    ...bracketMatches.map(m => ({ ...m, isBracket: true })),
+    ...nameMatches.map(m => ({ ...m, isBracket: false }))
+  ].sort((a, b) => a.index - b.index);
+  
+  // 构建 parts 数组
+  for (let i = 0; i < allMatches.length; i++) {
+    const currentMatch = allMatches[i];
+    
+    // 添加匹配前的文本
+    if (currentMatch.index > lastIndex) {
+      const textBefore = text.substring(lastIndex, currentMatch.index);
+      if (textBefore) {
+        parts.push({ type: 'text', content: textBefore });
+      }
+    }
+    
+    // 添加匹配的 monster 名字
+    parts.push({
+      type: currentMatch.isBracket ? 'tag' : 'name',
+      content: currentMatch.fullMatch,
+      monsterName: currentMatch.name
+    });
+    
+    lastIndex = currentMatch.index + currentMatch.fullMatch.length;
+  }
+  
+  // 添加最后剩余的文本
+  if (lastIndex < text.length) {
+    const remainingText = text.substring(lastIndex);
+    if (remainingText) {
+      parts.push({ type: 'text', content: remainingText });
+    }
+  }
+  
+  // 如果没有匹配到任何 monster 名字，返回原始文本
+  if (parts.length === 0) {
+    parts.push({ type: 'text', content: text });
+  }
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
       {parts.map((part, index) => {
-        // 跳过空字符串（split 可能在开头/结尾产生空字符串）
-        if (part.length === 0) {
-          return null;
-        }
-
-        // 检查是否是标签格式 [MonsterName]
-        const tagMatch = part.match(/^\[([^\]]+)\]$/);
-        if (tagMatch) {
-          const name = tagMatch[1].trim().toLowerCase();
+        // 处理 monster 名字（带括号或不带括号）
+        if (part.type === 'tag' || part.type === 'name') {
+          const name = part.monsterName || '';
           const color = MONSTER_COLORS[name] ?? '#000000';
           const avatarUrl = MONSTER_AVATARS[name];
+          
+          // 对于带括号的标签，显示时去掉括号；对于不带括号的，直接显示名字
+          const displayName = part.type === 'tag' 
+            ? part.content.replace(/^\[|\]$/g, '') 
+            : part.content;
           
           return (
             <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4 }}>
@@ -87,42 +184,53 @@ const renderMonsterColoredText = (text: string) => {
                 />
               )}
               <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
-                {tagMatch[1]}
+                {displayName}
               </Text>
             </View>
           );
         }
 
-        // 普通文本（包括冒号、空格、换行符等）
-        // 如果紧跟在标签后面，删除开头的冒号（中文冒号：或英文冒号:）和多余的空行
-        let displayText = part;
-        if (index > 0) {
-          const prevPart = parts[index - 1];
-          // 检查前一个部分是否是标签
-          if (prevPart && prevPart.match(/^\[([^\]]+)\]$/)) {
-            // 删除开头的冒号（中文或英文）
-            displayText = part.replace(/^[：:]\s*/, '');
-            // 如果紧跟在标签后面且只包含换行符和空白字符，删除所有换行符
-            if (displayText.match(/^[\s\n]*$/)) {
-              displayText = displayText.replace(/[\n\s]+/g, '');
-            } else {
-              // 否则只删除开头的换行符
-              displayText = displayText.replace(/^\n+/, '');
+        // 处理普通文本
+        if (part.type === 'text') {
+          let displayText = part.content;
+          
+          // 如果紧跟在 monster 名字后面，删除开头的冒号（中文冒号：或英文冒号:）和多余的空行
+          if (index > 0) {
+            const prevPart = parts[index - 1];
+            if (prevPart && (prevPart.type === 'tag' || prevPart.type === 'name')) {
+              // 删除开头的冒号（中文或英文）
+              displayText = displayText.replace(/^[：:]\s*/, '');
+              // 如果紧跟在标签后面且只包含换行符和空白字符，删除所有换行符
+              if (displayText.match(/^[\s\n]*$/)) {
+                displayText = displayText.replace(/[\n\s]+/g, '');
+              } else {
+                // 否则只删除开头的换行符
+                displayText = displayText.replace(/^\n+/, '');
+              }
             }
           }
-        }
-        // 如果是消息开头且只包含换行符和空白字符，删除它
-        if (index === 0 && displayText.match(/^[\s\n]*$/)) {
-          return null;
-        }
-        // 将多个连续的换行符压缩为单个换行符（但保留文本内容）
-        displayText = displayText.replace(/\n{2,}/g, '\n');
+          
+          // 如果是消息开头且只包含换行符和空白字符，删除它
+          if (index === 0 && displayText.match(/^[\s\n]*$/)) {
+            return null;
+          }
+          
+          // 将多个连续的换行符压缩为单个换行符（但保留文本内容）
+          displayText = displayText.replace(/\n{2,}/g, '\n');
+          
+          // 跳过空字符串
+          if (displayText.length === 0) {
+            return null;
+          }
 
-        return (
-          <Text key={index} style={{ fontSize: 15, fontFamily: 'Nunito_400Regular', lineHeight: 22 }}>
-            {displayText}
-          </Text>
-        );
+          return (
+            <Text key={index} style={{ fontSize: 15, fontFamily: 'Nunito_400Regular', lineHeight: 22 }}>
+              {displayText}
+            </Text>
+          );
+        }
+
+        return null;
       })}
     </View>
   );

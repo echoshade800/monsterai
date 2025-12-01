@@ -1,8 +1,8 @@
 [
     {
       "id": "1",
-      "agentName": "energy",
-      "name": "Energy",
+      "agentName": "foodie",
+      "name": "Foodie",
       "category": "Health",
       "description": "Stay strong and stress-free.",
       "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/energy.png",
@@ -12,8 +12,8 @@
     },
     {
       "id": "2",
-      "agentName": "face",
-      "name": "Face",
+      "agentName": "facey",
+      "name": "Facey",
       "category": "Beauty",
       "description": "I make your skin glow with data.",
       "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/face.png",
@@ -34,8 +34,8 @@
     },
     {
       "id": "4",
-      "agentName": "sleep",
-      "name": "Sleep",
+      "agentName": "sleeper",
+      "name": "Sleeper",
       "category": "Restful",
       "description": "I guide you to better sleep, naturally.",
       "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/sleep.png",
@@ -45,8 +45,8 @@
     },
     {
       "id": "5",
-      "agentName": "stress",
-      "name": "Stress",
+      "agentName": "moodie",
+      "name": "Moodie",
       "category": "Physical",
       "description": "I'm your cozy friend for calm days and happy minds.",
       "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/stress.png",
@@ -56,8 +56,8 @@
     },
     {
       "id": "6",
-      "agentName": "feces",
-      "name": "Poop",
+      "agentName": "poopy",
+      "name": "Poopy",
       "category": "Available",
       "description": "I'm your cute buddy for happy, healthy poops!",
       "imageUrl": "https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/feces.png",

@@ -1,11 +1,13 @@
 import { BlurView } from 'expo-blur';
 import Constants from 'expo-constants';
 import * as FileSystem from 'expo-file-system/legacy';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Image, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AvatarCropModal from '../components/AvatarCropModal';
+import { GenderPickerModal } from '../components/GenderPickerModal';
+import { HeightPickerModal } from '../components/HeightPickerModal';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
@@ -21,46 +23,52 @@ export default function ProfileScreen() {
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
-  const [tempHeight, setTempHeight] = useState('');
 
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
+  const [showGenderPicker, setShowGenderPicker] = useState(false);
+  const [showHeightPicker, setShowHeightPicker] = useState(false);
 
-  useEffect(() => {
-    loadAvatar();
-    loadUserInfo();
-  }, []);
-
-  const loadUserInfo = async () => {
+  // Load user info from API - use useCallback to make it reusable
+  const loadUserInfo = useCallback(async () => {
     try {
       const result: any = await userService.getUserInfo();
+      console.log('[Profile] getUserInfo result:', result);
+      
       if (result?.success && result?.data) {
         const userData = result.data;
+        console.log('[Profile] userData:', userData);
+        console.log('[Profile] gender:', userData.gender, 'height:', userData.height);
         
-        // 填充用户名，如果没有则设置为 "Unknown"
-        if (userData.userName) {
+        // 填充用户名
+        if (userData.userName && userData.userName.trim() !== '') {
           setName(userData.userName);
         } else {
           setName('Unknown');
         }
         
-        // 填充性别，如果没有则设置为 "Unknown"
-        if (userData.gender) {
-          setSex(userData.gender);
+        // 填充性别 - 确保正确映射 API 数据
+        // 处理 null, undefined, 空字符串等情况
+        if (userData.gender && String(userData.gender).trim() !== '') {
+          // API 返回的 gender 可能是小写，直接使用
+          setSex(String(userData.gender).trim());
         } else {
+          console.log('[Profile] gender is empty or null, setting to Unknown');
           setSex('Unknown');
         }
         
-        // 填充身高（格式化为 "xxx cm"），如果没有则设置为 "Unknown"
-        // 如果已经是 "xxx cm" 格式，直接使用；如果是数字，添加 " cm"
-        if (userData.height) {
-          const heightStr = String(userData.height);
+        // 填充身高（格式化为 "xxx cm"）
+        // 处理 null, undefined, 空字符串等情况
+        if (userData.height !== null && userData.height !== undefined && String(userData.height).trim() !== '') {
+          const heightStr = String(userData.height).trim();
           if (heightStr.includes('cm')) {
             setHeight(heightStr);
           } else {
+            // 如果是纯数字，添加 " cm"
             setHeight(`${heightStr} cm`);
           }
         } else {
+          console.log('[Profile] height is empty or null, setting to Unknown');
           setHeight('Unknown');
         }
         
@@ -69,19 +77,33 @@ export default function ProfileScreen() {
           setAvatarUri(userData.avatar);
         }
       } else {
-        // 如果获取失败，也设置为 Unknown
+        console.log('[Profile] getUserInfo failed or no data');
+        // 如果获取失败，设置为 Unknown
         setName('Unknown');
         setSex('Unknown');
         setHeight('Unknown');
       }
     } catch (error) {
-      console.error('Failed to load user info:', error);
+      console.error('[Profile] Failed to load user info:', error);
       // 如果出错，设置为 Unknown
       setName('Unknown');
       setSex('Unknown');
       setHeight('Unknown');
     }
-  };
+  }, []);
+
+  // Load data on mount
+  useEffect(() => {
+    loadAvatar();
+    loadUserInfo();
+  }, [loadUserInfo]);
+
+  // Reload data when page gains focus (e.g., returning from edit modal)
+  useFocusEffect(
+    useCallback(() => {
+      loadUserInfo();
+    }, [loadUserInfo])
+  );
 
   const loadAvatar = async () => {
     try {
@@ -117,24 +139,100 @@ export default function ProfileScreen() {
     setEditingField('name');
   };
 
-  const handleEditSex = () => {
-    // 如果 sex 是 "Unknown"，则 tempValue 设置为空字符串
-    if (sex === 'Unknown') {
-      setTempValue('');
-    } else {
-      setTempValue(sex);
+  // Convert gender format: 'male'/'female' -> 'Male'/'Female'/'Non-binary'/'Prefer not to say'
+  const convertToGenderPickerFormat = (gender: string): 'Male' | 'Female' | 'Non-binary' | 'Prefer not to say' => {
+    if (gender.toLowerCase() === 'male') return 'Male';
+    if (gender.toLowerCase() === 'female') return 'Female';
+    if (gender.toLowerCase() === 'non-binary' || gender.toLowerCase() === 'nonbinary') return 'Non-binary';
+    if (gender.toLowerCase() === 'prefer not to say' || gender.toLowerCase() === 'prefernottosay') return 'Prefer not to say';
+    return 'Male'; // default
+  };
+
+  // Convert gender format: 'Male'/'Female'/'Non-binary'/'Prefer not to say' -> 'male'/'female'/'non-binary'/'prefer not to say'
+  const convertFromGenderPickerFormat = (gender: 'Male' | 'Female' | 'Non-binary' | 'Prefer not to say'): string => {
+    return gender.toLowerCase();
+  };
+
+  // Format gender for display (capitalize first letter of each word)
+  const formatGenderForDisplay = (gender: string): string => {
+    if (!gender || gender === 'Unknown') return 'Unknown';
+    // Handle special cases
+    if (gender.toLowerCase() === 'prefer not to say' || gender.toLowerCase() === 'prefernottosay') {
+      return 'Prefer not to say';
     }
-    setEditingField('sex');
+    if (gender.toLowerCase() === 'non-binary' || gender.toLowerCase() === 'nonbinary') {
+      return 'Non-binary';
+    }
+    // Capitalize first letter
+    return gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+  };
+
+  const handleEditSex = () => {
+    setShowGenderPicker(true);
+  };
+
+  const handleGenderSave = async (newGender: 'Male' | 'Female' | 'Non-binary' | 'Prefer not to say') => {
+    try {
+      // 准备更新数据，将 gender 转换为小写格式
+      let updateData: any = {
+        gender: convertFromGenderPickerFormat(newGender),
+      };
+      
+      // 更新用户信息
+      const updateResult: any = await userService.updateUserInfo(updateData);
+      
+      if (updateResult?.success) {
+        // 重新从 API 加载数据，确保完全同步
+        await loadUserInfo();
+        Alert.alert('Success', 'Gender updated');
+        setShowGenderPicker(false);
+      } else {
+        Alert.alert('Error', updateResult?.message || 'Failed to update gender');
+      }
+    } catch (error) {
+      console.error('Error saving gender:', error);
+      Alert.alert('Error', 'Error occurred while saving gender, please try again later');
+    }
+  };
+
+  // Extract height in cm from string like "175 cm" or "175"
+  const extractHeightInCm = (heightStr: string): number => {
+    if (heightStr === 'Unknown' || heightStr === 'Unknown cm') {
+      return 175; // default height
+    }
+    const match = heightStr.match(/(\d+)/);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+    return 175; // default
   };
 
   const handleEditHeight = () => {
-    // 如果 height 是 "Unknown"，则 tempHeight 设置为空字符串
-    if (height === 'Unknown' || height === 'Unknown cm') {
-      setTempHeight('');
-    } else {
-      setTempHeight(height.replace(' cm', ''));
+    setShowHeightPicker(true);
+  };
+
+  const handleHeightSave = async (newHeight: number) => {
+    try {
+      // 准备更新数据，height 以 cm 为单位，API expects string
+      let updateData: any = {
+        height: String(newHeight),
+      };
+      
+      // 更新用户信息
+      const updateResult: any = await userService.updateUserInfo(updateData);
+      
+      if (updateResult?.success) {
+        // 重新从 API 加载数据，确保完全同步
+        await loadUserInfo();
+        Alert.alert('Success', 'Height updated');
+        setShowHeightPicker(false);
+      } else {
+        Alert.alert('Error', updateResult?.message || 'Failed to update height');
+      }
+    } catch (error) {
+      console.error('Error saving height:', error);
+      Alert.alert('Error', 'Error occurred while saving height, please try again later');
     }
-    setEditingField('height');
   };
 
   const handleSave = async () => {
@@ -165,7 +263,8 @@ export default function ProfileScreen() {
         const updateResult: any = await userService.updateUserInfo(updateData);
         
         if (updateResult?.success) {
-          setName(tempValue);
+          // 重新从 API 加载数据，确保完全同步
+          await loadUserInfo();
           Alert.alert('Success', 'Name updated');
           setEditingField(null);
         } else {
@@ -174,80 +273,6 @@ export default function ProfileScreen() {
       } catch (error) {
         console.error('Error saving name:', error);
         Alert.alert('Error', 'Error occurred while saving name, please try again later');
-      }
-    } else if (editingField === 'sex') {
-      // 如果值是 "Unknown"，不发送到服务器
-      if (tempValue === 'Unknown' || tempValue.trim() === '') {
-        Alert.alert('Tip', 'Please select gender');
-        return;
-      }
-      
-      try {
-        // 先获取用户信息，确保保留其他字段
-        const userInfoResult: any = await userService.getUserInfo();
-        
-        // 准备更新数据，将 sex 映射到 API 的 gender 字段
-        let updateData: any = {
-          gender: tempValue,
-        };
-        
-        // 如果成功获取到用户信息，可以合并其他字段（如果需要）
-        if (userInfoResult?.success && userInfoResult?.data) {
-          const currentUserData = userInfoResult.data;
-          // 如果需要保留其他字段，可以在这里合并
-          // 目前只更新 gender，所以直接使用上面的 updateData
-        }
-        
-        // 更新用户信息
-        const updateResult: any = await userService.updateUserInfo(updateData);
-        
-        if (updateResult?.success) {
-          setSex(tempValue);
-          Alert.alert('Success', 'Gender updated');
-          setEditingField(null);
-        } else {
-          Alert.alert('Error', updateResult?.message || 'Failed to update gender');
-        }
-      } catch (error) {
-        console.error('Error saving gender:', error);
-        Alert.alert('Error', 'Error occurred while saving gender, please try again later');
-      }
-    } else if (editingField === 'height') {
-      // 如果值是 "Unknown" 或为空，不发送到服务器
-      if (tempHeight === 'Unknown' || tempHeight.trim() === '') {
-        Alert.alert('Tip', 'Please select height');
-        return;
-      }
-      
-      try {
-        // 先获取用户信息，确保保留其他字段
-        const userInfoResult: any = await userService.getUserInfo();
-        
-        // 准备更新数据，将 tempHeight（纯数字）映射到 API 的 height 字段
-        let updateData: any = {
-          height: tempHeight,
-        };
-        
-        // 如果成功获取到用户信息，可以合并其他字段（如果需要）
-        if (userInfoResult?.success && userInfoResult?.data) {
-          const currentUserData = userInfoResult.data;
-          // 如果需要保留其他字段，可以在这里合并
-          // 目前只更新 height，所以直接使用上面的 updateData
-        }
-        
-        // 更新用户信息
-        const updateResult: any = await userService.updateUserInfo(updateData);
-        
-        if (updateResult?.success) {
-          setHeight(`${tempHeight} cm`);
-          Alert.alert('Success', 'Height updated');
-          setEditingField(null);
-        } else {
-          Alert.alert('Error', updateResult?.message || 'Failed to update height');
-        }
-      } catch (error) {
-        console.error('Error saving height:', error);
-        Alert.alert('Error', 'Error occurred while saving height, please try again later');
       }
     }
   };
@@ -472,9 +497,9 @@ export default function ProfileScreen() {
 
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
-                <Text style={styles.menuItemLabel}>Sex</Text>
+                <Text style={styles.menuItemLabel}>Gender</Text>
                 <Text style={styles.menuItemValue}>
-                  {sex ? sex.charAt(0).toUpperCase() + sex.slice(1) : ''}
+                  {sex ? formatGenderForDisplay(sex) : 'Unknown'}
                 </Text>
               </View>
               <TouchableOpacity style={styles.editButton} onPress={handleEditSex}>
@@ -567,8 +592,6 @@ export default function ProfileScreen() {
 
             <Text style={styles.modalTitle}>
               {editingField === 'name' && 'Edit Name'}
-              {editingField === 'sex' && 'Edit Sex'}
-              {editingField === 'height' && 'Edit Height'}
             </Text>
 
             {editingField === 'name' && (
@@ -584,45 +607,7 @@ export default function ProfileScreen() {
               </View>
             )}
 
-            {editingField === 'sex' && (
-              <View style={styles.optionsContainer}>
-                <TouchableOpacity
-                  style={[styles.optionButton, tempValue === 'male' && styles.optionButtonSelected]}
-                  onPress={() => setTempValue('male')}
-                >
-                  <Text style={[styles.optionText, tempValue === 'male' && styles.optionTextSelected]}>
-                    Male
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.optionButton, tempValue === 'female' && styles.optionButtonSelected]}
-                  onPress={() => setTempValue('female')}
-                >
-                  <Text style={[styles.optionText, tempValue === 'female' && styles.optionTextSelected]}>
-                    Female
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
 
-            {editingField === 'height' && (
-              <View style={styles.singlePickerContainer}>
-                <Text style={styles.pickerLabel}>Height (cm)</Text>
-                <ScrollView style={styles.singlePickerScrollView} showsVerticalScrollIndicator={false}>
-                  {Array.from({ length: 121 }, (_, i) => (120 + i).toString()).map(h => (
-                    <TouchableOpacity
-                      key={h}
-                      style={[styles.pickerItem, h === tempHeight && styles.pickerItemSelected]}
-                      onPress={() => setTempHeight(h)}
-                    >
-                      <Text style={[styles.pickerItemText, h === tempHeight && styles.pickerItemTextSelected]}>
-                        {h}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
 
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
@@ -644,6 +629,22 @@ export default function ProfileScreen() {
           onConfirm={handleCropConfirm}
         />
       )}
+
+      {/* Gender Picker Modal */}
+      <GenderPickerModal
+        visible={showGenderPicker}
+        initialGender={sex && sex !== 'Unknown' ? convertToGenderPickerFormat(sex) : 'Male'}
+        onClose={() => setShowGenderPicker(false)}
+        onSave={handleGenderSave}
+      />
+
+      {/* Height Picker Modal */}
+      <HeightPickerModal
+        visible={showHeightPicker}
+        initialHeight={extractHeightInCm(height)}
+        onClose={() => setShowHeightPicker(false)}
+        onSave={handleHeightSave}
+      />
     </View>
   );
 }

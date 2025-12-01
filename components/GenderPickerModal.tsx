@@ -14,7 +14,7 @@ import {
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SHEET_HEIGHT = 400;
 
-type Gender = 'Male' | 'Female' | 'Non-binary';
+type Gender = 'Male' | 'Female' | 'Non-binary' | 'Prefer not to say';
 
 interface GenderPickerModalProps {
   visible: boolean;
@@ -23,7 +23,7 @@ interface GenderPickerModalProps {
   onSave: (gender: Gender) => void;
 }
 
-const GENDERS: Gender[] = ['Male', 'Female', 'Non-binary'];
+const GENDERS: Gender[] = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
 
 export function GenderPickerModal({ visible, initialGender, onClose, onSave }: GenderPickerModalProps) {
   const [selectedGender, setSelectedGender] = useState<Gender>(initialGender);

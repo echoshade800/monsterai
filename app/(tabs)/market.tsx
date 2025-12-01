@@ -115,6 +115,51 @@ export default function MarketTab() {
   const [error, setError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Clean agent name: extract name from parentheses if exists, map old names to new names
+  // Example: "饮食管理 Monster（Foodie）" → "Foodie"
+  //          "Energy" → "Foodie"
+  //          "Foodie" → "Foodie"
+  const cleanAgentName = (name: string): string => {
+    if (!name) return name;
+    
+    let cleanedName = name.trim();
+    
+    // First, extract name from parentheses if exists (中文括号 or English parentheses)
+    const chineseBracketMatch = cleanedName.match(/（([^）]+)）/);
+    const englishBracketMatch = cleanedName.match(/\(([^)]+)\)/);
+    
+    if (chineseBracketMatch) {
+      cleanedName = chineseBracketMatch[1].trim();
+    } else if (englishBracketMatch) {
+      cleanedName = englishBracketMatch[1].trim();
+    }
+    
+    // Map old names to new names
+    const nameMapping: Record<string, string> = {
+      'Energy': 'Foodie',
+      'energy': 'Foodie',
+      'Face': 'Facey',
+      'face': 'Facey',
+      'Sleep': 'Sleeper',
+      'sleep': 'Sleeper',
+      'Stress': 'Moodie',
+      'stress': 'Moodie',
+      'Feces': 'Poopy',
+      'feces': 'Poopy',
+      'Poop': 'Poopy',
+      'poop': 'Poopy',
+      'Steward': 'Butler',
+      'steward': 'Butler',
+    };
+    
+    // If the cleaned name matches an old name, map it to the new name
+    if (nameMapping[cleanedName]) {
+      return nameMapping[cleanedName];
+    }
+    
+    return cleanedName;
+  };
+
   // 使用单独的 useEffect 来设置原生事件监听器，确保只执行一次
   useEffect(() => {
     const cleanup = useNativeTrigger();
@@ -210,8 +255,8 @@ export default function MarketTab() {
 
   const handleFingerprintPress = (agentName: string) => {
     console.log('Fingerprint pressed:', agentName);
-    // Special handling for Energy agent
-    if (agentName === 'energy') {
+    // Special handling for Foodie agent (previously energy)
+    if (agentName === 'foodie') {
       router.push('/energy-detail');
     } else {
       router.push({
@@ -479,7 +524,7 @@ export default function MarketTab() {
                 ]}
               >
                 <MonsterCard
-                  name={monster.name}
+                  name={cleanAgentName(monster.name)}
                   category={monster.category}
                   description={monster.description}
                   imageUrl={monster.imageUrl}

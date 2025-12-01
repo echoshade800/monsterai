@@ -49,6 +49,14 @@ export class UserData {
     this.city = data.city;
     this.createTime = data.createTime;
     this.canSetPassword = data.canSetPassword;
+    // Profile fields
+    this.gender = data.gender;
+    this.height = data.height;
+    this.weight = data.weight;
+    this.age = data.age;
+    this.activityLevel = data.activityLevel;
+    this.dietPreference = data.dietPreference;
+    this.goalWeight = data.goalWeight;
   }
 }
 

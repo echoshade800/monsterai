@@ -1,31 +1,31 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
-  Bell,
-  Calendar,
-  Camera,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Heart,
-  Image as ImageIcon,
-  MapPin,
-  X
+    Bell,
+    Calendar,
+    Camera,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    Heart,
+    Image as ImageIcon,
+    MapPin,
+    X
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert,
-  AppState,
-  Linking,
-  Modal,
-  Platform,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    AppState,
+    Linking,
+    Modal,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import api from '../../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../../src/services/api/api';
@@ -1518,32 +1518,46 @@ export default function HomeTab() {
             </View>
 
             <View style={styles.calendarDays}>
-              {generateCalendarDays().map((day, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.calendarDay,
-                    !day && styles.calendarDayEmpty,
-                    day &&
-                      day.toDateString() === selectedDate.toDateString() &&
-                      styles.calendarDaySelected,
-                  ]}
-                  onPress={() => day && selectCalendarDate(day)}
-                  disabled={!day}
-                >
-                  {day && (
-                    <Text
-                      style={[
-                        styles.calendarDayText,
-                        day.toDateString() === selectedDate.toDateString() &&
-                          styles.calendarDayTextSelected,
-                      ]}
-                    >
-                      {day.getDate()}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              ))}
+              {generateCalendarDays().map((day, index) => {
+                const isToday = day && day.toDateString() === new Date().toDateString();
+                const isSelected = day && day.toDateString() === selectedDate.toDateString();
+                
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.calendarDay,
+                      !day && styles.calendarDayEmpty,
+                      isSelected && styles.calendarDaySelected,
+                    ]}
+                    onPress={() => day && selectCalendarDate(day)}
+                    disabled={!day}
+                  >
+                    {day && (
+                      <View style={styles.calendarDayContent}>
+                        <Text
+                          style={[
+                            styles.calendarDayText,
+                            isSelected && styles.calendarDayTextSelected,
+                          ]}
+                        >
+                          {day.getDate()}
+                        </Text>
+                        {isToday && (
+                          <Text
+                            style={[
+                              styles.calendarTodayLabel,
+                              isSelected && styles.calendarTodayLabelSelected,
+                            ]}
+                          >
+                            Today
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         </View>
@@ -1910,6 +1924,22 @@ const styles = StyleSheet.create({
   calendarDayTextSelected: {
     color: '#FFFFFF',
     fontFamily: 'Nunito_700Bold',
+  },
+  calendarDayContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+  },
+  calendarTodayLabel: {
+    fontSize: 9,
+    fontFamily: 'Nunito_500Medium',
+    color: '#666666',
+    marginTop: 1,
+    lineHeight: 10,
+  },
+  calendarTodayLabelSelected: {
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_600SemiBold',
   },
   noLogsContainer: {
     paddingVertical: 40,

@@ -8,14 +8,23 @@ interface Agent {
   param_name: string;
   avatarUrl: string;
 }
-// face、posture、food_calorie、 sleep、stress、feces
+// 统一命名标准：
+// 大管家：Butler
+// 饮食管家：Foodie (之前用 energy)
+// 面部管家：Facey (之前用 face)
+// 姿态管家：Posture
+// 情绪管家：Moodie (之前用 stress)
+// 大便管家：Poopy (之前用 poop 或 feces)
+// 睡眠管家：Sleeper (之前用 sleep)
+// 注意：由于容器使用 column-reverse，数组最后一个元素会显示在最上面
 export const AGENTS: Agent[] = [
-  { id: 'feces', name: 'Feces', param_name: 'feces', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png' },
-  { id: 'stress', name: 'Stress', param_name: 'stress', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png' },
-  { id: 'sleep', name: 'Sleep', param_name: 'sleep', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png' },
+  { id: 'poopy', name: 'Poopy', param_name: 'poopy', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png' },
+  { id: 'moodie', name: 'Moodie', param_name: 'moodie', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png' },
+  { id: 'sleeper', name: 'Sleeper', param_name: 'sleeper', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png' },
   { id: 'posture', name: 'Posture', param_name: 'posture', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png' },
-  { id: 'face', name: 'Face', param_name: 'face', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png' },
-  { id: 'energy', name: 'Energy', param_name: 'energy', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png' },
+  { id: 'facey', name: 'Facey', param_name: 'facey', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png' },
+  { id: 'foodie', name: 'Foodie', param_name: 'foodie', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png' },
+  { id: 'butler', name: 'Butler', param_name: 'butler', avatarUrl: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesteward.png' },
 ];
 
 interface MentionSelectorProps {

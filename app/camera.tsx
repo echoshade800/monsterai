@@ -28,24 +28,24 @@ const IMAGE_MAP: { [key: string]: any } = {
 
 const AGENTS = [
   {
-    id: 'steward',
-    name: 'Steward',
+    id: 'butler',
+    name: 'Butler',
     frontImage: 'frontsteward.png',
     backImage: 'backsteward.png',
     prompt: 'Take any picture you want!',
     image_detection_type: 'full',
   },
   {
-    id: 'energy',
-    name: 'Energy',
+    id: 'foodie',
+    name: 'Foodie',
     frontImage: 'frontenergy.png',
     backImage: 'backenergy.png',
     prompt: 'Show me your food!',
     image_detection_type: 'food_calorie',
   },
   {
-    id: 'face',
-    name: 'Face',
+    id: 'facey',
+    name: 'Facey',
     frontImage: 'frontface.png',
     backImage: 'backface.png',
     prompt: 'Show me your face!',
@@ -60,24 +60,24 @@ const AGENTS = [
     image_detection_type: 'posture',
   },
   {
-    id: 'sleep',
-    name: 'Sleep',
+    id: 'sleeper',
+    name: 'Sleeper',
     frontImage: 'frontsleep.png',
     backImage: 'backsleep.png',
     prompt: 'How did you sleep? Show me!',
     image_detection_type: 'sleep',
   },
   {
-    id: 'stress',
-    name: 'Stress',
+    id: 'moodie',
+    name: 'Moodie',
     frontImage: 'frontstress.png',
     backImage: 'backstress.png',
     prompt: 'How stressed are you? Show me!',
     image_detection_type: 'stress',
   },
   {
-    id: 'feces',
-    name: 'Feces',
+    id: 'poopy',
+    name: 'Poopy',
     frontImage: 'frontfeces.png',
     backImage: 'backfeces.png',
     prompt: 'Did you poop today?',
@@ -409,9 +409,9 @@ export default function CameraScreen() {
             >
               {AGENTS.map((agent, index) => {
                 const imageStyle = [styles.agentImage];
-                if (agent.id === 'sleep' || agent.id === 'feces') {
+                if (agent.id === 'sleeper' || agent.id === 'poopy') {
                   imageStyle.push(styles.agentImageSmall);
-                } else if (agent.id === 'stress') {
+                } else if (agent.id === 'moodie') {
                   imageStyle.push(styles.agentImageUp);
                 } else if (agent.id === 'posture') {
                   imageStyle.push(styles.agentImageDown);

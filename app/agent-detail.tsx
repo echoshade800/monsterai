@@ -73,7 +73,7 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#F5E6D3',
   },
   face: {
-    name: 'Face Agent',
+    name: 'Facey',
     goal: 'I help you improve your skin tone, glow, and facial vitality.',
     mission: 'I track your face and help you understand what affects your glow.',
     tasks: [
@@ -111,7 +111,7 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#E8F5E9',
   },
   posture: {
-    name: 'Posture Agent',
+    name: 'Posture',
     goal: 'I help you stand taller, look better, and move with confidence.',
     mission: 'I detect posture problems you can\'t see and correct them.',
     tasks: [
@@ -149,7 +149,7 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#FFE4E1',
   },
   sleep: {
-    name: 'Sleep Agent',
+    name: 'Sleeper',
     goal: 'I help you sleep deeper and wake up more energized.',
     mission: 'I find the root causes behind your sleep quality.',
     tasks: [
@@ -187,7 +187,7 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#E3F2FD',
   },
   stress: {
-    name: 'Stress Agent',
+    name: 'Moodie',
     goal: 'I help you stabilize emotions and control daily stress.',
     mission: 'I read your expressions and patterns to find what affects your mood.',
     tasks: [
@@ -225,7 +225,7 @@ const AGENTS_DATA: Record<string, AgentData> = {
     backgroundColor: '#FFE0B2',
   },
   feces: {
-    name: 'Feces Agent',
+    name: 'Poopy',
     goal: 'I help your gut stay smooth, regular, and healthy.',
     mission: 'I analyze bowel patterns to understand your digestive health.',
     tasks: [
@@ -359,6 +359,31 @@ export default function AgentDetailPage() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const agentId = params.id as string;
+  
+  // Redirect foodie (or energy) to the dedicated energy-detail page
+  useEffect(() => {
+    if (agentId === 'foodie' || agentId === 'energy') {
+      router.replace('/energy-detail');
+      return;
+    }
+  }, [agentId, router]);
+  
+  // Map new agent names to old keys for AGENTS_DATA lookup
+  const agentNameMapping: Record<string, string> = {
+    'facey': 'face',
+    'sleeper': 'sleep',
+    'moodie': 'stress',
+    'poopy': 'feces',
+    // Keep old names for backward compatibility
+    'face': 'face',
+    'sleep': 'sleep',
+    'stress': 'stress',
+    'feces': 'feces',
+    'posture': 'posture',
+  };
+  
+  const mappedAgentId = agentNameMapping[agentId] || agentId;
+  
   const [isHired, setIsHired] = useState(true);
   const [permissions, setPermissions] = useState({
     camera: false,
@@ -369,7 +394,12 @@ export default function AgentDetailPage() {
     notifications: false,
   });
 
-  const agent = AGENTS_DATA[agentId];
+  const agent = AGENTS_DATA[mappedAgentId];
+  
+  // If agent not found or is foodie/energy (redirecting), return null
+  if (!agent || agentId === 'foodie' || agentId === 'energy') {
+    return null;
+  }
 
   // 同步权限状态
   const syncAllPermissions = async () => {
@@ -754,12 +784,13 @@ export default function AgentDetailPage() {
     setIsHired(true);
   };
 
-  const isStressAgent = agentId === 'stress';
+  // Check agent type using both new and old names
+  const isStressAgent = agentId === 'stress' || agentId === 'moodie';
   const isEnergyAgent = agentId === 'energy';
-  const isFaceAgent = agentId === 'face';
+  const isFaceAgent = agentId === 'face' || agentId === 'facey';
   const isPostureAgent = agentId === 'posture';
-  const isSleepAgent = agentId === 'sleep';
-  const isFecesAgent = agentId === 'feces';
+  const isSleepAgent = agentId === 'sleep' || agentId === 'sleeper';
+  const isFecesAgent = agentId === 'feces' || agentId === 'poopy';
 
   return (
     <View style={[styles.container, { backgroundColor: agent.backgroundColor }]}>

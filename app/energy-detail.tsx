@@ -1,8 +1,8 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, Brain, Calendar, ChevronRight, ClipboardList, Target, User } from 'lucide-react-native';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Image,
     ScrollView,
@@ -23,6 +23,7 @@ import { HeightPickerModal } from '../components/HeightPickerModal';
 import { TimePickerModal } from '../components/TimePickerModal';
 import { WeightPickerModal } from '../components/WeightPickerModal';
 import { getStrategyById } from '../constants/strategies';
+import userService from '../src/services/userService';
 
 // Mock data interfaces
 interface ReminderItem {
@@ -57,20 +58,20 @@ export default function EnergyDetailScreen() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   
   // Weight states
-  const [currentWeight, setCurrentWeight] = useState(58.4);
-  const [goalWeight, setGoalWeight] = useState(52.0);
+  const [currentWeight, setCurrentWeight] = useState<number | null>(null);
+  const [goalWeight, setGoalWeight] = useState<number | null>(null);
   const [showWeightPicker, setShowWeightPicker] = useState(false);
   const [weightPickerType, setWeightPickerType] = useState<'current' | 'goal'>('current');
 
   // Eating Window state
   const [showEatingWindowPicker, setShowEatingWindowPicker] = useState(false);
 
-  // Basic Info states
-  const [height, setHeight] = useState(175); // cm
-  const [age, setAge] = useState(28);
-  const [gender, setGender] = useState<'Male' | 'Female' | 'Non-binary'>('Male');
-  const [activityLevel, setActivityLevel] = useState<'Not Very Active' | 'Lightly Active' | 'Active' | 'Very Active'>('Lightly Active');
-  const [dietPreference, setDietPreference] = useState('Light flavors, low spice, no dairy');
+  // Basic Info states - loaded from API
+  const [height, setHeight] = useState<number | null>(null); // cm
+  const [age, setAge] = useState<number | null>(null);
+  const [gender, setGender] = useState<'Male' | 'Female' | 'Non-binary' | 'Prefer not to say' | null>(null);
+  const [activityLevel, setActivityLevel] = useState<'Not Very Active' | 'Lightly Active' | 'Active' | 'Very Active' | null>(null);
+  const [dietPreference, setDietPreference] = useState<string | null>(null);
   const [showHeightPicker, setShowHeightPicker] = useState(false);
   const [showAgePicker, setShowAgePicker] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
@@ -117,6 +118,121 @@ export default function EnergyDetailScreen() {
     }
     return { start: createTimeToday(12, 0), end: createTimeToday(20, 0) }; // fallback
   };
+
+  // Convert gender format from API (lowercase) to display format
+  const convertGenderFromAPI = (apiGender: string | null | undefined): 'Male' | 'Female' | 'Non-binary' | 'Prefer not to say' | null => {
+    if (!apiGender) return null;
+    const lower = apiGender.toLowerCase();
+    if (lower === 'male') return 'Male';
+    if (lower === 'female') return 'Female';
+    if (lower === 'non-binary' || lower === 'nonbinary') return 'Non-binary';
+    if (lower === 'prefer not to say' || lower === 'prefernottosay') return 'Prefer not to say';
+    return null;
+  };
+
+  // Convert gender format to API format (lowercase)
+  const convertGenderToAPI = (gender: 'Male' | 'Female' | 'Non-binary' | 'Prefer not to say'): string => {
+    return gender.toLowerCase();
+  };
+
+  // Extract height in cm from API value (could be number or string like "175 cm")
+  const extractHeightFromAPI = (apiHeight: any): number | null => {
+    if (!apiHeight) return null;
+    if (typeof apiHeight === 'number') return apiHeight;
+    if (typeof apiHeight === 'string') {
+      const match = apiHeight.match(/(\d+)/);
+      if (match) return parseInt(match[1], 10);
+    }
+    return null;
+  };
+
+  // Load user profile data from API (same source as Profile page)
+  const loadUserProfileData = useCallback(async () => {
+    try {
+      const result: any = await userService.getUserInfo();
+      if (result?.success && result?.data) {
+        const userData = result.data;
+        
+        // Load gender
+        if (userData.gender) {
+          const convertedGender = convertGenderFromAPI(userData.gender);
+          if (convertedGender) {
+            setGender(convertedGender);
+          }
+        } else {
+          setGender(null);
+        }
+        
+        // Load height (convert to number in cm)
+        if (userData.height) {
+          const heightInCm = extractHeightFromAPI(userData.height);
+          if (heightInCm) {
+            setHeight(heightInCm);
+          }
+        } else {
+          setHeight(null);
+        }
+        
+        // Load age
+        if (userData.age) {
+          const ageNum = typeof userData.age === 'number' ? userData.age : parseInt(String(userData.age), 10);
+          if (!isNaN(ageNum)) {
+            setAge(ageNum);
+          }
+        } else {
+          setAge(null);
+        }
+        
+        // Load weight (current weight)
+        if (userData.weight) {
+          const weightNum = typeof userData.weight === 'number' ? userData.weight : parseFloat(String(userData.weight));
+          if (!isNaN(weightNum)) {
+            setCurrentWeight(weightNum);
+          }
+        } else {
+          setCurrentWeight(null);
+        }
+        
+        // Load goal weight (if available)
+        if (userData.goalWeight) {
+          const goalWeightNum = typeof userData.goalWeight === 'number' ? userData.goalWeight : parseFloat(String(userData.goalWeight));
+          if (!isNaN(goalWeightNum)) {
+            setGoalWeight(goalWeightNum);
+          }
+        } else {
+          setGoalWeight(null);
+        }
+        
+        // Load activity level (if available)
+        if (userData.activityLevel) {
+          setActivityLevel(userData.activityLevel);
+        } else {
+          setActivityLevel(null);
+        }
+        
+        // Load diet preference (if available)
+        if (userData.dietPreference) {
+          setDietPreference(userData.dietPreference);
+        } else {
+          setDietPreference(null);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load user profile data:', error);
+    }
+  }, []);
+
+  // Load data on mount
+  useEffect(() => {
+    loadUserProfileData();
+  }, [loadUserProfileData]);
+
+  // Reload data when page gains focus (e.g., returning from Profile page)
+  useFocusEffect(
+    useCallback(() => {
+      loadUserProfileData();
+    }, [loadUserProfileData])
+  );
 
   // Dynamically calculate eating window data based on reminders
   const eatingWindowData = useMemo(() => {
@@ -246,13 +362,31 @@ export default function EnergyDetailScreen() {
     setShowWeightPicker(true);
   };
 
-  const handleWeightSave = (weight: number) => {
-    if (weightPickerType === 'current') {
-      setCurrentWeight(weight);
-    } else {
-      setGoalWeight(weight);
+  const handleWeightSave = async (weight: number) => {
+    try {
+      // Update API
+      const updateData: any = {};
+      if (weightPickerType === 'current') {
+        updateData.weight = weight;
+      } else {
+        updateData.goalWeight = weight;
+      }
+      
+      const updateResult: any = await userService.updateUserInfo(updateData);
+      
+      if (updateResult?.success) {
+        if (weightPickerType === 'current') {
+          setCurrentWeight(weight);
+        } else {
+          setGoalWeight(weight);
+        }
+        setShowWeightPicker(false);
+      } else {
+        console.error('Failed to update weight:', updateResult?.message);
+      }
+    } catch (error) {
+      console.error('Error saving weight:', error);
     }
-    setShowWeightPicker(false);
   };
 
   const handleEatingWindowSave = (startTime: string, endTime: string, enabled: boolean) => {
@@ -268,36 +402,106 @@ export default function EnergyDetailScreen() {
     setShowEatingWindowPicker(false);
   };
 
-  const handleHeightSave = (newHeight: number) => {
-    setHeight(newHeight);
-    setShowHeightPicker(false);
+  const handleHeightSave = async (newHeight: number) => {
+    try {
+      const updateData: any = {
+        height: String(newHeight), // API expects string
+      };
+      
+      const updateResult: any = await userService.updateUserInfo(updateData);
+      
+      if (updateResult?.success) {
+        setHeight(newHeight);
+        setShowHeightPicker(false);
+      } else {
+        console.error('Failed to update height:', updateResult?.message);
+      }
+    } catch (error) {
+      console.error('Error saving height:', error);
+    }
   };
 
-  const handleAgeSave = (newAge: number) => {
-    setAge(newAge);
-    setShowAgePicker(false);
+  const handleAgeSave = async (newAge: number) => {
+    try {
+      const updateData: any = {
+        age: newAge,
+      };
+      
+      const updateResult: any = await userService.updateUserInfo(updateData);
+      
+      if (updateResult?.success) {
+        setAge(newAge);
+        setShowAgePicker(false);
+      } else {
+        console.error('Failed to update age:', updateResult?.message);
+      }
+    } catch (error) {
+      console.error('Error saving age:', error);
+    }
   };
 
-  const handleGenderSave = (newGender: 'Male' | 'Female' | 'Non-binary') => {
-    setGender(newGender);
-    setShowGenderPicker(false);
+  const handleGenderSave = async (newGender: 'Male' | 'Female' | 'Non-binary' | 'Prefer not to say') => {
+    try {
+      const updateData: any = {
+        gender: convertGenderToAPI(newGender),
+      };
+      
+      const updateResult: any = await userService.updateUserInfo(updateData);
+      
+      if (updateResult?.success) {
+        setGender(newGender);
+        setShowGenderPicker(false);
+      } else {
+        console.error('Failed to update gender:', updateResult?.message);
+      }
+    } catch (error) {
+      console.error('Error saving gender:', error);
+    }
   };
 
-  const handleActivityLevelSave = (newActivityLevel: 'Not Very Active' | 'Lightly Active' | 'Active' | 'Very Active') => {
-    setActivityLevel(newActivityLevel);
-    setShowActivityLevelPicker(false);
+  const handleActivityLevelSave = async (newActivityLevel: 'Not Very Active' | 'Lightly Active' | 'Active' | 'Very Active') => {
+    try {
+      const updateData: any = {
+        activityLevel: newActivityLevel,
+      };
+      
+      const updateResult: any = await userService.updateUserInfo(updateData);
+      
+      if (updateResult?.success) {
+        setActivityLevel(newActivityLevel);
+        setShowActivityLevelPicker(false);
+      } else {
+        console.error('Failed to update activity level:', updateResult?.message);
+      }
+    } catch (error) {
+      console.error('Error saving activity level:', error);
+    }
   };
 
-  const handleDietPreferenceSave = (newPreference: string) => {
-    setDietPreference(newPreference);
-    setShowDietPreferenceModal(false);
+  const handleDietPreferenceSave = async (newPreference: string) => {
+    try {
+      const updateData: any = {
+        dietPreference: newPreference,
+      };
+      
+      const updateResult: any = await userService.updateUserInfo(updateData);
+      
+      if (updateResult?.success) {
+        setDietPreference(newPreference);
+        setShowDietPreferenceModal(false);
+      } else {
+        console.error('Failed to update diet preference:', updateResult?.message);
+      }
+    } catch (error) {
+      console.error('Error saving diet preference:', error);
+    }
   };
 
   const handleChatWithMe = () => {
-    // Navigate to Echo page (main chat) with @energy pre-filled
+    // Navigate to Echo page (main chat) with @foodie pre-filled
     router.push({
       pathname: '/(tabs)',
-      params: { mentionAgent: 'energy' },
+      params: { mentionAgent: 'foodie' },
     });
   };
 
@@ -314,7 +518,7 @@ export default function EnergyDetailScreen() {
         >
           <ArrowLeft size={24} color="#000000" strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={styles.navTitle}>Energy</Text>
+        <Text style={styles.navTitle}>Foodie</Text>
         <View style={styles.hiredBadge}>
           <Text style={styles.hiredText}>Hired</Text>
         </View>
@@ -668,7 +872,7 @@ export default function EnergyDetailScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.strategyDataLabel}>Current Weight</Text>
-                <Text style={styles.strategyDataValue}>{currentWeight.toFixed(1)}kg</Text>
+                <Text style={styles.strategyDataValue}>{currentWeight !== null ? `${currentWeight.toFixed(1)}kg` : '—'}</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.strategyDataRow}
@@ -676,7 +880,7 @@ export default function EnergyDetailScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.strategyDataLabel}>Goal Weight</Text>
-                <Text style={styles.strategyDataValue}>{goalWeight.toFixed(1)}kg</Text>
+                <Text style={styles.strategyDataValue}>{goalWeight !== null ? `${goalWeight.toFixed(1)}kg` : '—'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -710,7 +914,7 @@ export default function EnergyDetailScreen() {
               activeOpacity={0.7}
             >
               <Text style={styles.infoLabel}>Height</Text>
-              <Text style={styles.infoValue}>{height} cm</Text>
+              <Text style={styles.infoValue}>{height !== null ? `${height} cm` : '—'}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.infoRow}
@@ -718,7 +922,7 @@ export default function EnergyDetailScreen() {
               activeOpacity={0.7}
             >
               <Text style={styles.infoLabel}>Age</Text>
-              <Text style={styles.infoValue}>{age}</Text>
+              <Text style={styles.infoValue}>{age !== null ? age.toString() : '—'}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.infoRow}
@@ -726,7 +930,7 @@ export default function EnergyDetailScreen() {
               activeOpacity={0.7}
             >
               <Text style={styles.infoLabel}>Gender</Text>
-              <Text style={styles.infoValue}>{gender}</Text>
+              <Text style={styles.infoValue}>{gender !== null ? gender : '—'}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.infoRow}
@@ -734,7 +938,7 @@ export default function EnergyDetailScreen() {
               activeOpacity={0.7}
             >
               <Text style={styles.infoLabel}>Activity Level</Text>
-              <Text style={styles.infoValue}>{activityLevel}</Text>
+              <Text style={styles.infoValue}>{activityLevel !== null ? activityLevel : '—'}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.infoRow}
@@ -743,7 +947,7 @@ export default function EnergyDetailScreen() {
             >
               <Text style={styles.infoLabel}>Diet Preferences</Text>
               <Text style={[styles.infoValue, styles.infoValueMultiline]} numberOfLines={2}>
-                {dietPreference}
+                {dietPreference || '—'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -831,7 +1035,7 @@ export default function EnergyDetailScreen() {
       {/* Weight Picker Modal */}
       <WeightPickerModal
         visible={showWeightPicker}
-        initialWeight={weightPickerType === 'current' ? currentWeight : goalWeight}
+        initialWeight={weightPickerType === 'current' ? (currentWeight ?? 60) : (goalWeight ?? 55)}
         onClose={() => setShowWeightPicker(false)}
         onSave={handleWeightSave}
       />
@@ -849,7 +1053,7 @@ export default function EnergyDetailScreen() {
       {/* Height Picker Modal */}
       <HeightPickerModal
         visible={showHeightPicker}
-        initialHeight={height}
+        initialHeight={height ?? 175}
         onClose={() => setShowHeightPicker(false)}
         onSave={handleHeightSave}
       />
@@ -857,7 +1061,7 @@ export default function EnergyDetailScreen() {
       {/* Age Picker Modal */}
       <AgePickerModal
         visible={showAgePicker}
-        initialAge={age}
+        initialAge={age ?? 28}
         onClose={() => setShowAgePicker(false)}
         onSave={handleAgeSave}
       />
@@ -865,7 +1069,7 @@ export default function EnergyDetailScreen() {
       {/* Gender Picker Modal */}
       <GenderPickerModal
         visible={showGenderPicker}
-        initialGender={gender}
+        initialGender={gender ?? 'Male'}
         onClose={() => setShowGenderPicker(false)}
         onSave={handleGenderSave}
       />
@@ -873,7 +1077,7 @@ export default function EnergyDetailScreen() {
       {/* Activity Level Picker Modal */}
       <ActivityLevelPickerModal
         visible={showActivityLevelPicker}
-        initialActivityLevel={activityLevel}
+        initialActivityLevel={activityLevel ?? 'Lightly Active'}
         onClose={() => setShowActivityLevelPicker(false)}
         onSave={handleActivityLevelSave}
       />
@@ -881,7 +1085,7 @@ export default function EnergyDetailScreen() {
       {/* Diet Preference Modal */}
       <DietPreferenceModal
         visible={showDietPreferenceModal}
-        initialPreference={dietPreference}
+        initialPreference={dietPreference || ''}
         onClose={() => setShowDietPreferenceModal(false)}
         onSave={handleDietPreferenceSave}
       />
