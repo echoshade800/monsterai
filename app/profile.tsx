@@ -28,6 +28,10 @@ export default function ProfileScreen() {
   const [showCropModal, setShowCropModal] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
   const [showHeightPicker, setShowHeightPicker] = useState(false);
+  
+  // 点击计数器（用于进入 profile_info 页面）
+  const [versionClickCount, setVersionClickCount] = useState(0);
+  const [lastClickTime, setLastClickTime] = useState(0);
 
   // Load user info from API - use useCallback to make it reusable
   const loadUserInfo = useCallback(async () => {
@@ -574,9 +578,30 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.versionText}>
-            MonsterAI v{Constants.expoConfig?.version || '0.0.1'} (Beta)
-          </Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {
+              const now = Date.now();
+              // 如果距离上次点击超过2秒，重置计数器
+              if (now - lastClickTime > 2000) {
+                setVersionClickCount(1);
+              } else {
+                const newCount = versionClickCount + 1;
+                setVersionClickCount(newCount);
+                
+                // 如果点击了6次，跳转到 profile_info 页面
+                if (newCount >= 6) {
+                  setVersionClickCount(0);
+                  router.push('/profile-info');
+                }
+              }
+              setLastClickTime(now);
+            }}
+          >
+            <Text style={styles.versionText}>
+              MonsterAI v{Constants.expoConfig?.version || '0.0.1'} (Beta)
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
