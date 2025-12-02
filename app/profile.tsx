@@ -61,11 +61,12 @@ export default function ProfileScreen() {
           setSex('Unknown');
         }
         
-        // 填充身高（格式化为 "xxx cm"）
+        // 填充身高（支持 "xxx cm" 或 "x' x\"" 格式）
         // 处理 null, undefined, 空字符串等情况
         if (userData.height !== null && userData.height !== undefined && String(userData.height).trim() !== '') {
           const heightStr = String(userData.height).trim();
-          if (heightStr.includes('cm')) {
+          // 如果已经包含单位（cm 或 ' "），直接使用
+          if (heightStr.includes('cm') || heightStr.includes("'") || heightStr.includes('"')) {
             setHeight(heightStr);
           } else {
             // 如果是纯数字，添加 " cm"
@@ -199,15 +200,41 @@ export default function ProfileScreen() {
     }
   };
 
-  // Extract height in cm from string like "175 cm" or "175"
+  // Convert cm to feet/inches
+  const cmToFeet = (cm: number) => {
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+  };
+
+  // Convert feet/inches to cm
+  const feetToCm = (feet: number, inches: number) => {
+    return Math.round((feet * 12 + inches) * 2.54);
+  };
+
+  // Extract height in cm from string like "175 cm", "175", "5' 10\"", or "5'10\""
   const extractHeightInCm = (heightStr: string): number | null => {
     if (!heightStr || heightStr === 'Unknown' || heightStr === 'Unknown cm' || heightStr.trim() === '') {
       return null; // Return null when height is empty
     }
-    const match = heightStr.match(/(\d+)/);
-    if (match) {
-      return parseInt(match[1], 10);
+    
+    const trimmed = heightStr.trim();
+    
+    // Check for feet/inches format: "5' 10\"" or "5'10\""
+    const feetInchesMatch = trimmed.match(/(\d+)'[\s]*(\d+)"/);
+    if (feetInchesMatch) {
+      const feet = parseInt(feetInchesMatch[1], 10);
+      const inches = parseInt(feetInchesMatch[2], 10);
+      return feetToCm(feet, inches);
     }
+    
+    // Check for cm format: "175 cm" or "175"
+    const cmMatch = trimmed.match(/(\d+)/);
+    if (cmMatch) {
+      return parseInt(cmMatch[1], 10);
+    }
+    
     return null; // Return null if no match found
   };
 
@@ -215,11 +242,21 @@ export default function ProfileScreen() {
     setShowHeightPicker(true);
   };
 
-  const handleHeightSave = async (newHeight: number) => {
+  const handleHeightSave = async (newHeight: number, unit: 'cm' | 'ft') => {
     try {
-      // 准备更新数据，height 以 cm 为单位，API expects string
+      // 准备更新数据，根据单位生成对应的字符串格式
+      let heightString: string;
+      if (unit === 'cm') {
+        // 厘米格式: "170 cm"
+        heightString = `${newHeight} cm`;
+      } else {
+        // 英尺/英寸格式: "5' 10\""
+        const { feet, inches } = cmToFeet(newHeight);
+        heightString = `${feet}' ${inches}"`;
+      }
+      
       let updateData: any = {
-        height: String(newHeight),
+        height: heightString,
       };
       
       // 更新用户信息
