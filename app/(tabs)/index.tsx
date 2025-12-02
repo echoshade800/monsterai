@@ -447,6 +447,7 @@ export default function EchoTab() {
     let connectionOpened = false;
     let retryTimeoutId: NodeJS.Timeout | null = null;
     let connectionTimeoutId: NodeJS.Timeout | null = null;
+    let responseTimeoutId: NodeJS.Timeout | null = null;
 
     // 判断是否为网络连接错误
     const isNetworkError = (event: any): boolean => {
@@ -506,6 +507,38 @@ export default function EchoTab() {
                 connectionTimeoutId = null;
               }
               console.log(`${logPrefix}SSE connection established`);
+              
+              // 设置响应超时定时器（60秒），如果在这个时间内没有收到 complete 事件，重置 isSending
+              responseTimeoutId = setTimeout(() => {
+                if (!isCompleted) {
+                  console.warn(`${logPrefix}Response timeout: No complete event received within 60 seconds, resetting isSending`);
+                  // 如果有已累积的文本，保存它
+                  if (accumulatedText) {
+                    setMessages(prev => {
+                      const filtered = prev.filter(msg => msg.id !== tempMessageId);
+                      return [...filtered, {
+                        id: Date.now().toString(),
+                        type: 'assistant' as const,
+                        content: accumulatedText,
+                      }];
+                    });
+                  }
+                  // 清理状态
+                  accumulatedText = '';
+                  setCurrentResponse('');
+                  setIsSending(false);
+                  // 关闭连接
+                  if (eventSource) {
+                    try {
+                      eventSource.close();
+                    } catch (e) {
+                      console.warn(`${logPrefix}Error closing eventSource on response timeout:`, e);
+                    }
+                    eventSource = null;
+                  }
+                }
+              }, 60000) as any;
+              
               resolve();
             });
 
@@ -529,6 +562,12 @@ export default function EchoTab() {
                 } else if (data.type === 'complete') {
                   console.log(`${logPrefix}Complete:`, JSON.stringify(data, null, 2));
                   isCompleted = true;
+
+                  // 清除响应超时定时器
+                  if (responseTimeoutId) {
+                    clearTimeout(responseTimeoutId);
+                    responseTimeoutId = null;
+                  }
 
                   if (data.data?.code === 0 && data.data?.data?.[0]) {
                     const responseData = data.data.data[0];
@@ -559,9 +598,12 @@ export default function EchoTab() {
                         }];
                       });
                     }
+                  } else {
+                    // 即使没有回复内容，也要记录日志
+                    console.warn(`${logPrefix}Complete event received but no valid response data:`, data);
                   }
 
-                  // 清理
+                  // 清理（无论是否有回复内容，都要执行清理）
                   accumulatedText = '';
                   setCurrentResponse('');
                   setIsSending(false);
@@ -679,6 +721,10 @@ export default function EchoTab() {
       if (connectionTimeoutId) {
         clearTimeout(connectionTimeoutId);
         connectionTimeoutId = null;
+      }
+      if (responseTimeoutId) {
+        clearTimeout(responseTimeoutId);
+        responseTimeoutId = null;
       }
 
       // 如果有已累积的文本，保存它
