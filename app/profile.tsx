@@ -200,15 +200,15 @@ export default function ProfileScreen() {
   };
 
   // Extract height in cm from string like "175 cm" or "175"
-  const extractHeightInCm = (heightStr: string): number => {
-    if (heightStr === 'Unknown' || heightStr === 'Unknown cm') {
-      return 175; // default height
+  const extractHeightInCm = (heightStr: string): number | null => {
+    if (!heightStr || heightStr === 'Unknown' || heightStr === 'Unknown cm' || heightStr.trim() === '') {
+      return null; // Return null when height is empty
     }
     const match = heightStr.match(/(\d+)/);
     if (match) {
       return parseInt(match[1], 10);
     }
-    return 175; // default
+    return null; // Return null if no match found
   };
 
   const handleEditHeight = () => {

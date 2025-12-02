@@ -19,9 +19,10 @@ type HeightUnit = 'cm' | 'ft';
 
 interface HeightPickerModalProps {
   visible: boolean;
-  initialHeight: number; // Height in cm
+  initialHeight: number | null; // Height in cm, null if empty
+  initialUnit?: 'cm' | 'ft'; // Initial unit preference
   onClose: () => void;
-  onSave: (height: number) => void;
+  onSave: (height: number, unit: 'cm' | 'ft') => void;
 }
 
 // Conversion functions
@@ -32,9 +33,9 @@ const cmToFeet = (cm: number) => {
   return { feet, inches };
 };
 
-export function HeightPickerModal({ visible, initialHeight, onClose, onSave }: HeightPickerModalProps) {
+export function HeightPickerModal({ visible, initialHeight, initialUnit, onClose, onSave }: HeightPickerModalProps) {
   const [unit, setUnit] = useState<HeightUnit>('cm');
-  const [heightInCm, setHeightInCm] = useState(initialHeight);
+  const [heightInCm, setHeightInCm] = useState(initialHeight ?? 175);
 
   // Animation values
   const backdropOpacity = useRef(new Animated.Value(0)).current;
@@ -43,10 +44,18 @@ export function HeightPickerModal({ visible, initialHeight, onClose, onSave }: H
   // Reset height when modal opens
   useEffect(() => {
     if (visible) {
-      setHeightInCm(initialHeight);
-      setUnit('cm');
+      const height = initialHeight ?? 175;
+      setHeightInCm(height);
+      // Use initialUnit if provided, otherwise default based on height
+      if (initialUnit) {
+        setUnit(initialUnit);
+      } else if (initialHeight === null) {
+        setUnit('ft');
+      } else {
+        setUnit('cm');
+      }
     }
-  }, [initialHeight, visible]);
+  }, [initialHeight, initialUnit, visible]);
 
   // Animation effect
   useEffect(() => {
@@ -83,7 +92,7 @@ export function HeightPickerModal({ visible, initialHeight, onClose, onSave }: H
   }, [visible]);
 
   const handleSave = () => {
-    onSave(heightInCm);
+    onSave(heightInCm, unit);
   };
 
   const handleHeightChange = (height: number) => {

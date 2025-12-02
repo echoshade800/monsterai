@@ -31,6 +31,11 @@ export function HeightPicker({
   const feetScrollRef = useRef<ScrollView>(null);
   const inchesScrollRef = useRef<ScrollView>(null);
   const cmScrollRef = useRef<ScrollView>(null);
+  const isScrollingRef = useRef(false);
+  const isInitializingRef = useRef(false);
+  const selectedFeetRef = useRef(0);
+  const selectedInchesRef = useRef(0);
+  const selectedCmRef = useRef(0);
 
   // Initialize based on unit
   const initialFeetInches = cmToFeet(initialHeight);
@@ -38,77 +43,128 @@ export function HeightPicker({
   const [selectedFeet, setSelectedFeet] = useState(initialFeetInches.feet);
   const [selectedInches, setSelectedInches] = useState(initialFeetInches.inches);
   const [selectedCm, setSelectedCm] = useState(initialHeight);
+  
+  // Initialize refs
+  selectedFeetRef.current = initialFeetInches.feet;
+  selectedInchesRef.current = initialFeetInches.inches;
+  selectedCmRef.current = initialHeight;
 
   // Generate data arrays
   const feet = Array.from({ length: 5 }, (_, i) => i + 4); // 4-8 feet
   const inches = Array.from({ length: 12 }, (_, i) => i); // 0-11 inches
   const centimeters = Array.from({ length: 171 }, (_, i) => i + 100); // 100-270 cm
 
-  // Scroll to initial position when unit changes
+  // Update selected values when initialHeight or unit changes
   useEffect(() => {
-    setTimeout(() => {
-      if (unit === 'ft') {
-        const feetIndex = feet.indexOf(selectedFeet);
-        const inchesIndex = selectedInches;
+    if (unit === 'ft') {
+      // Convert cm to feet/inches
+      const feetInches = cmToFeet(initialHeight);
+      if (feetInches.feet !== selectedFeet || feetInches.inches !== selectedInches) {
+        isInitializingRef.current = true;
+        setSelectedFeet(feetInches.feet);
+        setSelectedInches(feetInches.inches);
+        selectedFeetRef.current = feetInches.feet;
+        selectedInchesRef.current = feetInches.inches;
+        
+        // Scroll to new position after a short delay
+        setTimeout(() => {
+          const feetIndex = feet.indexOf(feetInches.feet);
+          const inchesIndex = feetInches.inches;
 
-        if (feetScrollRef.current && feetIndex >= 0) {
-          feetScrollRef.current.scrollTo({ y: feetIndex * ITEM_HEIGHT, animated: false });
-        }
-        if (inchesScrollRef.current && inchesIndex >= 0) {
-          inchesScrollRef.current.scrollTo({ y: inchesIndex * ITEM_HEIGHT, animated: false });
-        }
-      } else {
-        const cmIndex = centimeters.indexOf(selectedCm);
-        if (cmScrollRef.current && cmIndex >= 0) {
-          cmScrollRef.current.scrollTo({ y: cmIndex * ITEM_HEIGHT, animated: false });
-        }
+          if (feetScrollRef.current && feetIndex >= 0) {
+            feetScrollRef.current.scrollTo({ y: feetIndex * ITEM_HEIGHT, animated: false });
+          }
+          if (inchesScrollRef.current && inchesIndex >= 0) {
+            inchesScrollRef.current.scrollTo({ y: inchesIndex * ITEM_HEIGHT, animated: false });
+          }
+          
+          isInitializingRef.current = false;
+        }, 50);
       }
-    }, 100);
-  }, [unit]);
+    } else {
+      // Use cm directly, round to nearest integer since centimeters array contains integers
+      const roundedCm = Math.round(initialHeight);
+      if (roundedCm !== selectedCm) {
+        isInitializingRef.current = true;
+        setSelectedCm(roundedCm);
+        selectedCmRef.current = roundedCm;
+        
+        // Scroll to new position after a short delay
+        setTimeout(() => {
+          const cmIndex = centimeters.indexOf(roundedCm);
+          if (cmScrollRef.current && cmIndex >= 0) {
+            cmScrollRef.current.scrollTo({ y: cmIndex * ITEM_HEIGHT, animated: false });
+          }
+          
+          isInitializingRef.current = false;
+        }, 50);
+      }
+    }
+  }, [initialHeight, unit]);
 
   const handleScroll = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
     data: number[],
     setter: (value: number) => void,
-    onChange: (value: number) => void
+    updateRef: (value: number) => void
   ) => {
+    // Don't update during initialization or if already scrolling
+    if (isInitializingRef.current || isScrollingRef.current) {
+      return;
+    }
+    
     const offsetY = event.nativeEvent.contentOffset.y;
     const index = Math.round(offsetY / ITEM_HEIGHT);
     const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
     const value = data[clampedIndex];
+    
+    // Only update state and ref, don't call onChange during scroll
     setter(value);
-    onChange(value);
+    updateRef(value);
   };
 
   const handleScrollEnd = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
     scrollRef: React.RefObject<ScrollView>,
-    data: number[]
+    data: number[],
+    setter: (value: number) => void,
+    updateRef: (value: number) => void,
+    onChange: (value: number) => void
   ) => {
+    isScrollingRef.current = false;
+    
     const offsetY = event.nativeEvent.contentOffset.y;
     const index = Math.round(offsetY / ITEM_HEIGHT);
     const clampedIndex = Math.max(0, Math.min(index, data.length - 1));
+    const value = data[clampedIndex];
+    
+    setter(value);
+    updateRef(value);
     
     scrollRef.current?.scrollTo({
       y: clampedIndex * ITEM_HEIGHT,
       animated: true,
     });
+    
+    // Call onChange after a short delay to ensure state is updated
+    setTimeout(() => {
+      onChange(value);
+    }, 50);
   };
 
   const handleFeetChange = (value: number) => {
-    setSelectedFeet(value);
-    const cm = feetToCm(value, selectedInches);
+    // Use ref value for inches to ensure we have the latest value
+    const cm = feetToCm(value, selectedInchesRef.current);
     onHeightChange(cm);
   };
 
   const handleInchesChange = (value: number) => {
-    setSelectedInches(value);
-    const cm = feetToCm(selectedFeet, value);
+    // Use ref value for feet to ensure we have the latest value
+    const cm = feetToCm(selectedFeetRef.current, value);
     onHeightChange(cm);
   };
 
   const handleCmChange = (value: number) => {
-    setSelectedCm(value);
     onHeightChange(value);
   };
 
@@ -166,8 +222,11 @@ export function HeightPicker({
             centimeters,
             selectedCm,
             cmScrollRef,
-            (e) => handleScroll(e, centimeters, setSelectedCm, handleCmChange),
-            (e) => handleScrollEnd(e, cmScrollRef, centimeters),
+            (e) => handleScroll(e, centimeters, setSelectedCm, (v) => { selectedCmRef.current = v; }),
+            (e) => {
+              isScrollingRef.current = true;
+              handleScrollEnd(e, cmScrollRef, centimeters, setSelectedCm, (v) => { selectedCmRef.current = v; }, handleCmChange);
+            },
             ' cm'
           )}
         </View>
@@ -187,8 +246,11 @@ export function HeightPicker({
           feet,
           selectedFeet,
           feetScrollRef,
-          (e) => handleScroll(e, feet, setSelectedFeet, handleFeetChange),
-          (e) => handleScrollEnd(e, feetScrollRef, feet),
+          (e) => handleScroll(e, feet, setSelectedFeet, (v) => { selectedFeetRef.current = v; }),
+          (e) => {
+            isScrollingRef.current = true;
+            handleScrollEnd(e, feetScrollRef, feet, setSelectedFeet, (v) => { selectedFeetRef.current = v; }, handleFeetChange);
+          },
           ' ft'
         )}
 
@@ -197,8 +259,11 @@ export function HeightPicker({
           inches,
           selectedInches,
           inchesScrollRef,
-          (e) => handleScroll(e, inches, setSelectedInches, handleInchesChange),
-          (e) => handleScrollEnd(e, inchesScrollRef, inches),
+          (e) => handleScroll(e, inches, setSelectedInches, (v) => { selectedInchesRef.current = v; }),
+          (e) => {
+            isScrollingRef.current = true;
+            handleScrollEnd(e, inchesScrollRef, inches, setSelectedInches, (v) => { selectedInchesRef.current = v; }, handleInchesChange);
+          },
           ' in'
         )}
       </View>

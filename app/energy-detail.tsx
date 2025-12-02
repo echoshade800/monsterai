@@ -24,6 +24,7 @@ import { TimePickerModal } from '../components/TimePickerModal';
 import { WeightPickerModal } from '../components/WeightPickerModal';
 import { getStrategyById } from '../constants/strategies';
 import userService from '../src/services/userService';
+import storageManager from '../src/utils/storage';
 
 // Mock data interfaces
 interface ReminderItem {
@@ -60,6 +61,8 @@ export default function EnergyDetailScreen() {
   // Weight states
   const [currentWeight, setCurrentWeight] = useState<number | null>(null);
   const [goalWeight, setGoalWeight] = useState<number | null>(null);
+  const [currentWeightUnit, setCurrentWeightUnit] = useState<'kg' | 'lbs'>('kg');
+  const [goalWeightUnit, setGoalWeightUnit] = useState<'kg' | 'lbs'>('kg');
   const [showWeightPicker, setShowWeightPicker] = useState(false);
   const [weightPickerType, setWeightPickerType] = useState<'current' | 'goal'>('current');
 
@@ -68,6 +71,7 @@ export default function EnergyDetailScreen() {
 
   // Basic Info states - loaded from API
   const [height, setHeight] = useState<number | null>(null); // cm
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm');
   const [age, setAge] = useState<number | null>(null);
   const [gender, setGender] = useState<'Male' | 'Female' | 'Non-binary' | 'Prefer not to say' | null>(null);
   const [activityLevel, setActivityLevel] = useState<'Not Very Active' | 'Lightly Active' | 'Active' | 'Very Active' | null>(null);
@@ -146,6 +150,10 @@ export default function EnergyDetailScreen() {
     return null;
   };
 
+  // Conversion functions
+  const kgToLbs = (kg: number) => kg * 2.20462;
+  const lbsToKg = (lbs: number) => lbs / 2.20462;
+
   // Load user profile data from API (same source as Profile page)
   const loadUserProfileData = useCallback(async () => {
     try {
@@ -173,6 +181,21 @@ export default function EnergyDetailScreen() {
           setHeight(null);
         }
         
+        // Load height unit from API or local storage
+        if ((userData as any).heightUnit) {
+          setHeightUnit((userData as any).heightUnit);
+        } else {
+          // Try to load from local storage
+          try {
+            const savedHeightUnit = await storageManager.getItem('heightUnit');
+            if (savedHeightUnit === 'cm' || savedHeightUnit === 'ft') {
+              setHeightUnit(savedHeightUnit);
+            }
+          } catch (error) {
+            console.warn('Failed to load heightUnit from local storage:', error);
+          }
+        }
+        
         // Load age
         if (userData.age) {
           const ageNum = typeof userData.age === 'number' ? userData.age : parseInt(String(userData.age), 10);
@@ -183,21 +206,72 @@ export default function EnergyDetailScreen() {
           setAge(null);
         }
         
+        // Load current weight unit from API or local storage first
+        let loadedWeightUnit: 'kg' | 'lbs' = 'kg';
+        if ((userData as any).weightUnit) {
+          loadedWeightUnit = (userData as any).weightUnit;
+          console.log('[EnergyDetail] Loaded weightUnit from API:', loadedWeightUnit);
+        } else {
+          // Try to load from local storage
+          try {
+            const savedWeightUnit = await storageManager.getItem('currentWeightUnit');
+            console.log('[EnergyDetail] Loaded weightUnit from local storage:', savedWeightUnit, 'type:', typeof savedWeightUnit);
+            if (savedWeightUnit && (savedWeightUnit === 'kg' || savedWeightUnit === 'lbs')) {
+              loadedWeightUnit = savedWeightUnit as 'kg' | 'lbs';
+            } else {
+              console.log('[EnergyDetail] No valid weightUnit found, using default: kg');
+            }
+          } catch (error) {
+            console.warn('[EnergyDetail] Failed to load currentWeightUnit from local storage:', error);
+          }
+        }
+        setCurrentWeightUnit(loadedWeightUnit);
+        console.log('[EnergyDetail] Final loadedWeightUnit:', loadedWeightUnit);
+        
         // Load weight (current weight)
         if (userData.weight) {
           const weightNum = typeof userData.weight === 'number' ? userData.weight : parseFloat(String(userData.weight));
-          if (!isNaN(weightNum)) {
-            setCurrentWeight(weightNum);
+          console.log('[EnergyDetail] Loaded weight from API:', weightNum, 'unit:', loadedWeightUnit);
+          if (!isNaN(weightNum) && weightNum > 0) {
+            // If the stored unit is lbs, the value from backend is in lbs, convert to kg for internal state
+            // If the stored unit is kg, the value from backend is in kg, use directly
+            const weightInKg = loadedWeightUnit === 'lbs' ? lbsToKg(weightNum) : weightNum;
+            console.log('[EnergyDetail] Converted weightInKg:', weightInKg, 'from', weightNum, loadedWeightUnit);
+            setCurrentWeight(weightInKg);
+          } else {
+            setCurrentWeight(null);
           }
         } else {
           setCurrentWeight(null);
         }
         
+        // Load goal weight unit from API or local storage first
+        let loadedGoalWeightUnit: 'kg' | 'lbs' = 'kg';
+        if ((userData as any).goalWeightUnit) {
+          loadedGoalWeightUnit = (userData as any).goalWeightUnit;
+        } else {
+          // Try to load from local storage
+          try {
+            const savedGoalWeightUnit = await storageManager.getItem('goalWeightUnit');
+            if (savedGoalWeightUnit === 'kg' || savedGoalWeightUnit === 'lbs') {
+              loadedGoalWeightUnit = savedGoalWeightUnit;
+            }
+          } catch (error) {
+            console.warn('Failed to load goalWeightUnit from local storage:', error);
+          }
+        }
+        setGoalWeightUnit(loadedGoalWeightUnit);
+        
         // Load goal weight (if available)
         if (userData.goalWeight) {
           const goalWeightNum = typeof userData.goalWeight === 'number' ? userData.goalWeight : parseFloat(String(userData.goalWeight));
-          if (!isNaN(goalWeightNum)) {
-            setGoalWeight(goalWeightNum);
+          if (!isNaN(goalWeightNum) && goalWeightNum > 0) {
+            // If the stored unit is lbs, the value from backend is in lbs, convert to kg for internal state
+            // If the stored unit is kg, the value from backend is in kg, use directly
+            const weightInKg = loadedGoalWeightUnit === 'lbs' ? lbsToKg(goalWeightNum) : goalWeightNum;
+            setGoalWeight(weightInKg);
+          } else {
+            setGoalWeight(null);
           }
         } else {
           setGoalWeight(null);
@@ -362,23 +436,65 @@ export default function EnergyDetailScreen() {
     setShowWeightPicker(true);
   };
 
-  const handleWeightSave = async (weight: number) => {
+  const handleWeightSave = async (weight: number, unit: 'kg' | 'lbs') => {
     try {
-      // Update API
+      // Validate weight value
+      if (isNaN(weight) || weight <= 0) {
+        console.error('Invalid weight value:', weight);
+        return;
+      }
+
+      // Store weight in the unit selected by user (no conversion)
+      // If user selected lbs, weight is in lbs; if kg, weight is in kg
+      const weightToStore = weight;
+      
+      // Update API - store the value as-is in the selected unit
       const updateData: any = {};
       if (weightPickerType === 'current') {
-        updateData.weight = weight;
+        updateData.weight = String(weightToStore);
+        updateData.weightUnit = unit; // Try to save unit to backend
+        console.log('[EnergyDetail] Saving weight:', weightToStore, 'unit:', unit, 'type:', weightPickerType);
+        // Also save to local storage as backup
+        try {
+          await storageManager.setItem('currentWeightUnit', unit);
+          console.log('[EnergyDetail] Saved currentWeightUnit to local storage:', unit);
+        } catch (storageError) {
+          console.warn('[EnergyDetail] Failed to save currentWeightUnit to local storage:', storageError);
+        }
       } else {
-        updateData.goalWeight = weight;
+        updateData.goalWeight = String(weightToStore);
+        updateData.goalWeightUnit = unit; // Try to save unit to backend
+        console.log('[EnergyDetail] Saving goalWeight:', weightToStore, 'unit:', unit);
+        // Also save to local storage as backup
+        try {
+          await storageManager.setItem('goalWeightUnit', unit);
+          console.log('[EnergyDetail] Saved goalWeightUnit to local storage:', unit);
+        } catch (storageError) {
+          console.warn('[EnergyDetail] Failed to save goalWeightUnit to local storage:', storageError);
+        }
       }
       
       const updateResult: any = await userService.updateUserInfo(updateData);
       
       if (updateResult?.success) {
         if (weightPickerType === 'current') {
-          setCurrentWeight(weight);
+          // For internal state, convert to kg for consistency
+          // But save the unit preference for display
+          const weightInKg = unit === 'kg' ? weight : lbsToKg(weight);
+          if (!isNaN(weightInKg) && weightInKg > 0) {
+            setCurrentWeight(weightInKg);
+            setCurrentWeightUnit(unit);
+          } else {
+            console.error('Invalid weightInKg calculated:', weightInKg);
+          }
         } else {
-          setGoalWeight(weight);
+          const weightInKg = unit === 'kg' ? weight : lbsToKg(weight);
+          if (!isNaN(weightInKg) && weightInKg > 0) {
+            setGoalWeight(weightInKg);
+            setGoalWeightUnit(unit);
+          } else {
+            console.error('Invalid weightInKg calculated:', weightInKg);
+          }
         }
         setShowWeightPicker(false);
       } else {
@@ -402,16 +518,39 @@ export default function EnergyDetailScreen() {
     setShowEatingWindowPicker(false);
   };
 
-  const handleHeightSave = async (newHeight: number) => {
+  // Conversion functions for height
+  const cmToFeet = (cm: number) => {
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+  };
+
+  const feetToCm = (feet: number, inches: number) => {
+    return Math.round((feet * 12 + inches) * 2.54);
+  };
+
+  const handleHeightSave = async (newHeight: number, unit: 'cm' | 'ft') => {
     try {
+      // Height is always stored in cm in the backend
+      // newHeight is already in cm (from HeightPickerModal)
       const updateData: any = {
         height: String(newHeight), // API expects string
+        heightUnit: unit, // Try to save unit to backend
       };
+      
+      // Also save to local storage as backup
+      try {
+        await storageManager.setItem('heightUnit', unit);
+      } catch (storageError) {
+        console.warn('Failed to save heightUnit to local storage:', storageError);
+      }
       
       const updateResult: any = await userService.updateUserInfo(updateData);
       
       if (updateResult?.success) {
         setHeight(newHeight);
+        setHeightUnit(unit);
         setShowHeightPicker(false);
       } else {
         console.error('Failed to update height:', updateResult?.message);
@@ -872,7 +1011,22 @@ export default function EnergyDetailScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.strategyDataLabel}>Current Weight</Text>
-                <Text style={styles.strategyDataValue}>{currentWeight !== null ? `${currentWeight.toFixed(1)}kg` : '—'}</Text>
+                <Text style={styles.strategyDataValue}>
+                  {(() => {
+                    if (currentWeight === null || isNaN(currentWeight) || currentWeight <= 0) {
+                      return '—';
+                    }
+                    if (currentWeightUnit === 'kg') {
+                      return `${currentWeight.toFixed(1)}kg`;
+                    } else {
+                      const lbsValue = kgToLbs(currentWeight);
+                      if (isNaN(lbsValue) || lbsValue <= 0) {
+                        return '—';
+                      }
+                      return `${lbsValue.toFixed(1)}lbs`;
+                    }
+                  })()}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.strategyDataRow}
@@ -880,7 +1034,22 @@ export default function EnergyDetailScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.strategyDataLabel}>Goal Weight</Text>
-                <Text style={styles.strategyDataValue}>{goalWeight !== null ? `${goalWeight.toFixed(1)}kg` : '—'}</Text>
+                <Text style={styles.strategyDataValue}>
+                  {(() => {
+                    if (goalWeight === null || isNaN(goalWeight) || goalWeight <= 0) {
+                      return '—';
+                    }
+                    if (goalWeightUnit === 'kg') {
+                      return `${goalWeight.toFixed(1)}kg`;
+                    } else {
+                      const lbsValue = kgToLbs(goalWeight);
+                      if (isNaN(lbsValue) || lbsValue <= 0) {
+                        return '—';
+                      }
+                      return `${lbsValue.toFixed(1)}lbs`;
+                    }
+                  })()}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -914,7 +1083,19 @@ export default function EnergyDetailScreen() {
               activeOpacity={0.7}
             >
               <Text style={styles.infoLabel}>Height</Text>
-              <Text style={styles.infoValue}>{height !== null ? `${height} cm` : '—'}</Text>
+              <Text style={styles.infoValue}>
+                {(() => {
+                  if (height === null || isNaN(height) || height <= 0) {
+                    return '—';
+                  }
+                  if (heightUnit === 'cm') {
+                    return `${height} cm`;
+                  } else {
+                    const { feet, inches } = cmToFeet(height);
+                    return `${feet}' ${inches}"`;
+                  }
+                })()}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.infoRow}
@@ -1035,7 +1216,8 @@ export default function EnergyDetailScreen() {
       {/* Weight Picker Modal */}
       <WeightPickerModal
         visible={showWeightPicker}
-        initialWeight={weightPickerType === 'current' ? (currentWeight ?? 60) : (goalWeight ?? 55)}
+        initialWeight={weightPickerType === 'current' ? currentWeight : goalWeight}
+        initialUnit={weightPickerType === 'current' ? currentWeightUnit : goalWeightUnit}
         onClose={() => setShowWeightPicker(false)}
         onSave={handleWeightSave}
       />
@@ -1053,7 +1235,8 @@ export default function EnergyDetailScreen() {
       {/* Height Picker Modal */}
       <HeightPickerModal
         visible={showHeightPicker}
-        initialHeight={height ?? 175}
+        initialHeight={height}
+        initialUnit={heightUnit}
         onClose={() => setShowHeightPicker(false)}
         onSave={handleHeightSave}
       />

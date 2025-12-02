@@ -1,10 +1,11 @@
 import { BlurView } from 'expo-blur';
 import { Edit2 } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
 import storageManager from '../src/utils/storage';
+import { SuccessModal } from './SuccessModal';
 import { TimePickerModal } from './TimePickerModal';
 
 interface ReminderItem {
@@ -33,8 +34,11 @@ interface ReminderItemRowProps {
 function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = false, reminderId }: ReminderItemRowProps) {
   const [selected, setSelected] = useState<'yes' | 'no' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [currentTime, setCurrentTime] = useState(time);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const scaleAnimYes = useRef(new Animated.Value(1)).current;
   const scaleAnimNo = useRef(new Animated.Value(1)).current;
 
@@ -65,12 +69,14 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
       Alert.alert('Notice', 'You have already submitted your selection and cannot modify it again.');
       return;
     }
+    // 如果正在加载，直接返回
+    if (isLoading) {
+      return;
+    }
 
+    // 立即设置加载状态和选中状态
+    setIsLoading(true);
     setSelected('yes');
-    setIsSubmitted(true);
-    
-    // 保存选择结果到本地存储
-    await storageManager.setReminderSelection(reminderId, 'yes');
     
     // Trigger scale animation
     Animated.sequence([
@@ -106,26 +112,33 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
 
       console.log('Smart update response:', response);
 
+      // 关闭加载状态
+      setIsLoading(false);
+
       if (response.isSuccess()) {
         console.log('Successfully updated user time schedule');
-        Alert.alert('Success', 'Your selection has been successfully saved.');
+        // 保存选择结果到本地存储
+        await storageManager.setReminderSelection(reminderId, 'yes');
+        setIsSubmitted(true);
+        // Show custom success modal instead of Alert
+        setShowSuccessModal(true);
       } else {
         console.error('Failed to update user time schedule:', response);
-        Alert.alert('Error', 'Failed to save your selection, please try again later.');
-        // 如果失败，允许重新提交
-        setIsSubmitted(false);
+        // 如果失败，恢复按钮状态，允许重新提交
         setSelected(null);
-        // 清除本地存储的选择结果
-        await storageManager.clearReminderSelection(reminderId);
+        setIsSubmitted(false);
+        // Show custom error modal instead of Alert
+        setShowErrorModal(true);
       }
     } catch (error) {
       console.error('Error updating user time schedule:', error);
-      Alert.alert('Error', 'Network error, please try again later.');
-      // 如果出错，允许重新提交
-      setIsSubmitted(false);
+      // 关闭加载状态
+      setIsLoading(false);
+      // 如果出错，恢复按钮状态，允许重新提交
       setSelected(null);
-      // 清除本地存储的选择结果
-      await storageManager.clearReminderSelection(reminderId);
+      setIsSubmitted(false);
+      // Show custom error modal instead of Alert
+      setShowErrorModal(true);
     }
   };
 
@@ -198,12 +211,12 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
               <TouchableOpacity 
                 style={styles.editButton}
                 onPress={handleEditPress}
-                activeOpacity={(disabled || isSubmitted) ? 0.3 : 0.7}
-                disabled={disabled || isSubmitted}
+                activeOpacity={(disabled || isSubmitted || isLoading) ? 0.3 : 0.7}
+                disabled={disabled || isSubmitted || isLoading}
               >
                 <Edit2 
                   size={14} 
-                  color={(disabled || isSubmitted) ? "#CCCCCC" : "#999999"} 
+                  color={(disabled || isSubmitted || isLoading) ? "#CCCCCC" : "#999999"} 
                   strokeWidth={2} 
                 />
               </TouchableOpacity>
@@ -214,21 +227,21 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
         <View style={styles.buttonGroup}>
         <TouchableOpacity
           onPress={handleNoPress}
-          activeOpacity={(disabled || isSubmitted) ? 0.3 : 1}
-          disabled={disabled || isSubmitted}
+          activeOpacity={(disabled || isSubmitted || isLoading) ? 0.3 : 1}
+          disabled={disabled || isSubmitted || isLoading}
         >
           <Animated.View
             style={[
               styles.button,
               selected === 'no' && styles.buttonNo,
-              (disabled || (isSubmitted && selected !== 'no')) && styles.buttonDisabled,
+              (disabled || (isSubmitted && selected !== 'no') || isLoading) && styles.buttonDisabled,
               { transform: [{ scale: scaleAnimNo }] }
             ]}
           >
             <Text style={[
               styles.buttonText,
               selected === 'no' && styles.buttonTextActive,
-              (disabled || (isSubmitted && selected !== 'no')) && styles.buttonTextDisabled,
+              (disabled || (isSubmitted && selected !== 'no') || isLoading) && styles.buttonTextDisabled,
             ]}>
               No
             </Text>
@@ -236,24 +249,29 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleYesPress}
-          activeOpacity={(disabled || isSubmitted) ? 0.3 : 1}
-          disabled={disabled || isSubmitted}
+          activeOpacity={(disabled || isSubmitted || isLoading) ? 0.3 : 1}
+          disabled={disabled || isSubmitted || isLoading}
         >
           <Animated.View
             style={[
               styles.button,
               selected === 'yes' && styles.buttonYes,
               (disabled || (isSubmitted && selected !== 'yes')) && styles.buttonDisabled,
+              isLoading && styles.buttonLoading,
               { transform: [{ scale: scaleAnimYes }] }
             ]}
           >
-            <Text style={[
-              styles.buttonText,
-              selected === 'yes' && styles.buttonTextActive,
-              (disabled || (isSubmitted && selected !== 'yes')) && styles.buttonTextDisabled,
-            ]}>
-              Yes
-            </Text>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={[
+                styles.buttonText,
+                selected === 'yes' && styles.buttonTextActive,
+                (disabled || (isSubmitted && selected !== 'yes')) && styles.buttonTextDisabled,
+              ]}>
+                Yes
+              </Text>
+            )}
           </Animated.View>
         </TouchableOpacity>
       </View>
@@ -264,6 +282,19 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
         initialTime={currentTime}
         onClose={handleTimePickerClose}
         onSave={handleTimeSave}
+      />
+
+      <SuccessModal
+        visible={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
+
+      <SuccessModal
+        visible={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        title="opps !"
+        message="Something went wrong.\nLet's try again!"
+        imageUrl="https://dzdbhsix5ppsc.cloudfront.net/monster/popwindowfailed.png"
       />
     </>
   );
@@ -441,6 +472,10 @@ const styles = StyleSheet.create({
   },
   buttonNo: {
     backgroundColor: '#E55A5A',
+  },
+  buttonLoading: {
+    backgroundColor: '#4CCB5E',
+    opacity: 0.8,
   },
   buttonText: {
     fontSize: 13,

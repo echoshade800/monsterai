@@ -19,18 +19,27 @@ type WeightUnit = 'kg' | 'lbs';
 
 interface WeightPickerModalProps {
   visible: boolean;
-  initialWeight: number; // Weight in kg
+  initialWeight: number | null; // Weight in kg, null if empty
+  initialUnit?: 'kg' | 'lbs'; // Initial unit preference
   onClose: () => void;
-  onSave: (weight: number) => void;
+  onSave: (weight: number, unit: 'kg' | 'lbs') => void;
 }
 
 // Conversion functions
 const kgToLbs = (kg: number) => kg * 2.20462;
 const lbsToKg = (lbs: number) => lbs / 2.20462;
 
-export function WeightPickerModal({ visible, initialWeight, onClose, onSave }: WeightPickerModalProps) {
+// Helper function to get valid weight
+const getValidWeight = (weight: number | null): number => {
+  if (weight === null || isNaN(weight) || weight <= 0) {
+    return 60; // Default weight
+  }
+  return weight;
+};
+
+export function WeightPickerModal({ visible, initialWeight, initialUnit, onClose, onSave }: WeightPickerModalProps) {
   const [unit, setUnit] = useState<WeightUnit>('kg');
-  const [weightInKg, setWeightInKg] = useState(initialWeight);
+  const [weightInKg, setWeightInKg] = useState(getValidWeight(initialWeight));
 
   // Animation values
   const backdropOpacity = useRef(new Animated.Value(0)).current;
@@ -39,10 +48,26 @@ export function WeightPickerModal({ visible, initialWeight, onClose, onSave }: W
   // Reset weight when modal opens
   useEffect(() => {
     if (visible) {
-      setWeightInKg(initialWeight);
-      setUnit('kg');
+      const weight = getValidWeight(initialWeight);
+      setWeightInKg(weight);
+      // Use initialUnit if provided, otherwise default based on weight
+      if (initialUnit) {
+        setUnit(initialUnit);
+      } else if (initialWeight === null || isNaN(initialWeight as number)) {
+        setUnit('lbs');
+      } else {
+        setUnit('kg');
+      }
     }
-  }, [initialWeight, visible]);
+  }, [initialWeight, initialUnit, visible]);
+
+  // Safety check: ensure weightInKg is always valid
+  useEffect(() => {
+    if (isNaN(weightInKg) || weightInKg <= 0) {
+      console.warn('weightInKg became invalid, resetting to default:', weightInKg);
+      setWeightInKg(60); // Reset to default
+    }
+  }, [weightInKg]);
 
   // Animation effect
   useEffect(() => {
@@ -79,15 +104,59 @@ export function WeightPickerModal({ visible, initialWeight, onClose, onSave }: W
   }, [visible]);
 
   const handleSave = () => {
-    onSave(weightInKg);
+    // Get current weightInKg value (may have changed)
+    const currentWeightInKg = weightInKg;
+    
+    // Validate weightInKg before saving
+    if (isNaN(currentWeightInKg) || currentWeightInKg <= 0 || !isFinite(currentWeightInKg)) {
+      console.error('Invalid weightInKg:', currentWeightInKg);
+      // Try to get a valid weight from getCurrentWeight
+      const currentWeight = getCurrentWeight();
+      if (!isNaN(currentWeight) && currentWeight > 0 && isFinite(currentWeight)) {
+        // If currentWeight is valid, use it to recalculate weightInKg
+        const recalculatedWeightInKg = unit === 'kg' ? currentWeight : lbsToKg(currentWeight);
+        if (!isNaN(recalculatedWeightInKg) && recalculatedWeightInKg > 0 && isFinite(recalculatedWeightInKg)) {
+          const weightToSave = unit === 'kg' ? recalculatedWeightInKg : kgToLbs(recalculatedWeightInKg);
+          if (!isNaN(weightToSave) && weightToSave > 0 && isFinite(weightToSave)) {
+            onSave(weightToSave, unit);
+            return;
+          }
+        }
+      }
+      console.error('Cannot save: weightInKg is invalid and cannot be recovered');
+      return;
+    }
+
+    // If user selected lbs, convert from kg to lbs for storage
+    // If user selected kg, use kg value directly
+    const weightToSave = unit === 'kg' ? currentWeightInKg : kgToLbs(currentWeightInKg);
+    
+    // Validate converted value
+    if (isNaN(weightToSave) || weightToSave <= 0 || !isFinite(weightToSave)) {
+      console.error('Invalid weightToSave:', weightToSave, 'unit:', unit, 'weightInKg:', currentWeightInKg);
+      return;
+    }
+    
+    onSave(weightToSave, unit);
   };
 
   const handleWeightChange = (weight: number) => {
+    // Validate weight before processing
+    if (isNaN(weight) || weight <= 0) {
+      console.error('Invalid weight in handleWeightChange:', weight);
+      return;
+    }
+
     if (unit === 'kg') {
       setWeightInKg(weight);
     } else {
       // Convert lbs to kg
-      setWeightInKg(lbsToKg(weight));
+      const weightInKgValue = lbsToKg(weight);
+      if (isNaN(weightInKgValue) || weightInKgValue <= 0) {
+        console.error('Invalid weightInKgValue after conversion:', weightInKgValue, 'from weight:', weight);
+        return;
+      }
+      setWeightInKg(weightInKgValue);
     }
   };
 
@@ -96,7 +165,9 @@ export function WeightPickerModal({ visible, initialWeight, onClose, onSave }: W
   };
 
   const getCurrentWeight = () => {
-    return unit === 'kg' ? weightInKg : kgToLbs(weightInKg);
+    // Ensure weightInKg is valid
+    const validWeightInKg = isNaN(weightInKg) || weightInKg <= 0 ? 60 : weightInKg;
+    return unit === 'kg' ? validWeightInKg : kgToLbs(validWeightInKg);
   };
 
   const getCurrentWeightDisplay = () => {
@@ -146,17 +217,8 @@ export function WeightPickerModal({ visible, initialWeight, onClose, onSave }: W
             </TouchableOpacity>
           </View>
 
-          {/* Unit Toggle (kg / lbs) */}
+          {/* Unit Toggle (lbs / kg) */}
           <View style={styles.unitToggleContainer}>
-            <TouchableOpacity
-              style={[styles.unitButton, unit === 'kg' && styles.unitButtonActive]}
-              onPress={() => handleUnitToggle('kg')}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.unitButtonText, unit === 'kg' && styles.unitButtonTextActive]}>
-                kg
-              </Text>
-            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.unitButton, unit === 'lbs' && styles.unitButtonActive]}
               onPress={() => handleUnitToggle('lbs')}
@@ -164,6 +226,15 @@ export function WeightPickerModal({ visible, initialWeight, onClose, onSave }: W
             >
               <Text style={[styles.unitButtonText, unit === 'lbs' && styles.unitButtonTextActive]}>
                 lbs
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.unitButton, unit === 'kg' && styles.unitButtonActive]}
+              onPress={() => handleUnitToggle('kg')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.unitButtonText, unit === 'kg' && styles.unitButtonTextActive]}>
+                kg
               </Text>
             </TouchableOpacity>
           </View>
