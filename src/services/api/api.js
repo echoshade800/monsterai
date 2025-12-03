@@ -24,7 +24,7 @@ const API_CONFIGS = {
     },
   },
   [ENV.STAGING]: {
-    BASE_URL: 'http://23.20.151.253:8999',
+    BASE_URL: 'http://23.20.151.253:8998',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
     CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
     AGENT_CONFIG_FILE: 'agent_list_config_prod.json',
@@ -35,7 +35,7 @@ const API_CONFIGS = {
     },
   },
   [ENV.PRODUCTION]: {
-    BASE_URL: 'http://23.20.151.253:8999',
+    BASE_URL: 'http://23.20.151.253:8998',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
     CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
     AGENT_CONFIG_FILE: 'agent_list_config_prod.json',
@@ -170,7 +170,7 @@ export const API_ENDPOINTS = {
   TIMELINE: {
     INFO: '/timeline/info',
     SAVE: '/timeline/save',
-    REMINDER: '/timeline/reminder',
+    REMINDER: '/timeline/reminder-rules',
   },
 
   DEVICE_TOKEN: {

@@ -1,31 +1,31 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
-    Bell,
-    Calendar,
-    Camera,
-    ChevronLeft,
-    ChevronRight,
-    Clock,
-    Heart,
-    Image as ImageIcon,
-    MapPin,
-    X
+  Bell,
+  Calendar,
+  Camera,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Heart,
+  Image as ImageIcon,
+  MapPin,
+  X
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    AppState,
-    Linking,
-    Modal,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  AppState,
+  Linking,
+  Modal,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import api from '../../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../../src/services/api/api';
@@ -350,17 +350,29 @@ export default function HomeTab() {
 
   // 将 API 响应映射到 TimelineItem
   const mapApiRecordToTimelineItem = (record: any): TimelineItem | null => {
-    const { time, type, prompt } = record;
+    const { time, type, title } = record;
     
-    if (!time || !type) {
+    if (!time) {
       return null;
     }
 
-    // 获取 id，支持 id 和 _id 两种格式
-    const recordId = record.id || record._id;
+    // 新的 API 返回格式：所有记录都是 reminder 类型
+    // 使用 rule_id 作为 id，支持 id、_id、rule_id 三种格式
+    const recordId = record.id || record._id || record.rule_id;
 
-    // 处理 reminder 类型
-    if (type.endsWith('_reminder')) {
+    // 处理 reminder 类型（新 API 返回的所有记录都是 reminder 类型）
+    if (type === 'reminder') {
+      return {
+        id: recordId,
+        time,
+        type: 'reminder',
+        title: title || 'Reminder', // 使用 API 返回的 title 字段
+        toggleEnabled: record.switch !== false, // switch: true 表示启用，false 表示禁用
+      };
+    }
+    
+    // 兼容旧格式：处理以 _reminder 结尾的类型
+    if (type && type.endsWith('_reminder')) {
       const reminderType = type.replace('_reminder', '');
       const titleMap: Record<string, string> = {
         sleep: 'Sleep Reminder',
@@ -374,8 +386,8 @@ export default function HomeTab() {
         id: recordId,
         time,
         type: 'reminder',
-        title: titleMap[reminderType] || getTitleFromTypeOrPrompt(reminderType, prompt) + ' Reminder',
-        toggleEnabled: !record.cancel, // cancel: false 表示启用
+        title: title || titleMap[reminderType] || getTitleFromTypeOrPrompt(reminderType, record.prompt) + ' Reminder',
+        toggleEnabled: record.switch !== false, // 优先使用 switch 字段
       };
     } else if (['sleep', 'getup', 'breakfast', 'lunch', 'dinner', 'wake up', 'wakeup', 'meal'].includes(type)) {
       // 处理 prediction 类型
@@ -388,7 +400,7 @@ export default function HomeTab() {
         meal: { title: 'Meal', subtitle: 'You tend to have a meal around this time.' },
       };
       const mapped = titleMap[type] || { 
-        title: getTitleFromTypeOrPrompt(type, prompt), 
+        title: getTitleFromTypeOrPrompt(type, record.prompt), 
         subtitle: '' 
       };
       return {
@@ -397,7 +409,7 @@ export default function HomeTab() {
         title: mapped.title,
         subtitle: mapped.subtitle,
       };
-    } else if (type.endsWith('_done')) {
+    } else if (type && type.endsWith('_done')) {
       // 处理 action 类型（*_done）
       const actionType = type.replace('_done', '');
       const agentTagMap: Record<string, string> = {
@@ -423,14 +435,14 @@ export default function HomeTab() {
         description: descriptionMap[actionType] || `You completed ${actionType}.`,
       };
     } else {
-      // 处理其他类型，使用 prompt 或 type 生成标题
-      const title = getTitleFromTypeOrPrompt(type, prompt);
-      console.log('mapApiRecordToTimelineItem unknown type', time, type, prompt, '-> title:', title);
+      // 处理其他类型，使用 title 或 prompt 或 type 生成标题
+      const displayTitle = title || getTitleFromTypeOrPrompt(type, record.prompt);
+      console.log('mapApiRecordToTimelineItem unknown type', time, type, record.prompt, '-> title:', displayTitle);
       return {
         time,
         type: 'unknown',
-        title: title,
-        subtitle: `${title}.`,
+        title: displayTitle,
+        subtitle: `${displayTitle}.`,
       };
     }
   };
@@ -504,16 +516,17 @@ export default function HomeTab() {
     }
 
     try {
-      // 打开开关，cancel 为 false；关闭开关，cancel 为 true
-      const cancel = !newValue;
+      // 新的 API 格式：使用 rule_id 和 switch 字段
+      // item.id 在 mapApiRecordToTimelineItem 中已经被设置为 rule_id
+      const requestBody: any = {
+        rule_id: item.id,
+        switch: newValue, // switch: true 表示启用，false 表示禁用
+      };
       
       // 调用 API 更新状态
       const response = await api.post(
         API_ENDPOINTS.TIMELINE.SAVE,
-        {
-          id: item.id,
-          cancel: cancel,
-        },
+        requestBody,
         { requireAuth: true }
       );
 
