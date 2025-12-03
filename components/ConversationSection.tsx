@@ -42,12 +42,6 @@ const MONSTER_COLORS: Record<string, string> = {
   posture: '#32C25F',
   facey: '#FF4FB0',
   butler: '#666666',
-  // 旧名称映射
-  energy: '#F38319', // foodie
-  stress: '#7A4DBA', // moodie
-  sleep: '#206BDB', // sleeper
-  feces: '#844E02', // poopy
-  face: '#FF4FB0', // facey
 };
 
 // Monster 头像 URL 映射表（包含新旧名称）
@@ -60,12 +54,6 @@ const MONSTER_AVATARS: Record<string, string> = {
   posture: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png',
   facey: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
   butler: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesteward.png',
-  // 旧名称映射
-  energy: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png',
-  stress: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png',
-  sleep: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png',
-  feces: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png',
-  face: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
 };
 
 // 统一渲染函数：给所有 [MonsterName] 标签或直接出现的 MonsterName 加颜色，并在标签前显示头像

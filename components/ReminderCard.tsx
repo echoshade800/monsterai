@@ -275,14 +275,22 @@ function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, remin
             style={[
               styles.button,
               selected === 'no' && styles.buttonNo,
-              (disabled || (isSubmitted && selected !== 'no') || isLoading) && styles.buttonDisabled,
+              // 只有在没有选中状态且被禁用时才应用禁用样式
+              (disabled && selected !== 'no') && styles.buttonDisabled,
+              (isSubmitted && selected !== 'no' && !disabled) && styles.buttonDisabled,
+              isLoading && styles.buttonDisabled,
+              // 当 disabled 且已选中时，保留选中样式但略微降低透明度
+              (disabled && selected === 'no') && { opacity: 0.7 },
               { transform: [{ scale: scaleAnimNo }] }
             ]}
           >
             <Text style={[
               styles.buttonText,
               selected === 'no' && styles.buttonTextActive,
-              (disabled || (isSubmitted && selected !== 'no') || isLoading) && styles.buttonTextDisabled,
+              // 只有在没有选中状态且被禁用时才应用禁用文本样式
+              (disabled && selected !== 'no') && styles.buttonTextDisabled,
+              (isSubmitted && selected !== 'no' && !disabled) && styles.buttonTextDisabled,
+              isLoading && styles.buttonTextDisabled,
             ]}>
               No
             </Text>
@@ -297,8 +305,12 @@ function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, remin
             style={[
               styles.button,
               selected === 'yes' && styles.buttonYes,
-              (disabled || (isSubmitted && selected !== 'yes')) && styles.buttonDisabled,
+              // 只有在没有选中状态且被禁用时才应用禁用样式
+              (disabled && selected !== 'yes') && styles.buttonDisabled,
+              (isSubmitted && selected !== 'yes' && !disabled) && styles.buttonDisabled,
               isLoading && styles.buttonLoading,
+              // 当 disabled 且已选中时，保留选中样式但略微降低透明度
+              (disabled && selected === 'yes') && { opacity: 0.7 },
               { transform: [{ scale: scaleAnimYes }] }
             ]}
           >
@@ -308,7 +320,9 @@ function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, remin
               <Text style={[
                 styles.buttonText,
                 selected === 'yes' && styles.buttonTextActive,
-                (disabled || (isSubmitted && selected !== 'yes')) && styles.buttonTextDisabled,
+                // 只有在没有选中状态且被禁用时才应用禁用文本样式
+                (disabled && selected !== 'yes') && styles.buttonTextDisabled,
+                (isSubmitted && selected !== 'yes' && !disabled) && styles.buttonTextDisabled,
               ]}>
                 Yes
               </Text>
