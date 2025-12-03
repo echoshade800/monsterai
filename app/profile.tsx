@@ -67,27 +67,50 @@ export default function ProfileScreen() {
         // 与foodie详情页保持一致：解析后端返回的字符串格式
         if (userData.height !== null && userData.height !== undefined && String(userData.height).trim() !== '') {
           const heightStr = String(userData.height).trim();
+          console.log('[Profile] Loading height from API:', heightStr);
           
           // 解析身高字符串，确定单位和数值
           // 检查是否是英尺/英寸格式: "5' 10\"" 或 "5'10\""
           const feetInchesMatch = heightStr.match(/(\d+)'[\s]*(\d+)"/);
           if (feetInchesMatch) {
             // 英尺/英寸格式，直接使用后端返回的字符串
+            console.log('[Profile] Detected feet/inches format, setting unit to ft');
             setHeight(heightStr);
             setHeightUnit('ft');
           } else if (heightStr.includes('cm')) {
             // 厘米格式，直接使用后端返回的字符串
+            console.log('[Profile] Detected cm format, setting unit to cm');
             setHeight(heightStr);
             setHeightUnit('cm');
           } else {
-            // 如果是纯数字，添加 " cm"
-            setHeight(`${heightStr} cm`);
-            setHeightUnit('cm');
+            // 如果是纯数字，尝试从本地存储读取单位，否则默认cm
+            try {
+              const savedHeightUnit = await storageManager.getItem('heightUnit');
+              const unit = (savedHeightUnit === 'cm' || savedHeightUnit === 'ft') ? savedHeightUnit : 'cm';
+              console.log('[Profile] Pure number format, using unit from storage:', unit);
+              setHeight(`${heightStr} cm`);
+              setHeightUnit(unit);
+            } catch (error) {
+              console.warn('Failed to load heightUnit from local storage:', error);
+              setHeight(`${heightStr} cm`);
+              setHeightUnit('cm');
+            }
           }
         } else {
           console.log('[Profile] height is empty or null, setting to Unknown');
           setHeight('Unknown');
-          setHeightUnit('cm');
+          // 尝试从本地存储读取单位
+          try {
+            const savedHeightUnit = await storageManager.getItem('heightUnit');
+            if (savedHeightUnit === 'cm' || savedHeightUnit === 'ft') {
+              setHeightUnit(savedHeightUnit);
+            } else {
+              setHeightUnit('cm');
+            }
+          } catch (error) {
+            console.warn('Failed to load heightUnit from local storage:', error);
+            setHeightUnit('cm');
+          }
         }
         
         // 填充头像（如果有）
@@ -272,10 +295,19 @@ export default function ProfileScreen() {
         height: heightString,
       };
       
+      // 保存单位到本地存储（与foodie详情页一致）
+      try {
+        await storageManager.setItem('heightUnit', unit);
+      } catch (storageError) {
+        console.warn('Failed to save heightUnit to local storage:', storageError);
+      }
+      
       // 更新用户信息
       const updateResult: any = await userService.updateUserInfo(updateData);
       
       if (updateResult?.success) {
+        // 更新本地状态
+        setHeightUnit(unit);
         // 重新从 API 加载数据，确保完全同步
         await loadUserInfo();
         Alert.alert('Success', 'Height updated');
@@ -734,6 +766,7 @@ export default function ProfileScreen() {
       <HeightPickerModal
         visible={showHeightPicker}
         initialHeight={extractHeightInCm(height)}
+        initialUnit={heightUnit}
         onClose={() => setShowHeightPicker(false)}
         onSave={handleHeightSave}
       />
