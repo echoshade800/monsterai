@@ -52,6 +52,12 @@ public class AppDelegate: ExpoAppDelegate {
     let result = RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
     return super.application(application, continue: userActivity, restorationHandler: restorationHandler) || result
   }
+
+  // 清除应用图标上的badge数字
+  public override func applicationDidBecomeActive(_ application: UIApplication) {
+    super.applicationDidBecomeActive(application)
+    UIApplication.shared.applicationIconBadgeNumber = 0
+  }
 }
 
 class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
