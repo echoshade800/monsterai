@@ -17,11 +17,38 @@ import healthDataManager from '../../src/utils/health-data-manager';
 import locationManager from '../../src/utils/location-manager';
 import mobileDataManager from '../../src/utils/mobile-data-manager';
 import storageManager from '../../src/utils/storage';
-interface ReminderItem {
+// 一次性提醒的时间信息
+interface OneTimePattern {
+  scheduled_time: string;
+}
+
+// 重复规则的配置
+interface RepeatRulePattern {
+  type: string; // 例如: "daily", "weekly" 等
+}
+
+// ReminderItem 基础字段
+interface ReminderItemBase {
   time: string;
   title: string;
   task_type: string;
+  original_text?: string;
 }
+
+// 一次性提醒类型
+interface ReminderItemOneTime extends ReminderItemBase {
+  pattern_type: "one_time";
+  one_time: OneTimePattern;
+}
+
+// 重复提醒类型
+interface ReminderItemRepeatRule extends ReminderItemBase {
+  pattern_type: "repeat_rule";
+  repeat_rule: RepeatRulePattern;
+}
+
+// ReminderItem 联合类型，确保 one_time 和 repeat_rule 互斥
+type ReminderItem = ReminderItemOneTime | ReminderItemRepeatRule;
 
 interface ReminderCardData {
   title: string;
@@ -78,12 +105,33 @@ export default function EchoTab() {
     }
 
     // 转换任务数据为 ReminderCard 格式
-    // 注意：确保 task_type 总是有值，以匹配 ConversationSection 的类型要求
-    const reminders: ReminderItem[] = tasks.map((task: any) => ({
-      time: task.time || '12:00',
-      title: task.title || 'Task',
-      task_type: task.task_type || 'meal'
-    } as ReminderItem));
+    const reminders: ReminderItem[] = tasks.map((task: any) => {
+      const baseItem: ReminderItemBase = {
+        time: task.time || '12:00',
+        title: task.title || 'Task',
+        task_type: task.task_type || 'meal',
+        original_text: task.original_text
+      };
+
+      // 根据 pattern_type 创建对应的 ReminderItem
+      const patternType = task.pattern_type || 'repeat_rule';
+      
+      if (patternType === 'one_time') {
+        // 一次性提醒
+        return {
+          ...baseItem,
+          pattern_type: 'one_time' as const,
+          one_time: task.one_time || { scheduled_time: '' }
+        } as ReminderItemOneTime;
+      } else {
+        // 重复提醒（默认）
+        return {
+          ...baseItem,
+          pattern_type: 'repeat_rule' as const,
+          repeat_rule: task.repeat_rule || { type: 'daily' }
+        } as ReminderItemRepeatRule;
+      }
+    });
 
     // 创建 ReminderCard 消息
     const id = messageId || `reminder_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -1241,8 +1289,8 @@ export default function EchoTab() {
   // 处理 function call
   const handleFunctionCall = useCallback(async (functionCallData: any) => {
     console.log('Processing function call:', functionCallData);
-
     const { name, arguments: argsString, call_id } = functionCallData;
+    console.log('raw function call data:', functionCallData);
     let args;
 
     // 解析参数
@@ -1263,19 +1311,21 @@ export default function EchoTab() {
 
     console.log(`tool function execution result:`, executionResult);
 
-    // 特殊处理 extract_user_task 函数
+    // 特殊处理 extract_user_task 函数 - 从执行结果中提取 tasks
     if (name === 'extract_user_task' && executionResult.success) {
       try {
         console.log('extract_user_task execution result:', executionResult);
         console.log('Raw result string:', executionResult.result);
         const resultData = JSON.parse(executionResult.result);
         console.log('Parsed extract_user_task result:', resultData);
-
+        
         // 使用公共函数创建 ReminderCard 消息
-        const reminderCardMessage = createReminderCardFromTasks(resultData.tasks);
-        if (reminderCardMessage) {
-          setMessages(prev => [...prev, reminderCardMessage]);
-          console.log('Added ReminderCard message for extracted tasks');
+        if (resultData.tasks && Array.isArray(resultData.tasks)) {
+          const reminderCardMessage = createReminderCardFromTasks(resultData.tasks);
+          if (reminderCardMessage) {
+            setMessages(prev => [...prev, reminderCardMessage]);
+            console.log('Added ReminderCard message for extracted tasks from execution result');
+          }
         }
       } catch (parseError) {
         console.error('Failed to parse extract_user_task result:', parseError);
@@ -1335,9 +1385,9 @@ export default function EchoTab() {
         title: "Need a reminder, boss?",
         monster: "poop",
         reminders: [
-          { time: "09:00", title: "Drink warm water", task_type: "meal" },
-          { time: "12:00", title: "Eat a banana", task_type: "meal" },
-          { time: "16:00", title: "Sip electrolytes", task_type: "meal" }
+          { time: "09:00", title: "Drink warm water", task_type: "meal", pattern_type: "repeat_rule" as const, repeat_rule: { type: "daily" } },
+          { time: "12:00", title: "Eat a banana", task_type: "meal", pattern_type: "repeat_rule" as const, repeat_rule: { type: "daily" } },
+          { time: "16:00", title: "Sip electrolytes", task_type: "meal", pattern_type: "repeat_rule" as const, repeat_rule: { type: "daily" } }
         ]
       }
     };

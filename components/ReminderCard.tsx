@@ -8,11 +8,38 @@ import storageManager from '../src/utils/storage';
 import { SuccessModal } from './SuccessModal';
 import { TimePickerModal } from './TimePickerModal';
 
-interface ReminderItem {
+// 一次性提醒的时间信息
+interface OneTimePattern {
+  scheduled_time: string;
+}
+
+// 重复规则的配置
+interface RepeatRulePattern {
+  type: string; // 例如: "daily", "weekly" 等
+}
+
+// ReminderItem 基础字段
+interface ReminderItemBase {
   time: string;
   title: string;
-  task_type?: string;
+  task_type: string;
+  original_text?: string;
 }
+
+// 一次性提醒类型
+interface ReminderItemOneTime extends ReminderItemBase {
+  pattern_type: "one_time";
+  one_time: OneTimePattern;
+}
+
+// 重复提醒类型
+interface ReminderItemRepeatRule extends ReminderItemBase {
+  pattern_type: "repeat_rule";
+  repeat_rule: RepeatRulePattern;
+}
+
+// ReminderItem 联合类型，确保 one_time 和 repeat_rule 互斥
+type ReminderItem = ReminderItemOneTime | ReminderItemRepeatRule;
 
 interface ReminderCardProps {
   title: string;
@@ -23,15 +50,15 @@ interface ReminderCardProps {
 }
 
 interface ReminderItemRowProps {
-  time: string;
-  title: string;
-  task_type: string;
+  reminder: ReminderItem; // 完整的 ReminderItem 对象
+  time: string; // 当前显示的时间（可能被用户修改过）
   onTimeChange: (newTime: string) => void;
   disabled?: boolean;
   reminderId: string; // Reminder 唯一标识 (messageId + index)
 }
 
-function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = false, reminderId }: ReminderItemRowProps) {
+function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, reminderId }: ReminderItemRowProps) {
+  const { title, task_type } = reminder;
   const [selected, setSelected] = useState<'yes' | 'no' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -95,14 +122,28 @@ function ReminderItemRow({ time, title, task_type, onTimeChange, disabled = fals
     try {
       // 获取 headers
       const headers = await getHeadersWithPassId();
-      console.log('task_type', task_type, 'title', title, 'time', time);
+      
+      // 构建完整的 ReminderItem 请求体
+      // 使用用户修改后的时间（如果有修改）
+      const requestBody: any = {
+        task_type: reminder.task_type,
+        title: reminder.title,
+        time: time, // 使用当前显示的时间（可能被用户修改过）
+        pattern_type: reminder.pattern_type,
+        original_text: reminder.original_text,
+      };
+
+      // 根据 pattern_type 添加对应的字段
+      if (reminder.pattern_type === 'one_time') {
+        requestBody.one_time = reminder.one_time;
+      } else if (reminder.pattern_type === 'repeat_rule') {
+        requestBody.repeat_rule = reminder.repeat_rule;
+      }
+
+      console.log('Sending complete ReminderItem:', JSON.stringify(requestBody, null, 2));
 
       // 发送 POST 请求
-      const response = await api.post(API_ENDPOINTS.DATA_AGENT.USER_TIME_SCHEDULE_SMART_UPDATE, {
-        task_type: task_type,
-        title: title,
-        time: time,
-      }, {
+      const response = await api.post(API_ENDPOINTS.DATA_AGENT.USER_TIME_SCHEDULE_SMART_UPDATE, requestBody, {
         headers: {
           'accept': 'application/json',
           'passid': (headers as any).passid || (headers as any).passId,
@@ -341,9 +382,8 @@ export function ReminderCard({ title, monster, reminders, disabled = false, mess
               return (
                 <ReminderItemRow
                   key={`${reminder.time}-${reminder.title}-${index}`}
+                  reminder={reminder}
                   time={reminderTimes[index]}
-                  title={reminder.title}
-                  task_type={reminder.task_type || 'meal'}
                   onTimeChange={(newTime) => handleTimeChange(index, newTime)}
                   disabled={disabled}
                   reminderId={reminderId}
