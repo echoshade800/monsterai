@@ -16,13 +16,9 @@ export function WeightPicker({
   unit,
   onWeightChange,
 }: WeightPickerProps) {
-  const integerScrollRef = useRef<ScrollView>(null);
-  const decimalScrollRef = useRef<ScrollView>(null);
-  const isScrollingRef = useRef(false);
-  const isInitializingRef = useRef(false);
-  const selectedIntegerRef = useRef(initialInteger);
-  const selectedDecimalRef = useRef(initialDecimal);
-
+  // Validate and ensure initialWeight is a valid number
+  const validInitialWeight = isNaN(initialWeight) || initialWeight <= 0 ? (unit === 'kg' ? 60 : 132) : initialWeight;
+  
   // Generate data arrays based on unit
   const minWeight = unit === 'kg' ? 30 : 66; // 30kg or 66lbs
   const maxWeight = unit === 'kg' ? 200 : 440; // 200kg or 440lbs
@@ -31,8 +27,15 @@ export function WeightPicker({
   const decimals = Array.from({ length: 10 }, (_, i) => i); // 0-9 for .0 to .9
 
   // Split weight into integer and decimal parts
-  const initialInteger = Math.floor(initialWeight);
-  const initialDecimal = Math.round((initialWeight - initialInteger) * 10);
+  const initialInteger = Math.floor(validInitialWeight);
+  const initialDecimal = Math.round((validInitialWeight - initialInteger) * 10);
+
+  const integerScrollRef = useRef<ScrollView>(null);
+  const decimalScrollRef = useRef<ScrollView>(null);
+  const isScrollingRef = useRef(false);
+  const isInitializingRef = useRef(false);
+  const selectedIntegerRef = useRef(initialInteger);
+  const selectedDecimalRef = useRef(initialDecimal);
 
   const [selectedInteger, setSelectedInteger] = useState(initialInteger);
   const [selectedDecimal, setSelectedDecimal] = useState(initialDecimal);

@@ -4,13 +4,13 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, Brain, Calendar, ChevronRight, ClipboardList, Target, User } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityLevelPickerModal } from '../components/ActivityLevelPickerModal';
@@ -448,11 +448,10 @@ export default function EnergyDetailScreen() {
       // If user selected lbs, weight is in lbs; if kg, weight is in kg
       const weightToStore = weight;
       
-      // Update API - store the value as-is in the selected unit
+      // Update API - store the value with unit concatenated in the weight string
       const updateData: any = {};
       if (weightPickerType === 'current') {
-        updateData.weight = String(weightToStore);
-        updateData.weightUnit = unit; // Try to save unit to backend
+        updateData.weight = `${weightToStore}${unit}`;
         console.log('[EnergyDetail] Saving weight:', weightToStore, 'unit:', unit, 'type:', weightPickerType);
         // Also save to local storage as backup
         try {
@@ -462,8 +461,7 @@ export default function EnergyDetailScreen() {
           console.warn('[EnergyDetail] Failed to save currentWeightUnit to local storage:', storageError);
         }
       } else {
-        updateData.goalWeight = String(weightToStore);
-        updateData.goalWeightUnit = unit; // Try to save unit to backend
+        updateData.goalWeight = `${weightToStore}${unit}`;
         console.log('[EnergyDetail] Saving goalWeight:', weightToStore, 'unit:', unit);
         // Also save to local storage as backup
         try {

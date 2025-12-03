@@ -1,14 +1,14 @@
 import { X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { WeightPicker } from './WeightPicker';
 
@@ -142,21 +142,27 @@ export function WeightPickerModal({ visible, initialWeight, initialUnit, onClose
 
   const handleWeightChange = (weight: number) => {
     // Validate weight before processing
-    if (isNaN(weight) || weight <= 0) {
+    if (isNaN(weight) || weight <= 0 || !isFinite(weight)) {
       console.error('Invalid weight in handleWeightChange:', weight);
       return;
     }
 
     if (unit === 'kg') {
-      setWeightInKg(weight);
+      // Ensure the weight is within reasonable bounds
+      if (weight >= 30 && weight <= 200) {
+        setWeightInKg(weight);
+      }
     } else {
       // Convert lbs to kg
       const weightInKgValue = lbsToKg(weight);
-      if (isNaN(weightInKgValue) || weightInKgValue <= 0) {
+      if (isNaN(weightInKgValue) || weightInKgValue <= 0 || !isFinite(weightInKgValue)) {
         console.error('Invalid weightInKgValue after conversion:', weightInKgValue, 'from weight:', weight);
         return;
       }
-      setWeightInKg(weightInKgValue);
+      // Ensure the converted weight is within reasonable bounds
+      if (weightInKgValue >= 30 && weightInKgValue <= 200) {
+        setWeightInKg(weightInKgValue);
+      }
     }
   };
 
@@ -166,8 +172,13 @@ export function WeightPickerModal({ visible, initialWeight, initialUnit, onClose
 
   const getCurrentWeight = () => {
     // Ensure weightInKg is valid
-    const validWeightInKg = isNaN(weightInKg) || weightInKg <= 0 ? 60 : weightInKg;
-    return unit === 'kg' ? validWeightInKg : kgToLbs(validWeightInKg);
+    const validWeightInKg = isNaN(weightInKg) || weightInKg <= 0 || !isFinite(weightInKg) ? 60 : weightInKg;
+    const weight = unit === 'kg' ? validWeightInKg : kgToLbs(validWeightInKg);
+    // Ensure the converted weight is also valid
+    if (isNaN(weight) || weight <= 0 || !isFinite(weight)) {
+      return unit === 'kg' ? 60 : 132; // Default fallback
+    }
+    return weight;
   };
 
   const getCurrentWeightDisplay = () => {
