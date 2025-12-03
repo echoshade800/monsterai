@@ -1397,23 +1397,21 @@ export default function EchoTab() {
 
   return (
     <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={dismissKeyboard}>
-        <View style={styles.contentWrapper}>
+      <View style={styles.contentWrapper}>
         <Header
           isCollapsed={isCollapsed}
           onCollapse={handleCollapse}
           refreshTrigger={refreshTrigger}
           onTestReminder={handleTestReminder}
         />
-          <ConversationSection
-            messages={messages}
-            isLoading={isLoading}
-            isSending={isSending}
-            currentResponse={currentResponse}
-            keyboardHeight={keyboardHeight}
-          />
-        </View>
-      </TouchableWithoutFeedback>
+        <ConversationSection
+          messages={messages}
+          isLoading={isLoading}
+          isSending={isSending}
+          currentResponse={currentResponse}
+          keyboardHeight={keyboardHeight}
+        />
+      </View>
 
       <InputField
         onFocus={handleInputFocus}

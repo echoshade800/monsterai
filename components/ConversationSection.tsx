@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ReminderCard } from './ReminderCard';
 
 interface ReminderItem {
@@ -437,8 +437,9 @@ export function ConversationSection({
       style={styles.scrollContainer}
       contentContainerStyle={[styles.container, { paddingBottom: dynamicPaddingBottom }]}
       showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="always"
+      keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
+      scrollEventThrottle={16}
     >
       {messages.map((message, index) => {
         if (message.type === 'timestamp') {
@@ -473,21 +474,26 @@ export function ConversationSection({
 
         if (message.type === 'assistant') {
           return (
-            <View key={message.id} style={styles.assistantMessageContainer}>
-              <Pressable
+            <View key={message.id} style={styles.assistantMessageContainer} collapsable={false}>
+              <TouchableOpacity
                 onLongPress={() => handleCopyMessage(message.content)}
+                delayLongPress={500}
+                activeOpacity={1}
                 style={styles.assistantTextWrapper}
+                hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
               >
                 {renderMonsterColoredText(message.content)}
-              </Pressable>
+              </TouchableOpacity>
             </View>
           );
         }
 
         return (
           <View key={message.id} style={styles.userMessageContainer}>
-            <Pressable
+            <TouchableOpacity
               onLongPress={() => handleCopyMessage(message.content || 'Image message')}
+              delayLongPress={500}
+              activeOpacity={1}
               style={[styles.userBubble, message.photoUri && styles.userBubbleWithPhoto]}
             >
               {message.photoUri && (
@@ -500,7 +506,7 @@ export function ConversationSection({
               ) : message.photoUri && !message.content ? (
                 <Text style={styles.photoOnlyText}>📷 Image</Text>
               ) : null}
-            </Pressable>
+            </TouchableOpacity>
           </View>
         );
       })}
@@ -582,7 +588,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   assistantTextWrapper: {
-    width: '100%',
+    alignSelf: 'flex-start',
+    flexShrink: 1,
   },
   assistantText: {
     fontSize: 15,
