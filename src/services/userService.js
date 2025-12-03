@@ -300,22 +300,16 @@ class UserService {
   }
 
   /**
-   * 获取用户状态信息（包括邀请码）
-   * @returns {Promise<Object>} 状态信息，包含 invite_code 字段
+   * 启动更新用户状态
+   * @returns {Promise<Object>} 状态信息
    */
   async getUserStatusInfo() {
     try {
       // 获取时区，使用标准时区名称格式
       let timezone = 'string'; // 默认值
       try {
-        // 尝试获取系统时区名称
-        const timeZoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        if (timeZoneName) {
-          timezone = timeZoneName;
-        } else {
-          // 如果获取不到，使用偏移量格式
-          timezone = getTimezone();
-        }
+        // 尝试获取系统时区格式为+800
+        timezone = getTimezone();
       } catch (error) {
         console.warn('Failed to get timezone, using default value:', error);
         timezone = getTimezone();

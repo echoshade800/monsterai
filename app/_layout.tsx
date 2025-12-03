@@ -39,6 +39,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { analytics } from '../config/firebase';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
+import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
 
 // 配置通知处理程序
@@ -168,6 +169,39 @@ export default function Layout() {
     
     initializeAnalytics();
     
+    // 检查用户是否已登录，如果已登录则获取用户状态信息
+    const checkUserStatus = async () => {
+      try {
+        const userData = await storageManager.getUserData();
+        const hasPassId = userData && userData.passId;
+        
+        if (hasPassId) {
+          console.log('User is logged in, fetching user status info on app startup');
+          try {
+            const statusResult: any = await userService.getUserStatusInfo();
+            if (statusResult.success) {
+              console.log('User status info fetched successfully on app startup:', statusResult.data);
+            } else {
+              console.warn('Failed to get user status info on app startup:', statusResult.message);
+            }
+          } catch (error) {
+            console.error('Error getting user status info on app startup:', error);
+            // 静默失败，不影响应用启动
+          }
+        } else {
+          console.log('User not logged in, skipping user status info fetch');
+        }
+      } catch (error) {
+        console.error('Error checking user login status:', error);
+        // 静默失败，不影响应用启动
+      }
+    };
+    
+    // 延迟执行，确保应用完全启动后再调用
+    const statusCheckTimeout = setTimeout(() => {
+      checkUserStatus();
+    }, 1000);
+    
     // 注册推送通知
     registerForPushNotificationsAsync().then(async token => {
       if (token) {
@@ -207,6 +241,11 @@ export default function Layout() {
     }).catch(error => {
       console.error('Error registering push notifications:', error);
     });
+    
+    // 清理函数
+    return () => {
+      clearTimeout(statusCheckTimeout);
+    };
   }, []);
 
   // 定时上传数据
