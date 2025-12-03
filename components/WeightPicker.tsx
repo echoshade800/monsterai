@@ -42,32 +42,36 @@ export function WeightPicker({
 
   // Update selected values and scroll when initialWeight or unit changes
   useEffect(() => {
-    const newInteger = Math.floor(initialWeight);
-    const newDecimal = Math.round((initialWeight - newInteger) * 10);
+    // Validate and ensure initialWeight is a valid number (same logic as top-level)
+    const validWeight = isNaN(initialWeight) || initialWeight <= 0 || !isFinite(initialWeight) 
+      ? (unit === 'kg' ? 60 : 132) 
+      : initialWeight;
     
-    // Only update if values actually changed
-    if (newInteger !== selectedInteger || newDecimal !== selectedDecimal) {
-      isInitializingRef.current = true;
-      setSelectedInteger(newInteger);
-      setSelectedDecimal(newDecimal);
-      selectedIntegerRef.current = newInteger;
-      selectedDecimalRef.current = newDecimal;
-      
-      // Scroll to new position after a short delay
-      setTimeout(() => {
-        const integerIndex = integers.indexOf(newInteger);
-        const decimalIndex = newDecimal;
+    const newInteger = Math.floor(validWeight);
+    const newDecimal = Math.round((validWeight - newInteger) * 10);
+    
+    // Always update to ensure state is in sync with props, even if values appear the same
+    // This handles cases where initialWeight changes from invalid to valid or vice versa
+    isInitializingRef.current = true;
+    setSelectedInteger(newInteger);
+    setSelectedDecimal(newDecimal);
+    selectedIntegerRef.current = newInteger;
+    selectedDecimalRef.current = newDecimal;
+    
+    // Scroll to new position after a short delay
+    setTimeout(() => {
+      const integerIndex = integers.indexOf(newInteger);
+      const decimalIndex = newDecimal;
 
-        if (integerScrollRef.current && integerIndex >= 0) {
-          integerScrollRef.current.scrollTo({ y: integerIndex * ITEM_HEIGHT, animated: false });
-        }
-        if (decimalScrollRef.current && decimalIndex >= 0) {
-          decimalScrollRef.current.scrollTo({ y: decimalIndex * ITEM_HEIGHT, animated: false });
-        }
-        
-        isInitializingRef.current = false;
-      }, 50);
-    }
+      if (integerScrollRef.current && integerIndex >= 0) {
+        integerScrollRef.current.scrollTo({ y: integerIndex * ITEM_HEIGHT, animated: false });
+      }
+      if (decimalScrollRef.current && decimalIndex >= 0) {
+        decimalScrollRef.current.scrollTo({ y: decimalIndex * ITEM_HEIGHT, animated: false });
+      }
+      
+      isInitializingRef.current = false;
+    }, 50);
   }, [initialWeight, unit]);
 
   const handleScroll = (
