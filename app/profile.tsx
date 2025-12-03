@@ -19,6 +19,7 @@ export default function ProfileScreen() {
   const [name, setName] = useState('');
   const [sex, setSex] = useState('');
   const [height, setHeight] = useState('');
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm'); // 用于解析和显示身高单位
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -63,18 +64,30 @@ export default function ProfileScreen() {
         
         // 填充身高（支持 "xxx cm" 或 "x' x\"" 格式）
         // 处理 null, undefined, 空字符串等情况
+        // 与foodie详情页保持一致：解析后端返回的字符串格式
         if (userData.height !== null && userData.height !== undefined && String(userData.height).trim() !== '') {
           const heightStr = String(userData.height).trim();
-          // 如果已经包含单位（cm 或 ' "），直接使用
-          if (heightStr.includes('cm') || heightStr.includes("'") || heightStr.includes('"')) {
+          
+          // 解析身高字符串，确定单位和数值
+          // 检查是否是英尺/英寸格式: "5' 10\"" 或 "5'10\""
+          const feetInchesMatch = heightStr.match(/(\d+)'[\s]*(\d+)"/);
+          if (feetInchesMatch) {
+            // 英尺/英寸格式，直接使用后端返回的字符串
             setHeight(heightStr);
+            setHeightUnit('ft');
+          } else if (heightStr.includes('cm')) {
+            // 厘米格式，直接使用后端返回的字符串
+            setHeight(heightStr);
+            setHeightUnit('cm');
           } else {
             // 如果是纯数字，添加 " cm"
             setHeight(`${heightStr} cm`);
+            setHeightUnit('cm');
           }
         } else {
           console.log('[Profile] height is empty or null, setting to Unknown');
           setHeight('Unknown');
+          setHeightUnit('cm');
         }
         
         // 填充头像（如果有）
@@ -553,7 +566,24 @@ export default function ProfileScreen() {
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
                 <Text style={styles.menuItemLabel}>Height</Text>
-                <Text style={styles.menuItemValue}>{height}</Text>
+                <Text style={styles.menuItemValue}>
+                  {(() => {
+                    if (height === 'Unknown' || !height) {
+                      return 'Unknown';
+                    }
+                    // 解析身高字符串，提取数字和单位，然后格式化显示（与foodie详情页一致）
+                    const heightInCm = extractHeightInCm(height);
+                    if (heightInCm === null) {
+                      return 'Unknown';
+                    }
+                    if (heightUnit === 'cm') {
+                      return `${heightInCm} cm`;
+                    } else {
+                      const { feet, inches } = cmToFeet(heightInCm);
+                      return `${feet}' ${inches}"`;
+                    }
+                  })()}
+                </Text>
               </View>
               <TouchableOpacity style={styles.editButton} onPress={handleEditHeight}>
                 <Text style={styles.editButtonText}>Edit</Text>

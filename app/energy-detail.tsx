@@ -4,13 +4,13 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, Brain, Calendar, ChevronRight, ClipboardList, Target, User } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Image,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Image,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityLevelPickerModal } from '../components/ActivityLevelPickerModal';
@@ -139,15 +139,29 @@ export default function EnergyDetailScreen() {
     return gender.toLowerCase();
   };
 
-  // Extract height in cm from API value (could be number or string like "175 cm")
-  const extractHeightFromAPI = (apiHeight: any): number | null => {
-    if (!apiHeight) return null;
-    if (typeof apiHeight === 'number') return apiHeight;
+  // Extract height in cm from API value (could be number or string like "175 cm" or "5' 10\"")
+  const extractHeightFromAPI = (apiHeight: any): { height: number | null; unit: 'cm' | 'ft' } => {
+    if (!apiHeight) return { height: null, unit: 'cm' };
+    if (typeof apiHeight === 'number') return { height: apiHeight, unit: 'cm' };
     if (typeof apiHeight === 'string') {
-      const match = apiHeight.match(/(\d+)/);
-      if (match) return parseInt(match[1], 10);
+      const trimmed = apiHeight.trim();
+      
+      // Check for feet/inches format: "5' 10\"" or "5'10\""
+      const feetInchesMatch = trimmed.match(/(\d+)'[\s]*(\d+)"/);
+      if (feetInchesMatch) {
+        const feet = parseInt(feetInchesMatch[1], 10);
+        const inches = parseInt(feetInchesMatch[2], 10);
+        const heightInCm = feetToCm(feet, inches);
+        return { height: heightInCm, unit: 'ft' };
+      }
+      
+      // Check for cm format: "175 cm" or "175"
+      const cmMatch = trimmed.match(/(\d+)/);
+      if (cmMatch) {
+        return { height: parseInt(cmMatch[1], 10), unit: 'cm' };
+      }
     }
-    return null;
+    return { height: null, unit: 'cm' };
   };
 
   // Conversion functions
@@ -171,21 +185,28 @@ export default function EnergyDetailScreen() {
           setGender(null);
         }
         
-        // Load height (convert to number in cm)
+        // Load height (parse from string format like "175 cm" or "5' 10\"")
         if (userData.height) {
-          const heightInCm = extractHeightFromAPI(userData.height);
+          const { height: heightInCm, unit: parsedUnit } = extractHeightFromAPI(userData.height);
           if (heightInCm) {
             setHeight(heightInCm);
+            // 从后端数据中解析出的单位优先
+            setHeightUnit(parsedUnit);
+          } else {
+            setHeight(null);
+            // 如果解析失败，尝试从本地存储加载单位
+            try {
+              const savedHeightUnit = await storageManager.getItem('heightUnit');
+              if (savedHeightUnit === 'cm' || savedHeightUnit === 'ft') {
+                setHeightUnit(savedHeightUnit);
+              }
+            } catch (error) {
+              console.warn('Failed to load heightUnit from local storage:', error);
+            }
           }
         } else {
           setHeight(null);
-        }
-        
-        // Load height unit from API or local storage
-        if ((userData as any).heightUnit) {
-          setHeightUnit((userData as any).heightUnit);
-        } else {
-          // Try to load from local storage
+          // 如果后端没有身高数据，尝试从本地存储加载单位
           try {
             const savedHeightUnit = await storageManager.getItem('heightUnit');
             if (savedHeightUnit === 'cm' || savedHeightUnit === 'ft') {
@@ -530,11 +551,19 @@ export default function EnergyDetailScreen() {
 
   const handleHeightSave = async (newHeight: number, unit: 'cm' | 'ft') => {
     try {
-      // Height is always stored in cm in the backend
-      // newHeight is already in cm (from HeightPickerModal)
+      // 准备更新数据，根据单位生成对应的字符串格式（与profile页面保持一致）
+      let heightString: string;
+      if (unit === 'cm') {
+        // 厘米格式: "170 cm"
+        heightString = `${newHeight} cm`;
+      } else {
+        // 英尺/英寸格式: "5' 10\""
+        const { feet, inches } = cmToFeet(newHeight);
+        heightString = `${feet}' ${inches}"`;
+      }
+      
       const updateData: any = {
-        height: String(newHeight), // API expects string
-        heightUnit: unit, // Try to save unit to backend
+        height: heightString, // 保存为字符串格式，与profile页面一致
       };
       
       // Also save to local storage as backup
