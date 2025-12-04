@@ -32,62 +32,87 @@ interface ConversationSectionProps {
   keyboardHeight?: number;
 }
 
-// Monster 颜色映射表（统一管理，包含新旧名称）
-const MONSTER_COLORS: Record<string, string> = {
-  // 新名称
-  foodie: '#F38319',
-  moodie: '#7A4DBA',
-  sleeper: '#206BDB',
-  poopy: '#844E02',
-  posture: '#32C25F',
-  facey: '#FF4FB0',
-  butler: '#666666',
+// Monster 统一配置（包含名称、颜色和头像）
+const MONSTER_CONFIG: Record<string, { color: string; avatar: string }> = {
+  foodie: {
+    color: '#F38319',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png',
+  },
+  moodie: {
+    color: '#7A4DBA',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png',
+  },
+  sleeper: {
+    color: '#206BDB',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png',
+  },
+  poopy: {
+    color: '#844E02',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png',
+  },
+  posture: {
+    color: '#32C25F',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png',
+  },
+  facey: {
+    color: '#FF4FB0',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
+  },
+  butler: {
+    color: '#666666',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesteward.png',
+  },
 };
 
-// Monster 头像 URL 映射表（包含新旧名称）
-const MONSTER_AVATARS: Record<string, string> = {
-  // 新名称
-  foodie: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png',
-  moodie: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png',
-  sleeper: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png',
-  poopy: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png',
-  posture: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png',
-  facey: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
-  butler: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesteward.png',
-};
-
-// 统一渲染函数：给所有 [MonsterName] 标签或直接出现的 MonsterName 加颜色，并在标签前显示头像
+// 统一渲染函数：给所有 [MonsterName] 或 @MonsterName 标签或直接出现的 MonsterName 加颜色，并在标签前显示头像
 const renderMonsterColoredText = (text: string) => {
   if (!text) return null;
 
-  // 构建所有可能的 monster 名字列表（包括新旧名称）
-  const monsterNames = [
-    'foodie', 'energy', 'moodie', 'stress', 'sleeper', 'sleep',
-    'poopy', 'feces', 'posture', 'facey', 'face', 'butler'
-  ];
+  // 从统一配置中提取所有 monster 名字列表
+  const monsterNames = Object.keys(MONSTER_CONFIG);
   
-  // 只匹配带括号的格式 [MonsterName]，避免误匹配普通文本中的单词（如 "sleep", "face", "stress" 等）
-  let processedText = text;
-  const parts: Array<{ type: 'text' | 'tag', content: string, monsterName?: string }> = [];
+  // 只匹配带括号的格式 [MonsterName] 或 @MonsterName，避免误匹配普通文本中的单词（如 "sleep", "face", "stress" 等）
+  const parts: Array<{ type: 'text' | 'tag', content: string, monsterName?: string, tagType?: 'bracket' | 'mention' }> = [];
   let lastIndex = 0;
   
-  // 只匹配带括号的标签格式 [MonsterName]，避免误匹配普通文本中的单词
+  // 匹配带括号的标签格式 [MonsterName]，支持大小写（如 [Foodie] 或 [foodie]）
   const bracketRegex = new RegExp(`\\[(${monsterNames.join('|')})\\]`, 'gi');
   let match;
-  const bracketMatches: Array<{ index: number, name: string, fullMatch: string }> = [];
+  const bracketMatches: Array<{ index: number, name: string, fullMatch: string, tagType: 'bracket' }> = [];
   
   while ((match = bracketRegex.exec(text)) !== null) {
     bracketMatches.push({
       index: match.index,
       name: match[1].toLowerCase(),
-      fullMatch: match[0]
+      fullMatch: match[0],
+      tagType: 'bracket'
     });
   }
   
-  // 只使用带括号的匹配，不匹配不带括号的普通单词
-  const allMatches = bracketMatches
-    .map(m => ({ ...m, isBracket: true }))
-    .sort((a, b) => a.index - b.index);
+  // 匹配 @ 符号格式 @MonsterName，支持大小写（如 @Foodie 或 @foodie）
+  const mentionRegex = new RegExp(`@(${monsterNames.join('|')})\\b`, 'gi');
+  const mentionMatches: Array<{ index: number, name: string, fullMatch: string, tagType: 'mention' }> = [];
+  
+  while ((match = mentionRegex.exec(text)) !== null) {
+    // 检查这个匹配是否在某个括号匹配的范围内（避免重复匹配）
+    const isInBracket = bracketMatches.some(bm => 
+      match!.index >= bm.index && match!.index < bm.index + bm.fullMatch.length
+    );
+    if (!isInBracket) {
+      mentionMatches.push({
+        index: match.index,
+        name: match[1].toLowerCase(),
+        fullMatch: match[0],
+        tagType: 'mention'
+      });
+    }
+  }
+  
+  // 合并所有匹配并按位置排序
+  const allMatches = [
+    ...bracketMatches,
+    ...mentionMatches
+  ].sort((a, b) => a.index - b.index);
   
   // 构建 parts 数组
   for (let i = 0; i < allMatches.length; i++) {
@@ -101,11 +126,12 @@ const renderMonsterColoredText = (text: string) => {
       }
     }
     
-    // 添加匹配的 monster 名字（现在只匹配带括号的标签）
+    // 添加匹配的 monster 名字（支持 [MonsterName] 和 @MonsterName 两种格式）
     parts.push({
       type: 'tag',
       content: currentMatch.fullMatch,
-      monsterName: currentMatch.name
+      monsterName: currentMatch.name,
+      tagType: currentMatch.tagType
     });
     
     lastIndex = currentMatch.index + currentMatch.fullMatch.length;
@@ -127,14 +153,20 @@ const renderMonsterColoredText = (text: string) => {
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
       {parts.map((part, index) => {
-        // 处理 monster 名字（只处理带括号的标签格式）
+        // 处理 monster 名字（支持 [MonsterName] 和 @MonsterName 两种格式）
         if (part.type === 'tag') {
           const name = part.monsterName || '';
-          const color = MONSTER_COLORS[name] ?? '#000000';
-          const avatarUrl = MONSTER_AVATARS[name];
+          const monsterConfig = MONSTER_CONFIG[name];
+          const color = monsterConfig?.color ?? '#000000';
+          const avatarUrl = monsterConfig?.avatar;
           
-          // 显示时去掉括号
-          const displayName = part.content.replace(/^\[|\]$/g, '');
+          // 根据标签类型去掉前缀：bracket 类型去掉 [ ]，mention 类型去掉 @
+          let displayName = part.content;
+          if (part.tagType === 'bracket') {
+            displayName = displayName.replace(/^\[|\]$/g, '');
+          } else if (part.tagType === 'mention') {
+            displayName = displayName.replace(/^@/, '');
+          }
           
           return (
             <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4 }}>
@@ -456,9 +488,7 @@ export function ConversationSection({
                 style={styles.assistantTextWrapper}
                 hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
               >
-                {renderMonsterColoredText(`
-Alright, USERBDRYV6RNP — let’s start by calculating your caloric needs and then build your **personalized 7-day high-protein Chinese-style meal plan** to support **weight control** while also benefiting **skin and sleep**.  ####---###### **Step 1: BMR & TDEE**####**BMR (female formula)** = 447.593 + (9.247 × weight_kg) + (3.098 × height_cm) - (4.330 × age)  ##= 447.593 + (9.247 × 58) + (3.098 × 160) - (4.330 × 35)  ##= 447.593 + 536.326 + 495.68 - 151.55  ##= **1327.049 kcal/day**####**Activity level:** Rarely exercises → activity factor = **1.3**  ##**TDEE:** 1327.049 × 1.3 ≈ **1725 kcal/day**####**Goal:** Mild calorie deficit for weight control → target calories = **~1550 kcal/day**  ##Macronutrient goal: **~30% protein (~115g), 40% carbs (~155g), 30% fat (~52g)**  ####---###### **Step 2: Principles**##- **Protein:** Lean poultry, fish, eggs, tofu, soy milk, Greek yogurt (lactose-free if needed).##- **Carbs:** Brown rice, millet, sweet potato, oats — low glycemic, warm preparation, no raw/cold.##- **Fat:** Nuts (walnut, almond), avocado, sesame paste for omega-3 & skin health.##- **Sleep-friendly:** Avoid excess caffeine; dinner rich in tryptophan & magnesium for better sleep.##- **Skin improvement:** Vitamin C & E rich foods (kiwi, spinach, bell peppers), omega-3 from fish.##- **Cultural fit:** Warm, cooked Chinese-style dishes, mild seasoning, no raw salads.####---###### **Step 3: 7-Day Plan**####**Time pattern:**  ##- **Breakfast:** 7:30  ##- **Morning Snack:** 10:00  ##
-`)}
+                {renderMonsterColoredText(message.content)}
               </TouchableOpacity>
             </View>
           );
@@ -476,9 +506,9 @@ Alright, USERBDRYV6RNP — let’s start by calculating your caloric needs and t
                 <MessageImage uri={message.photoUri} />
               )}
               {message.content ? (
-                <Text style={[styles.userText, message.photoUri && styles.textWithImage]}>
-                  {message.content}
-                </Text>
+                <View style={message.photoUri && styles.textWithImage}>
+                  {renderMonsterColoredText(message.content)}
+                </View>
               ) : message.photoUri && !message.content ? (
                 <Text style={styles.photoOnlyText}>📷 Image</Text>
               ) : null}
