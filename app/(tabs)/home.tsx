@@ -525,7 +525,7 @@ export default function HomeTab() {
       
       // 调用 API 更新状态
       const response = await api.post(
-        API_ENDPOINTS.TIMELINE.SAVE,
+        API_ENDPOINTS.TIMELINE.SWITCH,
         requestBody,
         { requireAuth: true }
       );
