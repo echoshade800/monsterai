@@ -66,17 +66,12 @@ const renderMonsterColoredText = (text: string) => {
     'poopy', 'feces', 'posture', 'facey', 'face', 'butler'
   ];
   
-  // 创建匹配模式：优先匹配带括号的 [MonsterName]，然后匹配不带括号的（单词边界）
-  // 使用非捕获组和单词边界确保准确匹配
-  const monsterPattern = `(\\[(${monsterNames.join('|')})\\]|(?<!\\[)\\b(${monsterNames.join('|')})\\b(?![\\]]))`;
-  
-  // 由于 JavaScript 不支持后向断言，我们使用两步处理
-  // 第一步：处理带括号的格式
+  // 只匹配带括号的格式 [MonsterName]，避免误匹配普通文本中的单词（如 "sleep", "face", "stress" 等）
   let processedText = text;
-  const parts: Array<{ type: 'text' | 'tag' | 'name', content: string, monsterName?: string }> = [];
+  const parts: Array<{ type: 'text' | 'tag', content: string, monsterName?: string }> = [];
   let lastIndex = 0;
   
-  // 先匹配所有带括号的标签
+  // 只匹配带括号的标签格式 [MonsterName]，避免误匹配普通文本中的单词
   const bracketRegex = new RegExp(`\\[(${monsterNames.join('|')})\\]`, 'gi');
   let match;
   const bracketMatches: Array<{ index: number, name: string, fullMatch: string }> = [];
@@ -89,29 +84,10 @@ const renderMonsterColoredText = (text: string) => {
     });
   }
   
-  // 再匹配所有不带括号的名字（但要排除已经在括号内的）
-  const nameRegex = new RegExp(`\\b(${monsterNames.join('|')})\\b`, 'gi');
-  const nameMatches: Array<{ index: number, name: string, fullMatch: string }> = [];
-  
-  while ((match = nameRegex.exec(text)) !== null) {
-    // 检查这个匹配是否在某个括号匹配的范围内
-    const isInBracket = bracketMatches.some(bm => 
-      match!.index >= bm.index && match!.index < bm.index + bm.fullMatch.length
-    );
-    if (!isInBracket) {
-      nameMatches.push({
-        index: match.index,
-        name: match[1].toLowerCase(),
-        fullMatch: match[0]
-      });
-    }
-  }
-  
-  // 合并所有匹配并按位置排序
-  const allMatches = [
-    ...bracketMatches.map(m => ({ ...m, isBracket: true })),
-    ...nameMatches.map(m => ({ ...m, isBracket: false }))
-  ].sort((a, b) => a.index - b.index);
+  // 只使用带括号的匹配，不匹配不带括号的普通单词
+  const allMatches = bracketMatches
+    .map(m => ({ ...m, isBracket: true }))
+    .sort((a, b) => a.index - b.index);
   
   // 构建 parts 数组
   for (let i = 0; i < allMatches.length; i++) {
@@ -125,9 +101,9 @@ const renderMonsterColoredText = (text: string) => {
       }
     }
     
-    // 添加匹配的 monster 名字
+    // 添加匹配的 monster 名字（现在只匹配带括号的标签）
     parts.push({
-      type: currentMatch.isBracket ? 'tag' : 'name',
+      type: 'tag',
       content: currentMatch.fullMatch,
       monsterName: currentMatch.name
     });
@@ -151,16 +127,14 @@ const renderMonsterColoredText = (text: string) => {
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
       {parts.map((part, index) => {
-        // 处理 monster 名字（带括号或不带括号）
-        if (part.type === 'tag' || part.type === 'name') {
+        // 处理 monster 名字（只处理带括号的标签格式）
+        if (part.type === 'tag') {
           const name = part.monsterName || '';
           const color = MONSTER_COLORS[name] ?? '#000000';
           const avatarUrl = MONSTER_AVATARS[name];
           
-          // 对于带括号的标签，显示时去掉括号；对于不带括号的，直接显示名字
-          const displayName = part.type === 'tag' 
-            ? part.content.replace(/^\[|\]$/g, '') 
-            : part.content;
+          // 显示时去掉括号
+          const displayName = part.content.replace(/^\[|\]$/g, '');
           
           return (
             <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4 }}>
@@ -185,7 +159,7 @@ const renderMonsterColoredText = (text: string) => {
           // 如果紧跟在 monster 名字后面，删除开头的冒号（中文冒号：或英文冒号:）和多余的空行
           if (index > 0) {
             const prevPart = parts[index - 1];
-            if (prevPart && (prevPart.type === 'tag' || prevPart.type === 'name')) {
+            if (prevPart && prevPart.type === 'tag') {
               // 删除开头的冒号（中文或英文）
               displayText = displayText.replace(/^[：:]\s*/, '');
               // 如果紧跟在标签后面且只包含换行符和空白字符，删除所有换行符
@@ -482,7 +456,9 @@ export function ConversationSection({
                 style={styles.assistantTextWrapper}
                 hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
               >
-                {renderMonsterColoredText(message.content)}
+                {renderMonsterColoredText(`
+Alright, USERBDRYV6RNP — let’s start by calculating your caloric needs and then build your **personalized 7-day high-protein Chinese-style meal plan** to support **weight control** while also benefiting **skin and sleep**.  ####---###### **Step 1: BMR & TDEE**####**BMR (female formula)** = 447.593 + (9.247 × weight_kg) + (3.098 × height_cm) - (4.330 × age)  ##= 447.593 + (9.247 × 58) + (3.098 × 160) - (4.330 × 35)  ##= 447.593 + 536.326 + 495.68 - 151.55  ##= **1327.049 kcal/day**####**Activity level:** Rarely exercises → activity factor = **1.3**  ##**TDEE:** 1327.049 × 1.3 ≈ **1725 kcal/day**####**Goal:** Mild calorie deficit for weight control → target calories = **~1550 kcal/day**  ##Macronutrient goal: **~30% protein (~115g), 40% carbs (~155g), 30% fat (~52g)**  ####---###### **Step 2: Principles**##- **Protein:** Lean poultry, fish, eggs, tofu, soy milk, Greek yogurt (lactose-free if needed).##- **Carbs:** Brown rice, millet, sweet potato, oats — low glycemic, warm preparation, no raw/cold.##- **Fat:** Nuts (walnut, almond), avocado, sesame paste for omega-3 & skin health.##- **Sleep-friendly:** Avoid excess caffeine; dinner rich in tryptophan & magnesium for better sleep.##- **Skin improvement:** Vitamin C & E rich foods (kiwi, spinach, bell peppers), omega-3 from fish.##- **Cultural fit:** Warm, cooked Chinese-style dishes, mild seasoning, no raw salads.####---###### **Step 3: 7-Day Plan**####**Time pattern:**  ##- **Breakfast:** 7:30  ##- **Morning Snack:** 10:00  ##
+`)}
               </TouchableOpacity>
             </View>
           );
