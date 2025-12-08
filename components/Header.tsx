@@ -5,13 +5,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Image, ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-    Extrapolate,
-    interpolate,
-    runOnJS,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withTiming,
+  Extrapolate,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
 } from 'react-native-reanimated';
 import { api, getTimezone } from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
@@ -124,7 +124,7 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
             const timeSource = item.created_at || item.timestamp;
             const time = formatTime(timeSource);
             // Use reasoning as the message content
-            const message = item.reasoning || '';
+            const message = item.summary_reasoning || '';
             
             return {
               time,
@@ -581,7 +581,7 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
                           return entriesToRender.map((entry, index) => (
                             <Text key={index} style={styles.logLine}>
                               {entry.time ? <Text style={styles.logTime}>[{entry.time}]</Text> : null}
-                              <Text style={styles.logText}>{entry.time ? ' ' : ''}{entry.message}</Text>
+                              <Text style={styles.logText}>{entry.time ? ' ' : ''}{entry.message?.length > 100 ? entry.message.substring(0, 100) + '...' : entry.message}</Text>
                             </Text>
                           ));
                         })()}

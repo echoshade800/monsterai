@@ -294,7 +294,7 @@ export default function HomeTab() {
             const timeSource = item.created_at || item.timestamp;
             const time = formatTime(timeSource);
             // Use reasoning as the message content
-            const message = item.reasoning || '';
+            const message = item.summary_reasoning || '';
             
             return {
               time,
@@ -1360,7 +1360,7 @@ export default function HomeTab() {
                           key={partIndex}
                           style={[styles.thinkingLogText, { color: '#FFFFFF' }]}
                         >
-                          {part.text}
+                          {part.text?.length > 100 ? part.text.substring(0, 100) + '...' : part.text}
                         </Text>
                       ))}
                     </View>
