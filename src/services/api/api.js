@@ -27,8 +27,8 @@ const API_CONFIGS = {
     BASE_URL: 'http://23.20.151.253:8998',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
     CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
-    AGENT_CONFIG_FILE: 'agent_list_config_prod.json',
-    MINIAPP_CONFIG_FILE: 'miniapp_list_config_prod.json',
+    AGENT_CONFIG_FILE: 'agent_list_config_debug.json',
+    MINIAPP_CONFIG_FILE: 'miniapp_list_config_debug.json',
     TIMEOUT: 60000,
     HEADERS: {
       'Content-Type': 'application/json',
@@ -38,8 +38,8 @@ const API_CONFIGS = {
     BASE_URL: 'http://23.20.151.253:8998',
     AUTH_BASE_URL: 'http://54.80.146.38:8999',
     CDN_BASE_URL: 'https://dzdbhsix5ppsc.cloudfront.net/monster',
-    AGENT_CONFIG_FILE: 'agent_list_config_prod.json',
-    MINIAPP_CONFIG_FILE: 'miniapp_list_config_prod.json',
+    AGENT_CONFIG_FILE: 'agent_list_config_debug.json',
+    MINIAPP_CONFIG_FILE: 'miniapp_list_config_debug.json',
     TIMEOUT: 60000,
     HEADERS: {
       'Content-Type': 'application/json',

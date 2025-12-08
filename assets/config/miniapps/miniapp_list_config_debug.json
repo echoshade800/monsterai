@@ -131,9 +131,9 @@
     "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Monex/0.1.0.zip",
     "hot": false,
     "tag": [
-      "Createor Love"
+      "🤩 Createor Love"
     ],
-    "score": "95%"
+    "score": "😊 95%"
   },
   {
     "id": "10",
@@ -214,6 +214,91 @@
     "category": "lifestyle",
     "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/poppoop1.jpg",
     "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/PopPoop/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 95%"
+  },
+  {
+    "id": "15",
+    "name": "Dayer",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Dayer/1.0.0.zip",
+    "module_name": "DayerMiniApp",
+    "category": "lifestyle",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/dayer1.jpg",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Dayer/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 95%"
+  },
+  {
+    "id": "16",
+    "name": "MoneyTracker",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/MoneyTracker/1.0.0.zip",
+    "module_name": "MoneyTrackerMiniApp",
+    "category": "lifestyle",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/moneytrack1.jpg",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/MoneyTracker/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 95%"
+  },
+  {
+    "id": "17",
+    "name": "Lumi",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Lumi/1.0.0.zip",
+    "module_name": "LumiMiniApp",
+    "category": "lifestyle",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/lumi.jpg",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Lumi/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 95%"
+  },
+  {
+    "id": "19",
+    "name": "Focow",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Focow/1.0.0.zip",
+    "module_name": "FocowMiniApp",
+    "category": "gaming",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/linker.png",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Focow/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 90%"
+  },
+  {
+    "id": "20",
+    "name": "Cosika",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Cosika/1.0.0.zip",
+    "module_name": "CosikaMiniApp",
+    "category": "gaming",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/cosika.png",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Cosika/1.0.0.zip",
     "hot": false,
     "tag": [
       "🤩 Createor Love"
