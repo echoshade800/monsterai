@@ -1,4 +1,21 @@
 [
+{
+  "id": "23",
+  "name": "PersonaCortex",
+  "icon": "🟩",
+  "color": "#FF6B8A",
+  "miniAppType": "RN",
+  "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/PersonaCortex/1.0.0.zip",
+  "module_name": "PersonaCortexMiniApp",
+  "category": "lifestyle",
+  "image": "",
+  "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/PersonaCortex/1.0.0.zip",
+  "hot": false,
+  "tag": [
+    "🤩 Createor Love"
+  ],
+  "score": "😊 95%"
+},
   {
     "id": "1",
     "name": "2048",
@@ -279,8 +296,8 @@
     "miniAppType": "RN",
     "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Focow/1.0.0.zip",
     "module_name": "FocowMiniApp",
-    "category": "gaming",
-    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/materials/linker.png",
+    "category": "lifestyle",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/focow.png",
     "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Focow/1.0.0.zip",
     "hot": false,
     "tag": [
@@ -304,5 +321,39 @@
       "🤩 Createor Love"
     ],
     "score": "😊 95%"
+  },
+  {
+    "id": "21",
+    "name": "Drinky",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Drinky/1.0.0.zip",
+    "module_name": "DrinkyMiniApp",
+    "category": "lifestyle",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/drinky.jpeg",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Drinky/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 95%"
+  },
+  {
+    "id": "22",
+    "name": "Hugglet",
+    "icon": "🟩",
+    "color": "#FF6B8A",
+    "miniAppType": "RN",
+    "host": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Hugglet/1.0.0.zip",
+    "module_name": "HuggletMiniApp",
+    "category": "gaming",
+    "image": "https://dzdbhsix5ppsc.cloudfront.net/monster/hugglet.jpeg",
+    "releaseUrl": "https://vsa-bucket-public-new.s3.amazonaws.com/miniapps/Hugglet/1.0.0.zip",
+    "hot": false,
+    "tag": [
+      "🤩 Createor Love"
+    ],
+    "score": "😊 98%"
   }
 ]
