@@ -1,5 +1,6 @@
 import { Alert } from 'react-native';
-import { ApiError, API_STATUS } from '../services/api-clients/client.js';
+import { ApiError } from '../services/api-clients/client.js';
+import Logger from './logger.js';
 
 // 获取错误消息
 export const getErrorMessage = (error) => {
@@ -34,7 +35,7 @@ export const showConfirm = (message, title = '确认', onConfirm, onCancel) => {
 
 // 处理API错误
 export const handleApiError = (error, showAlert = true) => {
-  console.error('API错误:', error);
+  Logger.error(`API错误: ${error.message || error}`);
   
   if (showAlert) {
     showError(error);

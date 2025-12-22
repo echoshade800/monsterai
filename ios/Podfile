@@ -39,6 +39,8 @@ target 'MonsterAI' do
 
   config = use_native_modules!(config_command)
 
+  pod 'CocoaLumberjack'
+
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
   use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
   #强制引入，忽略上面的条件判断，因为 react-native-firebase 一定要引入 use_frameworks! :linkage

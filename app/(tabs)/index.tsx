@@ -1376,23 +1376,37 @@ export default function EchoTab() {
   }, []);
 
   // Test reminder function - inserts a reminder card into the chat
-  const handleTestReminder = useCallback(() => {
-    const reminderMessage: Message = {
-      id: `reminder_${Date.now()}`,
-      type: 'reminderCard',
-      content: '',
-      reminderCardData: {
-        title: "Need a reminder, boss?",
-        monster: "poop",
-        reminders: [
-          { time: "09:00", title: "Drink warm water", task_type: "meal", pattern_type: "repeat_rule" as const, repeat_rule: { type: "daily" } },
-          { time: "12:00", title: "Eat a banana", task_type: "meal", pattern_type: "repeat_rule" as const, repeat_rule: { type: "daily" } },
-          { time: "16:00", title: "Sip electrolytes", task_type: "meal", pattern_type: "repeat_rule" as const, repeat_rule: { type: "daily" } }
-        ]
-      }
-    };
+  const handleTestReminder = useCallback(async () => {
+    console.log('handleTestReminder - 开始获取今日步数');
     
-    setMessages(prev => [...prev, reminderMessage]);
+    try {
+      // 检查 HealthKit 是否可用
+      const isAvailable = await healthDataManager.isAvailable();
+      if (!isAvailable) {
+        Alert.alert('提示', 'HealthKit 不可用，请确保在 iOS 设备上运行');
+        return;
+      }
+
+      // 获取今日步数
+      const result = await healthDataManager.getStepCount('today');
+      
+      if (!result.success) {
+        Alert.alert('获取失败', result.error || '无法获取步数数据');
+        return;
+      }
+
+      // 格式化步数数据
+      const formatted = healthDataManager.formatStepCountData(result.data, 'today') as { total?: number; average?: number; days?: number; records?: any[]; period?: string };
+      const totalSteps = formatted?.total || 0;
+
+      // 显示结果
+      Alert.alert('今日步数', `您今天的步数是：${totalSteps.toLocaleString()} 步`);
+      console.log('今日步数获取成功:', totalSteps);
+    } catch (error) {
+      console.error('获取今日步数失败:', error);
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      Alert.alert('错误', `获取步数时发生错误：${errorMessage}`);
+    }
   }, []);
 
   return (
@@ -1402,7 +1416,7 @@ export default function EchoTab() {
           isCollapsed={isCollapsed}
           onCollapse={handleCollapse}
           refreshTrigger={refreshTrigger}
-          onTestReminder={handleTestReminder}
+          onTestReminder={CURRENT_ENV === ENV.DEVELOPMENT ? handleTestReminder : undefined}
         />
         <ConversationSection
           messages={messages}

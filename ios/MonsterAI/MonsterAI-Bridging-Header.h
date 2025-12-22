@@ -27,6 +27,7 @@
 // 自定义模块 - 必须在 Swift 头文件之前导入
 #import "MiniAppViewController.h"
 #import "MiniAppH5ViewController.h"
+#import "RNLoggerHelper.h"
 
 // Swift 生成的 Objective-C 头文件 - 必须放在最后
 

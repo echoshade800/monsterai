@@ -87,16 +87,19 @@ class HealthDataManager {
    * @returns {Promise<boolean>}
    */
   async isAvailable() {
+    console.log('----------------------------------------------------------------');
     console.log('[HealthDataManager] 🔍 开始检查 HealthKit 可用性...');
     
     try {
       if (Platform.OS !== 'ios') {
         console.log('[HealthDataManager] ⚠️ 平台检查失败: 当前平台为', Platform.OS, '，HealthKit 仅在 iOS 设备上可用');
+        console.log('----------------------------------------------------------------');
         return false;
       }
 
       if (!AppleHealthKit) {
         console.log('[HealthDataManager] ❌ AppleHealthKit 模块未加载');
+        console.log('----------------------------------------------------------------');
         return false;
       }
       
@@ -107,6 +110,7 @@ class HealthDataManager {
         console.warn('[HealthDataManager] ⚠️ AppleHealthKit.isAvailable 方法不存在，尝试直接返回 true');
         console.log('[HealthDataManager] 💡 可用的方法:', Object.keys(AppleHealthKit).slice(0, 10));
         // 如果模块已加载但方法不存在，假设 HealthKit 可用
+        console.log('----------------------------------------------------------------');
         return true;
       }
 
@@ -118,6 +122,7 @@ class HealthDataManager {
           if (!resolved) {
             resolved = true;
             console.warn('[HealthDataManager] ⚠️ isAvailable 回调超时（3秒），假设 HealthKit 可用');
+            console.log('----------------------------------------------------------------');
             resolve(true); // 超时时假设可用，让后续方法自己处理
           }
         }, 3000);
@@ -130,11 +135,13 @@ class HealthDataManager {
               
               if (err) {
                 console.log('[HealthDataManager] ❌ HealthKit isAvailable 错误:', err);
+                console.log('----------------------------------------------------------------');
                 resolve(false);
                 return;
               }
               const isAvailable = available === true;
               console.log('[HealthDataManager] ✅ HealthKit 可用性检查完成:', isAvailable);
+              console.log('----------------------------------------------------------------');
               resolve(isAvailable);
             }
           });
@@ -143,12 +150,14 @@ class HealthDataManager {
             resolved = true;
             clearTimeout(timeoutId);
             console.log('[HealthDataManager] ❌ HealthKit isAvailable 异常:', e);
+            console.log('----------------------------------------------------------------');
             resolve(false);
           }
         }
       });
     } catch (error) {
       console.error('[HealthDataManager] ❌ 检查 HealthKit 可用性失败:', error);
+      console.log('----------------------------------------------------------------');
       return false;
     }
   }
@@ -376,7 +385,7 @@ class HealthDataManager {
    * @returns {{startDate: Date, endDate: Date}}
    */
   getDateRange(periodOrOptions) {
-    console.log('[HealthDataManager] 📅 计算日期范围, 参数:', periodOrOptions);
+    console.log('[HealthDataManager] 📅 计算日期范围, periodOrOptions 参数:', periodOrOptions);
     
     const now = new Date();
     let startDate, endDate;
@@ -511,12 +520,9 @@ class HealthDataManager {
       return new Promise((resolve) => {
         // 如果是自定义日期范围，使用 getDailyStepCountSamples
         const isCustomRange = typeof periodOrOptions === 'object' && periodOrOptions !== null;
-        const methodName = (periodOrOptions === TimePeriod.TODAY && !isCustomRange) 
-          ? 'getStepCount' 
-          : 'getDailyStepCountSamples';
-        
+        // const methodName = (periodOrOptions === TimePeriod.TODAY && !isCustomRange) ? 'getStepCount' : 'getStepCountSamples';
+        const methodName = 'getDailyStepCountSamples';
         console.log('[HealthDataManager] 🔧 使用方法:', methodName);
-        
         if (!AppleHealthKit[methodName]) {
           console.log('[HealthDataManager] ❌ 方法不可用:', methodName);
           resolve({
@@ -538,6 +544,15 @@ class HealthDataManager {
 
           const dataCount = Array.isArray(results) ? results.length : (results ? 1 : 0);
           console.log('[HealthDataManager] ✅ 步数数据获取成功, 记录数:', dataCount);
+          
+          // 遍历打印每个 item 的详细内容
+          if (Array.isArray(results)) {
+            results.forEach((item, index) => {
+              console.log(`[HealthDataManager] 📊 步数数据 [${index + 1}/${dataCount}]:`, JSON.stringify(item, null, 2));
+            });
+          } else if (results) {
+            console.log('[HealthDataManager] 📊 步数数据详情:', JSON.stringify(results, null, 2));
+          }
           
           resolve({
             success: true,
