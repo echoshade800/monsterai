@@ -14,26 +14,31 @@ class RNLogger: NSObject, RCTBridgeModule {
     
     @objc(verbose:)
     func verbose(_ message: String) {
-        RNLoggerHelper.logVerbose(message)
+        let logMessage = "[JS] \(message)"
+        RNLoggerHelper.logVerbose(logMessage)
     }
     
     @objc(debug:)
     func debug(_ message: String) {
-        RNLoggerHelper.logDebug(message)
+        let logMessage = "[JS] \(message)"
+        RNLoggerHelper.logDebug(logMessage)
     }
     
     @objc(info:)
     func info(_ message: String) {
-        RNLoggerHelper.logInfo(message)
+        let logMessage = "[JS] \(message)"
+        RNLoggerHelper.logInfo(logMessage)
     }
     
     @objc(warn:)
     func warn(_ message: String) {
-        RNLoggerHelper.logWarn(message)
+        let logMessage = "[JS] \(message)"
+        RNLoggerHelper.logWarn(logMessage)
     }
     
     @objc(error:)
     func error(_ message: String) {
-        RNLoggerHelper.logError(message)
+        let logMessage = "[JS] \(message)"
+        RNLoggerHelper.logError(logMessage)
     }
 }

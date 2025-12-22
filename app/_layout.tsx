@@ -40,6 +40,7 @@ import { analytics } from '../config/firebase';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
+import Logger from '../src/utils/logger';
 import storageManager from '../src/utils/storage';
 
 // 配置通知处理程序
@@ -154,6 +155,12 @@ export default function Layout() {
   // 应用启动时初始化 Firebase 和注册推送通知
   useEffect(() => {
     console.log('Layout component mounted, starting initialization');
+    
+    // 测试 Logger 功能
+    Logger.info('App started - Logger test');
+    Logger.debug('This is a debug message from JS');
+    Logger.warn('This is a warning message from JS');
+    Logger.error('This is an error message from JS');
     
     // 初始化 Firebase Analytics
     const initializeAnalytics = async () => {
