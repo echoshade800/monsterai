@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import { ReminderCard } from './ReminderCard';
 
 // 一次性提醒的时间信息
@@ -93,7 +94,245 @@ const MONSTER_CONFIG: Record<string, { color: string; avatar: string }> = {
   },
 };
 
+// Markdown 样式配置
+const markdownStyles = {
+  body: {
+    fontSize: 15,
+    fontFamily: 'Nunito_400Regular',
+    color: '#000000',
+    lineHeight: 22,
+  },
+  paragraph: {
+    marginTop: 0,
+    marginBottom: 8,
+  },
+  heading1: {
+    fontSize: 20,
+    fontFamily: 'Nunito_700Bold',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  heading2: {
+    fontSize: 18,
+    fontFamily: 'Nunito_700Bold',
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  heading3: {
+    fontSize: 16,
+    fontFamily: 'Nunito_600SemiBold',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  strong: {
+    fontFamily: 'Nunito_700Bold',
+  },
+  em: {
+    fontStyle: 'italic',
+  },
+  code_inline: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
+    fontFamily: 'monospace',
+    fontSize: 14,
+  },
+  code_block: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 8,
+    fontFamily: 'monospace',
+    fontSize: 14,
+  },
+  list_item: {
+    marginBottom: 4,
+  },
+  bullet_list: {
+    marginBottom: 8,
+  },
+  ordered_list: {
+    marginBottom: 8,
+  },
+  link: {
+    color: '#206BDB',
+    textDecorationLine: 'underline',
+  },
+  blockquote: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#CCCCCC',
+    paddingLeft: 12,
+    marginLeft: 0,
+    marginVertical: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+    paddingVertical: 8,
+    paddingRight: 12,
+  },
+};
+
+// 渲染带 Markdown 和 Monster 标签的文本
+// 策略：先分割文本（按 monster 标签），然后对每个文本部分应用 markdown 渲染
+const renderMarkdownWithMonsterTags = (text: string) => {
+  if (!text) return null;
+
+  // 从统一配置中提取所有 monster 名字列表
+  const monsterNames = Object.keys(MONSTER_CONFIG);
+  
+  // 匹配带括号的标签格式 [MonsterName] 或 @MonsterName
+  const bracketRegex = new RegExp(`\\[(${monsterNames.join('|')})\\]`, 'gi');
+  const mentionRegex = new RegExp(`@(${monsterNames.join('|')})\\b`, 'gi');
+  
+  // 分割文本，保留 monster 标签
+  const parts: Array<{ type: 'text' | 'tag', content: string, monsterName?: string, tagType?: 'bracket' | 'mention' }> = [];
+  let lastIndex = 0;
+  
+  const bracketMatches: Array<{ index: number, name: string, fullMatch: string, tagType: 'bracket' }> = [];
+  let match;
+  
+  while ((match = bracketRegex.exec(text)) !== null) {
+    bracketMatches.push({
+      index: match.index,
+      name: match[1].toLowerCase(),
+      fullMatch: match[0],
+      tagType: 'bracket'
+    });
+  }
+  
+  const mentionMatches: Array<{ index: number, name: string, fullMatch: string, tagType: 'mention' }> = [];
+  
+  while ((match = mentionRegex.exec(text)) !== null) {
+    const isInBracket = bracketMatches.some(bm => 
+      match!.index >= bm.index && match!.index < bm.index + bm.fullMatch.length
+    );
+    if (!isInBracket) {
+      mentionMatches.push({
+        index: match.index,
+        name: match[1].toLowerCase(),
+        fullMatch: match[0],
+        tagType: 'mention'
+      });
+    }
+  }
+  
+  const allMatches = [
+    ...bracketMatches,
+    ...mentionMatches
+  ].sort((a, b) => a.index - b.index);
+  
+  // 构建 parts 数组
+  for (let i = 0; i < allMatches.length; i++) {
+    const currentMatch = allMatches[i];
+    
+    if (currentMatch.index > lastIndex) {
+      const textBefore = text.substring(lastIndex, currentMatch.index);
+      if (textBefore) {
+        parts.push({ type: 'text', content: textBefore });
+      }
+    }
+    
+    parts.push({
+      type: 'tag',
+      content: currentMatch.fullMatch,
+      monsterName: currentMatch.name,
+      tagType: currentMatch.tagType
+    });
+    
+    lastIndex = currentMatch.index + currentMatch.fullMatch.length;
+  }
+  
+  if (lastIndex < text.length) {
+    const remainingText = text.substring(lastIndex);
+    if (remainingText) {
+      parts.push({ type: 'text', content: remainingText });
+    }
+  }
+  
+  if (parts.length === 0) {
+    parts.push({ type: 'text', content: text });
+  }
+
+  // 渲染每个部分
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      {parts.map((part, index) => {
+        if (part.type === 'tag') {
+          // 渲染 monster 标签
+          const name = part.monsterName || '';
+          const monsterConfig = MONSTER_CONFIG[name];
+          const color = monsterConfig?.color ?? '#000000';
+          const avatarUrl = monsterConfig?.avatar;
+          
+          let displayName = part.content;
+          if (part.tagType === 'bracket') {
+            displayName = displayName.replace(/^\[|\]$/g, '');
+          } else if (part.tagType === 'mention') {
+            displayName = displayName.replace(/^@/, '');
+          }
+          
+          return (
+            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4 }}>
+              {avatarUrl && (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
+                  resizeMode="cover"
+                />
+              )}
+              <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
+                {displayName}
+              </Text>
+            </View>
+          );
+        }
+
+        if (part.type === 'text') {
+          // 对文本部分应用 markdown 渲染
+          let displayText = part.content;
+          
+          // 如果紧跟在 monster 名字后面，删除开头的冒号和多余的空行
+          if (index > 0) {
+            const prevPart = parts[index - 1];
+            if (prevPart && prevPart.type === 'tag') {
+              displayText = displayText.replace(/^[：:]\s*/, '');
+              if (displayText.match(/^[\s\n]*$/)) {
+                displayText = displayText.replace(/[\n\s]+/g, '');
+              } else {
+                displayText = displayText.replace(/^\n+/, '');
+              }
+            }
+          }
+          
+          if (index === 0 && displayText.match(/^[\s\n]*$/)) {
+            return null;
+          }
+          
+          displayText = displayText.replace(/\n{2,}/g, '\n');
+          
+          if (displayText.length === 0) {
+            return null;
+          }
+
+          // 使用 Markdown 组件渲染文本
+          return (
+            <Markdown
+              key={index}
+              style={markdownStyles}
+              mergeStyle={false}
+            >
+              {displayText}
+            </Markdown>
+          );
+        }
+
+        return null;
+      })}
+    </View>
+  );
+};
+
 // 统一渲染函数：给所有 [MonsterName] 或 @MonsterName 标签或直接出现的 MonsterName 加颜色，并在标签前显示头像
+// 保留此函数用于向后兼容（用户消息等不需要 markdown 的地方）
 const renderMonsterColoredText = (text: string) => {
   if (!text) return null;
 
@@ -527,7 +766,7 @@ export function ConversationSection({
                 style={styles.assistantTextWrapper}
                 hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
               >
-                {renderMonsterColoredText(message.content)}
+                {renderMarkdownWithMonsterTags(message.content)}
               </TouchableOpacity>
             </View>
           );
