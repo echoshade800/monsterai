@@ -3,11 +3,38 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ReminderCard } from './ReminderCard';
 
-interface ReminderItem {
+// 一次性提醒的时间信息
+interface OneTimePattern {
+  scheduled_time: string;
+}
+
+// 重复规则的配置
+interface RepeatRulePattern {
+  type: string; // 例如: "daily", "weekly" 等
+}
+
+// ReminderItem 基础字段
+interface ReminderItemBase {
   time: string;
   title: string;
   task_type: string;
+  original_text?: string;
 }
+
+// 一次性提醒类型
+interface ReminderItemOneTime extends ReminderItemBase {
+  pattern_type: "one_time";
+  one_time: OneTimePattern;
+}
+
+// 重复提醒类型
+interface ReminderItemRepeatRule extends ReminderItemBase {
+  pattern_type: "repeat_rule";
+  repeat_rule: RepeatRulePattern;
+}
+
+// ReminderItem 联合类型，确保 one_time 和 repeat_rule 互斥
+type ReminderItem = ReminderItemOneTime | ReminderItemRepeatRule;
 
 interface ReminderCardData {
   title: string;
@@ -30,6 +57,7 @@ interface ConversationSectionProps {
   isSending?: boolean;
   currentResponse?: string;
   keyboardHeight?: number;
+  onSendMessage?: (operation: string, text: string) => void; // 发送消息的回调函数，operation 和 text 字段
 }
 
 // Monster 统一配置（包含名称、颜色和头像）
@@ -325,7 +353,8 @@ export function ConversationSection({
   isLoading = false,
   isSending = false,
   currentResponse = '',
-  keyboardHeight = 0
+  keyboardHeight = 0,
+  onSendMessage
 }: ConversationSectionProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const dot1Anim = useRef(new Animated.Value(0.4)).current;
@@ -472,6 +501,7 @@ export function ConversationSection({
                   reminders={message.reminderCardData.reminders}
                   disabled={!isLastReminderCard}
                   messageId={message.id}
+                  onSendMessage={onSendMessage}
                 />
               )}
             </View>

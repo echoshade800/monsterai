@@ -47,6 +47,7 @@ interface ReminderCardProps {
   reminders: ReminderItem[];
   disabled?: boolean;
   messageId?: string; // 消息 ID，用于唯一标识 ReminderCard
+  onSendMessage?: (operation: string, text: string) => void; // 发送消息的回调函数，operation 和 text 字段
 }
 
 interface ReminderItemRowProps {
@@ -55,9 +56,10 @@ interface ReminderItemRowProps {
   onTimeChange: (newTime: string) => void;
   disabled?: boolean;
   reminderId: string; // Reminder 唯一标识 (messageId + index)
+  onSendMessage?: (operation: string, text: string) => void; // 发送消息的回调函数，operation 和 text 字段
 }
 
-function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, reminderId }: ReminderItemRowProps) {
+function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, reminderId, onSendMessage }: ReminderItemRowProps) {
   const { title, task_type } = reminder;
   const [selected, setSelected] = useState<'yes' | 'no' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -161,6 +163,12 @@ function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, remin
         // 保存选择结果到本地存储
         await storageManager.setReminderSelection(reminderId, 'yes');
         setIsSubmitted(true);
+        // 发送消息：已经设置 XX 时间提醒做XX事情
+        const operationMessage = `reminder_yes_${time}_${title}`;
+        const textMessage = `已经设置 ${time} 提醒做${title}`;
+        if (onSendMessage) {
+          onSendMessage(operationMessage, textMessage);
+        }
         // Show custom success modal instead of Alert
         setShowSuccessModal(true);
       } else {
@@ -199,6 +207,13 @@ function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, remin
     
     // 保存选择结果到本地存储
     await storageManager.setReminderSelection(reminderId, 'no');
+    
+    // 发送消息：取消提醒
+    const operationMessage = 'reminder_no';
+    const textMessage = '取消提醒';
+    if (onSendMessage) {
+      onSendMessage(operationMessage, textMessage);
+    }
     
     // Trigger scale animation
     Animated.sequence([
@@ -355,7 +370,7 @@ function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, remin
   );
 }
 
-export function ReminderCard({ title, monster, reminders, disabled = false, messageId }: ReminderCardProps) {
+export function ReminderCard({ title, monster, reminders, disabled = false, messageId, onSendMessage }: ReminderCardProps) {
   const [reminderTimes, setReminderTimes] = useState<string[]>(
     reminders.map(r => r.time)
   );
@@ -401,6 +416,7 @@ export function ReminderCard({ title, monster, reminders, disabled = false, mess
                   onTimeChange={(newTime) => handleTimeChange(index, newTime)}
                   disabled={disabled}
                   reminderId={reminderId}
+                  onSendMessage={onSendMessage}
                 />
               );
             })}

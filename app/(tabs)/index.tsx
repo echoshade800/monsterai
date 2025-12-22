@@ -1341,6 +1341,82 @@ export default function EchoTab() {
     // }
   }, [sendFunctionCallResult]);
 
+  // 处理 ReminderCard 发送的消息（包含 operation 和 text 字段）
+  const handleReminderMessage = useCallback(async (operation: string, text: string) => {
+    try {
+      if (!userData) {
+        Alert.alert('Error', 'User info not loaded, please try again');
+        return;
+      }
+
+      setIsSending(true);
+      setCurrentResponse('');
+
+      const messageTimestamp = Date.now().toString();
+
+      // 添加用户消息，使用 text 作为显示内容
+      const userMsg: Message = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: text,
+      };
+      setMessages(prev => [...prev, userMsg]);
+
+      // 检测消息中的 @mention（使用 text 进行检测）
+      const mentionedAgent = detectMention(text);
+
+      // 构建请求体，包含 operation 和 text 字段
+      const requestBody: any = {
+        uid: String(userData.uid || userData.id),
+        msg_id: generateMsgId(),
+        trace_id: generateTraceId(),
+        timestamp: messageTimestamp,
+        text: text, // text 字段用于显示和检测 mention
+        operation: operation, // operation 字段用于标识操作类型
+        system_prompt: ["you are a helpful AI assistant"],
+        msg_type: "text",
+      };
+      // 如果消息中包含 @mention，添加 at 字段
+      if (mentionedAgent) {
+        requestBody.at = mentionedAgent;
+      }
+      console.log('ReminderCard requestBody', requestBody);
+      
+      // 调用通用处理函数
+      await handleStreamRequest({
+        requestBody,
+        tempMessageId: 'temp_ai_response',
+        logPrefix: 'ReminderCard message',
+        onComplete: (responseData, eventSource) => {
+          // 检查 Function Call
+          if ((responseData.msg_type === 'function_call_output' || responseData.msg_type === 'fun_call') && responseData.call_res) {
+            console.log('Function Call detected:', responseData.call_res);
+
+            if (eventSource) {
+              eventSource.close();
+            }
+
+            setIsSending(false);
+
+            handleFunctionCall(responseData.call_res).catch(error => {
+              console.error('Function call execution failed:', error);
+              Alert.alert('Error', 'Error executing function call');
+            });
+
+            return false; // 停止默认处理
+          }
+          return true; // 继续默认处理
+        },
+        errorMessage: 'Connection interrupted, please try again'
+      });
+      
+    } catch (error) {
+      console.error('Error sending reminder message:', error);
+      Alert.alert('Error', 'Failed to send message, please try again');
+      setIsSending(false);
+    }
+  }, [userData, handleStreamRequest, detectMention, handleFunctionCall]);
+
   // 发送消息
   const sendMessage = useCallback((message: string) => {
     if (!message.trim() || isSending || !userData) return;
@@ -1424,6 +1500,7 @@ export default function EchoTab() {
           isSending={isSending}
           currentResponse={currentResponse}
           keyboardHeight={keyboardHeight}
+          onSendMessage={handleReminderMessage}
         />
       </View>
 
