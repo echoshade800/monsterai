@@ -63,6 +63,7 @@ interface Message {
   avatar?: string;
   photoUri?: string;
   reminderCardData?: ReminderCardData;
+  operation?: string; // 服务端下发的 operation 字段
 }
 
 export default function EchoTab() {
@@ -212,6 +213,9 @@ export default function EchoTab() {
       // 提取图片URL（支持多个字段，包括 photoUri_preview）
       const photoUri = item.image || item.imageUrl || item.image_url || item.photoUri || item.photoUri_preview || undefined;
       
+      // 提取 operation 字段
+      const operation = item.operation || undefined;
+      
       // 如果消息包含图片，记录日志
       if (photoUri) {
         console.log('Converting image message:', {
@@ -228,6 +232,7 @@ export default function EchoTab() {
         content: getMessageContent(item),
         avatar: type === 'assistant' ? '🦑' : undefined,
         photoUri,
+        operation,
       };
     };
     
@@ -643,6 +648,7 @@ export default function EchoTab() {
                           id: responseData._id || Date.now().toString(),
                           type: 'assistant' as const,
                           content: responseData.text || accumulatedText,
+                          operation: responseData.operation || undefined,
                         }];
                       });
                     }
@@ -1355,10 +1361,12 @@ export default function EchoTab() {
       const messageTimestamp = Date.now().toString();
 
       // 添加用户消息，使用 text 作为显示内容
+      // 注意：这个消息会被 ConversationSection 过滤掉（因为 isOperation: true）
       const userMsg: Message = {
         id: Date.now().toString(),
         type: 'user',
         content: text,
+        operation: operation, // 标记为 operation 消息，用于在界面中过滤显示
       };
       setMessages(prev => [...prev, userMsg]);
 

@@ -49,6 +49,7 @@ interface Message {
   avatar?: string;
   photoUri?: string;
   reminderCardData?: ReminderCardData;
+  operation?: string; // 服务端下发的 operation 字段
 }
 
 interface ConversationSectionProps {
@@ -477,6 +478,13 @@ export function ConversationSection({
       scrollEventThrottle={16}
     >
       {messages.map((message, index) => {
+        // 过滤掉用户侧发出的带 operation 字段的消息
+        console.log('message', message);
+        //
+        if (message.type === 'user' && message.operation !== "") {
+          return null;
+        }
+
         if (message.type === 'timestamp') {
           return (
             <View key={message.id} style={styles.timestampContainer}>
