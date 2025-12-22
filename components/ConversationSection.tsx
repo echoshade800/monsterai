@@ -481,7 +481,8 @@ export function ConversationSection({
         // 过滤掉用户侧发出的带 operation 字段的消息
         console.log('message', message);
         //
-        if (message.type === 'user' && message.operation !== "") {
+        // 过滤掉用户侧发出的带 operation 字段的消息（operation 存在且不为空）
+        if (message.type === 'user' && message.operation) {
           return null;
         }
 

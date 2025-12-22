@@ -152,6 +152,13 @@ export default function EchoTab() {
   const convertToMessages = (data: any): Message[] => {
     if (!data) return [];
 
+    console.log('[convertToMessages] Raw server response data:', {
+      dataType: Array.isArray(data) ? 'array' : typeof data,
+      dataLength: Array.isArray(data) ? data.length : 'N/A',
+      firstItem: Array.isArray(data) && data.length > 0 ? data[0] : data,
+      sampleItemKeys: Array.isArray(data) && data.length > 0 ? Object.keys(data[0]) : Object.keys(data || {})
+    });
+
     // 辅助函数：根据 is_user 字段确定消息类型
     const getMessageType = (item: any): 'user' | 'assistant' => {
       // 优先使用 is_user 字段
@@ -213,8 +220,39 @@ export default function EchoTab() {
       // 提取图片URL（支持多个字段，包括 photoUri_preview）
       const photoUri = item.image || item.imageUrl || item.image_url || item.photoUri || item.photoUri_preview || undefined;
       
-      // 提取 operation 字段
-      const operation = item.operation || undefined;
+      // 提取 operation 字段（支持多种可能的字段名）
+      const operation = item.operation || item.operation_type || item.op || undefined;
+      
+      // 调试日志：检查 operation 字段
+      if (type === 'user' && (item.operation !== undefined || item.operation_type !== undefined || item.op !== undefined)) {
+        console.log('Converting message with operation field:', {
+          messageId,
+          type,
+          content: getMessageContent(item),
+          operation: item.operation,
+          operation_type: item.operation_type,
+          op: item.op,
+          extracted_operation: operation,
+          allFields: Object.keys(item)
+        });
+      }
+      
+      // 调试日志：检查看起来像 operation 消息但 operation 字段为 undefined 的情况
+      if (type === 'user') {
+        const content = getMessageContent(item);
+        // 如果内容看起来像 operation 消息（包含"已经设置"或"取消提醒"），但 operation 字段为 undefined
+        if ((content.includes('已经设置') || content.includes('取消提醒')) && !operation) {
+          console.log('[convertItem] User message with operation-like content but no operation field:', {
+            messageId,
+            content,
+            itemKeys: Object.keys(item),
+            itemOperation: item.operation,
+            itemOperationType: item.operation_type,
+            itemOp: item.op,
+            fullItem: JSON.stringify(item, null, 2)
+          });
+        }
+      }
       
       // 如果消息包含图片，记录日志
       if (photoUri) {
@@ -950,6 +988,14 @@ export default function EchoTab() {
       let historyMessages: Message[] = [];
 
       if (result.success && result.data) {
+        // 调试日志：查看服务端返回的原始数据结构
+        console.log('[fetchConversationHistory] Raw server response data:', {
+          dataType: Array.isArray(result.data) ? 'array' : typeof result.data,
+          dataLength: Array.isArray(result.data) ? result.data.length : 'N/A',
+          firstItem: Array.isArray(result.data) && result.data.length > 0 ? result.data[0] : result.data,
+          sampleItemKeys: Array.isArray(result.data) && result.data.length > 0 ? Object.keys(result.data[0]) : Object.keys(result.data || {})
+        });
+        
         const convertedMessages = convertToMessages(result.data);
         // 反转消息数组，使最旧的消息在前，最新的在后
         historyMessages = convertedMessages.reverse();
