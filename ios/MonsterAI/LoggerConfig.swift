@@ -29,5 +29,15 @@ import CocoaLumberjack
         }
         
         RNLoggerHelper.logInfo("DDLog initialized with verbose level")
+        
+        // 3. Register Network Logging Protocol
+        // 注册网络请求日志协议，拦截所有网络请求
+        URLProtocol.registerClass(NetworkLoggingProtocol.self)
+        
+        // 确保所有默认的 URLSessionConfiguration 都包含我们的 protocol
+        NetworkLoggingProtocol.setupURLSessionConfigurationSwizzling()
+        
+        RNLoggerHelper.logInfo("Network logging protocol registered successfully")
+        RNLoggerHelper.logInfo("All HTTP/HTTPS requests will be logged to file")
     }
 }

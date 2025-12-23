@@ -7,6 +7,8 @@ RCT_EXTERN_METHOD(debug:(NSString *)message)
 RCT_EXTERN_METHOD(info:(NSString *)message)
 RCT_EXTERN_METHOD(warn:(NSString *)message)
 RCT_EXTERN_METHOD(error:(NSString *)message)
+RCT_EXTERN_METHOD(getLogFilePath:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(shareLogFile:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 
 @end
 

@@ -28,6 +28,7 @@
 		69C2A7982EF8FC1F009E2AEB /* RNLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 69C2A7972EF8FC1F009E2AEB /* RNLogger.m */; };
 		69C2A79A2EF8FE0F009E2AEB /* RNLoggerHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 69C2A7992EF8FE0F009E2AEB /* RNLoggerHelper.h */; };
 		69C2A79C2EF8FE15009E2AEB /* RNLoggerHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 69C2A79B2EF8FE15009E2AEB /* RNLoggerHelper.m */; };
+		69C2A7B72EFA3ED6009E2AEB /* NetworkLoggingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69C2A7B62EFA3ED6009E2AEB /* NetworkLoggingProtocol.swift */; };
 		9577CDC70FEE6FE5E8E27CE6 /* Pods_MonsterAI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C916BD4C4FA2722BE8823A5E /* Pods_MonsterAI.framework */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
@@ -63,6 +64,7 @@
 		69C2A7972EF8FC1F009E2AEB /* RNLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNLogger.m; sourceTree = "<group>"; };
 		69C2A7992EF8FE0F009E2AEB /* RNLoggerHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNLoggerHelper.h; sourceTree = "<group>"; };
 		69C2A79B2EF8FE15009E2AEB /* RNLoggerHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNLoggerHelper.m; sourceTree = "<group>"; };
+		69C2A7B62EFA3ED6009E2AEB /* NetworkLoggingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkLoggingProtocol.swift; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = MonsterAI/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		C7B02699F6D9FACFE04C7393 /* LoggerConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LoggerConfig.swift; path = MonsterAI/LoggerConfig.swift; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				361715844AF37ADFC730EF27 /* PrivacyInfo.xcprivacy */,
 				69AD044A2ECDB80E00523E82 /* README.md */,
+				69C2A7B62EFA3ED6009E2AEB /* NetworkLoggingProtocol.swift */,
 				C7B02699F6D9FACFE04C7393 /* LoggerConfig.swift */,
 			);
 			name = MonsterAI;
@@ -490,6 +493,7 @@
 				693C6AEA2ECD7C6100E5783D /* RNLocationService.m in Sources */,
 				693C6AEB2ECD7C6100E5783D /* RNLocationService.swift in Sources */,
 				693C6AE02ECD7C4A00E5783D /* H5JSExecUtil.swift in Sources */,
+				69C2A7B72EFA3ED6009E2AEB /* NetworkLoggingProtocol.swift in Sources */,
 				693C6AE12ECD7C4A00E5783D /* NetworkTrigger.m in Sources */,
 				693C6AE22ECD7C4A00E5783D /* MiniAppManager.swift in Sources */,
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,

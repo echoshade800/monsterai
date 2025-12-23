@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Image, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Modal, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AvatarCropModal from '../components/AvatarCropModal';
 import { GenderPickerModal } from '../components/GenderPickerModal';
 import { HeightPickerModal } from '../components/HeightPickerModal';
@@ -12,6 +12,8 @@ import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
+
+const { RNLogger } = NativeModules;
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -485,6 +487,28 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleExportLogs = async () => {
+    if (Platform.OS !== 'ios') {
+      Alert.alert('Info', 'Log export is only available on iOS');
+      return;
+    }
+
+    if (!RNLogger) {
+      Alert.alert('Error', 'Logger module is not available');
+      return;
+    }
+
+    try {
+      await RNLogger.shareLogFile();
+    } catch (error: unknown) {
+      console.error('[Profile] Failed to export logs:', error);
+      Alert.alert(
+        'Failed to export logs',
+        error instanceof Error ? error.message : 'Error occurred while exporting logs, please try again'
+      );
+    }
+  };
+
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
@@ -673,6 +697,15 @@ export default function ProfileScreen() {
               <Text style={styles.dangerText}>Delete Account</Text>
               <ChevronRight size={20} color="#FF3B30" strokeWidth={2} />
             </TouchableOpacity>
+            {Platform.OS === 'ios' && (
+              <>
+                <TouchableOpacity style={styles.menuItem} onPress={handleExportLogs}>
+                  <Text style={styles.menuItemText}>Export Logs</Text>
+                  <ChevronRight size={20} color="#666" strokeWidth={2} />
+                </TouchableOpacity>
+                <View style={styles.divider} />
+              </>
+            )}
           </View>
         </View>
 
