@@ -407,7 +407,9 @@ function sendPushNotification(config) {
       req.on('end', () => {
         client.close();
         
-        if (status === '200') {
+        // HTTP/2 的 :status 可能是字符串或数字，统一转换为字符串比较
+        const statusCode = String(status);
+        if (statusCode === '200') {
           console.log('✅ 推送发送成功!');
           if (responseData) {
             try {
