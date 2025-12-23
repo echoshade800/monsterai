@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   SETTINGS: 'settings',
   CACHE: 'cache',
   REMINDER_SELECTIONS: 'reminderSelections', // Reminder 选择结果
+  MOBILE_DATA_UPLOAD_HISTORY: 'mobileDataUploadHistory', // 手机数据上传历史
 };
 
 // 用户数据结构

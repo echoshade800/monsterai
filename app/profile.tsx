@@ -706,6 +706,12 @@ export default function ProfileScreen() {
                 <View style={styles.divider} />
               </>
             )}
+            
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/phone-data')}>
+              <Text style={styles.menuItemText}>Phone Data</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
+            
           </View>
         </View>
 

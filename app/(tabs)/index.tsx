@@ -349,11 +349,46 @@ export default function EchoTab() {
     }
   }, []);
 
+  // 启动上传定时器（独立函数，确保定时器总是被创建）
+  const startUploadTimer = useCallback(() => {
+    // 如果定时器已存在，先清理
+    if (uploadTimerRef.current) {
+      console.log('[EchoTab] 🔄 Clearing existing upload timer before starting new one');
+      clearInterval(uploadTimerRef.current);
+      uploadTimerRef.current = null;
+    }
+
+    console.log('[EchoTab] ⏰ Starting upload timer (every 5 minutes)');
+    
+    // 立即执行一次上传
+    mobileDataManager.uploadData({ period: 'today' }).catch((error) => {
+      console.error('[EchoTab] ❌ Initial upload failed:', error);
+    });
+
+    // 启动定时器，每5分钟执行一次上传
+    uploadTimerRef.current = setInterval(async () => {
+      try {
+        console.log('[EchoTab] ⏰ Scheduled upload: uploading data...');
+        await mobileDataManager.uploadData({ period: 'today' });
+        console.log('[EchoTab] ✅ Scheduled upload completed');
+      } catch (error) {
+        console.error('[EchoTab] ❌ Scheduled upload failed:', error);
+      }
+    }, 5 * 60 * 1000); // 5分钟 = 5 * 60 * 1000 毫秒
+    
+    console.log('[EchoTab] ✅ Upload timer started successfully, timer ID:', uploadTimerRef.current);
+  }, []);
+
   // 请求所有数据权限（首次进入时）
   const requestAllPermissions = useCallback(async () => {
     // 如果已经请求过权限，跳过
     if (permissionsRequestedRef.current) {
       console.log('[EchoTab] Permissions already requested, skipping...');
+      // 即使权限已请求过，也要确保定时器在运行
+      if (!uploadTimerRef.current) {
+        console.log('[EchoTab] ⚠️ Upload timer not running, starting it now...');
+        startUploadTimer();
+      }
       return;
     }
 
@@ -381,30 +416,18 @@ export default function EchoTab() {
 
       // 3. 请求健康数据权限
       console.log('[EchoTab] ❤️ Requesting health data permissions...');
+      let healthPermissionGranted = false;
       try {
         await healthDataManager.requestAllCommonPermissions();
         console.log('[EchoTab] ✅ Health data permissions requested');
-        
-        // 立即执行一次上传
-        await mobileDataManager.uploadData({ period: 'today' });
-        
-        // 启动定时器，每5分钟执行一次上传
-        if (uploadTimerRef.current) {
-          clearInterval(uploadTimerRef.current);
-        }
-        uploadTimerRef.current = setInterval(async () => {
-          try {
-            console.log('[EchoTab] ⏰ Scheduled upload: uploading data...');
-            await mobileDataManager.uploadData({ period: 'today' });
-            console.log('[EchoTab] ✅ Scheduled upload completed');
-          } catch (error) {
-            console.error('[EchoTab] ❌ Scheduled upload failed:', error);
-          }
-        }, 5 * 60 * 1000); // 5分钟 = 5 * 60 * 1000 毫秒
-        console.log('[EchoTab] ⏰ Started scheduled upload timer (every 5 minutes)');
+        healthPermissionGranted = true;
       } catch (error) {
         console.error('[EchoTab] ❌ Failed to request health data permissions:', error);
       }
+
+      // 无论健康权限是否成功，都启动上传定时器
+      // 因为即使权限失败，定时器也应该运行（可能会上传部分数据）
+      startUploadTimer();
 
       // 4. 请求相册权限
       console.log('[EchoTab] 📷 Requesting photo library permission...');
@@ -422,8 +445,13 @@ export default function EchoTab() {
       console.log('[EchoTab] ✅ All permissions requested');
     } catch (error) {
       console.error('[EchoTab] ❌ Error requesting permissions:', error);
+      // 即使权限请求出错，也尝试启动定时器
+      if (!uploadTimerRef.current) {
+        console.log('[EchoTab] ⚠️ Starting upload timer despite permission errors...');
+        startUploadTimer();
+      }
     }
-  }, []);
+  }, [startUploadTimer]);
 
   // 初始化用户数据（从本地存储获取真实数据）
   useEffect(() => {
@@ -1090,12 +1118,20 @@ export default function EchoTab() {
     fetchConversationHistory();
   }, [fetchConversationHistory, params.photoUri]);
 
-  // 每次页面聚焦时，触发刷新 AgentLogs
+  // 每次页面聚焦时，触发刷新 AgentLogs 并检查上传定时器
   useFocusEffect(
     useCallback(() => {
       console.log('Page focused, triggering AgentLogs refresh');
       setRefreshTrigger(prev => prev + 1);
-    }, [])
+      
+      // 检查上传定时器是否在运行，如果没有则重新启动
+      if (!uploadTimerRef.current) {
+        console.log('[EchoTab] ⚠️ Upload timer not running on focus, restarting...');
+        startUploadTimer();
+      } else {
+        console.log('[EchoTab] ✅ Upload timer is running (ID:', uploadTimerRef.current, ')');
+      }
+    }, [startUploadTimer])
   );
   
   // 检测消息中的 @mention 并返回对应的 param_name

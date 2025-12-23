@@ -9,7 +9,7 @@ import calendarManager from './calendar-manager';
 import deviceInfoManager from './device-info-manager';
 import healthDataManager, { TimePeriod } from './health-data-manager';
 import locationManager from './location-manager';
-import storageManager from './storage';
+import storageManager, { STORAGE_KEYS } from './storage';
 
 class MobileDataManager {
   constructor() {
@@ -348,6 +348,10 @@ class MobileDataManager {
       );
 
       console.log('[MobileDataManager] ✅ 数据上传成功');
+      
+      // 记录上传历史到本地存储
+      await this._recordUploadHistory(dataToUpload);
+      
       return {
         success: true,
       };
@@ -1259,6 +1263,146 @@ class MobileDataManager {
     } catch (error) {
       console.warn('[MobileDataManager] ⚠️ 获取位置数据失败:', error);
       return { success: true, data: null };
+    }
+  }
+
+  /**
+   * 记录上传历史到本地存储
+   * @private
+   */
+  async _recordUploadHistory(dataToUpload) {
+    try {
+      const history = await this.getUploadHistory();
+      
+      // 提取数据摘要
+      const dataSummary = this._extractDataSummary(dataToUpload);
+      
+      // 创建新的历史记录，包含完整的上传数据
+      const newRecord = {
+        id: Date.now().toString(),
+        uploadTime: Date.now(),
+        dataSummary,
+        fullData: dataToUpload, // 保存完整的上传数据
+      };
+      
+      // 添加到历史记录数组的开头（最新的在前面）
+      history.unshift(newRecord);
+      
+      // 限制历史记录数量（最多保留100条）
+      const maxRecords = 100;
+      if (history.length > maxRecords) {
+        history.splice(maxRecords);
+      }
+      
+      // 保存到本地存储
+      await storageManager.setItem(
+        STORAGE_KEYS.MOBILE_DATA_UPLOAD_HISTORY,
+        JSON.stringify(history)
+      );
+      
+      console.log('[MobileDataManager] ✅ 上传历史已记录');
+    } catch (error) {
+      console.warn('[MobileDataManager] ⚠️ 记录上传历史失败:', error);
+    }
+  }
+
+  /**
+   * 提取数据摘要（用于展示）
+   * @private
+   */
+  _extractDataSummary(dataToUpload) {
+    const summary = {
+      hasData: false,
+      recordCount: 0,
+      stepCount: 0,
+      heartRate: 0,
+      activeEnergy: 0,
+      distance: 0,
+      sleepRecords: 0,
+      calendarEvents: 0,
+      hasLocation: false,
+      hasGyroscope: false,
+    };
+
+    if (!dataToUpload || !dataToUpload.data || !Array.isArray(dataToUpload.data)) {
+      return summary;
+    }
+
+    const records = dataToUpload.data;
+    summary.recordCount = records.length;
+    summary.hasData = records.length > 0;
+
+    // 汇总所有记录的数据
+    records.forEach(record => {
+      if (record.step_count) {
+        summary.stepCount += record.step_count;
+      }
+      if (record.heart_rate) {
+        summary.heartRate = record.heart_rate; // 平均值，取最后一个
+      }
+      if (record.active_energy_burned) {
+        summary.activeEnergy += record.active_energy_burned;
+      }
+      if (record.distance_walking_running) {
+        summary.distance += record.distance_walking_running;
+      }
+      if (record.sleep_analysis && Array.isArray(record.sleep_analysis)) {
+        summary.sleepRecords += record.sleep_analysis.length;
+      }
+      if (record.calendar_events && Array.isArray(record.calendar_events)) {
+        summary.calendarEvents += record.calendar_events.length;
+      }
+      if (record.location) {
+        summary.hasLocation = true;
+      }
+      if (record.gyroscope) {
+        summary.hasGyroscope = true;
+      }
+    });
+
+    return summary;
+  }
+
+  /**
+   * 获取上传历史
+   * @returns {Promise<Array>} 上传历史记录数组
+   */
+  /**
+   * 获取上传历史
+   * @returns {Promise<Array>} 上传历史记录数组
+   */
+  async getUploadHistory() {
+    try {
+      const historyString = await storageManager.getItem(
+        STORAGE_KEYS.MOBILE_DATA_UPLOAD_HISTORY
+      );
+      
+      if (!historyString) {
+        return [];
+      }
+      
+      const history = JSON.parse(historyString);
+      return Array.isArray(history) ? history : [];
+    } catch (error) {
+      console.warn('[MobileDataManager] ⚠️ 获取上传历史失败:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 清除上传历史
+   * @returns {Promise<boolean>} 清除是否成功
+   */
+  async clearUploadHistory() {
+    try {
+      await storageManager.removeItem(
+        STORAGE_KEYS.MOBILE_DATA_UPLOAD_HISTORY
+      );
+      console.log('[MobileDataManager] ✅ 上传历史已清除');
+      return true;
+    } catch (error) {
+      console.warn('[MobileDataManager] ⚠️ 清除上传历史失败:', error);
+      return false;
     }
   }
 }
