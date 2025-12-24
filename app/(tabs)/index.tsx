@@ -61,7 +61,7 @@ export default function EchoTab() {
   }, [params.mentionAgent]);
 
   // 将 extract_user_task 的 tasks 数据转换为 ReminderCard Message
-  const createReminderCardFromTasks = (tasks: any[], messageId?: string): Message | null => {
+  const createReminderCardFromTasks = (tasks: any[], messageId?: string, timestamp?: number): Message | null => {
     if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
       return null;
     }
@@ -97,12 +97,13 @@ export default function EchoTab() {
 
     // 创建 ReminderCard 消息
     const id = messageId || `reminder_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    const timestamp = Date.now(); // 添加时间戳字段
+    // 使用传入的时间戳，如果没有则使用当前时间
+    const messageTimestamp = timestamp || Date.now();
     return {
       id,
       type: 'reminderCard' as const,
       content: '',
-      timestamp, // 设置时间戳
+      timestamp: messageTimestamp, // 设置时间戳
       reminderCardData: {
         title: '📋 Reminder',
         monster: 'default',
@@ -121,6 +122,53 @@ export default function EchoTab() {
       firstItem: Array.isArray(data) && data.length > 0 ? data[0] : data,
       sampleItemKeys: Array.isArray(data) && data.length > 0 ? Object.keys(data[0]) : Object.keys(data || {})
     });
+
+    // 辅助函数：解析和验证时间戳
+    const parseTimestamp = (timestamp: any, messageId: string): number => {
+      if (timestamp === undefined || timestamp === null) {
+        throw new Error(`[parseTimestamp] Timestamp is undefined or null. Message ID: ${messageId}`);
+      }
+
+      let parsedTimestamp: number;
+
+      if (typeof timestamp === 'number') {
+        // 已经是数字，直接使用
+        parsedTimestamp = timestamp;
+      } else {
+        const timestampStr = String(timestamp);
+
+        // 检查是否是时间格式字符串（如 "10:30"），如果是则抛出异常
+        const timePattern = /^\d{1,2}:\d{2}(:\d{2})?$/;
+        if (timePattern.test(timestampStr.trim())) {
+          throw new Error(`[parseTimestamp] Invalid timestamp format: expected timestamp (number), but got time string "${timestampStr}". Message ID: ${messageId}`);
+        }
+
+        // 先尝试直接解析为数字（如果是纯数字字符串）
+        const directParse = parseInt(timestampStr, 10);
+
+        // 如果是有效的数字时间戳（大于 1000000000000），直接使用
+        if (!isNaN(directParse) && directParse > 1000000000000) {
+          parsedTimestamp = directParse;
+        } else {
+          // 尝试解析 ISO 日期字符串（如 "2025-12-24T06:36:49.239000"）
+          const dateParse = Date.parse(timestampStr);
+          if (!isNaN(dateParse) && dateParse > 0) {
+            parsedTimestamp = dateParse;
+          } else {
+            // 如果无法解析为时间戳，抛出异常
+            throw new Error(`[parseTimestamp] Invalid timestamp format: cannot parse "${timestampStr}" as timestamp. Expected number or ISO date string. Message ID: ${messageId}`);
+          }
+        }
+      }
+
+      // 验证时间戳是否合理（应该是13位数字，大于 1000000000000，即 2001-09-09）
+      // 如果不是有效的时间戳，抛出异常
+      if (isNaN(parsedTimestamp) || parsedTimestamp <= 1000000000000) {
+        throw new Error(`[parseTimestamp] Invalid timestamp value: ${parsedTimestamp}. Expected timestamp > 1000000000000 (2001-09-09). Message ID: ${messageId}, Original value: ${timestamp}`);
+      }
+
+      return parsedTimestamp;
+    };
 
     // 辅助函数：根据 is_user 字段确定消息类型
     const getMessageType = (item: any): 'user' | 'assistant' => {
@@ -160,9 +208,23 @@ export default function EchoTab() {
             // 解析 arguments JSON 字符串
             const args = JSON.parse(callRes.arguments);
             
-            // 使用公共函数创建 ReminderCard 消息
+            // 提取并解析时间戳（使用与普通消息相同的逻辑）
+            const timestamp = item.created_at || item.timestamp || item.createdAt || undefined;
             const messageId = item._id || item.id || item.trace_id || `reminder_${index}_${Date.now()}`;
-            const reminderCard = createReminderCardFromTasks(args.tasks, messageId);
+            let messageTimestamp: number | undefined = undefined;
+            
+            if (timestamp !== undefined && timestamp !== null) {
+              try {
+                messageTimestamp = parseTimestamp(timestamp, messageId);
+              } catch (error) {
+                // 如果解析失败，使用 undefined（不抛出异常，允许继续处理）
+                console.warn('[convertItem] Failed to parse timestamp for function_call message:', error);
+                messageTimestamp = undefined;
+              }
+            }
+            
+            // 使用公共函数创建 ReminderCard 消息，传递原始时间戳
+            const reminderCard = createReminderCardFromTasks(args.tasks, messageId, messageTimestamp);
             if (reminderCard) {
               return reminderCard;
             }
@@ -193,45 +255,13 @@ export default function EchoTab() {
       // 验证并转换时间戳
       let messageTimestamp = Date.now(); // 默认使用当前时间
       if (timestamp !== undefined && timestamp !== null) {
-        let parsedTimestamp: number;
-        
-        if (typeof timestamp === 'number') {
-          // 已经是数字，直接使用
-          parsedTimestamp = timestamp;
-        } else {
-          const timestampStr = String(timestamp);
-          
-          // 检查是否是时间格式字符串（如 "10:30"），如果是则抛出异常
-          const timePattern = /^\d{1,2}:\d{2}(:\d{2})?$/;
-          if (timePattern.test(timestampStr.trim())) {
-            throw new Error(`[convertItem] Invalid timestamp format: expected timestamp (number), but got time string "${timestampStr}". Message ID: ${messageId}`);
-          }
-          
-          // 先尝试直接解析为数字（如果是纯数字字符串）
-          const directParse = parseInt(timestampStr, 10);
-          
-          // 如果是有效的数字时间戳（大于 1000000000000），直接使用
-          if (!isNaN(directParse) && directParse > 1000000000000) {
-            parsedTimestamp = directParse;
-          } else {
-            // 尝试解析 ISO 日期字符串（如 "2025-12-24T06:36:49.239000"）
-            const dateParse = Date.parse(timestampStr);
-            if (!isNaN(dateParse) && dateParse > 0) {
-              parsedTimestamp = dateParse;
-            } else {
-              // 如果无法解析为时间戳，抛出异常
-              throw new Error(`[convertItem] Invalid timestamp format: cannot parse "${timestampStr}" as timestamp. Expected number or ISO date string. Message ID: ${messageId}`);
-            }
-          }
+        try {
+          messageTimestamp = parseTimestamp(timestamp, messageId);
+        } catch (error) {
+          // 如果解析失败，使用默认的当前时间（保持原有行为）
+          console.warn('[convertItem] Failed to parse timestamp, using current time:', error);
+          messageTimestamp = Date.now();
         }
-        
-        // 验证时间戳是否合理（应该是13位数字，大于 1000000000000，即 2001-09-09）
-        // 如果不是有效的时间戳，抛出异常
-        if (isNaN(parsedTimestamp) || parsedTimestamp <= 1000000000000) {
-          throw new Error(`[convertItem] Invalid timestamp value: ${parsedTimestamp}. Expected timestamp > 1000000000000 (2001-09-09). Message ID: ${messageId}, Original value: ${timestamp}`);
-        }
-        
-        messageTimestamp = parsedTimestamp;
       }
       
       // 调试日志：检查看起来像 operation 消息但 operation 字段为 undefined 的情况
@@ -581,6 +611,10 @@ export default function EchoTab() {
     let retryTimeoutId: NodeJS.Timeout | null = null;
     let connectionTimeoutId: NodeJS.Timeout | null = null;
     let responseTimeoutId: NodeJS.Timeout | null = null;
+    // 保存请求时间戳，用于临时消息
+    const requestTimestamp = requestBody.timestamp 
+      ? (typeof requestBody.timestamp === 'string' ? parseInt(requestBody.timestamp, 10) : requestBody.timestamp)
+      : Date.now();
 
     // 判断是否为网络连接错误
     const isNetworkError = (event: any): boolean => {
@@ -697,11 +731,14 @@ export default function EchoTab() {
                     // 过滤掉临时消息，但保留 reminderCard 消息
                     const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
                     // 合并消息：先添加临时消息和其他消息，然后添加 reminderCard 消息
-                    return [...filtered, {
+                    const updated = [...filtered, {
                       id: tempMessageId,
                       type: 'assistant' as const,
                       content: accumulatedText,
+                      timestamp: requestTimestamp, // 添加时间戳
                     }, ...reminderCardMessages];
+                    // 按时间戳排序，确保最新消息在底部
+                    return sortMessagesByTimestamp(updated);
                   });
                 } else if (data.type === 'complete') {
                   console.log(`${logPrefix}Complete:`, JSON.stringify(data, null, 2));
