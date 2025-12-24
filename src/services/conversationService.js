@@ -11,9 +11,12 @@ class ConversationService {
     try {
       console.log('[ConversationService][getConversationHistory] Starting to fetch conversation history');
 
+      // 构建 URL，添加 limit=200 查询参数
+      const url = `${API_ENDPOINTS.CONVERSATION.HISTORY_INFO}?limit=200`;
+      
       // 使用 GET 请求，不需要 body
       // Headers 会自动通过 api.get 方法添加（device, timezone, version, passId）
-      const response = await api.get(API_ENDPOINTS.CONVERSATION.HISTORY_INFO);
+      const response = await api.get(url);
       
       console.log('[ConversationService][getConversationHistory] response', response);
 
