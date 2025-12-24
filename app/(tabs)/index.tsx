@@ -1246,7 +1246,7 @@ export default function EchoTab() {
       } catch (error) {
         console.error('[startMemoryPolling] Scheduled memory poll failed:', error);
       }
-    }, 5 * 1000); // 5秒 = 5 * 1000 毫秒
+    }, 3 * 1000); // 3秒 = 3 * 1000 毫秒
     
     console.log('[startMemoryPolling] Memory polling timer started successfully, timer ID:', memoryPollingTimerRef.current);
   }, [pollLatestMemory]);
