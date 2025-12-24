@@ -65,7 +65,7 @@ export default function EchoTab() {
     if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
       return null;
     }
-
+    console.log('createReminderCardFromTasks tasks', tasks);
     // 转换任务数据为 ReminderCard 格式
     const reminders: ReminderItem[] = tasks.map((task: any) => {
       const baseItem: ReminderItemBase = {
@@ -97,10 +97,12 @@ export default function EchoTab() {
 
     // 创建 ReminderCard 消息
     const id = messageId || `reminder_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const timestamp = Date.now(); // 添加时间戳字段
     return {
       id,
       type: 'reminderCard' as const,
       content: '',
+      timestamp, // 设置时间戳
       reminderCardData: {
         title: '📋 Reminder',
         monster: 'default',
@@ -230,20 +232,6 @@ export default function EchoTab() {
         }
         
         messageTimestamp = parsedTimestamp;
-      }
-      
-      // 调试日志：检查 operation 字段
-      if (type === 'user' && (item.operation !== undefined || item.operation_type !== undefined || item.op !== undefined)) {
-        console.log('Converting message with operation field:', {
-          messageId,
-          type,
-          content: getMessageContent(item),
-          operation: item.operation,
-          operation_type: item.operation_type,
-          op: item.op,
-          extracted_operation: operation,
-          allFields: Object.keys(item)
-        });
       }
       
       // 调试日志：检查看起来像 operation 消息但 operation 字段为 undefined 的情况
@@ -660,14 +648,18 @@ export default function EchoTab() {
                   // 如果有已累积的文本，保存它
                   if (accumulatedText) {
                     setMessages(prev => {
-                      const filtered = prev.filter(msg => msg.id !== tempMessageId);
+                      // 保留所有 reminderCard 类型的消息
+                      const reminderCardMessages = prev.filter(msg => msg.type === 'reminderCard');
+                      // 过滤掉临时消息，但保留 reminderCard 消息
+                      const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
                       const newMessage: Message = {
                         id: Date.now().toString(),
                         type: 'assistant' as const,
                         content: accumulatedText,
                         timestamp: Date.now(),
                       };
-                      const updated = [...filtered, newMessage];
+                      // 合并消息：先添加新消息和其他消息，然后添加 reminderCard 消息
+                      const updated = [...filtered, newMessage, ...reminderCardMessages];
                       return sortMessagesByTimestamp(updated);
                     });
                   }
@@ -700,12 +692,16 @@ export default function EchoTab() {
 
                   // 更新临时消息
                   setMessages(prev => {
-                    const filtered = prev.filter(msg => msg.id !== tempMessageId);
+                    // 保留所有 reminderCard 类型的消息
+                    const reminderCardMessages = prev.filter(msg => msg.type === 'reminderCard');
+                    // 过滤掉临时消息，但保留 reminderCard 消息
+                    const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
+                    // 合并消息：先添加临时消息和其他消息，然后添加 reminderCard 消息
                     return [...filtered, {
                       id: tempMessageId,
                       type: 'assistant' as const,
                       content: accumulatedText,
-                    }];
+                    }, ...reminderCardMessages];
                   });
                 } else if (data.type === 'complete') {
                   console.log(`${logPrefix}Complete:`, JSON.stringify(data, null, 2));
@@ -738,7 +734,10 @@ export default function EchoTab() {
                     // 默认文本消息处理（过滤掉 function_call_output 类型的消息）
                     if (responseData.msg_type === 'text') {
                       setMessages(prev => {
-                        const filtered = prev.filter(msg => msg.id !== tempMessageId);
+                        // 保留所有 reminderCard 类型的消息（这些消息不应该被删除）
+                        const reminderCardMessages = prev.filter(msg => msg.type === 'reminderCard');
+                        // 过滤掉临时消息，但保留 reminderCard 消息
+                        const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
                         const newMessage: Message = {
                           id: responseData._id || Date.now().toString(),
                           type: 'assistant' as const,
@@ -746,7 +745,8 @@ export default function EchoTab() {
                           operation: responseData.operation || undefined,
                           timestamp: responseData.created_at || responseData.timestamp || Date.now(),
                         };
-                        const updated = [...filtered, newMessage];
+                        // 合并消息：先添加新消息和其他消息，然后添加 reminderCard 消息（确保它们不会被删除）
+                        const updated = [...filtered, newMessage, ...reminderCardMessages];
                         // 按时间戳排序，确保最新消息在底部
                         return sortMessagesByTimestamp(updated);
                       });
@@ -883,14 +883,18 @@ export default function EchoTab() {
       // 如果有已累积的文本，保存它
       if (accumulatedText) {
         setMessages(prev => {
-          const filtered = prev.filter(msg => msg.id !== tempMessageId);
+          // 保留所有 reminderCard 类型的消息
+          const reminderCardMessages = prev.filter(msg => msg.type === 'reminderCard');
+          // 过滤掉临时消息，但保留 reminderCard 消息
+          const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
           const newMessage: Message = {
             id: Date.now().toString(),
             type: 'assistant' as const,
             content: accumulatedText,
             timestamp: Date.now(),
           };
-          const updated = [...filtered, newMessage];
+          // 合并消息：先添加新消息和其他消息，然后添加 reminderCard 消息
+          const updated = [...filtered, newMessage, ...reminderCardMessages];
           return sortMessagesByTimestamp(updated);
         });
       }
@@ -1240,20 +1244,23 @@ export default function EchoTab() {
         setMessages(prev => {
           // 如果已经有消息，合并而不是替换
           if (prev.length > 0) {
-            // 创建一个消息ID集合，用于去重
+            // 保留所有 reminderCard 类型的消息（这些消息不应该被服务器返回的消息列表覆盖）
+            const reminderCardMessages = prev.filter(msg => msg.type === 'reminderCard');
+            // 创建一个消息ID集合，用于去重（包括 reminderCard 消息的 ID）
             const existingIds = new Set(prev.map(msg => msg.id));
             // 只添加不存在的历史消息
             const newHistoryMessages = historyMessages.filter(msg => !existingIds.has(msg.id));
-            // 合并所有消息
-            const merged = [...prev, ...newHistoryMessages];
+            // 合并所有消息：先添加历史消息，然后添加 reminderCard 消息（确保它们不会被删除）
+            const merged = [...prev.filter(msg => msg.type !== 'reminderCard'), ...newHistoryMessages, ...reminderCardMessages];
             // 按时间戳排序（最旧的在前，最新的在后）
             const sorted = sortMessagesByTimestamp(merged);
             console.log('Merging and sorting messages by timestamp:', { 
               prevCount: prev.length, 
               historyCount: historyMessages.length, 
               newCount: newHistoryMessages.length,
+              reminderCardCount: reminderCardMessages.length,
               mergedCount: sorted.length,
-              note: 'Messages sorted by timestamp (oldest first, newest last)'
+              note: 'Messages sorted by timestamp (oldest first, newest last), reminderCard messages preserved'
             });
             return sorted;
           }
