@@ -1460,8 +1460,7 @@ export default function EchoTab() {
       if (mentionedAgent) {
         requestBody.at = mentionedAgent;
       }
-      console.log('requestBody', requestBody);
-      
+      console.log('send msg to server requestBody', requestBody);
       // 调用通用处理函数
       await handleStreamRequest({
         requestBody,

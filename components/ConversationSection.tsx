@@ -721,7 +721,7 @@ export function ConversationSection({
     >
       {messages.map((message, index) => {
         // 过滤掉用户侧发出的带 operation 字段的消息
-        console.log('message', message);
+        // console.log('message', message);
         //
         // 过滤掉用户侧发出的带 operation 字段的消息（operation 存在且不为空）
         if (message.type === 'user' && message.operation) {
