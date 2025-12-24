@@ -942,7 +942,7 @@ const styles = StyleSheet.create({
   assistantTextWrapper: {
     alignSelf: 'flex-start',
     flexShrink: 1,
-    maxWidth: '85%',
+    maxWidth: '99%',
   },
   assistantText: {
     fontSize: 15,
@@ -988,11 +988,13 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: 'relative',
-    width: 220,
-    height: 220,
+    width: '100%',
+    maxWidth: 220,
+    aspectRatio: 1,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 8,
+    alignSelf: 'flex-start',
   },
   messageImage: {
     width: '100%',
