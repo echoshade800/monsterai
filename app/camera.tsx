@@ -117,7 +117,7 @@ export default function CameraScreen() {
   }
 
   // 处理图片上传后的导航逻辑
-  function navigateWithImage(
+  async function navigateWithImage(
     uploadResult: any,
     localUri: string,
     selectedAgent: string,
@@ -148,8 +148,9 @@ export default function CameraScreen() {
       mode
     });
 
-    // 导航到相应页面（使用 replace 避免路由栈增长）
+    // 根据模式处理导航
     if (mode === 'photo-text') {
+      // photo-text 模式：导航到照片文字页面
       router.replace({
         pathname: '/photo-text',
         params: { 
@@ -159,16 +160,20 @@ export default function CameraScreen() {
         }
       });
     } else {
-      // 返回聊天页面，使用 replace 替换当前相机页面
-      router.replace({
-        pathname: '/(tabs)',
-        params: { 
-          photoUri: imageUri, 
-          agentId: selectedAgent, 
-          imageDetectionType,
-          mode: 'photo' 
-        }
-      });
+      // photo 模式：存储图片信息到 AsyncStorage，然后返回聊天页面
+      const photoData = {
+        photoUri: imageUri,
+        agentId: selectedAgent,
+        imageDetectionType,
+        mode: 'photo'
+      };
+      
+      // 存储待处理的图片信息
+      await storageManager.setPendingPhoto(photoData);
+      console.log('Photo data stored, navigating back to chat page');
+      
+      // 使用 router.back() 返回到聊天页面
+      router.back();
     }
   }
 
@@ -228,7 +233,7 @@ export default function CameraScreen() {
       }
 
       // 处理图片上传后的导航逻辑
-      navigateWithImage(uploadResult, photo.uri, selectedAgent, mode, router, 'Navigation params');
+      await navigateWithImage(uploadResult, photo.uri, selectedAgent, mode, router, 'Navigation params');
     } catch (error) {
       console.error('Failed to take picture:', error);
       Alert.alert('Error', 'Failed to take picture: ' + (error as Error).message);
@@ -296,7 +301,7 @@ export default function CameraScreen() {
         }
 
         // 处理图片上传后的导航逻辑
-        navigateWithImage(uploadResult, selectedImage.uri, selectedAgent, mode, router, 'Album selection navigation params');
+        await navigateWithImage(uploadResult, selectedImage.uri, selectedAgent, mode, router, 'Album selection navigation params');
       }
     } catch (error) {
       console.error('Failed to select image:', error);

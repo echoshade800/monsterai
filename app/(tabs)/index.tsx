@@ -36,6 +36,9 @@ export default function EchoTab() {
   const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
   const memoryPollingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const latestMemoryIdRef = useRef<string | null>(null);
+  const lastRefreshTimeRef = useRef<number>(0);
+  const refreshDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isPageFocusedRef = useRef<boolean>(false); // 跟踪页面是否处于聚焦状态
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -1357,19 +1360,22 @@ export default function EchoTab() {
     }
   }, [userData, sendNewUserMessage, sendEnterUserMessage, fetchMemoryList, sortMessagesByTimestamp, startMemoryPolling]);
 
-  // 组件挂载时获取对话历史（只在首次挂载且没有照片参数时获取）
+  // 组件挂载时获取对话历史（只在首次挂载时获取）
   useEffect(() => {
-    // 如果有照片参数，说明是拍照返回，不需要重新获取历史消息
-    if (params.photoUri) {
-      console.log('Photo parameter detected, skipping history fetch, processing photo directly');
-      setIsLoading(false);
-      return;
-    }
-    
     // 如果已经初始化过，不再重复获取
     if (historyInitializedRef.current) {
       console.log('History messages already initialized, skipping duplicate fetch');
-      setIsLoading(false);
+      // 如果有照片参数，不设置 isLoading，让照片处理逻辑自己处理
+      if (!params.photoUri) {
+        setIsLoading(false);
+      }
+      return;
+    }
+    
+    // 如果有照片参数，不在这里获取历史消息，让照片处理逻辑来处理
+    // 这样可以确保历史消息在添加图片消息之前已经加载
+    if (params.photoUri) {
+      console.log('Photo parameter detected, history will be loaded in photo processing logic');
       return;
     }
     
@@ -1378,32 +1384,6 @@ export default function EchoTab() {
     fetchConversationHistory();
   }, [fetchConversationHistory, params.photoUri]);
 
-  // 每次页面聚焦时，触发刷新 AgentLogs 并检查上传定时器和 memory 轮询定时器
-  useFocusEffect(
-    useCallback(() => {
-      console.log('Page focused, triggering AgentLogs refresh');
-      setRefreshTrigger(prev => prev + 1);
-      
-      // 检查上传定时器是否在运行，如果没有则重新启动
-      if (!uploadTimerRef.current) {
-        console.log('[EchoTab] ⚠️ Upload timer not running on focus, restarting...');
-        startUploadTimer();
-      } else {
-        console.log('[EchoTab] ✅ Upload timer is running (ID:', uploadTimerRef.current, ')');
-      }
-      
-      // 检查 memory 轮询定时器是否在运行，如果没有则重新启动（需要先有 latestMemoryId）
-      if (!memoryPollingTimerRef.current && latestMemoryIdRef.current) {
-        console.log('[EchoTab] ⚠️ Memory polling timer not running on focus, restarting...');
-        startMemoryPolling();
-      } else if (memoryPollingTimerRef.current) {
-        console.log('[EchoTab] ✅ Memory polling timer is running (ID:', memoryPollingTimerRef.current, ')');
-      } else {
-        console.log('[EchoTab] ⚠️ Memory polling timer not started (no latest memory id yet)');
-      }
-    }, [startUploadTimer, startMemoryPolling])
-  );
-  
   // 检测消息中的 @mention 并返回对应的 param_name
   const detectMention = (message: string): string | null => {
     // 遍历所有 agents，检查消息中是否包含 @AgentName
@@ -1515,6 +1495,215 @@ export default function EchoTab() {
     }
   }, [userData, handleStreamRequest, sortMessagesByTimestamp]);
 
+  // 处理从 AsyncStorage 获取的待处理图片信息
+  const processPendingPhoto = useCallback(async (photoData: any) => {
+    if (!photoData || !userData) {
+      return;
+    }
+
+    const { photoUri, agentId, imageDetectionType, mode, description } = photoData;
+
+    // 避免重复处理同一张照片
+    if (processedPhotoRef.current === photoUri) {
+      console.log('Photo already processed, skipping:', photoUri);
+      // 清除待处理的图片信息
+      await storageManager.clearPendingPhoto();
+      return;
+    }
+    processedPhotoRef.current = photoUri;
+
+    // 检查当前是否已有历史消息
+    const hasHistoryMessages = messages.some(msg => msg.type === 'assistant' || msg.isMemory);
+
+    // 如果历史消息还没有初始化，先加载历史消息
+    if (!historyInitializedRef.current && !hasHistoryMessages) {
+      console.log('History not initialized yet, loading history first before processing pending photo');
+      setIsLoading(true);
+      historyInitializedRef.current = true;
+      try {
+        await fetchConversationHistory();
+      } catch (error) {
+        console.error('Failed to load conversation history before processing pending photo:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    const messageId = `photo_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const currentTimestamp = Date.now();
+    // 根据模式设置消息内容
+    const messageContent = mode === 'photo-text' && description 
+      ? description 
+      : 'Please analyze this photo';
+    
+    const userMsg: Message = {
+      id: messageId,
+      type: 'user',
+      content: messageContent,
+      photoUri: photoUri,
+      timestamp: currentTimestamp,
+    };
+
+    console.log('Preparing to add pending photo message to interface:', {
+      id: userMsg.id,
+      type: userMsg.type,
+      hasPhotoUri: !!userMsg.photoUri,
+      photoUriPreview: userMsg.photoUri?.substring(0, 80),
+      content: userMsg.content,
+      mode,
+    });
+
+    // 使用函数式更新确保消息被正确添加
+    setMessages(prev => {
+      console.log('Current message list length:', prev.length);
+      // 检查是否已经存在相同的消息（避免重复）
+      const exists = prev.some(msg => msg.id === messageId || (msg.photoUri === photoUri && msg.type === 'user'));
+      if (exists) {
+        console.log('Message already exists, skipping add');
+        return prev;
+      }
+      const newMessages = [...prev, userMsg];
+      // 按时间戳排序，确保最新消息在底部
+      const sorted = sortMessagesByTimestamp(newMessages);
+      console.log('✅ Successfully added pending photo message, updated message list length:', sorted.length);
+      return sorted;
+    });
+
+    // 根据模式设置消息文本
+    const messageText = mode === 'photo-text' && description 
+      ? description 
+      : 'Please analyze this photo';
+
+    console.log('Sending pending image message:', {
+      mode,
+      messageText,
+      photoUri,
+      imageDetectionType,
+      agentId,
+    });
+
+    // 延迟发送消息，确保消息已经添加到状态中
+    setTimeout(() => {
+      // 传递图片URL和imageDetectionType给 handleStreamResponse
+      handleStreamResponse(messageText, photoUri, imageDetectionType);
+
+      // 清除待处理的图片信息
+      storageManager.clearPendingPhoto();
+    }, 50);
+  }, [userData, messages, handleStreamResponse, sortMessagesByTimestamp, fetchConversationHistory]);
+
+  // 每次页面聚焦时，触发刷新 AgentLogs 并检查上传定时器和 memory 轮询定时器
+  // 使用 useRef 存储函数引用，避免依赖项变化导致 useFocusEffect 重新执行
+  const startUploadTimerRef = useRef(startUploadTimer);
+  const startMemoryPollingRef = useRef(startMemoryPolling);
+  const processPendingPhotoRef = useRef(processPendingPhoto);
+  
+  // 更新 ref 值，但不触发 useFocusEffect 重新执行
+  useEffect(() => {
+    startUploadTimerRef.current = startUploadTimer;
+    startMemoryPollingRef.current = startMemoryPolling;
+    processPendingPhotoRef.current = processPendingPhoto;
+  }, [startUploadTimer, startMemoryPolling, processPendingPhoto]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const now = Date.now();
+      const timeSinceLastRefresh = now - lastRefreshTimeRef.current;
+      const MIN_REFRESH_INTERVAL = 5000; // 最小刷新间隔 5 秒（从2秒增加到5秒）
+      const wasPageFocused = isPageFocusedRef.current;
+      
+      // 标记页面为聚焦状态
+      isPageFocusedRef.current = true;
+
+      // 如果页面之前就已经处于聚焦状态，且距离上次刷新时间太短，则跳过刷新
+      // 这样可以避免在页面没有真正失去焦点时重复刷新
+      if (wasPageFocused && timeSinceLastRefresh < MIN_REFRESH_INTERVAL) {
+        console.log(`Page already focused, skipping refresh (${timeSinceLastRefresh}ms since last refresh)`);
+        
+        // 检查上传定时器和 memory 轮询定时器，但不触发刷新
+        if (!uploadTimerRef.current) {
+          console.log('[EchoTab] ⚠️ Upload timer not running on focus, restarting...');
+          startUploadTimerRef.current();
+        }
+        
+        if (!memoryPollingTimerRef.current && latestMemoryIdRef.current) {
+          console.log('[EchoTab] ⚠️ Memory polling timer not running on focus, restarting...');
+          startMemoryPollingRef.current();
+        }
+        
+        // 清理函数：标记页面为失焦状态
+        return () => {
+          isPageFocusedRef.current = false;
+          if (refreshDebounceTimerRef.current) {
+            clearTimeout(refreshDebounceTimerRef.current);
+            refreshDebounceTimerRef.current = null;
+          }
+        };
+      }
+
+      // 清除之前的防抖定时器
+      if (refreshDebounceTimerRef.current) {
+        clearTimeout(refreshDebounceTimerRef.current);
+        refreshDebounceTimerRef.current = null;
+      }
+
+      // 如果距离上次刷新时间太短，使用防抖延迟刷新
+      if (timeSinceLastRefresh < MIN_REFRESH_INTERVAL) {
+        console.log(`Page focused, but too soon since last refresh (${timeSinceLastRefresh}ms), debouncing...`);
+        refreshDebounceTimerRef.current = setTimeout(() => {
+          // 检查页面是否仍然处于聚焦状态
+          if (isPageFocusedRef.current) {
+            console.log('Page focused, triggering AgentLogs refresh (debounced)');
+            lastRefreshTimeRef.current = Date.now();
+            setRefreshTrigger(prev => prev + 1);
+          }
+          refreshDebounceTimerRef.current = null;
+        }, MIN_REFRESH_INTERVAL - timeSinceLastRefresh);
+      } else {
+        console.log('Page focused, triggering AgentLogs refresh');
+        lastRefreshTimeRef.current = now;
+        setRefreshTrigger(prev => prev + 1);
+      }
+      
+      // 检查上传定时器是否在运行，如果没有则重新启动
+      if (!uploadTimerRef.current) {
+        console.log('[EchoTab] ⚠️ Upload timer not running on focus, restarting...');
+        startUploadTimerRef.current();
+      } else {
+        console.log('[EchoTab] ✅ Upload timer is running (ID:', uploadTimerRef.current, ')');
+      }
+      
+      // 检查 memory 轮询定时器是否在运行，如果没有则重新启动（需要先有 latestMemoryId）
+      if (!memoryPollingTimerRef.current && latestMemoryIdRef.current) {
+        console.log('[EchoTab] ⚠️ Memory polling timer not running on focus, restarting...');
+        startMemoryPollingRef.current();
+      } else if (memoryPollingTimerRef.current) {
+        console.log('[EchoTab] ✅ Memory polling timer is running (ID:', memoryPollingTimerRef.current, ')');
+      } else {
+        console.log('[EchoTab] ⚠️ Memory polling timer not started (no latest memory id yet)');
+      }
+
+      // 检查是否有待处理的图片信息（从相机页面返回时）
+      const checkPendingPhoto = async () => {
+        const pendingPhoto = await storageManager.getPendingPhoto();
+        if (pendingPhoto) {
+          console.log('Found pending photo, processing...', pendingPhoto);
+          await processPendingPhotoRef.current(pendingPhoto);
+        }
+      };
+      checkPendingPhoto();
+
+      // 清理函数：标记页面为失焦状态，清除防抖定时器
+      return () => {
+        isPageFocusedRef.current = false;
+        if (refreshDebounceTimerRef.current) {
+          clearTimeout(refreshDebounceTimerRef.current);
+          refreshDebounceTimerRef.current = null;
+        }
+      };
+    }, []) // 移除所有依赖项，使用 ref 来访问最新的函数
+  );
+
   // 处理来自相机的照片
   useEffect(() => {
     if (params.photoUri && params.mode && userData) {
@@ -1531,71 +1720,109 @@ export default function EchoTab() {
       }
       processedPhotoRef.current = photoUri;
       
-      // 确保 isLoading 为 false，因为不重新获取历史消息
-      setIsLoading(false);
+      // 处理图片消息的逻辑
+      const processPhotoMessage = async () => {
+        // 检查当前是否已有历史消息（通过检查 messages 状态中是否有 assistant 类型的消息）
+        const hasHistoryMessages = messages.some(msg => msg.type === 'assistant' || msg.isMemory);
 
-      const messageId = `photo_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      const currentTimestamp = Date.now();
-      const userMsg: Message = {
-        id: messageId,
-        type: 'user', 
-        content: mode === 'photo-text' ? (description || '') : 'Please analyze this photo',
-        photoUri: photoUri,
-        timestamp: currentTimestamp,
+        // 如果历史消息已经初始化或者已有历史消息，不再重新获取，直接处理图片消息
+        // 这样可以避免不必要的网络请求和界面刷新
+        if (historyInitializedRef.current || hasHistoryMessages) {
+          console.log('History already initialized or exists, skipping history fetch, directly processing photo', {
+            historyInitialized: historyInitializedRef.current,
+            hasHistoryMessages,
+            messagesCount: messages.length
+          });
+          setIsLoading(false);
+        } else {
+          // 如果历史消息还没有初始化，先加载历史消息，然后再处理图片
+          // 这样可以确保历史消息不会丢失
+          console.log('History not initialized yet, loading history first before processing photo');
+          setIsLoading(true);
+          historyInitializedRef.current = true; // 标记为已初始化，避免重复加载
+          try {
+            await fetchConversationHistory();
+          } catch (error) {
+            console.error('Failed to load conversation history before processing photo:', error);
+          } finally {
+            setIsLoading(false);
+          }
+        }
+
+        const messageId = `photo_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        const currentTimestamp = Date.now();
+        const userMsg: Message = {
+          id: messageId,
+          type: 'user', 
+          content: mode === 'photo-text' ? (description || '') : 'Please analyze this photo',
+          photoUri: photoUri,
+          timestamp: currentTimestamp,
+        };
+
+        console.log('Preparing to add user image message to interface:', {
+          id: userMsg.id,
+          type: userMsg.type,
+          hasPhotoUri: !!userMsg.photoUri,
+          photoUriPreview: userMsg.photoUri?.substring(0, 80),
+          content: userMsg.content
+        });
+        
+        // 使用函数式更新确保消息被正确添加
+        setMessages(prev => {
+          console.log('Current message list length:', prev.length);
+          // 检查是否已经存在相同的消息（避免重复）
+          const exists = prev.some(msg => msg.id === messageId || (msg.photoUri === photoUri && msg.type === 'user'));
+          if (exists) {
+            console.log('Message already exists, skipping add');
+            return prev;
+          }
+          const newMessages = [...prev, userMsg];
+          // 按时间戳排序，确保最新消息在底部
+          const sorted = sortMessagesByTimestamp(newMessages);
+          console.log('✅ Successfully added message, updated message list length:', sorted.length);
+          console.log('Latest message:', sorted[sorted.length - 1]);
+          return sorted;
+        });
+        
+        // 根据模式设置消息文本
+        const messageText = mode === 'photo-text' && description 
+          ? description 
+          : 'Please analyze this photo';
+        
+        console.log('Sending image message:', { 
+          mode, 
+          description, 
+          messageText, 
+          photoUri, 
+          imageDetectionType,
+          agentId 
+        });
+        
+        // 延迟清除 params，确保消息已经添加到状态中
+        setTimeout(() => {
+          // 传递图片URL和imageDetectionType给 handleStreamResponse
+          handleStreamResponse(messageText, photoUri, imageDetectionType);
+          
+          // 处理完成后，清除 params 避免重复处理
+          // 使用 setParams 清除参数，而不是 replace，这样可以保持在当前页面
+          // 相机页面已经使用 replace 导航到这里，所以这里只需要清除参数即可
+          setTimeout(() => {
+            // 清除所有相关参数，避免重复处理
+            router.setParams({
+              photoUri: undefined,
+              mode: undefined,
+              description: undefined,
+              imageDetectionType: undefined,
+              agentId: undefined,
+            });
+          }, 100);
+        }, 50);
       };
 
-      console.log('Preparing to add user image message to interface:', {
-        id: userMsg.id,
-        type: userMsg.type,
-        hasPhotoUri: !!userMsg.photoUri,
-        photoUriPreview: userMsg.photoUri?.substring(0, 80),
-        content: userMsg.content
-      });
-      
-      // 使用函数式更新确保消息被正确添加
-      setMessages(prev => {
-        console.log('Current message list length:', prev.length);
-        // 检查是否已经存在相同的消息（避免重复）
-        const exists = prev.some(msg => msg.id === messageId || (msg.photoUri === photoUri && msg.type === 'user'));
-        if (exists) {
-          console.log('Message already exists, skipping add');
-          return prev;
-        }
-        const newMessages = [...prev, userMsg];
-        // 按时间戳排序，确保最新消息在底部
-        const sorted = sortMessagesByTimestamp(newMessages);
-        console.log('✅ Successfully added message, updated message list length:', sorted.length);
-        console.log('Latest message:', sorted[sorted.length - 1]);
-        return sorted;
-      });
-      
-      // 根据模式设置消息文本
-      const messageText = mode === 'photo-text' && description 
-        ? description 
-        : 'Please analyze this photo';
-      
-      console.log('Sending image message:', { 
-        mode, 
-        description, 
-        messageText, 
-        photoUri, 
-        imageDetectionType,
-        agentId 
-      });
-      
-      // 延迟清除 params，确保消息已经添加到状态中
-      setTimeout(() => {
-        // 传递图片URL和imageDetectionType给 handleStreamResponse
-        handleStreamResponse(messageText, photoUri, imageDetectionType);
-        
-        // 处理完成后，清除 params 避免重复处理
-        // 使用 router.replace 清除参数，但延迟执行确保状态已更新
-        setTimeout(() => {
-          router.replace('/(tabs)');
-        }, 100);
-      }, 50);
+      // 执行处理逻辑
+      processPhotoMessage();
     }
-  }, [params.photoUri, params.mode, params.description, params.imageDetectionType, params.agentId, userData, handleStreamResponse, router, sortMessagesByTimestamp]);
+  }, [params.photoUri, params.mode, params.description, params.imageDetectionType, params.agentId, userData, handleStreamResponse, router, sortMessagesByTimestamp, fetchConversationHistory, messages]);
 
   // 将 function call 结果发送回服务器
   const sendFunctionCallResult = useCallback(async (callId: string, functionName: string, result: any) => {

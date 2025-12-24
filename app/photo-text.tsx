@@ -4,6 +4,7 @@ import { ChevronLeft } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import storageManager from '../src/utils/storage';
 
 export default function PhotoTextScreen() {
   const [description, setDescription] = useState('');
@@ -11,11 +12,26 @@ export default function PhotoTextScreen() {
   const params = useLocalSearchParams();
   const photoUri = params.photoUri as string;
 
-  function handleSubmit() {
-    router.push({
-      pathname: '/(tabs)',
-      params: { photoUri, description, agentId: params.agentId, mode: 'photo-text' }
-    });
+  async function handleSubmit() {
+    if (!description.trim()) {
+      return;
+    }
+
+    // 存储待处理的图片信息（包含描述文字）
+    const photoData = {
+      photoUri,
+      agentId: params.agentId as string,
+      imageDetectionType: (params.imageDetectionType as string) || 'full',
+      mode: 'photo-text' as const,
+      description: description.trim(),
+    };
+
+    // 存储待处理的图片信息
+    await storageManager.setPendingPhoto(photoData);
+    console.log('Photo-text data stored, navigating back to chat page');
+
+    // 使用 router.back() 返回到聊天页面
+    router.back();
   }
 
   return (

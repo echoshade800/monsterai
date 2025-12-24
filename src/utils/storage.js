@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   CACHE: 'cache',
   REMINDER_SELECTIONS: 'reminderSelections', // Reminder 选择结果
   MOBILE_DATA_UPLOAD_HISTORY: 'mobileDataUploadHistory', // 手机数据上传历史
+  PENDING_PHOTO: 'pendingPhoto', // 待处理的图片信息（从相机页面返回时使用）
 };
 
 // 用户数据结构
@@ -495,6 +496,56 @@ class StorageManager {
       return true;
     } catch (error) {
       console.error('Failed to clear reminder selection:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 存储待处理的图片信息（从相机页面返回时使用）
+   * @param {Object} photoData - 图片数据 { photoUri, agentId, imageDetectionType, mode, description? }
+   * @returns {Promise<boolean>} 存储是否成功
+   */
+  async setPendingPhoto(photoData) {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.PENDING_PHOTO, JSON.stringify(photoData));
+      console.log('Pending photo stored:', photoData);
+      return true;
+    } catch (error) {
+      console.error('Failed to store pending photo:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取待处理的图片信息
+   * @returns {Promise<Object|null>} 图片数据或 null
+   */
+  async getPendingPhoto() {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.PENDING_PHOTO);
+      if (data) {
+        const photoData = JSON.parse(data);
+        console.log('Pending photo retrieved:', photoData);
+        return photoData;
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to get pending photo:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 清除待处理的图片信息
+   * @returns {Promise<boolean>} 清除是否成功
+   */
+  async clearPendingPhoto() {
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEYS.PENDING_PHOTO);
+      console.log('Pending photo cleared');
+      return true;
+    } catch (error) {
+      console.error('Failed to clear pending photo:', error);
       return false;
     }
   }

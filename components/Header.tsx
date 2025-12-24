@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { Check, User } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -98,6 +98,8 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
   // Fetch agent log data from API
   const fetchAgentLogs = useCallback(async () => {
     try {
+      // 添加调用栈日志，帮助排查频繁调用的问题
+      console.log('[Header][fetchAgentLogs] Called', new Error().stack?.split('\n').slice(1, 4).join('\n'));
       setIsLoadingLogs(true);
       const baseHeaders = await getHeadersWithPassId();
       const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
@@ -110,7 +112,7 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
           },
         }
       );
-      console.log('fetchAgentLogs response', response);
+      console.log('[Header][fetchAgentLogs] response', response);
 
       if (response.isSuccess() && response.data) {
         // Transform API response to log entries format
@@ -272,15 +274,25 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
     }
   }, [todoItem, isDone]);
 
-  // Fetch logs on mount
+  // Fetch logs on mount (只在组件首次挂载时执行一次)
+  const hasMountedRef = useRef(false);
   useEffect(() => {
-    fetchAgentLogs();
-    fetchTodoList();
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      console.log('[Header] Component mounted, fetching initial data');
+      fetchAgentLogs();
+      fetchTodoList();
+    }
   }, [fetchAgentLogs, fetchTodoList]);
 
   // 当 refreshTrigger 变化时，重新获取 AgentLogs
+  // 使用 useRef 来跟踪上次的 refreshTrigger 值，避免重复请求
+  const lastRefreshTriggerRef = useRef<number | undefined>(undefined);
   useEffect(() => {
-    if (refreshTrigger !== undefined) {
+    // 只有当 refreshTrigger 真正变化且不是初始值时才触发刷新
+    if (refreshTrigger !== undefined && refreshTrigger !== lastRefreshTriggerRef.current) {
+      lastRefreshTriggerRef.current = refreshTrigger;
+      console.log('[Header] refreshTrigger changed, fetching AgentLogs', refreshTrigger);
       fetchAgentLogs();
     }
   }, [refreshTrigger, fetchAgentLogs]);
