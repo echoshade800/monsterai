@@ -1,4 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard';
+import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
@@ -597,6 +598,7 @@ export function ConversationSection({
   keyboardHeight = 0,
   onSendMessage
 }: ConversationSectionProps) {
+  const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   const dot1Anim = useRef(new Animated.Value(0.4)).current;
   const dot2Anim = useRef(new Animated.Value(0.4)).current;
@@ -854,10 +856,31 @@ export function ConversationSection({
       )}
       {/* 调试信息 */}
       {__DEV__ && (
-        <View style={{ padding: 10, backgroundColor: 'rgba(0,0,0,0.1)' }}>
-          <Text style={{ fontSize: 10 }}>isSending: {String(isSending)}</Text>
-          <Text style={{ fontSize: 10 }}>currentResponse: {currentResponse ? 'Has content' : 'Empty'}</Text>
-          <Text style={{ fontSize: 10 }}>Show indicator: {String(isSending && !currentResponse)}</Text>
+        <View style={styles.debugContainer}>
+          <View style={styles.debugInfo}>
+            <Text style={styles.debugText}>isSending: {String(isSending)}</Text>
+            <Text style={styles.debugText}>currentResponse: {currentResponse ? 'Has content' : 'Empty'}</Text>
+            <Text style={styles.debugText}>Show indicator: {String(isSending && !currentResponse)}</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.debugButton}
+            onPress={() => {
+              try {
+                const messagesData = JSON.stringify(messages);
+                router.push({
+                  pathname: '/conversation-debug',
+                  params: {
+                    messagesData: messagesData,
+                  },
+                });
+              } catch (error) {
+                console.error('Failed to navigate to debug page:', error);
+                Alert.alert('Error', 'Failed to open debug page');
+              }
+            }}
+          >
+            <Text style={styles.debugButtonText}>调试</Text>
+          </TouchableOpacity>
         </View>
       )}
     </ScrollView>
@@ -1028,13 +1051,11 @@ const styles = StyleSheet.create({
   },
   memoryMessageContainer: {
     flexDirection: 'column',
-    marginBottom: 15,
+    marginBottom: 5,
     marginTop: 8,
-    backgroundColor: '#F0F4FF',
+    backgroundColor: '#D0F4FF',
     borderRadius: 16,
-    padding: 14,
-    borderLeftWidth: 4,
-    borderLeftColor: '#6B8EFF',
+    paddingLeft: 14,
     shadowColor: '#6B8EFF',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1044,7 +1065,7 @@ const styles = StyleSheet.create({
   memoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 2,
     gap: 6,
   },
   memoryIcon: {
@@ -1059,5 +1080,32 @@ const styles = StyleSheet.create({
   memoryContentWrapper: {
     alignSelf: 'flex-start',
     flexShrink: 1,
+  },
+  debugContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
+  debugInfo: {
+    flex: 1,
+  },
+  debugText: {
+    fontSize: 10,
+    fontFamily: 'Nunito_400Regular',
+    color: '#666666',
+  },
+  debugButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#206BDB',
+    borderRadius: 6,
+    marginLeft: 10,
+  },
+  debugButtonText: {
+    fontSize: 12,
+    fontFamily: 'Nunito_600SemiBold',
+    color: '#FFFFFF',
   },
 });

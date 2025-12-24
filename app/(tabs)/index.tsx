@@ -228,10 +228,49 @@ export default function EchoTab() {
       const operation = item.operation || item.operation_type || item.op || undefined;
       
       // 提取时间戳（支持多种可能的字段名）
-      const timestamp = item.created_at || item.timestamp || item.createdAt || item.time || undefined;
-      const messageTimestamp = timestamp 
-        ? (typeof timestamp === 'number' ? timestamp : parseInt(String(timestamp), 10) || Date.now())
-        : Date.now();
+      // 注意：不包含 item.time，因为 time 字段可能是时间字符串（如 "10:30"）而不是时间戳
+      const timestamp = item.created_at || item.timestamp || item.createdAt || undefined;
+      
+      // 验证并转换时间戳
+      let messageTimestamp = Date.now(); // 默认使用当前时间
+      if (timestamp !== undefined && timestamp !== null) {
+        let parsedTimestamp: number;
+        
+        if (typeof timestamp === 'number') {
+          // 已经是数字，直接使用
+          parsedTimestamp = timestamp;
+        } else {
+          const timestampStr = String(timestamp);
+          // 先尝试直接解析为数字（如果是纯数字字符串）
+          const directParse = parseInt(timestampStr, 10);
+          
+          // 如果是有效的数字时间戳（大于 1000000000000），直接使用
+          if (!isNaN(directParse) && directParse > 1000000000000) {
+            parsedTimestamp = directParse;
+          } else {
+            // 尝试解析 ISO 日期字符串（如 "2025-12-24T06:36:49.239000"）
+            const dateParse = Date.parse(timestampStr);
+            if (!isNaN(dateParse) && dateParse > 0) {
+              parsedTimestamp = dateParse;
+            } else {
+              parsedTimestamp = NaN;
+            }
+          }
+        }
+        
+        // 验证时间戳是否合理（应该是13位数字，大于 1000000000000，即 2001-09-09）
+        // 如果解析失败或值不合理，使用当前时间
+        if (!isNaN(parsedTimestamp) && parsedTimestamp > 1000000000000) {
+          messageTimestamp = parsedTimestamp;
+        } else {
+          console.warn('[convertItem] Invalid timestamp value:', {
+            original: timestamp,
+            parsed: parsedTimestamp,
+            messageId,
+            usingDefault: true
+          });
+        }
+      }
       
       // 调试日志：检查 operation 字段
       if (type === 'user' && (item.operation !== undefined || item.operation_type !== undefined || item.op !== undefined)) {
