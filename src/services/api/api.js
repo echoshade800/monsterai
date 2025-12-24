@@ -152,6 +152,7 @@ export const API_ENDPOINTS = {
     STREAM: '/conversation/stream',
     HISTORY: '/conversation/history',
     HISTORY_INFO: '/conversation/history/info',
+    MEMORY_NEWER: '/conversation/memory/newer',
   },
 
   AGENT_LOG: {

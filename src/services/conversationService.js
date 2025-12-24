@@ -31,6 +31,46 @@ class ConversationService {
       };
     }
   }
+
+  /**
+   * 获取 memory 列表
+   * @param {Object} params - 查询参数
+   * @param {number} params.limit - 返回数量限制，默认 20
+   * @param {string} params.memory_id - 最新的 memory id，用于获取比该 id 更新的 memory
+   * @returns {Promise<Object>} memory 列表数据
+   */
+  async getMemoryList(params = {}) {
+    try {
+      console.log('[ConversationService][getMemoryList] Starting to fetch memory list', params);
+
+      const { limit = 20, memory_id } = params;
+      let url = `${API_ENDPOINTS.CONVERSATION.MEMORY_NEWER}?limit=${limit}`;
+      
+      // 如果提供了 memory_id，添加到查询参数中
+      if (memory_id) {
+        url += `&memory_id=${encodeURIComponent(memory_id)}`;
+      }
+
+      // 使用 GET 请求
+      // Headers 会自动通过 api.get 方法添加（device, timezone, version, passId）
+      const response = await api.get(url);
+      
+      console.log('[ConversationService][getMemoryList] response', response);
+
+      return {
+        success: true,
+        data: response.data,
+        message: response.getMessage(),
+      };
+    } catch (error) {
+      console.error('[ConversationService][getMemoryList] error', error);
+      return {
+        success: false,
+        error: error,
+        message: error.message || 'Failed to fetch memory list',
+      };
+    }
+  }
 }
 
 // 创建单例实例

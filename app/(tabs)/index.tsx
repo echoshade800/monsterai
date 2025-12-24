@@ -64,6 +64,8 @@ interface Message {
   photoUri?: string;
   reminderCardData?: ReminderCardData;
   operation?: string; // 服务端下发的 operation 字段
+  isMemory?: boolean; // 标识是否为 memory 消息
+  timestamp?: number; // 消息时间戳（用于排序）
 }
 
 export default function EchoTab() {
@@ -75,6 +77,8 @@ export default function EchoTab() {
   const uploadTimerRef = useRef<NodeJS.Timeout | null>(null);
   const launchApiCalledRef = useRef<boolean>(false);
   const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const memoryPollingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const latestMemoryIdRef = useRef<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -223,6 +227,12 @@ export default function EchoTab() {
       // 提取 operation 字段（支持多种可能的字段名）
       const operation = item.operation || item.operation_type || item.op || undefined;
       
+      // 提取时间戳（支持多种可能的字段名）
+      const timestamp = item.created_at || item.timestamp || item.createdAt || item.time || undefined;
+      const messageTimestamp = timestamp 
+        ? (typeof timestamp === 'number' ? timestamp : parseInt(String(timestamp), 10) || Date.now())
+        : Date.now();
+      
       // 调试日志：检查 operation 字段
       if (type === 'user' && (item.operation !== undefined || item.operation_type !== undefined || item.op !== undefined)) {
         console.log('Converting message with operation field:', {
@@ -271,6 +281,7 @@ export default function EchoTab() {
         avatar: type === 'assistant' ? '🦑' : undefined,
         photoUri,
         operation,
+        timestamp: messageTimestamp,
       };
     };
     
@@ -492,6 +503,12 @@ export default function EchoTab() {
         uploadTimerRef.current = null;
         console.log('[EchoTab] 🛑 Stopped scheduled upload timer');
       }
+      // 清理 memory 轮询定时器
+      if (memoryPollingTimerRef.current) {
+        clearInterval(memoryPollingTimerRef.current);
+        memoryPollingTimerRef.current = null;
+        console.log('[EchoTab] 🛑 Stopped memory polling timer');
+      }
     };
   }, [requestAllPermissions, callLaunchApi]);
 
@@ -536,6 +553,16 @@ export default function EchoTab() {
   const generateMsgId = () => {
     return Date.now().toString();
   };
+
+  // 按时间戳排序消息（最旧的在前，最新的在后）
+  const sortMessagesByTimestamp = useCallback((messages: Message[]): Message[] => {
+    return [...messages].sort((a, b) => {
+      const timestampA = a.timestamp || 0;
+      const timestampB = b.timestamp || 0;
+      // 按时间戳从小到大排序（最旧的在前，最新的在后）
+      return timestampA - timestampB;
+    });
+  }, []);
 
   // 通用的流式响应处理函数（带重试机制）
   const handleStreamRequest = useCallback(async (config: {
@@ -635,11 +662,14 @@ export default function EchoTab() {
                   if (accumulatedText) {
                     setMessages(prev => {
                       const filtered = prev.filter(msg => msg.id !== tempMessageId);
-                      return [...filtered, {
+                      const newMessage: Message = {
                         id: Date.now().toString(),
                         type: 'assistant' as const,
                         content: accumulatedText,
-                      }];
+                        timestamp: Date.now(),
+                      };
+                      const updated = [...filtered, newMessage];
+                      return sortMessagesByTimestamp(updated);
                     });
                   }
                   // 清理状态
@@ -710,12 +740,16 @@ export default function EchoTab() {
                     if (responseData.msg_type === 'text') {
                       setMessages(prev => {
                         const filtered = prev.filter(msg => msg.id !== tempMessageId);
-                        return [...filtered, {
+                        const newMessage: Message = {
                           id: responseData._id || Date.now().toString(),
                           type: 'assistant' as const,
                           content: responseData.text || accumulatedText,
                           operation: responseData.operation || undefined,
-                        }];
+                          timestamp: responseData.created_at || responseData.timestamp || Date.now(),
+                        };
+                        const updated = [...filtered, newMessage];
+                        // 按时间戳排序，确保最新消息在底部
+                        return sortMessagesByTimestamp(updated);
                       });
                     }
                   } else {
@@ -851,11 +885,14 @@ export default function EchoTab() {
       if (accumulatedText) {
         setMessages(prev => {
           const filtered = prev.filter(msg => msg.id !== tempMessageId);
-          return [...filtered, {
+          const newMessage: Message = {
             id: Date.now().toString(),
             type: 'assistant' as const,
             content: accumulatedText,
-          }];
+            timestamp: Date.now(),
+          };
+          const updated = [...filtered, newMessage];
+          return sortMessagesByTimestamp(updated);
         });
       }
 
@@ -889,7 +926,7 @@ export default function EchoTab() {
       console.error(`${logPrefix}Failed:`, error);
       handleFinalError();
     }
-  }, [apiConfig]);
+  }, [apiConfig, sortMessagesByTimestamp]);
 
   // 发送新用户欢迎语消息
   const sendNewUserMessage = useCallback(async (userDataParam = null) => {
@@ -1007,6 +1044,174 @@ export default function EchoTab() {
     }
   }, [userData, handleStreamRequest]);
 
+  
+
+  // 将 memory 数据转换为 Message 格式
+  const convertMemoryToMessages = useCallback((memoryList: any[]): Message[] => {
+    if (!memoryList || !Array.isArray(memoryList) || memoryList.length === 0) {
+      return [];
+    }
+
+    return memoryList.map((memoryItem) => {
+      // 使用 memory 字段作为内容，如果没有则使用 raw_text
+      const content = memoryItem.memory || memoryItem.raw_text || '';
+      
+      // 提取时间戳（created_at 字段）
+      const timestamp = memoryItem.created_at || Date.now();
+      
+      return {
+        id: memoryItem.id || `memory_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        type: 'assistant' as const,
+        content: content,
+        avatar: '🦑',
+        isMemory: true, // 标识为 memory 消息
+        timestamp: typeof timestamp === 'number' ? timestamp : parseInt(timestamp, 10) || Date.now(),
+      };
+    });
+  }, []);
+
+  // 获取 memory 列表
+  const fetchMemoryList = useCallback(async () => {
+    try {
+      console.log('[fetchMemoryList] Starting to fetch memory list');
+      const result: any = await conversationService.getMemoryList({ limit: 20 } as any);
+
+      if (result.success && result.data && Array.isArray(result.data)) {
+        console.log('[fetchMemoryList] Memory list fetched:', {
+          count: result.data.length,
+          sampleItem: result.data[0]
+        });
+
+        // 将 memory 数据转换为 Message 格式
+        const memoryMessages = convertMemoryToMessages(result.data);
+        
+        if (memoryMessages.length > 0) {
+          // 更新最新的 memory id（取第一条，因为 API 返回的是按时间倒序的）
+          const latestMemory = result.data[0];
+          if (latestMemory && latestMemory.id) {
+            latestMemoryIdRef.current = latestMemory.id;
+            console.log('[fetchMemoryList] Updated latest memory id:', latestMemory.id);
+          }
+          
+          // 将 memory 消息合并到消息列表中，并按时间戳排序
+          setMessages(prev => {
+            // 创建一个消息ID集合，用于去重
+            const existingIds = new Set(prev.map(msg => msg.id));
+            // 只添加不存在的 memory 消息
+            const newMemoryMessages = memoryMessages.filter(msg => !existingIds.has(msg.id));
+            
+            if (newMemoryMessages.length > 0) {
+              // 合并所有消息（包括新的 memory 消息和现有消息）
+              const merged = [...prev, ...newMemoryMessages];
+              // 按时间戳排序（最旧的在前，最新的在后）
+              const sorted = sortMessagesByTimestamp(merged);
+              console.log('[fetchMemoryList] Added and sorted memory messages:', {
+                newCount: newMemoryMessages.length,
+                totalCount: sorted.length,
+                sortedByTimestamp: true
+              });
+              return sorted;
+            }
+            return prev;
+          });
+        }
+      } else {
+        console.warn('[fetchMemoryList] Failed to get memory list:', result.message);
+      }
+    } catch (error) {
+      console.error('[fetchMemoryList] Error getting memory list:', error);
+    }
+  }, [convertMemoryToMessages, sortMessagesByTimestamp]);
+
+  // 轮询最新的 memory 内容
+  const pollLatestMemory = useCallback(async () => {
+    try {
+      const latestMemoryId = latestMemoryIdRef.current;
+      
+      if (!latestMemoryId) {
+        console.log('[pollLatestMemory] No latest memory id, skipping poll');
+        return;
+      }
+
+      console.log('[pollLatestMemory] Polling for new memory with memory_id:', latestMemoryId);
+      const result: any = await conversationService.getMemoryList({ 
+        limit: 20,
+        memory_id: latestMemoryId 
+      });
+
+      if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
+        console.log('[pollLatestMemory] New memory found:', {
+          count: result.data.length,
+          sampleItem: result.data[0]
+        });
+
+        // 将 memory 数据转换为 Message 格式
+        const memoryMessages = convertMemoryToMessages(result.data);
+        
+        if (memoryMessages.length > 0) {
+          // 更新最新的 memory id
+          const latestMemory = result.data[0];
+          if (latestMemory && latestMemory.id) {
+            latestMemoryIdRef.current = latestMemory.id;
+            console.log('[pollLatestMemory] Updated latest memory id:', latestMemory.id);
+          }
+          
+          // 将新的 memory 消息合并到消息列表中，并按时间戳排序
+          setMessages(prev => {
+            // 创建一个消息ID集合，用于去重
+            const existingIds = new Set(prev.map(msg => msg.id));
+            // 只添加不存在的 memory 消息
+            const newMemoryMessages = memoryMessages.filter(msg => !existingIds.has(msg.id));
+            
+            if (newMemoryMessages.length > 0) {
+              // 合并所有消息（包括新的 memory 消息和现有消息）
+              const merged = [...prev, ...newMemoryMessages];
+              // 按时间戳排序（最旧的在前，最新的在后）
+              const sorted = sortMessagesByTimestamp(merged);
+              console.log('[pollLatestMemory] Added and sorted new memory messages:', {
+                newCount: newMemoryMessages.length,
+                totalCount: sorted.length,
+                sortedByTimestamp: true
+              });
+              return sorted;
+            }
+            return prev;
+          });
+        }
+      } else {
+        console.log('[pollLatestMemory] No new memory found');
+      }
+    } catch (error) {
+      console.error('[pollLatestMemory] Error polling latest memory:', error);
+      // 静默处理错误，不阻塞轮询
+    }
+  }, [convertMemoryToMessages, sortMessagesByTimestamp]);
+
+  // 启动 memory 轮询定时器
+  const startMemoryPolling = useCallback(() => {
+    // 如果定时器已存在，先清理
+    if (memoryPollingTimerRef.current) {
+      console.log('[startMemoryPolling] Clearing existing polling timer');
+      clearInterval(memoryPollingTimerRef.current);
+      memoryPollingTimerRef.current = null;
+    }
+
+    console.log('[startMemoryPolling] Starting memory polling timer (every 5 seconds)');
+    
+    // 启动定时器，每5秒执行一次轮询
+    memoryPollingTimerRef.current = setInterval(async () => {
+      try {
+        console.log('[startMemoryPolling] Scheduled memory poll: polling for new memory...');
+        await pollLatestMemory();
+        console.log('[startMemoryPolling] Scheduled memory poll completed');
+      } catch (error) {
+        console.error('[startMemoryPolling] Scheduled memory poll failed:', error);
+      }
+    }, 5 * 1000); // 5秒 = 5 * 1000 毫秒
+    
+    console.log('[startMemoryPolling] Memory polling timer started successfully, timer ID:', memoryPollingTimerRef.current);
+  }, [pollLatestMemory]);
+
   // 获取对话历史
   const fetchConversationHistory = useCallback(async () => {
     try {
@@ -1025,10 +1230,10 @@ export default function EchoTab() {
         });
         
         const convertedMessages = convertToMessages(result.data);
-        // 反转消息数组，使最旧的消息在前，最新的在后
-        historyMessages = convertedMessages.reverse();
+        // 不反转，保持原始顺序，后续会按时间戳排序
+        historyMessages = convertedMessages;
         
-        // 合并历史消息和当前消息，确保新消息在最后
+        // 合并历史消息和当前消息，按时间戳排序
         setMessages(prev => {
           // 如果已经有消息，合并而不是替换
           if (prev.length > 0) {
@@ -1036,25 +1241,33 @@ export default function EchoTab() {
             const existingIds = new Set(prev.map(msg => msg.id));
             // 只添加不存在的历史消息
             const newHistoryMessages = historyMessages.filter(msg => !existingIds.has(msg.id));
-            // 历史消息在前（最旧在前，最新在后），新消息在后（确保最新消息在最后）
-            const merged = [...newHistoryMessages, ...prev];
-            console.log('Merging messages:', { 
+            // 合并所有消息
+            const merged = [...prev, ...newHistoryMessages];
+            // 按时间戳排序（最旧的在前，最新的在后）
+            const sorted = sortMessagesByTimestamp(merged);
+            console.log('Merging and sorting messages by timestamp:', { 
               prevCount: prev.length, 
               historyCount: historyMessages.length, 
               newCount: newHistoryMessages.length,
-              mergedCount: merged.length,
-              note: 'History messages first, new messages last, ensuring latest message is at the end'
+              mergedCount: sorted.length,
+              note: 'Messages sorted by timestamp (oldest first, newest last)'
             });
-            return merged;
+            return sorted;
           }
-          // 如果没有现有消息，直接使用历史消息
-          return historyMessages;
+          // 如果没有现有消息，按时间戳排序后返回历史消息
+          return sortMessagesByTimestamp(historyMessages);
         });
       } else {
         console.error('Failed to get conversation history:', result.message);
         // 只有在没有现有消息时才清空
         setMessages(prev => prev.length > 0 ? prev : []);
       }
+      
+      // 获取 memory 列表
+      await fetchMemoryList();
+      
+      // 启动 memory 轮询（在获取初始 memory 列表后）
+      startMemoryPolling();
       
       // 根据历史消息是否为空，调用相应的函数
       // 如果 userData 未加载，尝试从 storageManager 获取
@@ -1095,7 +1308,7 @@ export default function EchoTab() {
     } finally {
       setIsLoading(false);
     }
-  }, [userData, sendNewUserMessage, sendEnterUserMessage]);
+  }, [userData, sendNewUserMessage, sendEnterUserMessage, fetchMemoryList, sortMessagesByTimestamp, startMemoryPolling]);
 
   // 组件挂载时获取对话历史（只在首次挂载且没有照片参数时获取）
   useEffect(() => {
@@ -1118,7 +1331,7 @@ export default function EchoTab() {
     fetchConversationHistory();
   }, [fetchConversationHistory, params.photoUri]);
 
-  // 每次页面聚焦时，触发刷新 AgentLogs 并检查上传定时器
+  // 每次页面聚焦时，触发刷新 AgentLogs 并检查上传定时器和 memory 轮询定时器
   useFocusEffect(
     useCallback(() => {
       console.log('Page focused, triggering AgentLogs refresh');
@@ -1131,7 +1344,17 @@ export default function EchoTab() {
       } else {
         console.log('[EchoTab] ✅ Upload timer is running (ID:', uploadTimerRef.current, ')');
       }
-    }, [startUploadTimer])
+      
+      // 检查 memory 轮询定时器是否在运行，如果没有则重新启动（需要先有 latestMemoryId）
+      if (!memoryPollingTimerRef.current && latestMemoryIdRef.current) {
+        console.log('[EchoTab] ⚠️ Memory polling timer not running on focus, restarting...');
+        startMemoryPolling();
+      } else if (memoryPollingTimerRef.current) {
+        console.log('[EchoTab] ✅ Memory polling timer is running (ID:', memoryPollingTimerRef.current, ')');
+      } else {
+        console.log('[EchoTab] ⚠️ Memory polling timer not started (no latest memory id yet)');
+      }
+    }, [startUploadTimer, startMemoryPolling])
   );
   
   // 检测消息中的 @mention 并返回对应的 param_name
@@ -1159,6 +1382,7 @@ export default function EchoTab() {
       setCurrentResponse('');
 
       const messageTimestamp = Date.now().toString();
+      const currentTimestamp = Date.now();
 
       // 添加用户消息（如果还没有添加的话，比如照片消息已经在useEffect中添加了）
       if (!photoUri) {
@@ -1166,8 +1390,13 @@ export default function EchoTab() {
           id: Date.now().toString(),
           type: 'user',
           content: userMessage,
+          timestamp: currentTimestamp,
         };
-        setMessages(prev => [...prev, userMsg]);
+        setMessages(prev => {
+          const updated = [...prev, userMsg];
+          // 按时间戳排序，确保最新消息在底部
+          return sortMessagesByTimestamp(updated);
+        });
       }
 
       // 检测消息中的 @mention
@@ -1238,7 +1467,7 @@ export default function EchoTab() {
       Alert.alert('Error', 'Failed to send message, please try again');
       setIsSending(false);
     }
-  }, [userData, handleStreamRequest]);
+  }, [userData, handleStreamRequest, sortMessagesByTimestamp]);
 
   // 处理来自相机的照片
   useEffect(() => {
@@ -1260,11 +1489,13 @@ export default function EchoTab() {
       setIsLoading(false);
 
       const messageId = `photo_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const currentTimestamp = Date.now();
       const userMsg: Message = {
         id: messageId,
         type: 'user', 
         content: mode === 'photo-text' ? (description || '') : 'Please analyze this photo',
         photoUri: photoUri,
+        timestamp: currentTimestamp,
       };
 
       console.log('Preparing to add user image message to interface:', {
@@ -1285,9 +1516,11 @@ export default function EchoTab() {
           return prev;
         }
         const newMessages = [...prev, userMsg];
-        console.log('✅ Successfully added message, updated message list length:', newMessages.length);
-        console.log('Latest message:', newMessages[newMessages.length - 1]);
-        return newMessages;
+        // 按时间戳排序，确保最新消息在底部
+        const sorted = sortMessagesByTimestamp(newMessages);
+        console.log('✅ Successfully added message, updated message list length:', sorted.length);
+        console.log('Latest message:', sorted[sorted.length - 1]);
+        return sorted;
       });
       
       // 根据模式设置消息文本
@@ -1316,7 +1549,7 @@ export default function EchoTab() {
         }, 100);
       }, 50);
     }
-  }, [params.photoUri, params.mode, params.description, params.imageDetectionType, params.agentId, userData, handleStreamResponse, router]);
+  }, [params.photoUri, params.mode, params.description, params.imageDetectionType, params.agentId, userData, handleStreamResponse, router, sortMessagesByTimestamp]);
 
   // 将 function call 结果发送回服务器
   const sendFunctionCallResult = useCallback(async (callId: string, functionName: string, result: any) => {
@@ -1441,6 +1674,7 @@ export default function EchoTab() {
       setCurrentResponse('');
 
       const messageTimestamp = Date.now().toString();
+      const currentTimestamp = Date.now();
 
       // 添加用户消息，使用 text 作为显示内容
       // 注意：这个消息会被 ConversationSection 过滤掉（因为 isOperation: true）
@@ -1449,8 +1683,13 @@ export default function EchoTab() {
         type: 'user',
         content: text,
         operation: operation, // 标记为 operation 消息，用于在界面中过滤显示
+        timestamp: currentTimestamp,
       };
-      setMessages(prev => [...prev, userMsg]);
+      setMessages(prev => {
+        const updated = [...prev, userMsg];
+        // 按时间戳排序，确保最新消息在底部
+        return sortMessagesByTimestamp(updated);
+      });
 
       // 检测消息中的 @mention（使用 text 进行检测）
       const mentionedAgent = detectMention(text);
@@ -1505,7 +1744,7 @@ export default function EchoTab() {
       Alert.alert('Error', 'Failed to send message, please try again');
       setIsSending(false);
     }
-  }, [userData, handleStreamRequest, detectMention, handleFunctionCall]);
+  }, [userData, handleStreamRequest, detectMention, handleFunctionCall, sortMessagesByTimestamp]);
 
   // 发送消息
   const sendMessage = useCallback((message: string) => {

@@ -51,6 +51,7 @@ interface Message {
   photoUri?: string;
   reminderCardData?: ReminderCardData;
   operation?: string; // 服务端下发的 operation 字段
+  isMemory?: boolean; // 标识是否为 memory 消息
 }
 
 interface ConversationSectionProps {
@@ -128,7 +129,7 @@ const markdownStyles = {
     fontFamily: 'Nunito_700Bold',
   },
   em: {
-    fontStyle: 'italic',
+    fontStyle: 'italic' as const,
   },
   code_inline: {
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
@@ -157,7 +158,7 @@ const markdownStyles = {
   },
   link: {
     color: '#206BDB',
-    textDecorationLine: 'underline',
+    textDecorationLine: 'underline' as const,
   },
   blockquote: {
     borderLeftWidth: 4,
@@ -757,6 +758,28 @@ export function ConversationSection({
         }
 
         if (message.type === 'assistant') {
+          // 如果是 memory 消息，使用独特的样式
+          if (message.isMemory) {
+            return (
+              <View key={message.id} style={styles.memoryMessageContainer} collapsable={false}>
+                <View style={styles.memoryHeader}>
+                  <Text style={styles.memoryIcon}>🧠</Text>
+                  <Text style={styles.memoryLabel}>记忆</Text>
+                </View>
+                <TouchableOpacity
+                  onLongPress={() => handleCopyMessage(message.content)}
+                  delayLongPress={500}
+                  activeOpacity={1}
+                  style={styles.memoryContentWrapper}
+                  hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+                >
+                  {renderMarkdownWithMonsterTags(message.content)}
+                </TouchableOpacity>
+              </View>
+            );
+          }
+          
+          // 普通 assistant 消息
           return (
             <View key={message.id} style={styles.assistantMessageContainer} collapsable={false}>
               <TouchableOpacity
@@ -1002,5 +1025,39 @@ const styles = StyleSheet.create({
   reminderCardContainer: {
     marginBottom: 15,
     width: '100%',
+  },
+  memoryMessageContainer: {
+    flexDirection: 'column',
+    marginBottom: 15,
+    marginTop: 8,
+    backgroundColor: '#F0F4FF',
+    borderRadius: 16,
+    padding: 14,
+    borderLeftWidth: 4,
+    borderLeftColor: '#6B8EFF',
+    shadowColor: '#6B8EFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  memoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 6,
+  },
+  memoryIcon: {
+    fontSize: 16,
+  },
+  memoryLabel: {
+    fontSize: 13,
+    fontFamily: 'Nunito_600SemiBold',
+    color: '#6B8EFF',
+    letterSpacing: 0.5,
+  },
+  memoryContentWrapper: {
+    alignSelf: 'flex-start',
+    flexShrink: 1,
   },
 });
