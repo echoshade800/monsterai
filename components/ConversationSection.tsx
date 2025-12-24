@@ -3,57 +3,8 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
+import type { Message } from '../constants/types';
 import { ReminderCard } from './ReminderCard';
-
-// 一次性提醒的时间信息
-interface OneTimePattern {
-  scheduled_time: string;
-}
-
-// 重复规则的配置
-interface RepeatRulePattern {
-  type: string; // 例如: "daily", "weekly" 等
-}
-
-// ReminderItem 基础字段
-interface ReminderItemBase {
-  time: string;
-  title: string;
-  task_type: string;
-  original_text?: string;
-}
-
-// 一次性提醒类型
-interface ReminderItemOneTime extends ReminderItemBase {
-  pattern_type: "one_time";
-  one_time: OneTimePattern;
-}
-
-// 重复提醒类型
-interface ReminderItemRepeatRule extends ReminderItemBase {
-  pattern_type: "repeat_rule";
-  repeat_rule: RepeatRulePattern;
-}
-
-// ReminderItem 联合类型，确保 one_time 和 repeat_rule 互斥
-type ReminderItem = ReminderItemOneTime | ReminderItemRepeatRule;
-
-interface ReminderCardData {
-  title: string;
-  monster: string;
-  reminders: ReminderItem[];
-}
-
-interface Message {
-  id: string;
-  type: 'user' | 'assistant' | 'timestamp' | 'reminderCard';
-  content: string;
-  avatar?: string;
-  photoUri?: string;
-  reminderCardData?: ReminderCardData;
-  operation?: string; // 服务端下发的 operation 字段
-  isMemory?: boolean; // 标识是否为 memory 消息
-}
 
 interface ConversationSectionProps {
   messages?: Message[];
@@ -63,6 +14,60 @@ interface ConversationSectionProps {
   keyboardHeight?: number;
   onSendMessage?: (operation: string, text: string) => void; // 发送消息的回调函数，operation 和 text 字段
 }
+
+// 格式化时间戳为可读时间
+const formatMessageTimestamp = (timestamp?: number): string | null => {
+  if (!timestamp) return null;
+  
+  const date = new Date(timestamp);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  
+  // 计算时间差（毫秒）
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  // 获取时间部分
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const timeStr = `${hours}:${minutes}`;
+  
+  // 如果是今天
+  if (messageDate.getTime() === today.getTime()) {
+    // 1分钟内：刚刚
+    if (diffMins < 1) {
+      return '刚刚';
+    }
+    // 1小时内：X分钟前
+    if (diffMins < 60) {
+      return `${diffMins}分钟前`;
+    }
+    // 今天：显示时间
+    return timeStr;
+  }
+  
+  // 如果是昨天
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (messageDate.getTime() === yesterday.getTime()) {
+    return `昨天 ${timeStr}`;
+  }
+  
+  // 如果是一周内
+  if (diffDays < 7) {
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const weekday = weekdays[date.getDay()];
+    return `${weekday} ${timeStr}`;
+  }
+  
+  // 更早的日期：显示月-日 时:分
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${month}-${day} ${timeStr}`;
+};
 
 // Monster 统一配置（包含名称、颜色和头像）
 const MONSTER_CONFIG: Record<string, { color: string; avatar: string }> = {
@@ -762,6 +767,8 @@ export function ConversationSection({
         }
 
         if (message.type === 'assistant') {
+          const timestampText = formatMessageTimestamp(message.timestamp);
+          
           // 如果是 memory 消息，使用独特的样式
           if (message.isMemory) {
             return (
@@ -769,6 +776,9 @@ export function ConversationSection({
                 <View style={styles.memoryHeader}>
                   <Text style={styles.memoryIcon}>🧠</Text>
                   <Text style={styles.memoryLabel}>记忆</Text>
+                  {timestampText && (
+                    <Text style={styles.messageTimestamp}>{timestampText}</Text>
+                  )}
                 </View>
                 <TouchableOpacity
                   onLongPress={() => handleCopyMessage(message.content)}
@@ -795,29 +805,39 @@ export function ConversationSection({
               >
                 {renderMarkdownWithMonsterTags(message.content)}
               </TouchableOpacity>
+              {timestampText && (
+                <Text style={styles.messageTimestamp}>{timestampText}</Text>
+              )}
             </View>
           );
         }
 
+        const timestampText = formatMessageTimestamp(message.timestamp);
+        
         return (
           <View key={message.id} style={styles.userMessageContainer}>
-            <TouchableOpacity
-              onLongPress={() => handleCopyMessage(message.content || 'Image message')}
-              delayLongPress={500}
-              activeOpacity={1}
-              style={[styles.userBubble, message.photoUri && styles.userBubbleWithPhoto]}
-            >
-              {message.photoUri && (
-                <MessageImage uri={message.photoUri} />
+            <View style={styles.userMessageWrapper}>
+              <TouchableOpacity
+                onLongPress={() => handleCopyMessage(message.content || 'Image message')}
+                delayLongPress={500}
+                activeOpacity={1}
+                style={[styles.userBubble, message.photoUri && styles.userBubbleWithPhoto]}
+              >
+                {message.photoUri && (
+                  <MessageImage uri={message.photoUri} />
+                )}
+                {message.content ? (
+                  <View style={message.photoUri && styles.textWithImage}>
+                    {renderMonsterColoredText(message.content)}
+                  </View>
+                ) : message.photoUri && !message.content ? (
+                  <Text style={styles.photoOnlyText}>📷 Image</Text>
+                ) : null}
+              </TouchableOpacity>
+              {timestampText && (
+                <Text style={[styles.messageTimestamp, styles.userMessageTimestamp]}>{timestampText}</Text>
               )}
-              {message.content ? (
-                <View style={message.photoUri && styles.textWithImage}>
-                  {renderMonsterColoredText(message.content)}
-                </View>
-              ) : message.photoUri && !message.content ? (
-                <Text style={styles.photoOnlyText}>📷 Image</Text>
-              ) : null}
-            </TouchableOpacity>
+            </View>
           </View>
         );
       })}
@@ -911,7 +931,7 @@ const styles = StyleSheet.create({
   assistantMessageContainer: {
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    marginBottom: 0,
+    marginBottom: 10,
     alignItems: 'flex-start',
   },
   assistantAvatar: {
@@ -922,6 +942,7 @@ const styles = StyleSheet.create({
   assistantTextWrapper: {
     alignSelf: 'flex-start',
     flexShrink: 1,
+    maxWidth: '85%',
   },
   assistantText: {
     fontSize: 15,
@@ -937,14 +958,19 @@ const styles = StyleSheet.create({
   userMessageContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 12,
-    marginBottom: 15,
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  userMessageWrapper: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    maxWidth: '85%',
   },
   userBubble: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 18,
     padding: 14,
-    maxWidth: '75%',
+    maxWidth: '100%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1053,8 +1079,8 @@ const styles = StyleSheet.create({
   },
   memoryMessageContainer: {
     flexDirection: 'column',
-    marginBottom: 5,
-    marginTop: 8,
+    marginBottom: 20,
+    marginTop: 20,
     backgroundColor: '#D0F4FF',
     borderRadius: 16,
     paddingLeft: 14,
@@ -1069,6 +1095,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 2,
     gap: 6,
+    flexWrap: 'wrap',
   },
   memoryIcon: {
     fontSize: 16,
@@ -1109,5 +1136,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Nunito_600SemiBold',
     color: '#FFFFFF',
+  },
+  messageTimestamp: {
+    fontSize: 11,
+    fontFamily: 'Nunito_400Regular',
+    color: '#999999',
+    marginTop: -10,
+    alignSelf: 'flex-start',
+  },
+  userMessageTimestamp: {
+    alignSelf: 'flex-end',
+    marginTop: 2,
   },
 });
