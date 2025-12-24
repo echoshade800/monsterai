@@ -241,6 +241,13 @@ export default function EchoTab() {
           parsedTimestamp = timestamp;
         } else {
           const timestampStr = String(timestamp);
+          
+          // 检查是否是时间格式字符串（如 "10:30"），如果是则抛出异常
+          const timePattern = /^\d{1,2}:\d{2}(:\d{2})?$/;
+          if (timePattern.test(timestampStr.trim())) {
+            throw new Error(`[convertItem] Invalid timestamp format: expected timestamp (number), but got time string "${timestampStr}". Message ID: ${messageId}`);
+          }
+          
           // 先尝试直接解析为数字（如果是纯数字字符串）
           const directParse = parseInt(timestampStr, 10);
           
@@ -253,23 +260,19 @@ export default function EchoTab() {
             if (!isNaN(dateParse) && dateParse > 0) {
               parsedTimestamp = dateParse;
             } else {
-              parsedTimestamp = NaN;
+              // 如果无法解析为时间戳，抛出异常
+              throw new Error(`[convertItem] Invalid timestamp format: cannot parse "${timestampStr}" as timestamp. Expected number or ISO date string. Message ID: ${messageId}`);
             }
           }
         }
         
         // 验证时间戳是否合理（应该是13位数字，大于 1000000000000，即 2001-09-09）
-        // 如果解析失败或值不合理，使用当前时间
-        if (!isNaN(parsedTimestamp) && parsedTimestamp > 1000000000000) {
-          messageTimestamp = parsedTimestamp;
-        } else {
-          console.warn('[convertItem] Invalid timestamp value:', {
-            original: timestamp,
-            parsed: parsedTimestamp,
-            messageId,
-            usingDefault: true
-          });
+        // 如果不是有效的时间戳，抛出异常
+        if (isNaN(parsedTimestamp) || parsedTimestamp <= 1000000000000) {
+          throw new Error(`[convertItem] Invalid timestamp value: ${parsedTimestamp}. Expected timestamp > 1000000000000 (2001-09-09). Message ID: ${messageId}, Original value: ${timestamp}`);
         }
+        
+        messageTimestamp = parsedTimestamp;
       }
       
       // 调试日志：检查 operation 字段
@@ -1055,6 +1058,10 @@ export default function EchoTab() {
       };
       
       console.log('Sending enter message:', requestBody);
+      
+      // 设置发送状态，显示 Thinking... 指示器
+      setIsSending(true);
+      setCurrentResponse('');
       
       // 调用通用处理函数，静默处理，不显示响应和错误
       await handleStreamRequest({

@@ -682,7 +682,8 @@ export function ConversationSection({
     Alert.alert('Copied', 'Message copied to clipboard', [{ text: 'OK' }]);
   };
 
-  if (isLoading) {
+  // 当正在加载且消息为空时，显示加载动画
+  if (isLoading && (!messages || messages.length === 0)) {
     return (
       <View style={[styles.scrollContainer, styles.loadingContainer]}>
         <ActivityIndicator size="large" color="#999999" />
@@ -690,7 +691,8 @@ export function ConversationSection({
     );
   }
 
-  if (!messages || messages.length === 0) {
+  // 当不在加载且消息为空时，显示空状态提示
+  if (!isLoading && (!messages || messages.length === 0)) {
     return (
       <View style={[styles.scrollContainer, styles.emptyContainer]}>
         <Text style={styles.emptyText}>No conversation history</Text>
