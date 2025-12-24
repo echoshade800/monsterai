@@ -15,7 +15,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { api, getTimezone } from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
-import { CameraBox } from './CameraBox';
 
 interface HeaderProps {
   isCollapsed?: boolean;
@@ -434,17 +433,6 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
     };
   });
 
-  const sharedCameraStyle = useAnimatedStyle(() => {
-    return {
-      position: 'absolute',
-      right: 72,
-      bottom: 26,
-      width: 120,
-      height: 94,
-      zIndex: 1000,
-    };
-  });
-
   const sharedProfileStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
@@ -481,11 +469,6 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
   return (
     <GestureDetector gesture={swipeGesture}>
       <Animated.View style={[styles.headerContainer, headerAnimatedStyle]}>
-        {/* Shared Camera Box - Always mounted */}
-        <Animated.View style={sharedCameraStyle}>
-          <CameraBox />
-        </Animated.View>
-
         {/* Shared Title - Always mounted */}
         <Animated.View style={sharedTitleStyle}>
           <Text style={styles.titleText}>MonsterAI</Text>
@@ -588,7 +571,6 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
                       </Animated.View>
                     </View>
                   </TouchableOpacity>
-                  <View style={styles.cameraPlaceholder} />
                 </View>
               </Animated.View>
             </View>
@@ -612,14 +594,14 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
             <View style={styles.collapsedBannerContainer}>
               <View style={styles.collapsedThinkingBanner}>
                 <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-                <View style={styles.thinkingContent}>
+                <View style={[styles.thinkingContent]}>
                   <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
                     <View style={styles.thinkingHeader}>
                       <Text style={styles.brainEmoji}>🧠</Text>
                       <Text style={styles.thinkingTitle}>In My Mind</Text>
                     </View>
-                    <View style={styles.thinkingLogContainer}>
-                      <Animated.View style={logScrollStyle}>
+                    <View style={[styles.thinkingLogContainer]}>
+                      <Animated.View style={[logScrollStyle]}>
                         {(() => {
                           // 如果只有默认消息，不重复显示
                           const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
@@ -634,7 +616,6 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
                       </Animated.View>
                     </View>
                   </TouchableOpacity>
-                  <View style={styles.cameraPlaceholder} />
                 </View>
               </View>
             </View>
@@ -717,7 +698,7 @@ const styles = StyleSheet.create({
     pointerEvents: 'none',
   },
   bannersContainer: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
     paddingBottom: 12,
     marginTop: -20,
   },
@@ -847,7 +828,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   collapsedBannerContainer: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
     marginTop: -48,
     marginBottom: 12,
   },
@@ -868,13 +849,14 @@ const styles = StyleSheet.create({
   thinkingContent: {
     flex: 1,
     flexDirection: 'row',
-    padding: 18,
-    paddingTop: 14,
+    paddingHorizontal: 6,
+    paddingVertical: 14,
     alignItems: 'center',
   },
   thinkingLeft: {
     flex: 1,
-    paddingRight: 20,
+    paddingRight: 0,
+    marginHorizontal: 0,
   },
   thinkingHeader: {
     flexDirection: 'row',
@@ -893,6 +875,7 @@ const styles = StyleSheet.create({
   thinkingLogContainer: {
     flex: 1,
     overflow: 'hidden',
+    paddingHorizontal: 6,
   },
   logLine: {
     marginBottom: 2,
@@ -911,12 +894,6 @@ const styles = StyleSheet.create({
     color: '#000000',
     lineHeight: 20,
     flex: 1,
-  },
-  cameraPlaceholder: {
-    width: 140,
-    height: 110,
-    borderRadius: 16,
-    overflow: 'hidden',
   },
   profilePlaceholder: {
     width: 44,

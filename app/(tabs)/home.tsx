@@ -1623,7 +1623,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     paddingRight: 36,
-    height: 200,
+    height: 350,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
