@@ -1,6 +1,12 @@
 {
   "expo": {
     "name": "MonsterAI",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash_screen.png",
+      "resizeMode": "native",
+      "backgroundColor": "#ffffff"
+    },
     "slug": "MonsterAI",
     "version": "0.0.1",
     "scheme": "monsterai",
