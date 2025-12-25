@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "44453409571",
+    "project_id": "monsterai-20727",
+    "storage_bucket": "monsterai-20727.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44453409571:android:655f4734f2f9a866139296",
+        "android_client_info": {
+          "package_name": "com.monster.ai.us"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "44453409571-plsn7n3kdmlgkbi97h6hs4cf6gno3btd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAovmxy8tMBhCmUEDmYFrvo7AO35MqkbbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "44453409571-plsn7n3kdmlgkbi97h6hs4cf6gno3btd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "44453409571-behlnlf3dens3njgb6jfbq4cv37q2c7f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.monster.ai.us"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

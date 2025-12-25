@@ -1,4 +1,4 @@
-package com.fanthus.monsterai.debug
+package com.monster.ai.us
 
 import android.app.Application
 import android.content.res.Configuration

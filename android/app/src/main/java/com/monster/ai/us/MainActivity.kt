@@ -1,4 +1,4 @@
-package com.fanthus.monsterai.debug
+package com.monster.ai.us
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

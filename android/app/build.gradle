@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.fanthus.monsterai.debug'
+    namespace 'com.monster.ai.us'
     defaultConfig {
-        applicationId 'com.fanthus.monsterai.debug'
+        applicationId 'com.monster.ai.us'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 6
@@ -180,3 +180,5 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+apply plugin: 'com.google.gms.google-services'

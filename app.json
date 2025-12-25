@@ -40,7 +40,8 @@
       "expo-font"
     ],
     "android": {
-      "package": "com.fanthus.monsterai.debug",
+      "package": "com.monster.ai.us", 
+      "googleServicesFile": "./google-services.json",
       "versionCode": 6
     },
     "extra": {
