@@ -18,8 +18,7 @@ function configureGoogleSignIn() {
   GoogleSignin.configure({
     iosClientId: IOS_CLIENT_ID,
     // Android 会自动从 google-services.json 读取配置
-    // 如果需要手动配置，可以添加：
-    // webClientId: 'YOUR_WEB_CLIENT_ID', // 用于获取服务器端访问令牌
+    webClientId: '44453409571-plsn7n3kdmlgkbi97h6hs4cf6gno3btd.apps.googleusercontent.com',
     scopes: ['email', 'profile'], // 请求的权限范围
     offlineAccess: false, // 是否请求离线访问令牌
   });
