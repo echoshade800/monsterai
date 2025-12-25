@@ -1,3 +1,4 @@
+import Clipboard from '@react-native-clipboard/clipboard';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ChevronRight, RefreshCw } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
@@ -200,10 +201,14 @@ export default function PhoneDataScreen() {
 function DetailView({ record, onBack }: { record: UploadHistoryRecord; onBack: () => void }) {
   const fullData = record.fullData;
 
-  const handleCopyJson = (jsonString: string) => {
-    // 在 React Native 中，可以使用 Clipboard API
-    // 这里先简单显示提示，实际项目中可以集成 Clipboard
-    Alert.alert('提示', 'JSON 数据已准备复制（实际项目中可集成剪贴板功能）');
+  const handleCopyJson = async (jsonString: string) => {
+    try {
+      await Clipboard.setString(jsonString);
+      Alert.alert('成功', 'JSON 数据已复制到剪贴板');
+    } catch (error) {
+      console.error('[PhoneData] Failed to copy to clipboard:', error);
+      Alert.alert('错误', '复制失败，请重试');
+    }
   };
 
   const renderDataSection = (title: string, content: any) => {
