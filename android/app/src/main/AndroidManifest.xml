@@ -38,5 +38,7 @@
         <data android:scheme="monsterai"/>
       </intent-filter>
     </activity>
+    <activity android:name=".MiniAppRNActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode" android:theme="@style/Theme.App.SplashScreen" android:exported="false"/>
+    <activity android:name=".MiniAppH5Activity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode" android:theme="@style/Theme.App.SplashScreen" android:exported="false"/>
   </application>
 </manifest>
