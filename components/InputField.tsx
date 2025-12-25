@@ -4,10 +4,10 @@ import { AtSign, Camera, PenLine, Send } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, {
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { MentionSelector } from './MentionSelector';
 
@@ -119,6 +119,7 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
         [114, keyboardHeight.value + 10]
       ),
       opacity: interpolate(expanded, [0, 1], [1, 0]),
+      right: interpolate(expanded, [0, 1], [20, -100]), // 键盘展开时移出屏幕
     };
   });
 
@@ -240,7 +241,10 @@ export function InputField({ onFocus, onSend, isSending = false, disabled = fals
         </View>
       </Animated.View>
 
-      <Animated.View style={[styles.floatingCameraButton, cameraButtonAnimatedStyle]}>
+      <Animated.View 
+        style={[styles.floatingCameraButton, cameraButtonAnimatedStyle]}
+        pointerEvents={isKeyboardVisible ? 'none' : 'auto'}
+      >
         <TouchableOpacity
           style={[styles.cameraButton, disabled && styles.cameraButtonDisabled]}
           onPress={handleCameraPress}
