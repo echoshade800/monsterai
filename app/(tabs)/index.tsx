@@ -606,6 +606,9 @@ export default function EchoTab() {
       maxRetries = 3
     } = config;
     
+    // 清理 requestBody：如果 operation 字段为空或未定义，则删除该字段
+    const cleanedRequestBody = { ...requestBody };
+    console.log(`${logPrefix}cleanedRequestBody`, JSON.stringify(cleanedRequestBody, null, 2));
     let eventSource: any = null;
     let accumulatedText = '';
     let retryCount = 0;
@@ -614,9 +617,9 @@ export default function EchoTab() {
     let retryTimeoutId: NodeJS.Timeout | null = null;
     let connectionTimeoutId: NodeJS.Timeout | null = null;
     let responseTimeoutId: NodeJS.Timeout | null = null;
-    // 保存请求时间戳，用于临时消息
-    const requestTimestamp = requestBody.timestamp 
-      ? (typeof requestBody.timestamp === 'string' ? parseInt(requestBody.timestamp, 10) : requestBody.timestamp)
+    // 保存请求时间戳，用于临时消息（使用清理后的 requestBody）
+    const requestTimestamp = cleanedRequestBody.timestamp 
+      ? (typeof cleanedRequestBody.timestamp === 'string' ? parseInt(cleanedRequestBody.timestamp, 10) : cleanedRequestBody.timestamp)
       : Date.now();
 
     // 判断是否为网络连接错误
@@ -657,26 +660,44 @@ export default function EchoTab() {
             };
             const url = `${apiConfig.BASE_URL}${API_ENDPOINTS.CONVERSATION.STREAM}`;
             console.log('url', url);
-            // 创建 EventSource 实例
+            // 创建 EventSource 实例（使用清理后的 requestBody）
+            const bodyToSend = JSON.stringify(cleanedRequestBody);
+            console.log(`${logPrefix}Request body to send:`, bodyToSend);
             eventSource = new EventSource(
               url,
               {
                 method: 'POST',
                 headers,
-                body: JSON.stringify(requestBody),
+                body: bodyToSend,
                 pollingInterval: 0,
+                debug: true
               }
             );
 
             // 连接打开事件
-            eventSource.addEventListener('open', () => {
+            eventSource.addEventListener('open', (event: any) => {
               connectionOpened = true;
               // 清除连接超时定时器
               if (connectionTimeoutId) {
                 clearTimeout(connectionTimeoutId);
                 connectionTimeoutId = null;
               }
-              console.log(`${logPrefix}SSE connection established`);
+              console.log(`${logPrefix}SSE connection established`, 'event:', JSON.stringify(event, null, 2));
+              
+              // 添加一个定时检查，每5秒记录一次连接状态
+              const statusCheckInterval = setInterval(() => {
+                if (eventSource && !isCompleted) {
+                  console.log(`${logPrefix}Connection status check - isCompleted: ${isCompleted}, accumulatedText length: ${accumulatedText.length}`);
+                } else {
+                  clearInterval(statusCheckInterval);
+                }
+              }, 5000);
+              
+              // 在连接关闭时清除状态检查
+              eventSource.addEventListener('close', () => {
+                clearInterval(statusCheckInterval);
+                console.log(`${logPrefix}SSE connection closed`);
+              });
               
               // 设置响应超时定时器（60秒），如果在这个时间内没有收到 complete 事件，重置 isSending
               responseTimeoutId = setTimeout(() => {
@@ -721,9 +742,82 @@ export default function EchoTab() {
 
             // 监听消息事件
             eventSource.addEventListener('message', (event: any) => {
+              console.log(`${logPrefix}Message event received, raw data:`, event.data, 'event type:', event.type, 'lastEventId:', event.lastEventId);
               try {
-                const data = JSON.parse(event.data);
-                if (data.type === 'text_chunk') {
+                if (!event.data) {
+                  console.warn(`${logPrefix}Message event has no data`);
+                  return;
+                }
+                
+                // 尝试解析数据
+                let data;
+                try {
+                  data = JSON.parse(event.data);
+                } catch (parseErr) {
+                  console.error(`${logPrefix}Failed to parse event.data as JSON:`, parseErr, 'raw data:', event.data);
+                  // 如果不是JSON，可能是纯文本，直接处理
+                  if (typeof event.data === 'string' && event.data.trim()) {
+                    console.log(`${logPrefix}Received non-JSON text data:`, event.data);
+                    // 尝试将其作为文本块处理
+                    accumulatedText += event.data;
+                    setCurrentResponse(accumulatedText);
+                    return;
+                  }
+                  return;
+                }
+                
+                console.log(`${logPrefix} Parsed message data:`, JSON.stringify(data, null, 2));
+                
+                // 处理错误消息（特别是500错误）
+                if (data.type === 'error') {
+                  const errorCode = data.data?.code;
+                  const errorMsg = data.data?.msg || 'Unknown error';
+                  console.error(`${logPrefix}Error message received:`, errorCode, errorMsg);
+                  
+                  // 如果是500错误，抛出异常
+                  if (errorCode === 500) {
+                    isCompleted = true;
+                    
+                    // 清除所有定时器
+                    if (responseTimeoutId) {
+                      clearTimeout(responseTimeoutId);
+                      responseTimeoutId = null;
+                    }
+                    if (connectionTimeoutId) {
+                      clearTimeout(connectionTimeoutId);
+                      connectionTimeoutId = null;
+                    }
+                    if (retryTimeoutId) {
+                      clearTimeout(retryTimeoutId);
+                      retryTimeoutId = null;
+                    }
+                    
+                    // 关闭连接
+                    if (eventSource) {
+                      try {
+                        eventSource.close();
+                      } catch (e) {
+                        console.warn(`${logPrefix}Error closing eventSource on 500 error:`, e);
+                      }
+                      eventSource = null;
+                    }
+                    
+                    // 清理状态
+                    accumulatedText = '';
+                    setCurrentResponse('');
+                    setIsSending(false);
+                    
+                    // 抛出异常
+                    const error = new Error(`Server error (${errorCode}): ${errorMsg}`);
+                    (error as any).code = errorCode;
+                    (error as any).data = data.data;
+                    throw error;
+                  } else {
+                    // 其他错误代码，记录警告但不抛出异常
+                    console.warn(`${logPrefix}Non-500 error received:`, errorCode, errorMsg);
+                  }
+                  return;
+                } else if  (data.type === 'text_chunk') {
                   accumulatedText += data.word;
                   setCurrentResponse(accumulatedText);
 
@@ -808,12 +902,31 @@ export default function EchoTab() {
                 }
               } catch (parseError) {
                 console.error(`${logPrefix}Parse error:`, parseError, 'Raw data:', event.data);
+                
+                // 如果是500错误，显示错误消息并调用handleFinalError
+                if ((parseError as any)?.code === 500) {
+                  const errorMsg = (parseError as any)?.message || 'Server error (500)';
+                  console.error(`${logPrefix}500 error caught:`, errorMsg);
+                  
+                  // 显示错误提示（只在非静默模式下）
+                  if (!silent) {
+                    Alert.alert('Server Error', errorMsg);
+                  }
+                  
+                  // 调用handleFinalError进行清理
+                  handleFinalError();
+                }
               }
+            });
+
+            // 监听关闭事件
+            eventSource.addEventListener('close', (event: any) => {
+              console.log(`${logPrefix}SSE connection closed`, 'event:', JSON.stringify(event, null, 2));
             });
 
             // 错误事件
             eventSource.addEventListener('error', (event: any) => {
-              console.error(`${logPrefix}SSE error:`, event);
+              console.error(`${logPrefix}SSE error:`, 'event type:', event.type, 'message:', event.message, 'xhrState:', event.xhrState, 'xhrStatus:', event.xhrStatus, 'full event:', JSON.stringify(event, null, 2));
 
               // 如果已经完成，忽略后续错误
               if (isCompleted) {
@@ -963,7 +1076,7 @@ export default function EchoTab() {
     };
 
     try {
-      console.log(`${logPrefix}Request body:`, requestBody);
+      console.log(`${logPrefix}Request body:`, JSON.stringify(cleanedRequestBody, null, 2));
       await createConnection();
     } catch (error) {
       console.error(`${logPrefix}Failed:`, error);
