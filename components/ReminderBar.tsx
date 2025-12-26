@@ -25,11 +25,11 @@ interface ReminderBarProps {
   onPress?: (id: string) => void;
 }
 
-const AGENT_ICONS: Record<string, any> = {
-  nutrition: require('../assets/images/chatteam.png'), // Placeholder
-  coach: require('../assets/images/chatposture.png'), // Placeholder
-  somno: require('../assets/images/chatteam.png'), // Placeholder
-  default: require('../assets/images/chatteam.png'),
+const AGENT_ICONS: Record<string, string> = {
+  nutrition: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/probutler.png',
+  coach: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/probutler.png',
+  somno: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/probutler.png',
+  default: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/probutler.png',
 };
 
 export function ReminderBar({ reminder, onDone, onPress }: ReminderBarProps) {
@@ -67,7 +67,7 @@ export function ReminderBar({ reminder, onDone, onPress }: ReminderBarProps) {
           {/* Left: Icon */}
           <View style={styles.iconContainer}>
             <Image 
-              source={AGENT_ICONS[reminder.agent] || AGENT_ICONS.default} 
+              source={{ uri: AGENT_ICONS[reminder.agent] || AGENT_ICONS.default }} 
               style={styles.agentIcon} 
             />
           </View>

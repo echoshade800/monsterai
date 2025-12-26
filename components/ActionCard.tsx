@@ -56,7 +56,7 @@ export function ActionCard({ onDismiss }: ActionCardProps) {
         <View style={styles.content}>
           <View style={styles.leftSection}>
             <Image
-              source={{ uri: 'https://fluqztsizojdgpzxycmy.supabase.co/storage/v1/object/public/mon/Group%2092.png' }}
+              source={{ uri: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/probutler.png' }}
               style={styles.avatarImage}
             />
             <View style={styles.textContainer}>

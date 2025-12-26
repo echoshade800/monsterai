@@ -70,34 +70,82 @@ const formatMessageTimestamp = (timestamp?: number): string | null => {
 };
 
 // Monster 统一配置（包含名称、颜色和头像）
-const MONSTER_CONFIG: Record<string, { color: string; avatar: string }> = {
+const MONSTER_CONFIG: Record<string, { color: string; avatar: string; displayName: string }> = {
+  butler: {
+    color: '#FF801E',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/probutler.png',
+    displayName: 'Butler',
+  },
+  nutri: {
+    color: '#92D216',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/pronutri.png',
+    displayName: 'Nutri',
+  },
+  somno: {
+    color: '#5644A3',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/prosomno.png',
+    displayName: 'Somno',
+  },
+  coach: {
+    color: '#F04E1E',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/procoach.png',
+    displayName: 'Coach',
+  },
+  muse: {
+    color: '#E6878C',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/promuse.png',
+    displayName: 'Muse',
+  },
+  zen: {
+    color: '#82B7D3',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/prozen.png',
+    displayName: 'Zen',
+  },
+  brew: {
+    color: '#8B4427',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/probrew.png',
+    displayName: 'Brew',
+  },
+  architect: {
+    color: '#3071BB',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/proarchitect.png',
+    displayName: 'Architect',
+  },
+  fiscal: {
+    color: '#B77320',
+    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/profiscal.png',
+    displayName: 'Fiscal',
+  },
+  // 保留旧的角色映射以兼容性
   foodie: {
     color: '#F38319',
     avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileenergy.png',
+    displayName: 'Foodie',
   },
   moodie: {
     color: '#7A4DBA',
     avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilestress.png',
+    displayName: 'Moodie',
   },
   sleeper: {
     color: '#206BDB',
     avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesleep.png',
+    displayName: 'Sleeper',
   },
   poopy: {
     color: '#844E02',
     avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilefeces.png',
+    displayName: 'Poopy',
   },
   posture: {
     color: '#32C25F',
     avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileposture.png',
+    displayName: 'Posture',
   },
   facey: {
     color: '#FF4FB0',
     avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profileface.png',
-  },
-  butler: {
-    color: '#666666',
-    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/profilesteward.png',
+    displayName: 'Facey',
   },
 };
 
@@ -176,6 +224,42 @@ const markdownStyles = {
     paddingVertical: 8,
     paddingRight: 12,
   },
+};
+
+// 解析消息内容，识别 [Role]: 格式的前缀
+const parseMessageRole = (text: string): { role: string | null; cleanedText: string } => {
+  if (!text) return { role: null, cleanedText: text };
+  
+  // 匹配 [Role]: 格式的前缀（不区分大小写）
+  const rolePrefixRegex = /^\[(Butler|Nutri|Somno|Coach|Muse|Zen|Brew|Architect|Fiscal)\]:\s*/i;
+  const match = text.match(rolePrefixRegex);
+  
+  if (match) {
+    const roleName = match[1].toLowerCase();
+    const cleanedText = text.replace(rolePrefixRegex, '').trim();
+    return { role: roleName, cleanedText };
+  }
+  
+  return { role: null, cleanedText: text };
+};
+
+// 渲染消息头（头像 + 彩色名字）
+const renderMessageHeader = (role: string) => {
+  const monsterConfig = MONSTER_CONFIG[role];
+  if (!monsterConfig) return null;
+  
+  return (
+    <View style={styles.messageHeader}>
+      <Image
+        source={{ uri: monsterConfig.avatar }}
+        style={styles.messageHeaderAvatar}
+        resizeMode="cover"
+      />
+      <Text style={[styles.messageHeaderName, { color: monsterConfig.color }]}>
+        {monsterConfig.displayName}
+      </Text>
+    </View>
+  );
 };
 
 // 渲染带 Markdown 和 Monster 标签的文本
@@ -455,12 +539,15 @@ const renderMonsterColoredText = (text: string, timestampText?: string | null) =
           const color = monsterConfig?.color ?? '#000000';
           const avatarUrl = monsterConfig?.avatar;
           
-          // 根据标签类型去掉前缀：bracket 类型去掉 [ ]，mention 类型去掉 @
-          let displayName = part.content;
-          if (part.tagType === 'bracket') {
-            displayName = displayName.replace(/^\[|\]$/g, '');
-          } else if (part.tagType === 'mention') {
-            displayName = displayName.replace(/^@/, '');
+          // 使用配置中的 displayName，如果没有则使用原始内容
+          let displayName = monsterConfig?.displayName || part.content;
+          if (!monsterConfig?.displayName) {
+            // 根据标签类型去掉前缀：bracket 类型去掉 [ ]，mention 类型去掉 @
+            if (part.tagType === 'bracket') {
+              displayName = displayName.replace(/^\[|\]$/g, '');
+            } else if (part.tagType === 'mention') {
+              displayName = displayName.replace(/^@/, '');
+            }
           }
           
           return (
@@ -799,6 +886,7 @@ export function ConversationSection({
           
           // 如果是 memory 消息，使用独特的样式
           if (message.isMemory) {
+            const { role, cleanedText } = parseMessageRole(message.content);
             return (
               <View key={message.id} style={styles.memoryMessageContainer} collapsable={false}>
                 <View style={styles.memoryHeader}>
@@ -808,6 +896,7 @@ export function ConversationSection({
                     <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>{timestampText}</Text>
                   )}
                 </View>
+                {role && renderMessageHeader(role)}
                 <TouchableOpacity
                   onLongPress={() => handleCopyMessage(message.content)}
                   delayLongPress={500}
@@ -815,15 +904,18 @@ export function ConversationSection({
                   style={styles.memoryContentWrapper}
                   hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
                 >
-                  {renderMarkdownWithMonsterTags(message.content)}
+                  {renderMarkdownWithMonsterTags(cleanedText)}
                 </TouchableOpacity>
               </View>
             );
           }
           
           // 普通 assistant 消息
+          const { role, cleanedText } = parseMessageRole(message.content);
+          
           return (
             <View key={message.id} style={styles.assistantMessageContainer} collapsable={false}>
+              {role && renderMessageHeader(role)}
               <TouchableOpacity
                 onLongPress={() => handleCopyMessage(message.content)}
                 delayLongPress={500}
@@ -831,7 +923,7 @@ export function ConversationSection({
                 style={styles.assistantTextWrapper}
                 hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
               >
-                {renderMarkdownWithMonsterTags(message.content, timestampText)}
+                {renderMarkdownWithMonsterTags(cleanedText, timestampText)}
               </TouchableOpacity>
             </View>
           );
@@ -961,6 +1053,22 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     marginBottom: 10,
     alignItems: 'flex-start',
+  },
+  messageHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  messageHeaderAvatar: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    marginRight: 8,
+  },
+  messageHeaderName: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: 'Nunito_700Bold',
   },
   assistantAvatar: {
     width: 36,
