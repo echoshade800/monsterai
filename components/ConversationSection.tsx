@@ -843,10 +843,10 @@ export function ConversationSection({
           <View key={message.id} style={styles.userMessageContainer}>
             <View style={styles.userMessageWrapper}>
               <View style={styles.userNameRow}>
-                <Text style={styles.userNameText}>Boss</Text>
                 {timestampText && (
-                  <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>{timestampText}</Text>
+                  <Text style={[styles.inlineTimestamp, { marginRight: 8 }]}>{timestampText}</Text>
                 )}
+                <Text style={styles.userNameText}>Boss</Text>
               </View>
               <TouchableOpacity
                 onLongPress={() => handleCopyMessage(message.content || 'Image message')}
@@ -999,10 +999,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 14,
     maxWidth: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
   },
   userBubbleWithPhoto: {
     maxWidth: '85%',

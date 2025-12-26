@@ -71,6 +71,7 @@ export function ScrollableGlassTabBar({ state, descriptors, navigation }: Bottom
   return (
     <View style={[styles.container, { bottom: insets.bottom - 2 }]}>
       <BlurView intensity={80} tint="light" style={styles.blurContainer}>
+        <View style={styles.innerShadowHighlight} />
         <ScrollView
           ref={scrollViewRef}
           horizontal
@@ -160,6 +161,14 @@ const styles = StyleSheet.create({
   blurContainer: {
     flex: 1,
     borderRadius: 35,
+  },
+  innerShadowHighlight: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 35,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    zIndex: 5,
+    pointerEvents: 'none',
   },
   scrollContent: {
     paddingLeft: 15,

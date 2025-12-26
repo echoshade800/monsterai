@@ -6,9 +6,11 @@ import { ChevronRight } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Image, Modal, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AvatarCropModal from '../components/AvatarCropModal';
+import { AgePickerModal } from '../components/AgePickerModal';
 import { GenderPickerModal } from '../components/GenderPickerModal';
 import { HeightPickerModal } from '../components/HeightPickerModal';
-import api from '../src/services/api-clients/client';
+import { WeightPickerModal } from '../components/WeightPickerModal';
+import api, { getTimezone } from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
@@ -21,7 +23,11 @@ export default function ProfileScreen() {
   const [name, setName] = useState('');
   const [sex, setSex] = useState('');
   const [height, setHeight] = useState('');
-  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm'); // 用于解析和显示身高单位
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm');
+  const [age, setAge] = useState<number | null>(null);
+  const [weight, setWeight] = useState('');
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg');
+  const [timezone, setTimezone] = useState('');
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -31,6 +37,8 @@ export default function ProfileScreen() {
   const [showCropModal, setShowCropModal] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
   const [showHeightPicker, setShowHeightPicker] = useState(false);
+  const [showAgePicker, setShowAgePicker] = useState(false);
+  const [showWeightPicker, setShowWeightPicker] = useState(false);
   
   // 点击计数器（用于进入 profile_info 页面）
   const [versionClickCount, setVersionClickCount] = useState(0);
@@ -113,6 +121,39 @@ export default function ProfileScreen() {
             console.warn('Failed to load heightUnit from local storage:', error);
             setHeightUnit('cm');
           }
+        }
+
+        // 填充体重（支持 "xxx kg" 或 "xxx lbs" 格式）
+        if (userData.weight !== null && userData.weight !== undefined && String(userData.weight).trim() !== '') {
+          const weightStr = String(userData.weight).trim();
+          console.log('[Profile] Loading weight from API:', weightStr);
+          if (weightStr.includes('lbs')) {
+            setWeight(weightStr);
+            setWeightUnit('lbs');
+          } else if (weightStr.includes('kg')) {
+            setWeight(weightStr);
+            setWeightUnit('kg');
+          } else {
+            setWeight(`${weightStr} kg`);
+            setWeightUnit('kg');
+          }
+        } else {
+          setWeight('Unknown');
+        }
+
+        // 填充年龄
+        if (userData.age !== null && userData.age !== undefined && String(userData.age).trim() !== '') {
+          setAge(parseInt(String(userData.age), 10));
+        } else {
+          setAge(null);
+        }
+
+        // 填充时区
+        if (userData.timezone) {
+          setTimezone(userData.timezone);
+        } else {
+          // 默认使用当前系统时区
+          setTimezone(getTimezone());
         }
         
         // 填充头像（如果有）
@@ -276,6 +317,61 @@ export default function ProfileScreen() {
     return null; // Return null if no match found
   };
 
+  const handleEditAge = () => {
+    setShowAgePicker(true);
+  };
+
+  const handleAgeSave = async (newAge: number) => {
+    try {
+      const updateResult: any = await userService.updateUserInfo({ age: newAge });
+      if (updateResult?.success) {
+        await loadUserInfo();
+        Alert.alert('Success', 'Age updated');
+        setShowAgePicker(false);
+      } else {
+        Alert.alert('Error', updateResult?.message || 'Failed to update age');
+      }
+    } catch (error) {
+      console.error('Error saving age:', error);
+      Alert.alert('Error', 'Failed to save age');
+    }
+  };
+
+  const handleEditWeight = () => {
+    setShowWeightPicker(true);
+  };
+
+  const extractWeightInKg = (weightStr: string): number | null => {
+    if (!weightStr || weightStr === 'Unknown' || weightStr.trim() === '') return null;
+    const match = weightStr.match(/(\d+(\.\d+)?)/);
+    if (!match) return null;
+    const value = parseFloat(match[1]);
+    if (weightStr.includes('lbs')) return value / 2.20462;
+    return value;
+  };
+
+  const handleWeightSave = async (newWeight: number, unit: 'kg' | 'lbs') => {
+    try {
+      const weightString = unit === 'kg' ? `${newWeight} kg` : `${Math.round(newWeight * 2.20462)} lbs`;
+      const updateResult: any = await userService.updateUserInfo({ weight: weightString });
+      if (updateResult?.success) {
+        await loadUserInfo();
+        Alert.alert('Success', 'Weight updated');
+        setShowWeightPicker(false);
+      } else {
+        Alert.alert('Error', updateResult?.message || 'Failed to update weight');
+      }
+    } catch (error) {
+      console.error('Error saving weight:', error);
+      Alert.alert('Error', 'Failed to save weight');
+    }
+  };
+
+  const handleEditTimezone = () => {
+    setTempValue(timezone);
+    setEditingField('timezone');
+  };
+
   const handleEditHeight = () => {
     setShowHeightPicker(true);
   };
@@ -325,33 +421,15 @@ export default function ProfileScreen() {
 
   const handleSave = async () => {
     if (editingField === 'name') {
-      // 如果值是 "Unknown"，不发送到服务器
+      // ... existing name save logic ...
       if (tempValue === 'Unknown' || tempValue.trim() === '') {
         Alert.alert('Tip', 'Please enter a valid name');
         return;
       }
       
       try {
-        // 先获取用户信息，确保保留其他字段
-        const userInfoResult: any = await userService.getUserInfo();
-        
-        // 准备更新数据，如果需要可以合并现有数据
-        let updateData: any = {
-          userName: tempValue,
-        };
-        
-        // 如果成功获取到用户信息，可以合并其他字段（如果需要）
-        if (userInfoResult?.success && userInfoResult?.data) {
-          const currentUserData = userInfoResult.data;
-          // 如果需要保留其他字段，可以在这里合并
-          // 目前只更新 userName，所以直接使用上面的 updateData
-        }
-        
-        // 更新用户信息
-        const updateResult: any = await userService.updateUserInfo(updateData);
-        
+        const updateResult: any = await userService.updateUserInfo({ userName: tempValue });
         if (updateResult?.success) {
-          // 重新从 API 加载数据，确保完全同步
           await loadUserInfo();
           Alert.alert('Success', 'Name updated');
           setEditingField(null);
@@ -360,7 +438,21 @@ export default function ProfileScreen() {
         }
       } catch (error) {
         console.error('Error saving name:', error);
-        Alert.alert('Error', 'Error occurred while saving name, please try again later');
+        Alert.alert('Error', 'Failed to save name');
+      }
+    } else if (editingField === 'timezone') {
+      try {
+        const updateResult: any = await userService.updateUserInfo({ timezone: tempValue });
+        if (updateResult?.success) {
+          await loadUserInfo();
+          Alert.alert('Success', 'Timezone updated');
+          setEditingField(null);
+        } else {
+          Alert.alert('Error', updateResult?.message || 'Failed to update timezone');
+        }
+      } catch (error) {
+        console.error('Error saving timezone:', error);
+        Alert.alert('Error', 'Failed to save timezone');
       }
     }
   };
@@ -595,10 +687,10 @@ export default function ProfileScreen() {
 
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
-                <Text style={styles.menuItemLabel}>Name</Text>
-                <Text style={styles.menuItemValue}>{name}</Text>
+                <Text style={styles.menuItemLabel}>Age</Text>
+                <Text style={styles.menuItemValue}>{age || 'Unknown'}</Text>
               </View>
-              <TouchableOpacity style={styles.editButton} onPress={handleEditName}>
+              <TouchableOpacity style={styles.editButton} onPress={handleEditAge}>
                 <Text style={styles.editButtonText}>Edit</Text>
               </TouchableOpacity>
             </View>
@@ -607,7 +699,48 @@ export default function ProfileScreen() {
 
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
-                <Text style={styles.menuItemLabel}>Gender</Text>
+                <Text style={styles.menuItemLabel}>Height</Text>
+                <Text style={styles.menuItemValue}>
+                  {(() => {
+                    if (height === 'Unknown' || !height) return 'Unknown';
+                    const heightInCm = extractHeightInCm(height);
+                    if (heightInCm === null) return 'Unknown';
+                    if (heightUnit === 'cm') return `${heightInCm} cm`;
+                    const { feet, inches } = cmToFeet(heightInCm);
+                    return `${feet}' ${inches}"`;
+                  })()}
+                </Text>
+              </View>
+              <TouchableOpacity style={styles.editButton} onPress={handleEditHeight}>
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.menuItem}>
+              <View style={styles.menuItemLeft}>
+                <Text style={styles.menuItemLabel}>Weight</Text>
+                <Text style={styles.menuItemValue}>
+                  {(() => {
+                    if (weight === 'Unknown' || !weight) return 'Unknown';
+                    const weightInKg = extractWeightInKg(weight);
+                    if (weightInKg === null) return 'Unknown';
+                    if (weightUnit === 'kg') return `${Math.round(weightInKg)} kg`;
+                    return `${Math.round(weightInKg * 2.20462)} lbs`;
+                  })()}
+                </Text>
+              </View>
+              <TouchableOpacity style={styles.editButton} onPress={handleEditWeight}>
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.menuItem}>
+              <View style={styles.menuItemLeft}>
+                <Text style={styles.menuItemLabel}>Biological sex</Text>
                 <Text style={styles.menuItemValue}>
                   {sex ? formatGenderForDisplay(sex) : 'Unknown'}
                 </Text>
@@ -621,27 +754,10 @@ export default function ProfileScreen() {
 
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
-                <Text style={styles.menuItemLabel}>Height</Text>
-                <Text style={styles.menuItemValue}>
-                  {(() => {
-                    if (height === 'Unknown' || !height) {
-                      return 'Unknown';
-                    }
-                    // 解析身高字符串，提取数字和单位，然后格式化显示（与foodie详情页一致）
-                    const heightInCm = extractHeightInCm(height);
-                    if (heightInCm === null) {
-                      return 'Unknown';
-                    }
-                    if (heightUnit === 'cm') {
-                      return `${heightInCm} cm`;
-                    } else {
-                      const { feet, inches } = cmToFeet(heightInCm);
-                      return `${feet}' ${inches}"`;
-                    }
-                  })()}
-                </Text>
+                <Text style={styles.menuItemLabel}>Timezone</Text>
+                <Text style={styles.menuItemValue}>{timezone || 'Unknown'}</Text>
               </View>
-              <TouchableOpacity style={styles.editButton} onPress={handleEditHeight}>
+              <TouchableOpacity style={styles.editButton} onPress={handleEditTimezone}>
                 <Text style={styles.editButtonText}>Edit</Text>
               </TouchableOpacity>
             </View>
@@ -755,6 +871,7 @@ export default function ProfileScreen() {
 
             <Text style={styles.modalTitle}>
               {editingField === 'name' && 'Edit Name'}
+              {editingField === 'timezone' && 'Edit Timezone'}
             </Text>
 
             {editingField === 'name' && (
@@ -764,6 +881,19 @@ export default function ProfileScreen() {
                   value={tempValue}
                   onChangeText={setTempValue}
                   placeholder="Enter your name"
+                  placeholderTextColor="#999"
+                  autoFocus
+                />
+              </View>
+            )}
+
+            {editingField === 'timezone' && (
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  value={tempValue}
+                  onChangeText={setTempValue}
+                  placeholder="Enter timezone (e.g. +8, UTC+8)"
                   placeholderTextColor="#999"
                   autoFocus
                 />
@@ -808,6 +938,23 @@ export default function ProfileScreen() {
         initialUnit={heightUnit}
         onClose={() => setShowHeightPicker(false)}
         onSave={handleHeightSave}
+      />
+
+      {/* Age Picker Modal */}
+      <AgePickerModal
+        visible={showAgePicker}
+        initialAge={age || 25}
+        onClose={() => setShowAgePicker(false)}
+        onSave={handleAgeSave}
+      />
+
+      {/* Weight Picker Modal */}
+      <WeightPickerModal
+        visible={showWeightPicker}
+        initialWeight={extractWeightInKg(weight)}
+        initialUnit={weightUnit}
+        onClose={() => setShowWeightPicker(false)}
+        onSave={handleWeightSave}
       />
     </View>
   );

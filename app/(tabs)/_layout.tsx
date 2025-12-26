@@ -21,18 +21,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="fiscal"
-        options={{
-          title: 'Fiscal',
-        }}
-      />
-      <Tabs.Screen
-        name="architect"
-        options={{
-          title: 'Architect',
-        }}
-      />
-      <Tabs.Screen
         name="nutri"
         options={{
           title: 'Nutri',
@@ -51,12 +39,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="brew"
-        options={{
-          title: 'Brew',
-        }}
-      />
-      <Tabs.Screen
         name="zen"
         options={{
           title: 'Zen',
@@ -66,6 +48,24 @@ export default function TabLayout() {
         name="muse"
         options={{
           title: 'Muse',
+        }}
+      />
+      <Tabs.Screen
+        name="fiscal"
+        options={{
+          title: 'Fiscal',
+        }}
+      />
+      <Tabs.Screen
+        name="brew"
+        options={{
+          title: 'Brew',
+        }}
+      />
+      <Tabs.Screen
+        name="architect"
+        options={{
+          title: 'Architect',
         }}
       />
     </Tabs>
