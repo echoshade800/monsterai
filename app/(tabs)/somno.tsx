@@ -1,24 +1,23 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { 
-  ArrowRight, 
-  Check, 
-  ClipboardList, 
-  Clock, 
+import {
+  ArrowRight,
+  Check,
+  ClipboardList,
+  Clock,
   Target
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { 
-  Image,
-  ScrollView, 
-  StyleSheet, 
-  Text, 
-  TouchableOpacity, 
-  View,
+import {
   Dimensions,
-  Platform,
-  StatusBar
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
