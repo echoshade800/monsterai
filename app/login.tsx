@@ -173,9 +173,9 @@ export default function LoginScreen() {
                                 inviteCode.code;
           
           if (hasInviteCode) {
-            // 如果有邀请码，直接进入聊天页面
-            console.log('Invite code detected, entering chat page directly:', inviteCode);
-            router.replace('/(tabs)');
+            // 如果有邀请码，直接进入 home 页面
+            console.log('Invite code detected, entering home page directly:', inviteCode);
+            router.replace('/(tabs)/home');
           } else {
             // 如果没有邀请码，进入邀请码页面
             console.log('No invite code detected, entering invite code page');

@@ -19,7 +19,7 @@ export default function InviteCodeScreen() {
     // 测试环境下，1111 为通用邀请码，方便快速登录
     if (CURRENT_ENV === ENV.DEVELOPMENT && trimmedCode === '1111') {
       console.log('Test environment: Using universal invite code 1111, directly passing verification');
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/home');
       return;
     }
 
@@ -45,8 +45,8 @@ export default function InviteCodeScreen() {
       console.log('Invite code verification response:', data);
       // 当 code 为 0 时表示验证成功
       if (data.code === 0) {
-        // 验证成功，直接进入聊天页面
-        router.replace('/(tabs)');
+        // 验证成功，直接进入 home 页面
+        router.replace('/(tabs)/home');
       } else {
         alert(data.msg || 'Invalid invite code. Please try again.');
       }
