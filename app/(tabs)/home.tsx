@@ -2,13 +2,13 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Keyboard, StyleSheet, View } from 'react-native';
+import { Alert, AppState, AppStateStatus, Keyboard, StyleSheet, View } from 'react-native';
 import EventSource from 'react-native-sse';
 import { ConversationSection } from '../../components/ConversationSection';
 import { Header } from '../../components/Header';
 import { InputField } from '../../components/InputField';
-import { ReminderBar, ReminderItem as ReminderItemType } from '../../components/ReminderBar';
 import { AGENTS } from '../../components/MentionSelector';
+import { ReminderBar, ReminderItem as ReminderItemType } from '../../components/ReminderBar';
 import type {
   Message,
   ReminderItem,
@@ -1739,23 +1739,41 @@ export default function HomeScreen() {
   const startUploadTimerRef = useRef(startUploadTimer);
   const startMemoryPollingRef = useRef(startMemoryPolling);
   const processPendingPhotoRef = useRef(processPendingPhoto);
+  const fetchConversationHistoryRef = useRef(fetchConversationHistory);
+  const lastHistoryFetchTimeRef = useRef<number>(0);
   
   // 更新 ref 值，但不触发 useFocusEffect 重新执行
   useEffect(() => {
     startUploadTimerRef.current = startUploadTimer;
     startMemoryPollingRef.current = startMemoryPolling;
     processPendingPhotoRef.current = processPendingPhoto;
-  }, [startUploadTimer, startMemoryPolling, processPendingPhoto]);
+    fetchConversationHistoryRef.current = fetchConversationHistory;
+  }, [startUploadTimer, startMemoryPolling, processPendingPhoto, fetchConversationHistory]);
 
   useFocusEffect(
     useCallback(() => {
       const now = Date.now();
       const timeSinceLastRefresh = now - lastRefreshTimeRef.current;
       const MIN_REFRESH_INTERVAL = 5000; // 最小刷新间隔 5 秒（从2秒增加到5秒）
+      const MIN_HISTORY_FETCH_INTERVAL = 2000; // 历史消息获取最小间隔 2 秒
       const wasPageFocused = isPageFocusedRef.current;
       
       // 标记页面为聚焦状态
       isPageFocusedRef.current = true;
+
+      // 如果历史消息已经初始化过，且距离上次获取时间超过最小间隔，则触发获取历史消息
+      if (historyInitializedRef.current) {
+        const timeSinceLastHistoryFetch = now - lastHistoryFetchTimeRef.current;
+        if (timeSinceLastHistoryFetch >= MIN_HISTORY_FETCH_INTERVAL) {
+          console.log('[useFocusEffect] Fetching conversation history on tab focus');
+          lastHistoryFetchTimeRef.current = now;
+          fetchConversationHistoryRef.current().catch((error) => {
+            console.error('[useFocusEffect] Failed to fetch conversation history:', error);
+          });
+        } else {
+          console.log(`[useFocusEffect] Skipping history fetch, too soon since last fetch (${timeSinceLastHistoryFetch}ms)`);
+        }
+      }
 
       // 如果页面之前就已经处于聚焦状态，且距离上次刷新时间太短，则跳过刷新
       // 这样可以避免在页面没有真正失去焦点时重复刷新
@@ -1845,6 +1863,35 @@ export default function HomeScreen() {
       };
     }, []) // 移除所有依赖项，使用 ref 来访问最新的函数
   );
+
+  // 监听应用从后台回到前台，触发获取历史消息
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      // 当应用从后台（background/inactive）回到前台（active）时
+      if (nextAppState === 'active') {
+        // 检查历史消息是否已经初始化
+        if (historyInitializedRef.current) {
+          const now = Date.now();
+          const MIN_HISTORY_FETCH_INTERVAL = 2000; // 历史消息获取最小间隔 2 秒
+          const timeSinceLastHistoryFetch = now - lastHistoryFetchTimeRef.current;
+          
+          if (timeSinceLastHistoryFetch >= MIN_HISTORY_FETCH_INTERVAL) {
+            console.log('[AppState] App came to foreground, fetching conversation history');
+            lastHistoryFetchTimeRef.current = now;
+            fetchConversationHistoryRef.current().catch((error) => {
+              console.error('[AppState] Failed to fetch conversation history:', error);
+            });
+          } else {
+            console.log(`[AppState] Skipping history fetch, too soon since last fetch (${timeSinceLastHistoryFetch}ms)`);
+          }
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []); // 空依赖数组，只在组件挂载时设置监听器
 
   // 处理来自相机的照片
   useEffect(() => {
