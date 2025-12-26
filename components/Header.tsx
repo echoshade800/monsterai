@@ -80,11 +80,36 @@ const formatTime = (timeInput: any): string => {
 export function Header({ refreshTrigger }: HeaderProps) {
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [headerImageUrl, setHeaderImageUrl] = useState<string>('https://dzdbhsix5ppsc.cloudfront.net/monster/hezhao.jpg'); // 默认图片
   const router = useRouter();
 
   const handleProfilePress = () => {
     router.push('/profile');
   };
+
+  // Fetch header image URL from API
+  const fetchHeaderImage = useCallback(async () => {
+    try {
+      console.log('[Header][fetchHeaderImage] Fetching header image URL');
+      const response = await api.get(API_ENDPOINTS.APP_CONFIG.HOME_HEADER_IMAGE);
+      console.log('[Header][fetchHeaderImage] response', response);
+
+      if (response.isSuccess() && response.data) {
+        const imageUrl = response.data.image_url;
+        if (imageUrl) {
+          console.log('[Header][fetchHeaderImage] Setting header image URL:', imageUrl);
+          setHeaderImageUrl(imageUrl);
+        } else {
+          console.warn('[Header][fetchHeaderImage] No image_url in response data');
+        }
+      } else {
+        console.warn('[Header][fetchHeaderImage] Failed to fetch header image, using default');
+      }
+    } catch (error) {
+      console.error('[Header][fetchHeaderImage] Error fetching header image:', error);
+      // 失败时使用默认图片，不显示错误
+    }
+  }, []);
 
   // Fetch agent log data from API
   const fetchAgentLogs = useCallback(async () => {
@@ -144,15 +169,16 @@ export function Header({ refreshTrigger }: HeaderProps) {
     }
   }, []);
 
-  // Fetch logs on mount (只在组件首次挂载时执行一次)
+  // Fetch logs and header image on mount (只在组件首次挂载时执行一次)
   const hasMountedRef = useRef(false);
   useEffect(() => {
     if (!hasMountedRef.current) {
       hasMountedRef.current = true;
       console.log('[Header] Component mounted, fetching initial data');
+      fetchHeaderImage();
       fetchAgentLogs();
     }
-  }, [fetchAgentLogs]);
+  }, [fetchHeaderImage, fetchAgentLogs]);
 
   // 当 refreshTrigger 变化时，重新获取 AgentLogs
   // 使用 useRef 来跟踪上次的 refreshTrigger 值，避免重复请求
@@ -228,7 +254,7 @@ export function Header({ refreshTrigger }: HeaderProps) {
             imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
           >
             <Image 
-              source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/hezhao.jpg' }} 
+              source={{ uri: headerImageUrl }} 
               style={styles.bannerBackgroundImage}
               resizeMode="cover"
             />

@@ -177,6 +177,10 @@ export const API_ENDPOINTS = {
   DEVICE_TOKEN: {
     SET: '/device-token/set',
   },
+
+  APP_CONFIG: {
+    HOME_HEADER_IMAGE: '/app-config/home/header/image',
+  },
 };
 
 // 导出环境常量
