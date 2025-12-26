@@ -76,7 +76,12 @@ export default function NutriScreen() {
         <View style={styles.heroBannerContainer}>
           <Image 
             source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/livingroom.jpeg' }} 
-            style={styles.bannerImage}
+            style={styles.bannerImage} resizeMode="cover"
+            
+          />
+          <Image 
+            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/Nutri.png' }} 
+            style={[StyleSheet.absoluteFill, { top: 24, bottom: -104 }]}
             resizeMode="cover"
           />
         </View>

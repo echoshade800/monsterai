@@ -2,9 +2,9 @@ import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { Candy, User } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-    useAnimatedStyle,
+  useAnimatedStyle,
 } from 'react-native-reanimated';
 import { api } from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
@@ -195,11 +195,11 @@ export function Header({ refreshTrigger }: HeaderProps) {
 
   return (
     <View style={styles.headerContainer}>
-      {/* Shared Title - Always mounted */}
-      <Animated.View style={sharedTitleStyle}>
+        {/* Shared Title - Always mounted */}
+        <Animated.View style={sharedTitleStyle}>
         <Text style={styles.hiBossText}>Hi Boss！</Text>
         <Text style={styles.trackLifeText}>Let's track life together!</Text>
-      </Animated.View>
+        </Animated.View>
 
       {/* Shared Candy Button - Always mounted */}
       <Animated.View style={sharedCandyStyle}>
@@ -207,36 +207,41 @@ export function Header({ refreshTrigger }: HeaderProps) {
           <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
           <View style={styles.iconButtonBorder} />
           <Candy size={20} color="#000000" strokeWidth={2} />
-        </TouchableOpacity>
-      </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
 
-      {/* Shared Profile Button - Always mounted */}
-      <Animated.View style={sharedProfileStyle}>
-        <TouchableOpacity style={styles.iconButton} onPress={handleProfilePress}>
-          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-          <View style={styles.iconButtonBorder} />
-          <User size={20} color="#000000" strokeWidth={2} />
-        </TouchableOpacity>
-      </Animated.View>
+        {/* Shared Profile Button - Always mounted */}
+        <Animated.View style={sharedProfileStyle}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleProfilePress}>
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+            <View style={styles.iconButtonBorder} />
+            <User size={20} color="#000000" strokeWidth={2} />
+          </TouchableOpacity>
+        </Animated.View>
 
       <View style={styles.bannerContainer}>
-        <View style={styles.topExtension} />
-        <ImageBackground
-          source={require('../assets/images/chatbackground.png')}
-          style={styles.backgroundImage}
-          resizeMode="cover"
-          imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
-        >
-          <View style={styles.statusBar}>
-            <View />
-            <View style={styles.profilePlaceholder} />
-          </View>
-          
+          <View style={styles.topExtension} />
+          <ImageBackground
+            source={require('../assets/images/chatbackground.png')}
+            style={styles.backgroundImage}
+            resizeMode="cover"
+            imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
+          >
+            <Image 
+              source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/hezhao.jpg' }} 
+              style={styles.bannerBackgroundImage}
+              resizeMode="cover"
+            />
+            <View style={styles.statusBar}>
+              <View />
+              <View style={styles.profilePlaceholder} />
+            </View>
+
           {/* Review Carousel */}
           <ReviewCarousel data={MOCK_REVIEW_DATA} />
-        </ImageBackground>
-      </View>
-    </View>
+          </ImageBackground>
+              </View>
+            </View>
   );
 }
 
@@ -278,6 +283,13 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
     justifyContent: 'flex-end',
+  },
+  bannerBackgroundImage: {
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    bottom: -60,
   },
   statusBar: {
     flexDirection: 'row',

@@ -26,62 +26,48 @@ const IMAGE_MAP: { [key: string]: any } = {
   'backfeces.png': require('../assets/images/backfeces.png'),
 };
 
+// Helper function to get image source (supports both URL and local resources)
+function getImageSource(imagePath: string) {
+  // Check if it's a URL
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return { uri: imagePath };
+  }
+  // Otherwise, use local resource from IMAGE_MAP
+  return IMAGE_MAP[imagePath] || IMAGE_MAP['frontsteward.png'];
+}
+
 const AGENTS = [
   {
     id: 'butler',
     name: 'Butler',
-    frontImage: 'frontsteward.png',
-    backImage: 'backsteward.png',
-    prompt: 'Take any picture you want!',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/Butler.png',
+    backImage: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/bebulter.png',
+    prompt: 'Take any picture you want.',
     image_detection_type: 'full',
   },
   {
     id: 'foodie',
     name: 'Foodie',
-    frontImage: 'frontenergy.png',
-    backImage: 'backenergy.png',
-    prompt: 'Show me your food!',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/Nutri.png',
+    backImage: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/benutri.png',
+    prompt: 'Show me your food.',
     image_detection_type: 'food_calorie',
   },
   {
     id: 'facey',
     name: 'Facey',
-    frontImage: 'frontface.png',
-    backImage: 'backface.png',
-    prompt: 'Show me your face!',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/Brew.png',
+    backImage: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/bebrew.png',
+    prompt: 'Show me your drink.',
     image_detection_type: 'face',
   },
   {
     id: 'posture',
     name: 'Posture',
-    frontImage: 'frontposture.png',
-    backImage: 'backposture.png',
-    prompt: 'Check your posture!',
+    frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/Coach.png',
+    backImage: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/becoach.png',
+    prompt: 'Show me what you\'re doing.',
     image_detection_type: 'posture',
-  },
-  {
-    id: 'sleeper',
-    name: 'Sleeper',
-    frontImage: 'frontsleep.png',
-    backImage: 'backsleep.png',
-    prompt: 'How did you sleep? Show me!',
-    image_detection_type: 'sleep',
-  },
-  {
-    id: 'moodie',
-    name: 'Moodie',
-    frontImage: 'frontstress.png',
-    backImage: 'backstress.png',
-    prompt: 'How stressed are you? Show me!',
-    image_detection_type: 'stress',
-  },
-  {
-    id: 'poopy',
-    name: 'Poopy',
-    frontImage: 'frontfeces.png',
-    backImage: 'backfeces.png',
-    prompt: 'Did you poop today?',
-    image_detection_type: 'feces',
   },
 ];
 
@@ -378,20 +364,19 @@ export default function CameraScreen() {
           </View>
 
           <View style={styles.centerContainer}>
-            <View style={styles.promptContainer}>
-              <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
-              <Text style={styles.promptText}>{selectedAgentData.prompt}</Text>
-            </View>
-
             <TouchableOpacity 
               style={styles.captureButton} 
               onPress={takePicture}
               disabled={isUploading}
             >
               <Image
-                source={IMAGE_MAP[selectedAgentData.backImage]}
+                source={getImageSource(selectedAgentData.backImage)}
                 style={styles.captureImage}
               />
+              <View style={styles.promptContainer}>
+                <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+                <Text style={styles.promptText} numberOfLines={1}>{selectedAgentData.prompt}</Text>
+              </View>
               <View style={styles.captureOverlay}>
                 <View style={styles.cameraIconContainer}>
                   {isUploading ? (
@@ -414,13 +399,6 @@ export default function CameraScreen() {
             >
               {AGENTS.map((agent, index) => {
                 const imageStyle = [styles.agentImage];
-                if (agent.id === 'sleeper' || agent.id === 'poopy') {
-                  imageStyle.push(styles.agentImageSmall);
-                } else if (agent.id === 'moodie') {
-                  imageStyle.push(styles.agentImageUp);
-                } else if (agent.id === 'posture') {
-                  imageStyle.push(styles.agentImageDown);
-                }
 
                 return (
                   <TouchableOpacity
@@ -429,7 +407,7 @@ export default function CameraScreen() {
                     onPress={() => setSelectedAgent(agent.id)}
                   >
                     <Image
-                      source={IMAGE_MAP[selectedAgent === agent.id ? agent.backImage : agent.frontImage]}
+                      source={getImageSource(selectedAgent === agent.id ? agent.backImage : agent.frontImage)}
                       style={imageStyle}
                     />
                     {selectedAgent === agent.id && (
@@ -535,12 +513,16 @@ const styles = StyleSheet.create({
     marginTop: 200,
   },
   promptContainer: {
+    position: 'absolute',
+    top: -60,
+    alignSelf: 'center',
+    minWidth: 300,
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderRadius: 20,
-    marginBottom: 32,
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    zIndex: 10,
   },
   promptText: {
     fontSize: 16,
@@ -548,6 +530,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     textAlign: 'center',
     lineHeight: 22,
+    flexShrink: 1,
   },
   captureButton: {
     width: 140,
@@ -560,6 +543,9 @@ const styles = StyleSheet.create({
     width: 320,
     height: 320,
     resizeMode: 'contain',
+  },
+  captureImageHalfSize: {
+    transform: [{ scale: 0.5 }],
   },
   captureOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -608,6 +594,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'contain',
+  },
+  agentImageHalfSize: {
+    transform: [{ scale: 0.5 }],
   },
   agentImageSmall: {
     width: '85%',

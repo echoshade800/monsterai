@@ -290,16 +290,16 @@ const renderMarkdownWithMonsterTags = (text: string, timestampText?: string | nu
           return (
             <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4, flexWrap: 'wrap' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {avatarUrl && (
-                  <Image
-                    source={{ uri: avatarUrl }}
-                    style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
-                    resizeMode="cover"
-                  />
-                )}
-                <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
-                  {displayName}
-                </Text>
+              {avatarUrl && (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
+                  resizeMode="cover"
+                />
+              )}
+              <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
+                {displayName}
+              </Text>
               </View>
               {!timeAdded && timestampText && (
                 <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>
@@ -466,16 +466,16 @@ const renderMonsterColoredText = (text: string, timestampText?: string | null) =
           return (
             <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4, flexWrap: 'wrap' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {avatarUrl && (
-                  <Image
-                    source={{ uri: avatarUrl }}
-                    style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
-                    resizeMode="cover"
-                  />
-                )}
-                <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
-                  {displayName}
-                </Text>
+              {avatarUrl && (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
+                  resizeMode="cover"
+                />
+              )}
+              <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
+                {displayName}
+              </Text>
               </View>
               {!timeAdded && timestampText && (
                 <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>
