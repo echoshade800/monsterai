@@ -1,48 +1,71 @@
 import { Tabs } from 'expo-router';
-import { MessageCircle, BookText, Store, Users } from 'lucide-react-native';
-import { FloatingTabBar } from '../../components/FloatingTabBar';
+import { ScrollableGlassTabBar } from '../../components/ScrollableGlassTabBar';
 
 export default function TabLayout() {
   return (
     <Tabs
-      tabBar={(props) => <FloatingTabBar {...props} />}
+      tabBar={(props) => <ScrollableGlassTabBar {...props} />}
       screenOptions={{
         headerShown: false,
       }}>
       <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Echo',
-          tabBarIcon: ({ color, focused }) => (
-            <MessageCircle size={26} color={color} strokeWidth={2.5} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="home"
         options={{
-          title: 'Life Log',
-          tabBarIcon: ({ color, focused }) => (
-            <BookText size={26} color={color} strokeWidth={2.5} />
-          ),
+          title: 'Home',
         }}
       />
       <Tabs.Screen
-        name="market"
+        name="daily-brief"
         options={{
-          title: 'Store',
-          tabBarIcon: ({ color, focused }) => (
-            <Store size={26} color={color} strokeWidth={2.5} />
-          ),
+          title: 'Daily Brief',
         }}
       />
       <Tabs.Screen
-        name="social"
+        name="fiscal"
         options={{
-          title: 'Social',
-          tabBarIcon: ({ color, focused }) => (
-            <Users size={26} color={color} strokeWidth={2.5} />
-          ),
+          title: 'Fiscal',
+        }}
+      />
+      <Tabs.Screen
+        name="architect"
+        options={{
+          title: 'Architect',
+        }}
+      />
+      <Tabs.Screen
+        name="nutri"
+        options={{
+          title: 'Nutri',
+        }}
+      />
+      <Tabs.Screen
+        name="somno"
+        options={{
+          title: 'Somno',
+        }}
+      />
+      <Tabs.Screen
+        name="coach"
+        options={{
+          title: 'Coach',
+        }}
+      />
+      <Tabs.Screen
+        name="brew"
+        options={{
+          title: 'Brew',
+        }}
+      />
+      <Tabs.Screen
+        name="zen"
+        options={{
+          title: 'Zen',
+        }}
+      />
+      <Tabs.Screen
+        name="muse"
+        options={{
+          title: 'Muse',
         }}
       />
     </Tabs>

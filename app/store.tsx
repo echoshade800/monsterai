@@ -3,11 +3,11 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, NativeEventEmitter, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { unzip } from 'react-native-zip-archive';
-import { GameCard } from '../../components/GameCard';
-import { MonsterCard } from '../../components/MonsterCard';
-import { api } from '../../src/services/api-clients/client';
-import { API_ENDPOINTS, getBaseUrl, getConfigFileName } from '../../src/services/api/api';
-import storageManager from '../../src/utils/storage';
+import { GameCard } from '../components/GameCard';
+import { MonsterCard } from '../components/MonsterCard';
+import { api } from '../src/services/api-clients/client';
+import { API_ENDPOINTS, getBaseUrl, getConfigFileName } from '../src/services/api/api';
+import storageManager from '../src/utils/storage';
 const { MiniAppLauncher,NetworkTrigger } = NativeModules;
 const emitter = new NativeEventEmitter(NetworkTrigger);
 

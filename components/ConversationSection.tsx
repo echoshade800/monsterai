@@ -180,8 +180,10 @@ const markdownStyles = {
 
 // 渲染带 Markdown 和 Monster 标签的文本
 // 策略：先分割文本（按 monster 标签），然后对每个文本部分应用 markdown 渲染
-const renderMarkdownWithMonsterTags = (text: string) => {
+const renderMarkdownWithMonsterTags = (text: string, timestampText?: string | null) => {
   if (!text) return null;
+
+  let timeAdded = false;
 
   // 从统一配置中提取所有 monster 名字列表
   const monsterNames = Object.keys(MONSTER_CONFIG);
@@ -259,9 +261,17 @@ const renderMarkdownWithMonsterTags = (text: string) => {
     parts.push({ type: 'text', content: text });
   }
 
+  const hasTag = parts.some(p => p.type === 'tag');
+
   // 渲染每个部分
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      {!hasTag && timestampText && (
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 4, width: '100%' }}>
+          <Text style={styles.userNameText}>MonsterAI</Text>
+          <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>{timestampText}</Text>
+        </View>
+      )}
       {parts.map((part, index) => {
         if (part.type === 'tag') {
           // 渲染 monster 标签
@@ -278,17 +288,25 @@ const renderMarkdownWithMonsterTags = (text: string) => {
           }
           
           return (
-            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4 }}>
-              {avatarUrl && (
-                <Image
-                  source={{ uri: avatarUrl }}
-                  style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
-                  resizeMode="cover"
-                />
+            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4, flexWrap: 'wrap' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {avatarUrl && (
+                  <Image
+                    source={{ uri: avatarUrl }}
+                    style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
+                    resizeMode="cover"
+                  />
+                )}
+                <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
+                  {displayName}
+                </Text>
+              </View>
+              {!timeAdded && timestampText && (
+                <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>
+                  {timestampText}
+                </Text>
               )}
-              <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
-                {displayName}
-              </Text>
+              {(() => { if (!timeAdded && timestampText) timeAdded = true; return null; })()}
             </View>
           );
         }
@@ -340,8 +358,10 @@ const renderMarkdownWithMonsterTags = (text: string) => {
 
 // 统一渲染函数：给所有 [MonsterName] 或 @MonsterName 标签或直接出现的 MonsterName 加颜色，并在标签前显示头像
 // 保留此函数用于向后兼容（用户消息等不需要 markdown 的地方）
-const renderMonsterColoredText = (text: string) => {
+const renderMonsterColoredText = (text: string, timestampText?: string | null) => {
   if (!text) return null;
+
+  let timeAdded = false;
 
   // 从统一配置中提取所有 monster 名字列表
   const monsterNames = Object.keys(MONSTER_CONFIG);
@@ -444,17 +464,25 @@ const renderMonsterColoredText = (text: string) => {
           }
           
           return (
-            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4 }}>
-              {avatarUrl && (
-                <Image
-                  source={{ uri: avatarUrl }}
-                  style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
-                  resizeMode="cover"
-                />
+            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 4, flexWrap: 'wrap' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {avatarUrl && (
+                  <Image
+                    source={{ uri: avatarUrl }}
+                    style={{ width: 20, height: 20, marginRight: 4, borderRadius: 10 }}
+                    resizeMode="cover"
+                  />
+                )}
+                <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
+                  {displayName}
+                </Text>
+              </View>
+              {!timeAdded && timestampText && (
+                <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>
+                  {timestampText}
+                </Text>
               )}
-              <Text style={{ color, fontWeight: '600', fontFamily: 'Nunito_600SemiBold', fontSize: 15, lineHeight: 22 }}>
-                {displayName}
-              </Text>
+              {(() => { if (!timeAdded && timestampText) timeAdded = true; return null; })()}
             </View>
           );
         }
@@ -777,7 +805,7 @@ export function ConversationSection({
                   <Text style={styles.memoryIcon}>🧠</Text>
                   <Text style={styles.memoryLabel}>记忆</Text>
                   {timestampText && (
-                    <Text style={styles.messageTimestamp}>{timestampText}</Text>
+                    <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>{timestampText}</Text>
                   )}
                 </View>
                 <TouchableOpacity
@@ -803,11 +831,8 @@ export function ConversationSection({
                 style={styles.assistantTextWrapper}
                 hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
               >
-                {renderMarkdownWithMonsterTags(message.content)}
+                {renderMarkdownWithMonsterTags(message.content, timestampText)}
               </TouchableOpacity>
-              {timestampText && (
-                <Text style={styles.messageTimestamp}>{timestampText}</Text>
-              )}
             </View>
           );
         }
@@ -817,6 +842,12 @@ export function ConversationSection({
         return (
           <View key={message.id} style={styles.userMessageContainer}>
             <View style={styles.userMessageWrapper}>
+              <View style={styles.userNameRow}>
+                <Text style={styles.userNameText}>Boss</Text>
+                {timestampText && (
+                  <Text style={[styles.inlineTimestamp, { marginLeft: 8 }]}>{timestampText}</Text>
+                )}
+              </View>
               <TouchableOpacity
                 onLongPress={() => handleCopyMessage(message.content || 'Image message')}
                 delayLongPress={500}
@@ -834,9 +865,6 @@ export function ConversationSection({
                   <Text style={styles.photoOnlyText}>📷 Image</Text>
                 ) : null}
               </TouchableOpacity>
-              {timestampText && (
-                <Text style={[styles.messageTimestamp, styles.userMessageTimestamp]}>{timestampText}</Text>
-              )}
             </View>
           </View>
         );
@@ -912,7 +940,7 @@ export function ConversationSection({
 const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
-    backgroundColor: '#F5F7F9',
+    backgroundColor: '#F6F1EF',
   },
   container: {
     paddingHorizontal: 12,
@@ -1139,15 +1167,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_600SemiBold',
     color: '#FFFFFF',
   },
-  messageTimestamp: {
-    fontSize: 11,
-    fontFamily: 'Nunito_400Regular',
-    color: '#999999',
-    marginTop: -10,
-    alignSelf: 'flex-start',
-  },
   userMessageTimestamp: {
     alignSelf: 'flex-end',
     marginTop: 2,
+  },
+  userNameRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 4,
+  },
+  userNameText: {
+    fontSize: 13,
+    fontFamily: 'Nunito_700Bold',
+    color: '#333333',
+  },
+  inlineTimestamp: {
+    fontSize: 11,
+    fontFamily: 'Nunito_400Regular',
+    color: '#999999',
   },
 });

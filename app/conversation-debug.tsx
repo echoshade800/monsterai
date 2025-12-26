@@ -88,7 +88,7 @@ export default function ConversationDebug() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7F9',
+    backgroundColor: '#F6F1EF',
   },
   header: {
     flexDirection: 'row',

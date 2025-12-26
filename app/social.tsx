@@ -4,7 +4,7 @@ export default function SocialTab() {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../../assets/images/tab_social_bg.png')}
+        source={require('../assets/images/tab_social_bg.png')}
         style={styles.image}
         resizeMode="cover"
         onLoad={() => console.log('Social tab image loaded successfully')}

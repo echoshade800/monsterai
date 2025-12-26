@@ -1,33 +1,39 @@
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { Check, User } from 'lucide-react-native';
+import { Candy, User } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { ImageBackground, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-  Extrapolate,
-  interpolate,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
+    useAnimatedStyle,
 } from 'react-native-reanimated';
-import { api, getTimezone } from '../src/services/api-clients/client';
+import { api } from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
+import { ReviewCardData, ReviewCarousel } from './ReviewCarousel';
 
 interface HeaderProps {
-  isCollapsed?: boolean;
-  onCollapse?: (collapsed: boolean) => void;
   refreshTrigger?: number; // 当这个值变化时，触发刷新 AgentLogs
-  onTestReminder?: () => void; // Test reminder button callback
 }
 
-const EXPANDED_HEIGHT_WITH_TODO = 600;
-const EXPANDED_HEIGHT_WITHOUT_TODO = 500;
-const COLLAPSED_HEIGHT = 304;
-const COLLAPSE_THRESHOLD = 100;
-const TODO_BANNER_HEIGHT = 80;
+const FIXED_HEIGHT = 286; // Adjusted height (reduced by 18px)
+
+const MOCK_REVIEW_DATA: ReviewCardData[] = [
+  {
+    id: '1',
+    title: 'Your Deep 2025 Review',
+    subtitle: '✓ 7,788 boss unlocked',
+    coverImage: require('../assets/images/chatteam.png'),
+    ctaRoute: '/daily-brief',
+    status: 'ready',
+  },
+  {
+    id: '2',
+    title: 'Weekly Energy Report',
+    subtitle: 'Generating... 85%',
+    coverImage: require('../assets/images/chatposture.png'),
+    ctaRoute: '/energy-weekly-report',
+    status: 'generating',
+  },
+];
 
 const DEFAULT_MESSAGE = "I'll start giving insights once we talk a bit more.";
 
@@ -71,25 +77,10 @@ const formatTime = (timeInput: any): string => {
   return String(timeInput);
 };
 
-interface TodoItem {
-  prompt: string;
-  time: string;
-  done: boolean;
-}
-
-export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTestReminder }: HeaderProps) {
-  const [isDone, setIsDone] = useState(false);
+export function Header({ refreshTrigger }: HeaderProps) {
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
-  const [todoItem, setTodoItem] = useState<TodoItem | null>(null);
-  const [isLoadingTodo, setIsLoadingTodo] = useState(false);
-  const animatedCollapse = useSharedValue(isCollapsed ? 1 : 0);
-  const scrollY = useSharedValue(0);
   const router = useRouter();
-
-  const handleThinkingPress = () => {
-    router.push('/(tabs)/home');
-  };
 
   const handleProfilePress = () => {
     router.push('/profile');
@@ -153,127 +144,6 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
     }
   }, []);
 
-  // Fetch TODO list data from API
-  const fetchTodoList = useCallback(async () => {
-    try {
-      setIsLoadingTodo(true);
-      const baseHeaders = await getHeadersWithPassId();
-      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
-      
-      // 获取时间戳和时区
-      const timestamp = Date.now();
-      let timezone = getTimezone();
-      
-      // 将时区格式从 "+8" 转换为 "+800" 格式（匹配 API 要求）
-      // 例如：+8 → +800, +9 → +900, -5 → -500
-      if (timezone && /^[+-]\d+$/.test(timezone)) {
-        const sign = timezone[0];
-        const hours = timezone.slice(1);
-        timezone = `${sign}${hours}00`;
-      }
-      
-      let timestampString = process.env.NODE_ENV === 'development' ? '1763353563943' : timestamp.toString();
-      // 构建查询参数
-      const queryParams = new URLSearchParams({
-        timestamp: timestampString,
-        timezone: timezone,
-      });
-      console.log('fetchTodoList queryParams', queryParams.toString());
-      
-      const response = await api.get(
-        `${API_ENDPOINTS.TODO.LIST}?${queryParams.toString()}`,
-        {
-          headers: {
-            'passid': passIdValue,
-            'accept': 'application/json',
-          },
-        }
-      );
-      console.log('fetchTodoList response', response);
-
-      if (response.isSuccess() && response.data) {
-        // API 返回格式: { code: 0, msg: "success", data: { items: [...] } }
-        if (response.data.items && Array.isArray(response.data.items) && response.data.items.length > 0) {
-          const firstItem = response.data.items[0];
-          setTodoItem({
-            prompt: firstItem.prompt || '',
-            time: firstItem.time || '',
-            done: firstItem.done || false,
-          });
-          setIsDone(firstItem.done || false);
-        } else {
-          setTodoItem(null);
-        }
-      } else {
-        setTodoItem(null);
-      }
-    } catch (error) {
-      console.error('Failed to fetch todo list:', error);
-      setTodoItem(null);
-    } finally {
-      setIsLoadingTodo(false);
-    }
-  }, []);
-
-  // Handle TODO done action
-  const handleTodoDone = useCallback(async () => {
-    if (!todoItem) return;
-    
-    try {
-      const baseHeaders = await getHeadersWithPassId();
-      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
-      
-      const requestBody = {
-        prompt: todoItem.prompt,
-        time: todoItem.time,
-      };
-      
-      console.log('handleTodoDone - Request:', {
-        endpoint: API_ENDPOINTS.TODO.DONE,
-        body: requestBody,
-        headers: {
-          'passid': passIdValue,
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      const response = await api.post(
-        API_ENDPOINTS.TODO.DONE,
-        requestBody,
-        {
-          headers: {
-            'passid': passIdValue,
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      
-      console.log('handleTodoDone - Success Response:', {
-        code: response.code,
-        msg: response.msg,
-        data: response.data,
-      });
-      
-      if (response.isSuccess()) {
-        // 更新本地状态
-        const newDoneState = !isDone;
-        setIsDone(newDoneState);
-        setTodoItem({ ...todoItem, done: newDoneState });
-      }
-    } catch (error: any) {
-      console.error('handleTodoDone - Error Details:', {
-        errorType: error?.constructor?.name,
-        errorMessage: error?.message,
-        errorCode: error?.code,
-        errorData: error?.data,
-        fullError: error,
-        stack: error?.stack,
-      });
-    }
-  }, [todoItem, isDone]);
-
   // Fetch logs on mount (只在组件首次挂载时执行一次)
   const hasMountedRef = useRef(false);
   useEffect(() => {
@@ -281,9 +151,8 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
       hasMountedRef.current = true;
       console.log('[Header] Component mounted, fetching initial data');
       fetchAgentLogs();
-      fetchTodoList();
     }
-  }, [fetchAgentLogs, fetchTodoList]);
+  }, [fetchAgentLogs]);
 
   // 当 refreshTrigger 变化时，重新获取 AgentLogs
   // 使用 useRef 来跟踪上次的 refreshTrigger 值，避免重复请求
@@ -297,168 +166,20 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
     }
   }, [refreshTrigger, fetchAgentLogs]);
 
-  // Update scroll animation when log entries change
-  useEffect(() => {
-    const lineHeight = 23;
-    const totalHeight = logEntries.length * lineHeight;
-    
-    // 如果只有一条消息且没有时间（默认消息），不进行滚动
-    const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
-
-    if (totalHeight > 0 && !isDefaultMessage) {
-      scrollY.value = withRepeat(
-        withTiming(totalHeight, {
-          duration: 15000,
-        }),
-        -1,
-        false
-      );
-    } else {
-      scrollY.value = 0;
-    }
-  }, [logEntries]);
-
-  useEffect(() => {
-    animatedCollapse.value = withTiming(isCollapsed ? 1 : 0, {
-      duration: 250,
-    });
-  }, [isCollapsed]);
-
-  const swipeGesture = Gesture.Pan()
-    .onEnd((event) => {
-      'worklet';
-      if (event.velocityY < -500 || event.translationY < -50) {
-        if (onCollapse) {
-          runOnJS(onCollapse)(true);
-        }
-      } else if (event.velocityY > 500 || event.translationY > 50) {
-        if (onCollapse) {
-          runOnJS(onCollapse)(false);
-        }
-      }
-    });
-
-  const headerAnimatedStyle = useAnimatedStyle(() => {
-    const expandedHeight = todoItem ? EXPANDED_HEIGHT_WITH_TODO : EXPANDED_HEIGHT_WITHOUT_TODO;
-    const height = interpolate(
-      animatedCollapse.value,
-      [0, 1],
-      [expandedHeight, COLLAPSED_HEIGHT],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      height,
-    };
-  });
-
-  const backgroundContainerStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      animatedCollapse.value,
-      [0, 0.5, 1],
-      [1, 0.3, 0],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      opacity,
-      pointerEvents: animatedCollapse.value > 0.8 ? 'none' : 'auto',
-    };
-  });
-
-  const collapsedHeaderStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      animatedCollapse.value,
-      [0, 0.5, 1],
-      [0, 0.5, 1],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      opacity,
-      pointerEvents: animatedCollapse.value > 0.5 ? 'auto' : 'none',
-    };
-  });
-
-  const monsterImageStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      animatedCollapse.value,
-      [0, 0.4, 1],
-      [1, 0, 0],
-      Extrapolate.CLAMP
-    );
-
-    const height = interpolate(
-      animatedCollapse.value,
-      [0, 1],
-      [180, 0],
-      Extrapolate.CLAMP
-    );
-
-    const translateY = interpolate(
-      animatedCollapse.value,
-      [0, 1],
-      [0, -50],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      opacity,
-      height,
-      transform: [{ translateY }],
-      marginBottom: interpolate(animatedCollapse.value, [0, 1], [12, 0], Extrapolate.CLAMP),
-    };
-  });
-
-  const breakfastBannerStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      animatedCollapse.value,
-      [0, 0.4, 1],
-      [1, 0, 0],
-      Extrapolate.CLAMP
-    );
-
-    const height = interpolate(
-      animatedCollapse.value,
-      [0, 1],
-      [80, 0],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      opacity,
-      height,
-      marginBottom: interpolate(animatedCollapse.value, [0, 1], [12, 0], Extrapolate.CLAMP),
-    };
-  });
-
-  const zappedBannerStyle = useAnimatedStyle(() => {
-    const scale = interpolate(
-      animatedCollapse.value,
-      [0, 1],
-      [1, 0.95],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      transform: [{ scale }],
-    };
-  });
-
   const sharedProfileStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
-      right: 20,
-      top: Platform.OS === 'ios' ? 126 : (StatusBar.currentHeight || 0) + 76,
+      right: 12,
+      top: Platform.OS === 'ios' ? 116 : (StatusBar.currentHeight || 0) + 66,
       zIndex: 1001,
     };
   });
 
-  const sharedTestButtonStyle = useAnimatedStyle(() => {
+  const sharedCandyStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
-      right: 72,
-      top: Platform.OS === 'ios' ? 126 : (StatusBar.currentHeight || 0) + 76,
+      right: 64,
+      top: Platform.OS === 'ios' ? 116 : (StatusBar.currentHeight || 0) + 66,
       zIndex: 1001,
     };
   });
@@ -466,175 +187,56 @@ export function Header({ isCollapsed = false, onCollapse, refreshTrigger, onTest
   const sharedTitleStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
-      left: 20,
-      top: Platform.OS === 'ios' ? 126 : (StatusBar.currentHeight || 0) + 76,
+      left: 12,
+      top: Platform.OS === 'ios' ? 116 : (StatusBar.currentHeight || 0) + 66,
       zIndex: 1001,
     };
   });
 
-  const logScrollStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: -scrollY.value }],
-    };
-  });
-
   return (
-    <GestureDetector gesture={swipeGesture}>
-      <Animated.View style={[styles.headerContainer, headerAnimatedStyle]}>
-        {/* Shared Title - Always mounted */}
-        <Animated.View style={sharedTitleStyle}>
-          <Text style={styles.titleText}>MonsterAI</Text>
-        </Animated.View>
-
-        {/* Shared Test Button - Always mounted */}
-        {onTestReminder && (
-          <Animated.View style={sharedTestButtonStyle}>
-            <TouchableOpacity onPress={onTestReminder} style={styles.testButton}>
-              <Text style={styles.testButtonText}>Test</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
-        {/* Shared Profile Button - Always mounted */}
-        <Animated.View style={sharedProfileStyle}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleProfilePress}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-            <View style={styles.iconButtonBorder} />
-            <User size={20} color="#000000" strokeWidth={2} />
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* Expanded State - Full background with cards */}
-        <Animated.View style={[styles.expandedContainer, backgroundContainerStyle]}>
-          <View style={styles.topExtension} />
-          <ImageBackground
-            source={require('../assets/images/chatbackground.png')}
-            style={styles.backgroundImage}
-            resizeMode="cover"
-            imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
-          >
-            <View style={styles.statusBar}>
-              <View />
-              <View style={styles.profilePlaceholder} />
-            </View>
-
-            <View style={styles.bannersContainer}>
-              <Animated.View style={[styles.monsterImageContainer, monsterImageStyle]}>
-                <Image
-                  source={require('../assets/images/chatteam.png')}
-                  style={styles.monsterImage}
-                  resizeMode="cover"
-                />
-              </Animated.View>
-
-              {todoItem && (
-                <Animated.View style={[styles.breakfastBanner, breakfastBannerStyle]}>
-                  <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-                  <View style={styles.breakfastContent}>
-                    <View style={styles.breakfastLeft}>
-                      <Image
-                        source={require('../assets/images/chatposture.png')}
-                        style={styles.avatarImage}
-                      />
-                      <View style={styles.breakfastTextContainer}>
-                        <Text style={styles.timeRange}>
-                          {todoItem?.time}
-                        </Text>
-                        <Text style={styles.taskTitle}>
-                          {todoItem?.prompt}
-                        </Text>
-                      </View>
-                    </View>
-                    <TouchableOpacity
-                      style={[styles.doneButton, isDone && styles.doneButtonChecked]}
-                      onPress={handleTodoDone}
-                    >
-                      {isDone ? (
-                        <Check size={18} color="#FFFFFF" strokeWidth={3} />
-                      ) : (
-                        <Text style={styles.doneButtonText}>Done</Text>
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                </Animated.View>
-              )}
-
-              <Animated.View style={[styles.thinkingBanner, zappedBannerStyle]}>
-                <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-                <View style={styles.thinkingContent}>
-                  <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
-                    <View style={styles.thinkingHeader}>
-                      <Text style={styles.brainEmoji}>🧠</Text>
-                      <Text style={styles.thinkingTitle}>In My Mind</Text>
-                    </View>
-                    <View style={styles.thinkingLogContainer}>
-                      <Animated.View style={logScrollStyle}>
-                        {(() => {
-                          // 如果只有默认消息，不重复显示
-                          const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
-                          const entriesToRender = isDefaultMessage ? logEntries : [...logEntries, ...logEntries];
-                          return entriesToRender.map((entry, index) => (
-                            <Text key={index} style={styles.logLine}>
-                              {entry.time ? <Text style={styles.logTime}>[{entry.time}]</Text> : null}
-                              <Text style={styles.logText}>{entry.time ? ' ' : ''}{entry.message?.length > 100 ? entry.message.substring(0, 100) + '...' : entry.message}</Text>
-                            </Text>
-                          ));
-                        })()}
-                      </Animated.View>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </Animated.View>
-            </View>
-          </ImageBackground>
-        </Animated.View>
-
-        {/* Collapsed State - Simple header with zapped banner only */}
-        <Animated.View style={[styles.collapsedContainer, collapsedHeaderStyle]}>
-          <View style={styles.collapsedTopExtension} />
-          <ImageBackground
-            source={{ uri: 'https://dzdbhsix5ppsc.cloudfront.net/monster/materials/chatbackground.png' }}
-            style={styles.collapsedBackground}
-            resizeMode="cover"
-            imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
-          >
-            <View style={styles.collapsedHeader}>
-              <View />
-              <View style={styles.profilePlaceholder} />
-            </View>
-
-            <View style={styles.collapsedBannerContainer}>
-              <View style={styles.collapsedThinkingBanner}>
-                <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
-                <View style={[styles.thinkingContent]}>
-                  <TouchableOpacity style={styles.thinkingLeft} onPress={handleThinkingPress} activeOpacity={0.8}>
-                    <View style={styles.thinkingHeader}>
-                      <Text style={styles.brainEmoji}>🧠</Text>
-                      <Text style={styles.thinkingTitle}>In My Mind</Text>
-                    </View>
-                    <View style={[styles.thinkingLogContainer]}>
-                      <Animated.View style={[logScrollStyle]}>
-                        {(() => {
-                          // 如果只有默认消息，不重复显示
-                          const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
-                          const entriesToRender = isDefaultMessage ? logEntries : [...logEntries, ...logEntries];
-                          return entriesToRender.map((entry, index) => (
-                            <Text key={index} style={styles.logLine}>
-                              {entry.time ? <Text style={styles.logTime}>[{entry.time}]</Text> : null}
-                              <Text style={styles.logText}>{entry.time ? ' ' : ''}{entry.message}</Text>
-                            </Text>
-                          ));
-                        })()}
-                      </Animated.View>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </ImageBackground>
-        </Animated.View>
+    <View style={styles.headerContainer}>
+      {/* Shared Title - Always mounted */}
+      <Animated.View style={sharedTitleStyle}>
+        <Text style={styles.hiBossText}>Hi Boss！</Text>
+        <Text style={styles.trackLifeText}>Let's track life together!</Text>
       </Animated.View>
-    </GestureDetector>
+
+      {/* Shared Candy Button - Always mounted */}
+      <Animated.View style={sharedCandyStyle}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/store')}>
+          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+          <View style={styles.iconButtonBorder} />
+          <Candy size={20} color="#000000" strokeWidth={2} />
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* Shared Profile Button - Always mounted */}
+      <Animated.View style={sharedProfileStyle}>
+        <TouchableOpacity style={styles.iconButton} onPress={handleProfilePress}>
+          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+          <View style={styles.iconButtonBorder} />
+          <User size={20} color="#000000" strokeWidth={2} />
+        </TouchableOpacity>
+      </Animated.View>
+
+      <View style={styles.bannerContainer}>
+        <View style={styles.topExtension} />
+        <ImageBackground
+          source={require('../assets/images/chatbackground.png')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+          imageStyle={{ resizeMode: 'cover', position: 'absolute', bottom: 0, top: 'auto' }}
+        >
+          <View style={styles.statusBar}>
+            <View />
+            <View style={styles.profilePlaceholder} />
+          </View>
+          
+          {/* Review Carousel */}
+          <ReviewCarousel data={MOCK_REVIEW_DATA} />
+        </ImageBackground>
+      </View>
+    </View>
   );
 }
 
@@ -644,10 +246,10 @@ const styles = StyleSheet.create({
     overflow: 'visible',
     marginTop: Platform.OS === 'ios' ? -60 : -(StatusBar.currentHeight || 0) - 10,
     zIndex: 1000,
+    height: FIXED_HEIGHT,
   },
 
-  // Expanded state styles
-  expandedContainer: {
+  bannerContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -668,7 +270,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    backgroundColor: '#F5F7F9',
+    backgroundColor: '#F6F1EF',
     zIndex: -1,
   },
   backgroundImage: {
@@ -681,7 +283,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
     paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
     paddingBottom: 15,
   },
@@ -709,223 +311,19 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.6)',
     pointerEvents: 'none',
   },
-  bannersContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 12,
-    marginTop: -20,
-  },
-  monsterImageContainer: {
-    width: '100%',
-    overflow: 'hidden',
-    borderRadius: 24,
-  },
-  monsterImage: {
-    width: '100%',
-    height: '100%',
-  },
-  breakfastBanner: {
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-  },
-  breakfastContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 18,
-    paddingVertical: 15,
-  },
-  breakfastLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  avatarImage: {
-    width: 50,
-    height: 50,
-    marginRight: 14,
-  },
-  breakfastTextContainer: {
-    flex: 1,
-  },
-  timeRange: {
-    fontSize: 14,
-    fontFamily: 'Nunito_500Medium',
-    color: '#666666',
-    marginBottom: 2,
-  },
-  taskTitle: {
-    fontSize: 20,
-    fontFamily: 'Nunito_700Bold',
-    color: '#000000',
-  },
-  doneButton: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 20,
-    minWidth: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-  },
-  doneButtonChecked: {
-    backgroundColor: '#4CAF50',
-  },
-  doneButtonText: {
-    fontSize: 15,
-    fontFamily: 'Nunito_600SemiBold',
-    color: '#000000',
-  },
-  thinkingBanner: {
-    height: 113,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-  },
-
-  // Collapsed state styles
-  collapsedContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  collapsedTopExtension: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    backgroundColor: '#F5F7F9',
-    zIndex: -1,
-  },
-  collapsedBackground: {
-    width: '100%',
-    height: '100%',
-    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 0) + 10,
-    justifyContent: 'flex-end',
-  },
-  collapsedHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 20) + 10,
-    paddingBottom: 8,
-  },
-  collapsedBannerContainer: {
-    paddingHorizontal: 10,
-    marginTop: -48,
-    marginBottom: 12,
-  },
-  collapsedThinkingBanner: {
-    height: 113,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-  },
-
-  // Thinking banner content styles
-  thinkingContent: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingHorizontal: 6,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  thinkingLeft: {
-    flex: 1,
-    paddingRight: 0,
-    marginHorizontal: 0,
-  },
-  thinkingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 2,
-  },
-  brainEmoji: {
-    fontSize: 18,
-    marginRight: 6,
-  },
-  thinkingTitle: {
-    fontSize: 16,
-    fontFamily: 'Nunito_700Bold',
-    color: '#000000',
-  },
-  thinkingLogContainer: {
-    flex: 1,
-    overflow: 'hidden',
-    paddingHorizontal: 6,
-  },
-  logLine: {
-    marginBottom: 2,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  logTime: {
-    fontFamily: 'Courier New',
-    fontSize: 14,
-    color: '#E91E63',
-    fontWeight: '600',
-  },
-  logText: {
-    fontFamily: 'Courier New',
-    fontSize: 14,
-    color: '#000000',
-    lineHeight: 20,
-    flex: 1,
-  },
   profilePlaceholder: {
     width: 44,
     height: 44,
   },
-  titleText: {
-    fontSize: 28,
+  hiBossText: {
+    fontSize: 24,
     fontFamily: 'Nunito_700Bold',
-    color: '#000000',
+    color: '#FFFFFF',
   },
-  testButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  testButtonText: {
-    fontSize: 13,
+  trackLifeText: {
+    fontSize: 16,
     fontFamily: 'Nunito_400Regular',
-    color: '#B5B5B5',
+    color: '#FFFFFF',
+    marginTop: 2,
   },
 });

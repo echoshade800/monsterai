@@ -49,7 +49,7 @@ export default function EnergyWeeklyReportScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7F9',
+    backgroundColor: '#F6F1EF',
   },
   navBar: {
     flexDirection: 'row',
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 16,
-    backgroundColor: '#F5F7F9',
+    backgroundColor: '#F6F1EF',
   },
   backButton: {
     width: 40,
