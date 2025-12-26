@@ -54,20 +54,20 @@ const AGENTS = [
     image_detection_type: 'food_calorie',
   },
   {
-    id: 'facey',
-    name: 'Facey',
+    id: 'brew',
+    name: 'Brew',
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/Brew.png',
     backImage: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/bebrew.png',
     prompt: 'Show me your drink.',
-    image_detection_type: 'face',
+    image_detection_type: 'brew',
   },
   {
-    id: 'posture',
-    name: 'Posture',
+    id: 'coach',
+    name: 'Coach',
     frontImage: 'https://dzdbhsix5ppsc.cloudfront.net/monster/Coach.png',
     backImage: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/becoach.png',
     prompt: 'Show me what you\'re doing.',
-    image_detection_type: 'posture',
+    image_detection_type: 'coach',
   },
 ];
 

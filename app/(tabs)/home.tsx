@@ -1676,7 +1676,7 @@ export default function HomeScreen() {
     // 根据模式设置消息内容
     const messageContent = mode === 'photo-text' && description 
       ? description 
-      : 'Please analyze this photo';
+      : '';
     
     const userMsg: Message = {
       id: messageId,
@@ -1714,7 +1714,7 @@ export default function HomeScreen() {
     // 根据模式设置消息文本
     const messageText = mode === 'photo-text' && description 
       ? description 
-      : 'Please analyze this photo';
+      : '';
 
     console.log('Sending pending image message:', {
       mode,
@@ -1943,7 +1943,7 @@ export default function HomeScreen() {
         const userMsg: Message = {
           id: messageId,
           type: 'user', 
-          content: mode === 'photo-text' ? (description || '') : 'Please analyze this photo',
+          content: mode === 'photo-text' ? (description || '') : '',
           photoUri: photoUri,
           timestamp: currentTimestamp,
         };
@@ -1976,7 +1976,7 @@ export default function HomeScreen() {
         // 根据模式设置消息文本
         const messageText = mode === 'photo-text' && description 
           ? description 
-          : 'Please analyze this photo';
+          : '';
         
         console.log('Sending image message:', { 
           mode, 
