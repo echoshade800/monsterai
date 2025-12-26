@@ -1,28 +1,27 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { 
-  ArrowRight, 
-  Check, 
-  ChevronRight, 
-  ClipboardList, 
-  Clock, 
-  Target, 
-  UserCircle 
+import {
+  ArrowRight,
+  Check,
+  ClipboardList,
+  Clock,
+  Target
 } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { 
-  Image,
-  ScrollView, 
-  StyleSheet, 
-  Text, 
-  TouchableOpacity, 
-  View,
+import React, { useCallback, useEffect, useState } from 'react';
+import {
   Dimensions,
-  Platform,
-  StatusBar
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import api from '../../src/services/api-clients/client';
+import { getHeadersWithPassId } from '../../src/services/api/api';
 
 const { width, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BANNER_HEIGHT = SCREEN_HEIGHT * 0.3;
@@ -56,6 +55,37 @@ export default function NutriScreen() {
     triggerFoods: null,
   });
   const [reminders, setReminders] = useState<ReminderData[]>([]);
+
+  // Fetch goal_title from API
+  const fetchGoalTitle = useCallback(async () => {
+    try {
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      // 使用营养相关的 category，可以根据实际需求修改
+      const category = 'nutritionist'; // 或者使用其他合适的 category
+      const url = `/goal-data/category/newest?category=${category}`;
+      
+      const response = await api.get(url, {
+        headers: {
+          'accept': 'application/json',
+          'passid': passIdValue,
+        },
+      });
+
+      if (response.isSuccess() && response.data && response.data.goal_title) {
+        setGoal(response.data.goal_title);
+      }
+    } catch (error) {
+      console.error('Failed to fetch goal title:', error);
+      // 如果获取失败，保持 goal 为 null，显示占位符
+    }
+  }, []);
+
+  // Fetch goal title on component mount
+  useEffect(() => {
+    fetchGoalTitle();
+  }, [fetchGoalTitle]);
 
   // Function to render the value or placeholder
   const renderValue = (value: any, placeholder: string = '—') => {

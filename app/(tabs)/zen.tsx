@@ -8,7 +8,7 @@ import {
   Clock, 
   Target
 } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Image,
   ScrollView, 
@@ -21,6 +21,8 @@ import {
   StatusBar
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import api from '../../src/services/api-clients/client';
+import { getHeadersWithPassId } from '../../src/services/api/api';
 
 const { width, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BANNER_HEIGHT = SCREEN_HEIGHT * 0.3;
@@ -54,6 +56,37 @@ export default function ZenScreen() {
     unusedField: null,
   });
   const [reminders, setReminders] = useState<ReminderData[]>([]);
+
+  // Fetch goal_title from API
+  const fetchGoalTitle = useCallback(async () => {
+    try {
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      // 使用放空相关的 category
+      const category = 'mind_rest';
+      const url = `/goal-data/category/newest?category=${category}`;
+      
+      const response = await api.get(url, {
+        headers: {
+          'accept': 'application/json',
+          'passid': passIdValue,
+        },
+      });
+
+      if (response.isSuccess() && response.data && response.data.goal_title) {
+        setGoal(response.data.goal_title);
+      }
+    } catch (error) {
+      console.error('Failed to fetch goal title:', error);
+      // 如果获取失败，保持 goal 为 null，显示占位符
+    }
+  }, []);
+
+  // Fetch goal title on component mount
+  useEffect(() => {
+    fetchGoalTitle();
+  }, [fetchGoalTitle]);
 
   // Function to render the value or placeholder
   const renderValue = (value: any, placeholder: string = '—') => {
