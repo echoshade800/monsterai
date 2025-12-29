@@ -824,7 +824,14 @@ export default function ProfileScreen() {
             )}
             
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/core-inference-result')}>
-              <Text style={styles.menuItemText}>核心推理结果</Text>
+              <Text style={styles.menuItemText}>数据推理结果</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+            
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/today-inference-result')}>
+              <Text style={styles.menuItemText}>今日数据推理结果</Text>
               <ChevronRight size={20} color="#666" strokeWidth={2} />
             </TouchableOpacity>
 

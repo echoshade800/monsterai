@@ -112,6 +112,7 @@ export const getConfigFileName = (configType) => {
 export const API_ENDPOINTS = {
   DATA_AGENT: {
     LAUNCH: '/data-agent/launch',
+    REASONING: '/data-agent/reasoning',
     TODAY_TIME_SCHEDULE: '/data-agent/today-time-schedule/by-date',
     TODAY_TIME_LIST_SCHEDULE: '/data-agent/today-time-list-schedule/by-date',
     USER_TIME_SCHEDULE_SMART_UPDATE: '/data-agent/user-time-schedule/smart-update',

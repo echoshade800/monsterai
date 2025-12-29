@@ -5,7 +5,7 @@ import Markdown from 'react-native-markdown-display';
 import api from '../src/services/api-clients/client';
 import { API_ENDPOINTS } from '../src/services/api/api';
 
-export default function CoreInferenceResultScreen() {
+export default function TodayInferenceResultScreen() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -16,25 +16,25 @@ export default function CoreInferenceResultScreen() {
   };
 
   // 调用 data-agent/reasoning 接口并展示结果
-  const callLaunchApi = useCallback(async () => {
+  const callReasoningApi = useCallback(async () => {
     setIsLoading(true);
     setResult(null);
     setError(null);
-    console.log('[CoreInferenceResult] 🚀 Calling data-agent/reasoning API...');
+    console.log('[TodayInferenceResult] 🚀 Calling data-agent/reasoning API...');
 
     try {
       // 准备请求数据
       const requestData = {
         prompt: '',
-        endpoint: 'health_report',
+        endpoint: 'today_health_report',
       };
 
       // 等待 API 响应
       const response = await api.post(API_ENDPOINTS.DATA_AGENT.REASONING, requestData, {
-        requireAuth: false,
+        requireAuth: false
       });
       
-      console.log('[CoreInferenceResult] ✅ Reasoning API response:', response);
+      console.log('[TodayInferenceResult] ✅ Reasoning API response:', response);
       
       // 处理响应数据
       if (response.isSuccess()) {
@@ -56,7 +56,7 @@ export default function CoreInferenceResultScreen() {
         setError(`## 错误\n\n**错误信息:** ${errorMsg}\n\n`);
       }
     } catch (error: any) {
-      console.error('[CoreInferenceResult] ❌ Error calling reasoning API:', error);
+      console.error('[TodayInferenceResult] ❌ Error calling reasoning API:', error);
       const errorMessage = error?.message || '未知错误';
       setError(`## 错误\n\n**错误信息:** ${errorMessage}\n\n`);
     } finally {
@@ -70,20 +70,20 @@ export default function CoreInferenceResultScreen() {
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>核心推理结果</Text>
+        <Text style={styles.headerTitle}>今日数据推理结果</Text>
         <View style={styles.backButton} />
       </View>
 
       <View style={styles.content}>
         <TouchableOpacity 
           style={[styles.button, isLoading && styles.buttonDisabled]} 
-          onPress={callLaunchApi}
+          onPress={callReasoningApi}
           disabled={isLoading}
         >
           {isLoading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.buttonText}>触发 Launch API</Text>
+            <Text style={styles.buttonText}>触发推理</Text>
           )}
         </TouchableOpacity>
 
@@ -101,7 +101,7 @@ export default function CoreInferenceResultScreen() {
 
         {!result && !error && !isLoading && (
           <View style={styles.placeholderContainer}>
-            <Text style={styles.placeholderText}>核心推理结果页面</Text>
+            <Text style={styles.placeholderText}>今日数据推理结果页面</Text>
             <Text style={styles.placeholderSubtext}>点击上方按钮触发 API 调用</Text>
           </View>
         )}
