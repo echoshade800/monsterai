@@ -271,7 +271,7 @@ export default function HomeScreen() {
       }
       
       const type = getMessageType(item);
-      // 优先使用 _id 字段作为唯一标识
+      // 优先使用 msg_id 字段作为唯一标识
       const messageId = item.msg_id || Date.now().toString();
       
       // 提取图片URL（支持多个字段，包括 photoUri_preview）
@@ -901,12 +901,13 @@ export default function HomeScreen() {
                         // 过滤掉临时消息，但保留 reminderCard 消息
                         const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
                         const newMessage: Message = {
-                          id: responseData._id || Date.now().toString(),
+                          id: responseData.msg_id || Date.now().toString(),
                           type: 'assistant' as const,
                           content: responseData.text || accumulatedText,
                           operation: responseData.operation || undefined,
                           timestamp: responseData.created_at || responseData.timestamp || Date.now(),
                         };
+                        console.log('[newMessage] newMessage', JSON.stringify(newMessage, null, 2));
                         // 合并消息：先添加新消息和其他消息，然后添加 reminderCard 消息（确保它们不会被删除）
                         const updated = [...filtered, newMessage, ...reminderCardMessages];
                         // 按时间戳排序，确保最新消息在底部
