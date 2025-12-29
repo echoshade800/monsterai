@@ -1317,16 +1317,16 @@ export default function HomeScreen() {
     try {
       const latestMemoryId = latestMemoryIdRef.current;
       
-      if (!latestMemoryId) {
-        console.log('[pollLatestMemory] No latest memory id, skipping poll');
-        return;
+      // 构建请求参数：如果有 latestMemoryId 则使用它，否则不传 memory_id 以获取最新的 memory
+      const requestParams: any = { limit: 20 };
+      if (latestMemoryId) {
+        requestParams.memory_id = latestMemoryId;
+        console.log('[pollLatestMemory] Polling for new memory with memory_id:', latestMemoryId);
+      } else {
+        console.log('[pollLatestMemory] No latest memory id, fetching latest memory list');
       }
 
-      console.log('[pollLatestMemory] Polling for new memory with memory_id:', latestMemoryId);
-      const result: any = await conversationService.getMemoryList({ 
-        limit: 20,
-        memory_id: latestMemoryId 
-      });
+      const result: any = await conversationService.getMemoryList(requestParams);
 
       if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
         console.log('[pollLatestMemory] New memory found:', {
@@ -1338,7 +1338,7 @@ export default function HomeScreen() {
         const memoryMessages = convertMemoryToMessages(result.data);
         
         if (memoryMessages.length > 0) {
-          // 更新最新的 memory id
+          // 更新最新的 memory id（取第一条，因为 API 返回的是按时间倒序的）
           const latestMemory = result.data[0];
           if (latestMemory && latestMemory.id) {
             latestMemoryIdRef.current = latestMemory.id;
@@ -1786,7 +1786,7 @@ export default function HomeScreen() {
           startUploadTimerRef.current();
         }
         
-        if (!memoryPollingTimerRef.current && latestMemoryIdRef.current) {
+        if (!memoryPollingTimerRef.current) {
           console.log('[EchoTab] ⚠️ Memory polling timer not running on focus, restarting...');
           startMemoryPollingRef.current();
         }
@@ -1833,14 +1833,12 @@ export default function HomeScreen() {
         console.log('[EchoTab] ✅ Upload timer is running (ID:', uploadTimerRef.current, ')');
       }
       
-      // 检查 memory 轮询定时器是否在运行，如果没有则重新启动（需要先有 latestMemoryId）
-      if (!memoryPollingTimerRef.current && latestMemoryIdRef.current) {
+      // 检查 memory 轮询定时器是否在运行，如果没有则重新启动
+      if (!memoryPollingTimerRef.current) {
         console.log('[EchoTab] ⚠️ Memory polling timer not running on focus, restarting...');
         startMemoryPollingRef.current();
-      } else if (memoryPollingTimerRef.current) {
-        console.log('[EchoTab] ✅ Memory polling timer is running (ID:', memoryPollingTimerRef.current, ')');
       } else {
-        console.log('[EchoTab] ⚠️ Memory polling timer not started (no latest memory id yet)');
+        console.log('[EchoTab] ✅ Memory polling timer is running (ID:', memoryPollingTimerRef.current, ')');
       }
 
       // 检查是否有待处理的图片信息（从相机页面返回时）
