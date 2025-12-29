@@ -363,6 +363,7 @@ export default function HomeScreen() {
     return [];
   };
 
+  // 20251229-移除启动 lauch 接口，模型调用出来的结果会追加进入消息历史
   // 调用 data-agent/launch 接口（首次进入时，fire-and-forget）
   const callLaunchApi = useCallback(async () => {
     // 如果已经调用过，跳过
@@ -540,8 +541,6 @@ export default function HomeScreen() {
     // 延迟一点时间，确保用户数据已加载
     const timer = setTimeout(() => {
       requestAllPermissions();
-      // 调用 launch API（fire-and-forget）
-      callLaunchApi();
     }, 500);
 
     return () => {
@@ -559,7 +558,7 @@ export default function HomeScreen() {
         console.log('[EchoTab] 🛑 Stopped memory polling timer');
       }
     };
-  }, [requestAllPermissions, callLaunchApi]);
+  }, [requestAllPermissions]);
 
   // 启动心跳定时器（每10秒发送一次心跳）
   useEffect(() => {
