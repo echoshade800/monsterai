@@ -242,7 +242,7 @@ export default function HomeScreen() {
             
             // 提取并解析时间戳（使用与普通消息相同的逻辑）
             const timestamp = item.created_at || item.timestamp || item.createdAt || undefined;
-            const messageId = item._id || item.id || item.trace_id || `reminder_${index}_${Date.now()}`;
+            const messageId = item.msg_id || item._id || item.id || item.trace_id || `reminder_${index}_${Date.now()}`;
             let messageTimestamp: number | undefined = undefined;
             
             if (timestamp !== undefined && timestamp !== null) {

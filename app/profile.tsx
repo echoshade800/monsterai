@@ -5,8 +5,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Image, Modal, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import AvatarCropModal from '../components/AvatarCropModal';
 import { AgePickerModal } from '../components/AgePickerModal';
+import AvatarCropModal from '../components/AvatarCropModal';
 import { GenderPickerModal } from '../components/GenderPickerModal';
 import { HeightPickerModal } from '../components/HeightPickerModal';
 import { WeightPickerModal } from '../components/WeightPickerModal';
@@ -822,6 +822,13 @@ export default function ProfileScreen() {
                 <View style={styles.divider} />
               </>
             )}
+            
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/core-inference-result')}>
+              <Text style={styles.menuItemText}>核心推理结果</Text>
+              <ChevronRight size={20} color="#666" strokeWidth={2} />
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
             
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/phone-data')}>
               <Text style={styles.menuItemText}>Phone Data</Text>

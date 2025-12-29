@@ -850,9 +850,12 @@ export function ConversationSection({
           return null;
         }
 
+        // 使用组合 key 确保唯一性：message.id 或 index，加上 type 作为后备
+        const uniqueKey = message.id ? `${message.id}-${index}` : `message-${index}-${message.type || 'unknown'}`;
+
         if (message.type === 'timestamp') {
           return (
-            <View key={message.id} style={styles.timestampContainer}>
+            <View key={uniqueKey} style={styles.timestampContainer}>
               <Text style={styles.timestamp}>{message.content}</Text>
             </View>
           );
@@ -863,7 +866,7 @@ export function ConversationSection({
           const isLastReminderCard = index === lastReminderCardIndex;
           return (
             <View 
-              key={message.id} 
+              key={uniqueKey} 
               style={styles.reminderCardContainer}
               collapsable={false}
             >
@@ -888,7 +891,7 @@ export function ConversationSection({
           if (message.isMemory) {
             const { role, cleanedText } = parseMessageRole(message.content);
             return (
-              <View key={message.id} style={styles.memoryMessageContainer} collapsable={false}>
+              <View key={uniqueKey} style={styles.memoryMessageContainer} collapsable={false}>
                 <View style={styles.memoryHeader}>
                   <Text style={styles.memoryIcon}>🧠</Text>
                   <Text style={styles.memoryLabel}>记忆</Text>
@@ -914,7 +917,7 @@ export function ConversationSection({
           const { role, cleanedText } = parseMessageRole(message.content);
           
           return (
-            <View key={message.id} style={styles.assistantMessageContainer} collapsable={false}>
+            <View key={uniqueKey} style={styles.assistantMessageContainer} collapsable={false}>
               {role && renderMessageHeader(role)}
               <TouchableOpacity
                 onLongPress={() => handleCopyMessage(message.content)}
@@ -932,7 +935,7 @@ export function ConversationSection({
         const timestampText = formatMessageTimestamp(message.timestamp);
         
         return (
-          <View key={message.id} style={styles.userMessageContainer}>
+          <View key={uniqueKey} style={styles.userMessageContainer}>
             <View style={styles.userMessageWrapper}>
               <View style={styles.userNameRow}>
                 {timestampText && (
