@@ -272,7 +272,7 @@ export default function HomeScreen() {
       
       const type = getMessageType(item);
       // 优先使用 _id 字段作为唯一标识
-      const messageId = item._id || item.id || item.trace_id || `msg-${index}-${Date.now()}`;
+      const messageId = item.msg_id || Date.now().toString();
       
       // 提取图片URL（支持多个字段，包括 photoUri_preview）
       const photoUri = item.image || item.imageUrl || item.image_url || item.photoUri || item.photoUri_preview || undefined;
@@ -1405,18 +1405,11 @@ export default function HomeScreen() {
     try {
       setIsLoading(true);
       const result: any = await conversationService.getConversationHistory();
-
+      console.log('[fetchConversationHistory] result', JSON.stringify(result, null, 2));
       let historyMessages: Message[] = [];
 
       if (result.success && result.data) {
         // 调试日志：查看服务端返回的原始数据结构
-        // console.log('[fetchConversationHistory] Raw server response data:', {
-        //   dataType: Array.isArray(result.data) ? 'array' : typeof result.data,
-        //   dataLength: Array.isArray(result.data) ? result.data.length : 'N/A',
-        //   firstItem: Array.isArray(result.data) && result.data.length > 0 ? result.data[0] : result.data,
-        //   sampleItemKeys: Array.isArray(result.data) && result.data.length > 0 ? Object.keys(result.data[0]) : Object.keys(result.data || {})
-        // });
-        
         const convertedMessages = convertToMessages(result.data);
         // 不反转，保持原始顺序，后续会按时间戳排序
         historyMessages = convertedMessages;
@@ -1435,14 +1428,6 @@ export default function HomeScreen() {
             const merged = [...prev.filter(msg => msg.type !== 'reminderCard'), ...newHistoryMessages, ...reminderCardMessages];
             // 按时间戳排序（最旧的在前，最新的在后）
             const sorted = sortMessagesByTimestamp(merged);
-            // console.log('Merging and sorting messages by timestamp:', { 
-            //   prevCount: prev.length, 
-            //   historyCount: historyMessages.length, 
-            //   newCount: newHistoryMessages.length,
-            //   reminderCardCount: reminderCardMessages.length,
-            //   mergedCount: sorted.length,
-            //   note: 'Messages sorted by timestamp (oldest first, newest last), reminderCard messages preserved'
-            // });
             return sorted;
           }
           // 如果没有现有消息，按时间戳排序后返回历史消息
@@ -1470,7 +1455,7 @@ export default function HomeScreen() {
             console.log('Getting user data from storageManager:', currentUserData);
             setUserData(currentUserData);
           }
-                  } catch (error) {
+        } catch (error) {
           console.error('Failed to get user data from storageManager:', error);
         }
       }
@@ -1663,7 +1648,7 @@ export default function HomeScreen() {
       historyInitializedRef.current = true;
       try {
         await fetchConversationHistory();
-                    } catch (error) {
+      } catch (error) {
         console.error('Failed to load conversation history before processing pending photo:', error);
       } finally {
         setIsLoading(false);
@@ -1928,7 +1913,7 @@ export default function HomeScreen() {
           historyInitializedRef.current = true; // 标记为已初始化，避免重复加载
           try {
             await fetchConversationHistory();
-                  } catch (error) {
+          } catch (error) {
             console.error('Failed to load conversation history before processing photo:', error);
           } finally {
             setIsLoading(false);
