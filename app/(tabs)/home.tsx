@@ -771,7 +771,7 @@ export default function HomeScreen() {
 
             // 监听消息事件
             eventSource.addEventListener('message', (event: any) => {
-              console.log(`${logPrefix}Message event received, raw data:`, event.data, 'event type:', event.type, 'lastEventId:', event.lastEventId);
+              // console.log(`${logPrefix}Message event received, raw data:`, event.data, 'event type:', event.type, 'lastEventId:', event.lastEventId);
               try {
                 if (!event.data) {
                   console.warn(`${logPrefix}Message event has no data`);
@@ -795,7 +795,7 @@ export default function HomeScreen() {
                   return;
                 }
                 
-                console.log(`${logPrefix} Parsed message data:`, JSON.stringify(data, null, 2));
+                // console.log(`${logPrefix} Parsed message data:`, JSON.stringify(data, null, 2));
                 
                 // 处理错误消息（特别是500错误）
                 if (data.type === 'error') {
@@ -930,7 +930,7 @@ export default function HomeScreen() {
                   }
                 }
               } catch (parseError) {
-                console.error(`${logPrefix}Parse error:`, parseError, 'Raw data:', event.data);
+                // console.error(`${logPrefix}Parse error:`, parseError, 'Raw data:', event.data);
                 
                 // 如果是500错误，显示错误消息并调用handleFinalError
                 if ((parseError as any)?.code === 500) {
@@ -1411,12 +1411,12 @@ export default function HomeScreen() {
 
       if (result.success && result.data) {
         // 调试日志：查看服务端返回的原始数据结构
-        console.log('[fetchConversationHistory] Raw server response data:', {
-          dataType: Array.isArray(result.data) ? 'array' : typeof result.data,
-          dataLength: Array.isArray(result.data) ? result.data.length : 'N/A',
-          firstItem: Array.isArray(result.data) && result.data.length > 0 ? result.data[0] : result.data,
-          sampleItemKeys: Array.isArray(result.data) && result.data.length > 0 ? Object.keys(result.data[0]) : Object.keys(result.data || {})
-        });
+        // console.log('[fetchConversationHistory] Raw server response data:', {
+        //   dataType: Array.isArray(result.data) ? 'array' : typeof result.data,
+        //   dataLength: Array.isArray(result.data) ? result.data.length : 'N/A',
+        //   firstItem: Array.isArray(result.data) && result.data.length > 0 ? result.data[0] : result.data,
+        //   sampleItemKeys: Array.isArray(result.data) && result.data.length > 0 ? Object.keys(result.data[0]) : Object.keys(result.data || {})
+        // });
         
         const convertedMessages = convertToMessages(result.data);
         // 不反转，保持原始顺序，后续会按时间戳排序
@@ -1436,14 +1436,14 @@ export default function HomeScreen() {
             const merged = [...prev.filter(msg => msg.type !== 'reminderCard'), ...newHistoryMessages, ...reminderCardMessages];
             // 按时间戳排序（最旧的在前，最新的在后）
             const sorted = sortMessagesByTimestamp(merged);
-            console.log('Merging and sorting messages by timestamp:', { 
-              prevCount: prev.length, 
-              historyCount: historyMessages.length, 
-              newCount: newHistoryMessages.length,
-              reminderCardCount: reminderCardMessages.length,
-              mergedCount: sorted.length,
-              note: 'Messages sorted by timestamp (oldest first, newest last), reminderCard messages preserved'
-            });
+            // console.log('Merging and sorting messages by timestamp:', { 
+            //   prevCount: prev.length, 
+            //   historyCount: historyMessages.length, 
+            //   newCount: newHistoryMessages.length,
+            //   reminderCardCount: reminderCardMessages.length,
+            //   mergedCount: sorted.length,
+            //   note: 'Messages sorted by timestamp (oldest first, newest last), reminderCard messages preserved'
+            // });
             return sorted;
           }
           // 如果没有现有消息，按时间戳排序后返回历史消息

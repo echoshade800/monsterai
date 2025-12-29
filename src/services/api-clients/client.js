@@ -373,9 +373,9 @@ const request = async (url, options = {}) => {
   // 根据API类型获取正确的base URL
   const baseUrl = getBaseUrl(apiType);
   const fullUrl = `${baseUrl}${url}`;
-  if (__DEV__) {
-    console.log('request url', fullUrl);
-  }
+  // if (__DEV__) {
+  //   console.log('request url', fullUrl);
+  // }
 
   // 获取通用请求头所需的数据
   const deviceId = await getDeviceId();
@@ -429,27 +429,27 @@ const request = async (url, options = {}) => {
     });
 
     // 记录网络请求日志到文件
-    logNetworkRequest(fullUrl, method, requestConfig.headers, requestConfig.body);
+    // logNetworkRequest(fullUrl, method, requestConfig.headers, requestConfig.body);
 
     // 美化日志输出（仅在开发环境）
-    if (__DEV__) {
-      console.group(`📤 API Request [${method}]`);
-      console.log('URL:', fullUrl);
-      if (requestConfig.headers && Object.keys(requestConfig.headers).length > 0) {
-        console.log('Headers:', JSON.stringify(requestConfig.headers, null, 2));
-      }
-      if (requestConfig.body) {
-        try {
-          const bodyObj = typeof requestConfig.body === 'string'
-            ? JSON.parse(requestConfig.body)
-            : requestConfig.body;
-          console.log('Body:', JSON.stringify(bodyObj, null, 2));
-        } catch (e) {
-          console.log('Body:', requestConfig.body);
-        }
-      }
-      console.groupEnd();
-    }
+    // if (__DEV__) {
+    //   console.group(`📤 API Request [${method}]`);
+    //   console.log('URL:', fullUrl);
+    //   if (requestConfig.headers && Object.keys(requestConfig.headers).length > 0) {
+    //     console.log('Headers:', JSON.stringify(requestConfig.headers, null, 2));
+    //   }
+    //   if (requestConfig.body) {
+    //     try {
+    //       const bodyObj = typeof requestConfig.body === 'string'
+    //         ? JSON.parse(requestConfig.body)
+    //         : requestConfig.body;
+    //       console.log('Body:', JSON.stringify(bodyObj, null, 2));
+    //     } catch (e) {
+    //       console.log('Body:', requestConfig.body);
+    //     }
+    //   }
+    //   console.groupEnd();
+    // }
 
     // 发起请求
     const responsePromise = fetch(fullUrl, requestConfig);
@@ -511,11 +511,7 @@ const request = async (url, options = {}) => {
     const responseData = await response.json();
     
     // 记录网络响应日志到文件
-    logNetworkResponse(fullUrl, method, response.status, response.headers, responseData);
-    
-    if (__DEV__) {
-      console.log('responseData', responseData);
-    }
+    // logNetworkResponse(fullUrl, method, response.status, response.headers, responseData);
     
     // 检查业务状态码
     // 支持多种格式：

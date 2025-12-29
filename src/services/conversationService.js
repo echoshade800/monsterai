@@ -18,7 +18,7 @@ class ConversationService {
       // Headers 会自动通过 api.get 方法添加（device, timezone, version, passId）
       const response = await api.get(url);
       
-      console.log('[ConversationService][getConversationHistory] response', response);
+      // console.log('[ConversationService][getConversationHistory] response', response);
 
       return {
         success: true,
