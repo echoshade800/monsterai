@@ -875,12 +875,13 @@ export default function HomeScreen() {
                     responseTimeoutId = null;
                   }
 
-                  if (data.data?.code === 0 && data.data?.data?.[0]) {
-                    const responseData = data.data.data[0];
+                  if (data.data?.code === 0 && data.data?.data && Array.isArray(data.data.data) && data.data.data.length > 0) {
+                    const responseDataList = data.data.data;
+                    const firstResponseData = responseDataList[0];
 
-                    // 调用回调处理 complete 事件
+                    // 调用回调处理 complete 事件（只对第一条消息调用）
                     if (onComplete) {
-                      const shouldContinue = onComplete(responseData, eventSource);
+                      const shouldContinue = onComplete(firstResponseData, eventSource);
                       if (shouldContinue === false) {
                         accumulatedText = '';
                         setCurrentResponse('');
@@ -893,28 +894,44 @@ export default function HomeScreen() {
                       }
                     }
 
-                    // 默认文本消息处理（过滤掉 function_call_output 类型的消息）
-                    if (responseData.msg_type === 'text') {
-                      setMessages(prev => {
-                        // 保留所有 reminderCard 类型的消息（这些消息不应该被删除）
-                        const reminderCardMessages = prev.filter(msg => msg.type === 'reminderCard');
-                        // 过滤掉临时消息，但保留 reminderCard 消息
-                        const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
+                    // 处理所有消息（支持多条消息）
+                    setMessages(prev => {
+                      // 保留所有 reminderCard 类型的消息（这些消息不应该被删除）
+                      const reminderCardMessages = prev.filter(msg => msg.type === 'reminderCard');
+                      // 过滤掉临时消息，但保留 reminderCard 消息
+                      const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
+                      // 找出所有 text 类型的消息
+                      const textMessages = responseDataList.filter((item: any) => item.msg_type === 'text');
+                      if (textMessages.length > 0) {
+                        // 合并所有 text 消息的内容
+                        const mergedText = textMessages
+                          .map((item: any) => item.text || '')
+                          .filter((text: string) => text.trim().length > 0)
+                          .join('\n\n');
+                        
+                        // 使用第一条消息的其他字段（msg_id, created_at, operation 等）
+                        const firstTextMessage = textMessages[0];
                         const newMessage: Message = {
-                          id: responseData.msg_id || Date.now().toString(),
+                          id: firstTextMessage.msg_id || Date.now().toString(),
                           type: 'assistant' as const,
-                          content: responseData.text || accumulatedText,
-                          operation: responseData.operation || undefined,
-                          timestamp: responseData.created_at || responseData.timestamp || Date.now(),
+                          content: mergedText || accumulatedText,
+                          operation: firstTextMessage.operation || undefined,
+                          timestamp: firstTextMessage.created_at || firstTextMessage.timestamp || Date.now(),
                         };
-                        console.log('[newMessage] newMessage', JSON.stringify(newMessage, null, 2));
+                        console.log('[newMessage] Merged text messages:', {
+                          count: textMessages.length,
+                          message: JSON.stringify(newMessage, null, 2)
+                        });
                         // 合并消息：先添加新消息和其他消息，然后添加 reminderCard 消息（确保它们不会被删除）
                         const updated = [...filtered, newMessage, ...reminderCardMessages];
                         // 按时间戳排序，确保最新消息在底部
                         return sortMessagesByTimestamp(updated);
-                      });
-                    }
-    } else {
+                      }
+                      
+                      // 如果没有 text 消息，返回原有消息列表
+                      return prev;
+                    });
+                  } else {
                     // 即使没有回复内容，也要记录日志
                     console.warn(`${logPrefix}Complete event received but no valid response data:`, data);
                   }
