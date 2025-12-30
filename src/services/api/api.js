@@ -173,6 +173,7 @@ export const API_ENDPOINTS = {
     INFO: '/timeline/info',
     SWITCH: '/timeline/reminder-rules/switch',
     REMINDER: '/timeline/reminder-rules',
+    REMINDER_CURRENT: '/timeline/reminder-rules/current',
   },
 
   DEVICE_TOKEN: {

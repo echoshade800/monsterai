@@ -50,24 +50,7 @@ export default function HomeScreen() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [initialInputText, setInitialInputText] = useState('');
   const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
-  const [activeReminders, setActiveReminders] = useState<ReminderItemType[]>([
-    {
-      id: 'r1',
-      agent: 'nutrition',
-      timeWindow: '7:00–8:00',
-      title: 'Eat breakfast!',
-      status: 'active',
-      priority: 10,
-    },
-    {
-      id: 'r2',
-      agent: 'coach',
-      timeWindow: '9:30–10:00',
-      title: 'Take a quick walk',
-      status: 'active',
-      priority: 5,
-    }
-  ]);
+  const [activeReminders, setActiveReminders] = useState<ReminderItemType[]>([]);
   const apiConfig = getApiConfig();
 
   // Get the highest priority active reminder
@@ -79,6 +62,45 @@ export default function HomeScreen() {
     setActiveReminders(prev => prev.map(r => r.id === id ? { ...r, status: 'done' } : r));
     console.log('reminder_completed', id);
   };
+
+  // 获取当前活跃的提醒规则
+  const fetchActiveReminders = useCallback(async () => {
+    try {
+      console.log('[fetchActiveReminders] Fetching active reminders...');
+      const response = await api.get(API_ENDPOINTS.TIMELINE.REMINDER_CURRENT);
+      
+      if (response && response.data) {
+        const reminderData = response.data;
+        
+        // 将 API 响应转换为 ReminderItem 格式
+        const reminder: ReminderItemType = {
+          id: reminderData.rule_id || reminderData.uid || `reminder_${Date.now()}`,
+          agent: reminderData.type === 'reminder' ? 'default' : 'default', // 根据实际业务逻辑调整
+          timeWindow: reminderData.time || '00:00',
+          title: reminderData.title || 'Reminder',
+          status: reminderData.done ? 'done' : (reminderData.switch ? 'active' : 'expired'),
+          priority: 10, // 默认优先级，可以根据业务需求调整
+        };
+        
+        // 如果 switch 为 true 且 done 为 false，则设置为 active
+        if (reminderData.switch && !reminderData.done) {
+          setActiveReminders([reminder]);
+        } else {
+          // 如果没有活跃的提醒，设置为空数组
+          setActiveReminders([]);
+        }
+        
+        console.log('[fetchActiveReminders] Active reminders updated:', reminder);
+      } else {
+        console.log('[fetchActiveReminders] No active reminder data');
+        setActiveReminders([]);
+      }
+    } catch (error) {
+      console.error('[fetchActiveReminders] Failed to fetch active reminders:', error);
+      // 失败时保持空数组，不显示错误提示（静默处理）
+      setActiveReminders([]);
+    }
+  }, []);
 
   // Handle mentionAgent parameter from navigation
   useEffect(() => {
@@ -1552,6 +1574,9 @@ export default function HomeScreen() {
       // 启动 memory 轮询（在获取初始 memory 列表后）
       startMemoryPolling();
       
+      // 获取活跃的提醒规则
+      await fetchActiveReminders();
+      
       // 根据历史消息是否为空，调用相应的函数
       // 如果 userData 未加载，尝试从 storageManager 获取
       let currentUserData = userData;
@@ -1591,7 +1616,7 @@ export default function HomeScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [userData, sendNewUserMessage, sendEnterUserMessage, fetchMemoryList, sortMessagesByTimestamp, startMemoryPolling]);
+  }, [userData, sendNewUserMessage, sendEnterUserMessage, fetchMemoryList, sortMessagesByTimestamp, startMemoryPolling, fetchActiveReminders]);
 
   // 组件挂载时获取对话历史（只在首次挂载时获取）
   useEffect(() => {
@@ -1831,6 +1856,7 @@ export default function HomeScreen() {
   const startMemoryPollingRef = useRef(startMemoryPolling);
   const processPendingPhotoRef = useRef(processPendingPhoto);
   const fetchConversationHistoryRef = useRef(fetchConversationHistory);
+  const fetchActiveRemindersRef = useRef(fetchActiveReminders);
   const lastHistoryFetchTimeRef = useRef<number>(0);
   
   // 更新 ref 值，但不触发 useFocusEffect 重新执行
@@ -1839,7 +1865,8 @@ export default function HomeScreen() {
     startMemoryPollingRef.current = startMemoryPolling;
     processPendingPhotoRef.current = processPendingPhoto;
     fetchConversationHistoryRef.current = fetchConversationHistory;
-  }, [startUploadTimer, startMemoryPolling, processPendingPhoto, fetchConversationHistory]);
+    fetchActiveRemindersRef.current = fetchActiveReminders;
+  }, [startUploadTimer, startMemoryPolling, processPendingPhoto, fetchConversationHistory, fetchActiveReminders]);
 
   useFocusEffect(
     useCallback(() => {
@@ -1851,6 +1878,12 @@ export default function HomeScreen() {
       
       // 标记页面为聚焦状态
       isPageFocusedRef.current = true;
+
+      // 获取活跃的提醒规则（优先执行，确保总是会获取）
+      console.log('[useFocusEffect] Fetching active reminders on tab focus');
+      fetchActiveRemindersRef.current().catch((error) => {
+        console.error('[useFocusEffect] Failed to fetch active reminders:', error);
+      });
 
       // 如果历史消息已经初始化过，且距离上次获取时间超过最小间隔，则触发获取历史消息
       if (historyInitializedRef.current) {
@@ -1868,6 +1901,7 @@ export default function HomeScreen() {
 
       // 如果页面之前就已经处于聚焦状态，且距离上次刷新时间太短，则跳过刷新
       // 这样可以避免在页面没有真正失去焦点时重复刷新
+      // 注意：fetchActiveReminders 已经在上面执行了，所以即使这里 early return，提醒数据也会更新
       if (wasPageFocused && timeSinceLastRefresh < MIN_REFRESH_INTERVAL) {
         console.log(`Page already focused, skipping refresh (${timeSinceLastRefresh}ms since last refresh)`);
         
