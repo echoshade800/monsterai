@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   ArrowRight,
   Check,
@@ -86,6 +86,13 @@ export default function SomnoScreen() {
   useEffect(() => {
     fetchGoalTitle();
   }, [fetchGoalTitle]);
+
+  // 每次切换到 Somno tab 时重新获取目标信息
+  useFocusEffect(
+    useCallback(() => {
+      fetchGoalTitle();
+    }, [fetchGoalTitle])
+  );
 
   // Function to render the value or placeholder
   const renderValue = (value: any, placeholder: string = '—') => {
