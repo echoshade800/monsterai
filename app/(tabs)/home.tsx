@@ -2320,12 +2320,21 @@ export default function HomeScreen() {
         errorMessage: 'Connection interrupted, please try again'
       });
       
+      // 消息发送完成后，重新获取最新的提醒数据
+      await fetchActiveReminders();
+      
     } catch (error) {
       console.error('Error sending reminder message:', error);
       Alert.alert('Error', 'Failed to send message, please try again');
       setIsSending(false);
+      // 即使失败，也尝试刷新提醒数据，确保 UI 状态正确
+      try {
+        await fetchActiveReminders();
+      } catch (refreshError) {
+        console.error('[handleReminderMessage] Failed to refresh reminders after error:', refreshError);
+      }
     }
-  }, [userData, handleStreamRequest, detectMention, handleFunctionCall, sortMessagesByTimestamp]);
+  }, [userData, handleStreamRequest, detectMention, handleFunctionCall, sortMessagesByTimestamp, fetchActiveReminders]);
 
   // 处理提醒完成事件
   const handleReminderDone = useCallback(async (id: string) => {
