@@ -144,6 +144,75 @@ export default function HomeScreen() {
     };
   };
 
+  // 处理 function_call 类型的消息，特别是 extract_user_task
+  const processFunctionCallMessage = useCallback((item: any, parseTimestampFn?: (timestamp: any, messageId: string) => number, index?: number): Message | null => {
+    // 过滤掉 function_call_output 和 fun_call 类型的消息
+    if (item.msg_type === 'function_call_output' || item.msg_type === 'fun_call') {
+      return null;
+    }
+    
+    // 处理 function_call 类型的消息
+    if (item.msg_type === 'function_call' && item.call_res) {
+      const callRes = item.call_res;
+      // 如果是 extract_user_task，转换为 ReminderCard 消息
+      if (callRes.name === 'extract_user_task' && callRes.arguments) {
+        try {
+          // 解析 arguments JSON 字符串
+          const args = JSON.parse(callRes.arguments);
+          
+          // 提取并解析时间戳
+          const timestamp = item.created_at || item.timestamp || item.createdAt || undefined;
+          const messageId = item.msg_id || item._id || item.id || item.trace_id || `reminder_${index !== undefined ? index : Date.now()}_${Date.now()}`;
+          let messageTimestamp: number | undefined = undefined;
+          
+          if (timestamp !== undefined && timestamp !== null) {
+            try {
+              // 如果提供了 parseTimestamp 函数，使用它（在 convertToMessages 中使用）
+              if (parseTimestampFn) {
+                messageTimestamp = parseTimestampFn(timestamp, messageId);
+              } else {
+                // 否则使用简化版本（在 complete 事件处理中使用）
+                if (typeof timestamp === 'number') {
+                  messageTimestamp = timestamp;
+                } else {
+                  const timestampStr = String(timestamp);
+                  const directParse = parseInt(timestampStr, 10);
+                  if (!isNaN(directParse) && directParse > 1000000000000) {
+                    messageTimestamp = directParse;
+                  } else {
+                    const dateParse = Date.parse(timestampStr);
+                    if (!isNaN(dateParse) && dateParse > 0) {
+                      messageTimestamp = dateParse;
+                    }
+                  }
+                }
+              }
+            } catch (error) {
+              // 如果解析失败，使用 undefined（不抛出异常，允许继续处理）
+              console.warn('[processFunctionCallMessage] Failed to parse timestamp for function_call message:', error);
+              messageTimestamp = undefined;
+            }
+          }
+          
+          // 使用公共函数创建 ReminderCard 消息，传递原始时间戳
+          const reminderCard = createReminderCardFromTasks(args.tasks, messageId, messageTimestamp);
+          if (reminderCard) {
+            return reminderCard;
+          }
+        } catch (parseError) {
+          console.error('[processFunctionCallMessage] Failed to parse extract_user_task arguments:', parseError);
+          // 解析失败时，返回 null 过滤掉这条消息
+          return null;
+        }
+      }
+      // 其他 function_call 类型的消息，暂时过滤掉
+      return null;
+    }
+    
+    // 不是 function_call 类型，返回 null
+    return null;
+  }, []);
+
   // 将 API 返回的数据转换为 Message 格式
   const convertToMessages = (data: any): Message[] => {
     if (!data) return [];
@@ -226,47 +295,14 @@ export default function HomeScreen() {
 
     // 辅助函数：转换单个消息项
     const convertItem = (item: any, index: number): Message | null => {
-      // 过滤掉 function_call_output 和 fun_call 类型的消息
-      if (item.msg_type === 'function_call_output' || item.msg_type === 'fun_call') {
-        return null;
+      // 处理 function_call 类型的消息（使用公共函数）
+      const functionCallMessage = processFunctionCallMessage(item, parseTimestamp, index);
+      if (functionCallMessage !== null) {
+        return functionCallMessage;
       }
       
-      // 处理 function_call 类型的消息，特别是 extract_user_task
-      if (item.msg_type === 'function_call' && item.call_res) {
-        const callRes = item.call_res;
-        // 如果是 extract_user_task，转换为 ReminderCard 消息
-        if (callRes.name === 'extract_user_task' && callRes.arguments) {
-          try {
-            // 解析 arguments JSON 字符串
-            const args = JSON.parse(callRes.arguments);
-            
-            // 提取并解析时间戳（使用与普通消息相同的逻辑）
-            const timestamp = item.created_at || item.timestamp || item.createdAt || undefined;
-            const messageId = item.msg_id || item._id || item.id || item.trace_id || `reminder_${index}_${Date.now()}`;
-            let messageTimestamp: number | undefined = undefined;
-            
-            if (timestamp !== undefined && timestamp !== null) {
-              try {
-                messageTimestamp = parseTimestamp(timestamp, messageId);
-              } catch (error) {
-                // 如果解析失败，使用 undefined（不抛出异常，允许继续处理）
-                console.warn('[convertItem] Failed to parse timestamp for function_call message:', error);
-                messageTimestamp = undefined;
-              }
-            }
-            
-            // 使用公共函数创建 ReminderCard 消息，传递原始时间戳
-            const reminderCard = createReminderCardFromTasks(args.tasks, messageId, messageTimestamp);
-            if (reminderCard) {
-              return reminderCard;
-            }
-          } catch (parseError) {
-            console.error('Failed to parse extract_user_task arguments:', parseError);
-            // 解析失败时，返回 null 过滤掉这条消息
-            return null;
-          }
-        }
-        // 其他 function_call 类型的消息，暂时过滤掉
+      // 过滤掉 function_call_output 和 fun_call 类型的消息
+      if (item.msg_type === 'function_call_output' || item.msg_type === 'fun_call') {
         return null;
       }
       
@@ -900,11 +936,16 @@ export default function HomeScreen() {
                       const reminderCardMessages = prev.filter(msg => msg.type === 'reminderCard');
                       // 过滤掉临时消息，但保留 reminderCard 消息
                       const filtered = prev.filter(msg => msg.id !== tempMessageId && msg.type !== 'reminderCard');
-                      // 找出所有 text 类型的消息
+                      
+                      // 找出所有 text 和 function_call 类型的消息
                       const textMessages = responseDataList.filter((item: any) => item.msg_type === 'text');
+                      const functionCallMessages = responseDataList.filter((item: any) => item.msg_type === 'function_call' && item.call_res);
+                      
+                      const newMessages: Message[] = [];
+                      
+                      // 处理 text 类型的消息
                       if (textMessages.length > 0) {
-                        // 为每条 text 消息创建独立的 Message 对象
-                        const newMessages: Message[] = textMessages.map((item: any) => {
+                        const textMsgs = textMessages.map((item: any) => {
                           const message: Message = {
                             id: item.msg_id || `${Date.now()}-${Math.random()}`,
                             type: 'assistant' as const,
@@ -914,9 +955,25 @@ export default function HomeScreen() {
                           };
                           return message;
                         });
-                        
-                        console.log('[newMessages] Created text messages:', {
-                          count: newMessages.length,
+                        newMessages.push(...textMsgs);
+                      }
+                      
+                      // 处理 function_call 类型的消息（使用公共函数）
+                      if (functionCallMessages.length > 0) {
+                        functionCallMessages.forEach((item: any) => {
+                          // 使用公共函数处理 function_call 消息（不传入 parseTimestamp，使用简化版本）
+                          const functionCallMessage = processFunctionCallMessage(item);
+                          if (functionCallMessage !== null) {
+                            newMessages.push(functionCallMessage);
+                          }
+                        });
+                      }
+                      
+                      if (newMessages.length > 0) {
+                        console.log('[newMessages] Created messages:', {
+                          textCount: textMessages.length,
+                          functionCallCount: functionCallMessages.length,
+                          totalCount: newMessages.length,
                           messages: JSON.stringify(newMessages, null, 2)
                         });
                         // 添加所有新消息和其他消息，然后添加 reminderCard 消息（确保它们不会被删除）
@@ -925,7 +982,7 @@ export default function HomeScreen() {
                         return sortMessagesByTimestamp(updated);
                       }
                       
-                      // 如果没有 text 消息，返回原有消息列表
+                      // 如果没有新消息，返回原有消息列表
                       return prev;
                     });
                   } else {
