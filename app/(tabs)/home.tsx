@@ -903,27 +903,24 @@ export default function HomeScreen() {
                       // 找出所有 text 类型的消息
                       const textMessages = responseDataList.filter((item: any) => item.msg_type === 'text');
                       if (textMessages.length > 0) {
-                        // 合并所有 text 消息的内容
-                        const mergedText = textMessages
-                          .map((item: any) => item.text || '')
-                          .filter((text: string) => text.trim().length > 0)
-                          .join('\n\n');
-                        
-                        // 使用第一条消息的其他字段（msg_id, created_at, operation 等）
-                        const firstTextMessage = textMessages[0];
-                        const newMessage: Message = {
-                          id: firstTextMessage.msg_id || Date.now().toString(),
-                          type: 'assistant' as const,
-                          content: mergedText || accumulatedText,
-                          operation: firstTextMessage.operation || undefined,
-                          timestamp: firstTextMessage.created_at || firstTextMessage.timestamp || Date.now(),
-                        };
-                        console.log('[newMessage] Merged text messages:', {
-                          count: textMessages.length,
-                          message: JSON.stringify(newMessage, null, 2)
+                        // 为每条 text 消息创建独立的 Message 对象
+                        const newMessages: Message[] = textMessages.map((item: any) => {
+                          const message: Message = {
+                            id: item.msg_id || `${Date.now()}-${Math.random()}`,
+                            type: 'assistant' as const,
+                            content: item.text || '',
+                            operation: item.operation || undefined,
+                            timestamp: item.created_at || item.timestamp || Date.now(),
+                          };
+                          return message;
                         });
-                        // 合并消息：先添加新消息和其他消息，然后添加 reminderCard 消息（确保它们不会被删除）
-                        const updated = [...filtered, newMessage, ...reminderCardMessages];
+                        
+                        console.log('[newMessages] Created text messages:', {
+                          count: newMessages.length,
+                          messages: JSON.stringify(newMessages, null, 2)
+                        });
+                        // 添加所有新消息和其他消息，然后添加 reminderCard 消息（确保它们不会被删除）
+                        const updated = [...filtered, ...newMessages, ...reminderCardMessages];
                         // 按时间戳排序，确保最新消息在底部
                         return sortMessagesByTimestamp(updated);
                       }
