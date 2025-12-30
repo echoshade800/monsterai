@@ -1256,9 +1256,21 @@ export default function HomeScreen() {
     }
 
     return memoryList.map((memoryItem) => {
-      // 使用 memory 字段作为内容，如果没有则使用 raw_text
-      const content = memoryItem.memory || memoryItem.raw_text || '';
+      // 构建展示内容：第一行为 memory_type，第二行为 [memory_tag]memory字段
+      const memoryType = memoryItem.memory_type || '';
+      const memoryTag = memoryItem.memory_tag || '';
+      const memory = memoryItem.memory || memoryItem.raw_text || '';
       
+      // 格式化内容：memory_type\n[memory_tag]memory
+      let content = '';
+      if (memoryType) {
+        content = memoryType;
+      }
+      if (memoryTag && memory) {
+        content += content ? `\n[${memoryTag}]${memory}` : `[${memoryTag}]${memory}`;
+      } else if (memory) {
+        content += content ? `\n${memory}` : memory;
+      }
       // 提取时间戳（created_at 字段）
       const timestamp = memoryItem.created_at || Date.now();
       
