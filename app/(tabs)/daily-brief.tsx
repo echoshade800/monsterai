@@ -1326,85 +1326,6 @@ export default function DailyBriefScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>How I Think</Text>
-          <View style={styles.thinkingBanner}>
-            
-              {/* {thinkingLogs.map((log, index) => (
-                <View key={index} style={styles.thinkingLogLine}>
-                  {formatLogText(log).map((part, partIndex) => (
-                    <Text
-                      key={partIndex}
-                      style={[styles.thinkingLogText, { color: part.color }]}
-                    >
-                      {part.text}
-                    </Text>
-                  ))}
-                </View>
-              ))} */}
-            
-            <ScrollView
-              style={styles.thinkingScrollContainer}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
-            >
-              <View style={styles.thinkingScrollContainer}>
-              
-                {(() => {
-                  // 如果只有默认消息，不重复显示
-                  const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
-                  const entriesToRender = isDefaultMessage ? logEntries : [...logEntries, ...logEntries];
-                  return entriesToRender.map((entry, index) => (
-                    <View key={index} style={styles.thinkingLogLine}>
-                      {formatLogText(entry).map((part, partIndex) => (
-                        <Text
-                          key={partIndex}
-                          style={[styles.thinkingLogText, { color: '#FFFFFF' }]}
-                        >
-                          {part.text?.length > 100 ? part.text.substring(0, 100) + '...' : part.text}
-                        </Text>
-                      ))}
-                    </View>
-                  ));
-                })()}
-            </View>
-            </ScrollView>
-            
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.permissionsHeader}>
-            <Text style={styles.permissionsHeaderTitle}>Get the Full Experience</Text>
-            <Text style={styles.permissionsHeaderSubtitle}>Let the Monster team collect your data automatically. Everything stays private and secure.</Text>
-          </View>
-          <View style={styles.permissionsCard}>
-            {permissionsList.map((permission, index) => (
-              <View
-                key={permission.id}
-                style={[
-                  styles.permissionRow,
-                  index < permissionsList.length - 1 && styles.permissionRowBorder,
-                ]}
-              >
-                <View style={styles.permissionIcon}>{permission.icon}</View>
-                <View style={styles.permissionText}>
-                  <Text style={styles.permissionTitle}>{permission.title}</Text>
-                  <Text style={styles.permissionSubtitle}>
-                    {permission.enabled ? 'Enabled' : 'Not Enabled'}
-                  </Text>
-                </View>
-                <Switch
-                  value={permission.enabled}
-                  onValueChange={() => togglePermission(permission.id)}
-                  trackColor={{ false: '#E0E0E0', true: '#34C759' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Timeline</Text>
           <Text style={styles.timelineSubtitle}>From your phone, we track daily patterns to understand your health — all data stays private.</Text>
 
@@ -1497,6 +1418,84 @@ export default function DailyBriefScreen() {
           </View>
         </View>
 
+        <View style={styles.section}>
+          <View style={styles.permissionsHeader}>
+            <Text style={styles.permissionsHeaderTitle}>Get the Full Experience</Text>
+            <Text style={styles.permissionsHeaderSubtitle}>Let the Monster team collect your data automatically. Everything stays private and secure.</Text>
+          </View>
+          <View style={styles.permissionsCard}>
+            {permissionsList.map((permission, index) => (
+              <View
+                key={permission.id}
+                style={[
+                  styles.permissionRow,
+                  index < permissionsList.length - 1 && styles.permissionRowBorder,
+                ]}
+              >
+                <View style={styles.permissionIcon}>{permission.icon}</View>
+                <View style={styles.permissionText}>
+                  <Text style={styles.permissionTitle}>{permission.title}</Text>
+                  <Text style={styles.permissionSubtitle}>
+                    {permission.enabled ? 'Enabled' : 'Not Enabled'}
+                  </Text>
+                </View>
+                <Switch
+                  value={permission.enabled}
+                  onValueChange={() => togglePermission(permission.id)}
+                  trackColor={{ false: '#E0E0E0', true: '#34C759' }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+            ))}
+          </View>
+        </View>
+            
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>How I Think</Text>
+          <View style={styles.thinkingBanner}>
+            
+              {/* {thinkingLogs.map((log, index) => (
+                <View key={index} style={styles.thinkingLogLine}>
+                  {formatLogText(log).map((part, partIndex) => (
+                    <Text
+                      key={partIndex}
+                      style={[styles.thinkingLogText, { color: part.color }]}
+                    >
+                      {part.text}
+                    </Text>
+                  ))}
+                </View>
+              ))} */}
+            
+            <ScrollView
+              style={styles.thinkingScrollContainer}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
+            >
+              <View style={styles.thinkingScrollContainer}>
+              
+                {(() => {
+                  // 如果只有默认消息，不重复显示
+                  const isDefaultMessage = logEntries.length === 1 && !logEntries[0]?.time;
+                  const entriesToRender = isDefaultMessage ? logEntries : [...logEntries, ...logEntries];
+                  return entriesToRender.map((entry, index) => (
+                    <View key={index} style={styles.thinkingLogLine}>
+                      {formatLogText(entry).map((part, partIndex) => (
+                        <Text
+                          key={partIndex}
+                          style={[styles.thinkingLogText, { color: '#FFFFFF' }]}
+                        >
+                          {part.text?.length > 100 ? part.text.substring(0, 100) + '...' : part.text}
+                        </Text>
+                      ))}
+                    </View>
+                  ));
+                })()}
+            </View>
+            </ScrollView>
+            
+          </View>
+        </View>
       </ScrollView>
 
       <Modal

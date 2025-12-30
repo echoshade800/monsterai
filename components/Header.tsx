@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { api } from '../src/services/api-clients/client';
 import { API_ENDPOINTS, getHeadersWithPassId } from '../src/services/api/api';
-import { ReviewCardData, ReviewCarousel } from './ReviewCarousel';
+import { ReviewCardData } from './ReviewCarousel';
 
 interface HeaderProps {
   refreshTrigger?: number; // 当这个值变化时，触发刷新 AgentLogs
@@ -264,10 +264,10 @@ export function Header({ refreshTrigger }: HeaderProps) {
             </View>
 
           {/* Review Carousel */}
-          <ReviewCarousel data={MOCK_REVIEW_DATA} />
+          {/* <ReviewCarousel data={MOCK_REVIEW_DATA} /> */}
           </ImageBackground>
               </View>
-            </View>
+        </View>
   );
 }
 
