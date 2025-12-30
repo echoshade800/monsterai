@@ -14,6 +14,7 @@ import {
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   AppState,
   Linking,
@@ -109,6 +110,7 @@ export default function DailyBriefScreen() {
   const timelineDataCacheRef = useRef<Record<string, Array<{ time: string; category: string; description: string }>>>({});
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [togglingReminderId, setTogglingReminderId] = useState<string | null>(null);
 
   // 检查所有健康子项权限状态
   const checkAllHealthPermissions = async (silent = false): Promise<boolean> => {
@@ -515,6 +517,9 @@ export default function DailyBriefScreen() {
       return;
     }
 
+    // 设置加载状态
+    setTogglingReminderId(item.id);
+
     try {
       // 新的 API 格式：使用 rule_id 和 switch 字段
       // item.id 在 mapApiRecordToTimelineItem 中已经被设置为 rule_id
@@ -529,7 +534,7 @@ export default function DailyBriefScreen() {
         requestBody,
         { requireAuth: true }
       );
-
+      console.log('handleToggleReminder response', response);
       // 更新本地状态
       setTimelineData((prevData) =>
         prevData.map((dataItem) =>
@@ -541,6 +546,17 @@ export default function DailyBriefScreen() {
     } catch (error) {
       console.error('Failed to update reminder status:', error);
       Alert.alert('Error', 'Failed to update reminder status, please try again later');
+      // 发生错误时，恢复原来的状态
+      setTimelineData((prevData) =>
+        prevData.map((dataItem) =>
+          dataItem.id === item.id
+            ? { ...dataItem, toggleEnabled: !newValue }
+            : dataItem
+        )
+      );
+    } finally {
+      // 清除加载状态
+      setTogglingReminderId(null);
     }
   };
 
@@ -1371,12 +1387,17 @@ export default function DailyBriefScreen() {
                         </View>
                       </View>
                       <View style={styles.timelineReminderToggle}>
-                        <Switch
-                          value={item.toggleEnabled}
-                          onValueChange={(newValue) => handleToggleReminder(item, newValue)}
-                          trackColor={{ false: '#E0E0E0', true: '#34C759' }}
-                          thumbColor="#FFFFFF"
-                        />
+                        {togglingReminderId === item.id ? (
+                          <ActivityIndicator size="small" color="#34C759" />
+                        ) : (
+                          <Switch
+                            value={item.toggleEnabled}
+                            onValueChange={(newValue) => handleToggleReminder(item, newValue)}
+                            trackColor={{ false: '#E0E0E0', true: '#34C759' }}
+                            thumbColor="#FFFFFF"
+                            disabled={false}
+                          />
+                        )}
                       </View>
                     </>
                   )}
