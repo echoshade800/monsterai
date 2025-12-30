@@ -58,11 +58,6 @@ export default function HomeScreen() {
     .filter(r => r.status === 'active')
     .sort((a, b) => b.priority - a.priority)[0] || null;
 
-  const handleReminderDone = (id: string) => {
-    setActiveReminders(prev => prev.map(r => r.id === id ? { ...r, status: 'done' } : r));
-    console.log('reminder_completed', id);
-  };
-
   // 获取当前活跃的提醒规则
   const fetchActiveReminders = useCallback(async () => {
     try {
@@ -101,6 +96,7 @@ export default function HomeScreen() {
       setActiveReminders([]);
     }
   }, []);
+
 
   // Handle mentionAgent parameter from navigation
   useEffect(() => {
@@ -2330,6 +2326,63 @@ export default function HomeScreen() {
       setIsSending(false);
     }
   }, [userData, handleStreamRequest, detectMention, handleFunctionCall, sortMessagesByTimestamp]);
+
+  // 处理提醒完成事件
+  const handleReminderDone = useCallback(async (id: string) => {
+    try {
+      console.log('[handleReminderDone] Marking reminder as done:', id);
+      
+      // 在发送请求之前，先获取当前提醒的信息（用于后续发送消息）
+      const currentReminderInfo = activeReminders.find(r => r.id === id);
+      const time = currentReminderInfo?.timeWindow || '';
+      const title = currentReminderInfo?.title || '';
+      
+      // 调用 API 标记提醒为已完成
+      // 注意：请求体是一个字符串（提醒 ID），Content-Type 是 application/json
+      const response = await api.post(API_ENDPOINTS.TIMELINE.REMINDER_DONE, id, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('[handleReminderDone] Reminder marked as done successfully response:', response);
+      
+      // 请求成功后，发送消息（参考 ReminderCard.tsx 的实现）
+      // 检查响应是否成功：支持 ApiResponse 实例的 isSuccess() 方法，也支持直接检查 code 字段
+      const isSuccess = response && (
+        (typeof response.isSuccess === 'function' && response.isSuccess()) ||
+        response.code === 'A0000' ||
+        response.code === 0 ||
+        response.msg === 'success' ||
+        response.msg === 'succ'
+      );
+      
+      if (isSuccess && time && title) {
+        const operationMessage = `reminder_done_${time}_${title}`;
+        const textMessage = `已经完成 ${time} 的${title}提醒`;
+        
+        console.log('[handleReminderDone] Sending reminder done message:', { operationMessage, textMessage });
+        
+        // 调用 handleReminderMessage 发送消息
+        await handleReminderMessage(operationMessage, textMessage);
+      } else if (!time || !title) {
+        console.warn('[handleReminderDone] Missing time or title, skipping message send:', { time, title });
+      } else if (!isSuccess) {
+        console.warn('[handleReminderDone] Request was not successful, skipping message send:', response);
+      }
+      
+      // 请求成功后，重新获取最新的提醒数据
+      await fetchActiveReminders();
+    } catch (error) {
+      console.error('[handleReminderDone] Failed to mark reminder as done:', error);
+      // 即使失败，也尝试刷新提醒数据，确保 UI 状态正确
+      try {
+        await fetchActiveReminders();
+      } catch (refreshError) {
+        console.error('[handleReminderDone] Failed to refresh reminders after error:', refreshError);
+      }
+    }
+  }, [fetchActiveReminders, activeReminders, handleReminderMessage]);
 
   // 发送消息
   const sendMessage = useCallback((message: string) => {

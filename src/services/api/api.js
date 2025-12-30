@@ -174,6 +174,7 @@ export const API_ENDPOINTS = {
     SWITCH: '/timeline/reminder-rules/switch',
     REMINDER: '/timeline/reminder-rules',
     REMINDER_CURRENT: '/timeline/reminder-rules/current',
+    REMINDER_DONE: '/timeline/reminder-rules/done',
   },
 
   DEVICE_TOKEN: {
