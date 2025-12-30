@@ -4,13 +4,13 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, Brain, Calendar, ChevronRight, ClipboardList, Target, User } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityLevelPickerModal } from '../components/ActivityLevelPickerModal';
@@ -663,12 +663,40 @@ export default function EnergyDetailScreen() {
     }
   };
 
-  const handleChatWithMe = () => {
-    // Navigate to Echo page (main chat) with @foodie pre-filled
-    router.push({
-      pathname: '/(tabs)',
-      params: { mentionAgent: 'foodie' },
-    });
+  const handleChatWithMe = async () => {
+    // Store mentionAgent in AsyncStorage before navigating to root
+    // This allows us to pass the parameter when popping to root view
+    try {
+      await storageManager.setItem('pendingMentionAgent', 'foodie');
+      
+      // Dismiss all modals first
+      router.dismissAll();
+      
+      // Pop all routes until we reach the root view
+      // Use a loop to go back until we can't go back anymore
+      let backCount = 0;
+      const maxBackAttempts = 10; // Safety limit to prevent infinite loops
+      
+      while (router.canGoBack() && backCount < maxBackAttempts) {
+        router.back();
+        backCount++;
+        // Add a small delay to ensure the back action completes
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // After popping all routes, navigate to home tab to ensure we're on the root
+      // Using navigate instead of replace - if home is already in stack, it will pop to it
+      router.navigate('/(tabs)/home');
+    } catch (error) {
+      console.error('Failed to store mentionAgent or navigate:', error);
+      // Fallback: use dismissAll and replace if the loop fails
+      try {
+        router.dismissAll();
+        router.replace('/(tabs)/home');
+      } catch (fallbackError) {
+        console.error('Fallback navigation also failed:', fallbackError);
+      }
+    }
   };
 
   return (

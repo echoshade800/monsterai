@@ -92,6 +92,29 @@ export default function HomeScreen() {
     }
   }, [params.mentionAgent]);
 
+  // Handle mentionAgent from AsyncStorage (when using router.back())
+  useFocusEffect(
+    useCallback(() => {
+      const checkPendingMentionAgent = async () => {
+        try {
+          const pendingMentionAgent = await storageManager.getItem('pendingMentionAgent');
+          if (pendingMentionAgent) {
+            const agentName = pendingMentionAgent as string;
+            setInitialInputText(`@${agentName} `);
+            setShouldAutoFocus(true);
+            
+            // Clear the stored value after processing
+            await storageManager.removeItem('pendingMentionAgent');
+          }
+        } catch (error) {
+          console.error('Failed to check pending mentionAgent:', error);
+        }
+      };
+      
+      checkPendingMentionAgent();
+    }, [])
+  );
+
   // 将 extract_user_task 的 tasks 数据转换为 ReminderCard Message
   const createReminderCardFromTasks = (tasks: any[], messageId?: string, timestamp?: number): Message | null => {
     if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
