@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
+import { ArrowLeft } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, NativeEventEmitter, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { unzip } from 'react-native-zip-archive';
@@ -504,8 +505,17 @@ export default function MarketTab() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>MonsterAI</Text>
-          <Text style={styles.subtitle}>Your personal agent store</Text>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <ArrowLeft size={24} color="#000000" strokeWidth={2} />
+          </TouchableOpacity>
+          <View style={styles.headerContent}>
+            <Text style={styles.title}>MonsterAI</Text>
+            <Text style={styles.subtitle}>Your personal agent store</Text>
+          </View>
         </View>
 
         <View style={styles.grid}>
@@ -657,9 +667,20 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   header: {
+    flexDirection: 'column',
     paddingHorizontal: 20,
     marginBottom: 12,
     marginTop: 4,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  headerContent: {
+    flex: 1,
   },
   title: {
     fontSize: 28,
