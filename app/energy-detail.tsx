@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, ArrowRight, Brain, Calendar, ChevronRight, ClipboardList, Target, User } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, Brain, ClipboardList, User } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image,
@@ -22,7 +22,6 @@ import { GenderPickerModal } from '../components/GenderPickerModal';
 import { HeightPickerModal } from '../components/HeightPickerModal';
 import { TimePickerModal } from '../components/TimePickerModal';
 import { WeightPickerModal } from '../components/WeightPickerModal';
-import { getStrategyById } from '../constants/strategies';
 import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
 
@@ -1011,7 +1010,7 @@ export default function EnergyDetailScreen() {
         </View>
 
         {/* Current Strategy */}
-        <View style={styles.sectionContainer}>
+        {/* <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Target size={20} color="#000000" style={styles.sectionIcon} />
             <Text style={styles.sectionHeaderTitle}>Current Strategy</Text>
@@ -1098,7 +1097,7 @@ export default function EnergyDetailScreen() {
               </View>
             </View>
           </View>
-        </View>
+        </View> */}
 
         {/* Basic Info */}
         <View style={styles.sectionContainer}>
@@ -1161,7 +1160,7 @@ export default function EnergyDetailScreen() {
         </View>
 
         {/* Weekly Report */}
-        <View style={styles.sectionContainer}>
+        {/* <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Calendar size={20} color="#000000" style={styles.sectionIcon} />
             <Text style={styles.sectionHeaderTitle}>Your Week in Review</Text>
@@ -1185,7 +1184,7 @@ export default function EnergyDetailScreen() {
               <Text style={styles.seeDetailsButtonText}>See details</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* Chat with me Button - Fixed at bottom - Double Layer Capsule */}
