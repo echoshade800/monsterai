@@ -32,6 +32,18 @@ export default function TabLayout() {
           title: 'Store',
         }}
       />
+      <Tabs.Screen
+        name="team-goal"
+        options={{
+          title: 'Team Goal',
+        }}
+      />
+      <Tabs.Screen
+        name="memory"
+        options={{
+          title: 'Memory',
+        }}
+      />
     </Tabs>
   );
 }
