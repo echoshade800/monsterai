@@ -1063,8 +1063,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   messageHeaderAvatar: {
-    width: 26,
-    height: 26,
+    width: 34,
+    height: 34,
     borderRadius: 13,
     marginRight: 8,
   },
