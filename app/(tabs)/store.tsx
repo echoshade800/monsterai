@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, NativeEventEmitter, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { unzip } from 'react-native-zip-archive';
 import { GameCard } from '../../components/GameCard';
-import { MonsterCard } from '../../components/MonsterCard';
 import { api } from '../../src/services/api-clients/client';
 import { API_ENDPOINTS, getBaseUrl, getConfigFileName } from '../../src/services/api/api';
 import storageManager from '../../src/utils/storage';
@@ -450,50 +449,53 @@ export default function MarketTab() {
   };
 
   const renderGameRow = (games: MiniAppConfig[]) => (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.gamesRow}
-      contentContainerStyle={styles.gamesRowContent}
-    >
-      {games.map((game: MiniAppConfig) => (
-        console.log('game', game),
-        <GameCard
+    <View style={styles.gamesGrid}>
+      {games.map((game: MiniAppConfig, index: number) => (
+        <View
           key={game.id}
-          id={game.id}
-          name={game.name}
-          imageUrl={game.image}
-          isHot={game.hot}
-          rating={game.score ? parseInt(game.score.match(/(\d+)/)?.[1] || '0', 10) : 0}
-          tags={game.tag}
-          score={game.score}
-          onPlayPress={handlePlayPress}
-        />
+          style={[
+            styles.gameCardWrapper,
+            index % 2 === 0 ? styles.gameCardLeft : styles.gameCardRight,
+          ]}
+        >
+          <GameCard
+            id={game.id}
+            name={game.name}
+            imageUrl={game.image}
+            isHot={game.hot}
+            rating={game.score ? parseInt(game.score.match(/(\d+)/)?.[1] || '0', 10) : 0}
+            tags={game.tag}
+            score={game.score}
+            onPlayPress={handlePlayPress}
+          />
+        </View>
       ))}
-    </ScrollView>
+    </View>
   );
 
   const renderMiniAppRow = (apps: MiniAppConfig[]) => (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.gamesRow}
-      contentContainerStyle={styles.gamesRowContent}
-    >
-      {apps.map((app: MiniAppConfig) => (
-        <GameCard
+    <View style={styles.gamesGrid}>
+      {apps.map((app: MiniAppConfig, index: number) => (
+        <View
           key={app.id}
-          id={app.id}
-          name={app.name}
-          imageUrl={app.image}
-          isHot={app.hot}
-          rating={app.score ? parseInt(app.score.match(/(\d+)/)?.[1] || '0', 10) : 0}
-          tags={app.tag}
-          score={app.score}
-          onPlayPress={handleMiniAppPress}
-        />
+          style={[
+            styles.gameCardWrapper,
+            index % 2 === 0 ? styles.gameCardLeft : styles.gameCardRight,
+          ]}
+        >
+          <GameCard
+            id={app.id}
+            name={app.name}
+            imageUrl={app.image}
+            isHot={app.hot}
+            rating={app.score ? parseInt(app.score.match(/(\d+)/)?.[1] || '0', 10) : 0}
+            tags={app.tag}
+            score={app.score}
+            onPlayPress={handleMiniAppPress}
+          />
+        </View>
       ))}
-    </ScrollView>
+    </View>
   );
 
   return (
@@ -510,7 +512,7 @@ export default function MarketTab() {
           </View>
         </View>
 
-        <View style={styles.grid}>
+        {/* <View style={styles.grid}>
           {isMonstersLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#000000" />
@@ -545,7 +547,7 @@ export default function MarketTab() {
               <Text style={styles.emptyText}>No data available</Text>
             </View>
           )}
-        </View>
+        </View> */}
 
         <View style={styles.gamesSection}>
           <Text style={styles.gamesSectionTitle}>Game Store</Text>
@@ -709,11 +711,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 16,
   },
-  gamesRow: {
+  gamesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 20,
+  },
+  gameCardWrapper: {
+    width: '48%',
     marginBottom: 16,
   },
-  gamesRowContent: {
-    paddingHorizontal: 20,
+  gameCardLeft: {
+    marginRight: '2%',
+  },
+  gameCardRight: {
+    marginLeft: '2%',
   },
   bannerSection: {
     marginTop: 16,
@@ -837,4 +848,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

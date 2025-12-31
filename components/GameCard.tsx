@@ -84,8 +84,7 @@ export function GameCard({ id, name, imageUrl, isHot = false, rating, tags, scor
 
 const styles = StyleSheet.create({
   container: {
-    width: 220,
-    marginRight: 16,
+    width: '100%',
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
