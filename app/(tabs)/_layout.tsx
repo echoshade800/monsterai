@@ -26,6 +26,12 @@ export default function TabLayout() {
           title: 'Nutri',
         }}
       />
+      <Tabs.Screen
+        name="store"
+        options={{
+          title: 'Store',
+        }}
+      />
     </Tabs>
   );
 }

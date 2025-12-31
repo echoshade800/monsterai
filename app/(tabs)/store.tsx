@@ -1,14 +1,13 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, NativeEventEmitter, NativeModules, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { unzip } from 'react-native-zip-archive';
-import { GameCard } from '../components/GameCard';
-import { MonsterCard } from '../components/MonsterCard';
-import { api } from '../src/services/api-clients/client';
-import { API_ENDPOINTS, getBaseUrl, getConfigFileName } from '../src/services/api/api';
-import storageManager from '../src/utils/storage';
+import { GameCard } from '../../components/GameCard';
+import { MonsterCard } from '../../components/MonsterCard';
+import { api } from '../../src/services/api-clients/client';
+import { API_ENDPOINTS, getBaseUrl, getConfigFileName } from '../../src/services/api/api';
+import storageManager from '../../src/utils/storage';
 const { MiniAppLauncher,NetworkTrigger } = NativeModules;
 const emitter = new NativeEventEmitter(NetworkTrigger);
 
@@ -505,13 +504,6 @@ export default function MarketTab() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.7}
-          >
-            <ArrowLeft size={24} color="#000000" strokeWidth={2} />
-          </TouchableOpacity>
           <View style={styles.headerContent}>
             <Text style={styles.title}>MonsterAI</Text>
             <Text style={styles.subtitle}>Your personal agent store</Text>
@@ -671,13 +663,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 12,
     marginTop: 4,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    marginBottom: 8,
   },
   headerContent: {
     flex: 1,
