@@ -89,6 +89,12 @@ export default function EnergyDetailScreen() {
   const [nutritionistGoalWeight, setNutritionistGoalWeight] = useState<string | null>(null); // e.g., "54kg"
   const [eatingWindow, setEatingWindow] = useState<string | null>(null); // e.g., "10:00-18:00"
   const [insideMindData, setInsideMindData] = useState<Array<{ time: string; text: string }>>([]);
+  
+  // Daily macros left from API
+  const [dailyCalorieLeft, setDailyCalorieLeft] = useState<string | null>(null); // e.g., "180kcal"
+  const [dailyCarbsLeft, setDailyCarbsLeft] = useState<string | null>(null); // e.g., "50g"
+  const [dailyFatLeft, setDailyFatLeft] = useState<string | null>(null); // e.g., "50g"
+  const [dailyProteinLeft, setDailyProteinLeft] = useState<string | null>(null); // e.g., "50g"
 
   // Today's meals
   const todayMeals: MealItem[] = [
@@ -387,6 +393,25 @@ export default function EnergyDetailScreen() {
               ? { ...r, time: windowStr, enabled: true } 
               : r
           ));
+        }
+        
+        // Extract daily macros left
+        if (current?.daily_calorie_left) {
+          // Format: "180kcal" -> "180 kcal"
+          const formattedCalorieLeft = current.daily_calorie_left.replace('kcal', ' kcal');
+          setDailyCalorieLeft(formattedCalorieLeft);
+        }
+        
+        if (current?.daily_carbs_left) {
+          setDailyCarbsLeft(current.daily_carbs_left);
+        }
+        
+        if (current?.daily_fat_left) {
+          setDailyFatLeft(current.daily_fat_left);
+        }
+        
+        if (current?.daily_protein_left) {
+          setDailyProteinLeft(current.daily_protein_left);
         }
         
         // Extract history data for Inside My Mind
@@ -833,7 +858,7 @@ export default function EnergyDetailScreen() {
             <View style={styles.caloriesSection}>
               <Text style={styles.caloriesLabel}>Calories left</Text>
               <Text style={styles.caloriesValue}>
-                {dailyCalorieNeed || '—'}
+                {dailyCalorieLeft || '—'}
               </Text>
             </View>
             
@@ -843,7 +868,7 @@ export default function EnergyDetailScreen() {
                 <View style={[styles.macroRing, { borderColor: '#8B7FE8' }]} />
                 <View style={styles.macroTextContainer}>
                   <Text style={styles.macroLabel}>Carbs</Text>
-                  <Text style={styles.macroValue}>70g left</Text>
+                  <Text style={styles.macroValue}>{dailyCarbsLeft ? `${dailyCarbsLeft} left` : '—'}</Text>
                 </View>
               </View>
 
@@ -852,7 +877,7 @@ export default function EnergyDetailScreen() {
                 <View style={[styles.macroRing, { borderColor: '#FF9F66' }]} />
                 <View style={styles.macroTextContainer}>
                   <Text style={styles.macroLabel}>Fat</Text>
-                  <Text style={styles.macroValue}>26g left</Text>
+                  <Text style={styles.macroValue}>{dailyFatLeft ? `${dailyFatLeft} left` : '—'}</Text>
                 </View>
               </View>
 
@@ -861,7 +886,7 @@ export default function EnergyDetailScreen() {
                 <View style={[styles.macroRing, { borderColor: '#5CAADD' }]} />
                 <View style={styles.macroTextContainer}>
                   <Text style={styles.macroLabel}>Protein</Text>
-                  <Text style={styles.macroValue}>58g left</Text>
+                  <Text style={styles.macroValue}>{dailyProteinLeft ? `${dailyProteinLeft} left` : '—'}</Text>
                 </View>
               </View>
             </View>
@@ -1204,7 +1229,7 @@ export default function EnergyDetailScreen() {
           <View style={styles.infoRows}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>TDEE (kcal/day)</Text>
-              <Text style={styles.infoValue}>2,130</Text>
+              <Text style={styles.infoValue}>{dailyCalorieNeed || '—'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Current Weight</Text>
