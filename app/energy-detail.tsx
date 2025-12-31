@@ -970,11 +970,9 @@ export default function EnergyDetailScreen() {
           <View style={styles.remindersSection}>
             <Text style={styles.remindersSectionTitle}>Reminders</Text>
             {reminders.map((reminder) => (
-              <TouchableOpacity
+              <View
                 key={reminder.id}
                 style={styles.reminderRow}
-                onPress={() => handleReminderPress(reminder.id)}
-                activeOpacity={reminder.enabled && reminder.time !== 'OFF' ? 0.7 : 1}
               >
                 <Text style={styles.reminderName}>{reminder.name}</Text>
                 <Text style={[
@@ -983,7 +981,7 @@ export default function EnergyDetailScreen() {
                 ]}>
                   {reminder.time}
                 </Text>
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
         </View>
@@ -1060,11 +1058,7 @@ export default function EnergyDetailScreen() {
             </TouchableOpacity>
 
             <View style={styles.strategyDataRows}>
-              <TouchableOpacity 
-                style={styles.strategyDataRow}
-                onPress={() => handleWeightPress('current')}
-                activeOpacity={0.7}
-              >
+              <View style={styles.strategyDataRow}>
                 <Text style={styles.strategyDataLabel}>Current Weight</Text>
                 <Text style={styles.strategyDataValue}>
                   {(() => {
@@ -1082,12 +1076,8 @@ export default function EnergyDetailScreen() {
                     }
                   })()}
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.strategyDataRow}
-                onPress={() => handleWeightPress('goal')}
-                activeOpacity={0.7}
-              >
+              </View>
+              <View style={styles.strategyDataRow}>
                 <Text style={styles.strategyDataLabel}>Goal Weight</Text>
                 <Text style={styles.strategyDataValue}>
                   {(() => {
@@ -1105,7 +1095,7 @@ export default function EnergyDetailScreen() {
                     }
                   })()}
                 </Text>
-              </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -1132,11 +1122,7 @@ export default function EnergyDetailScreen() {
               <Text style={styles.infoLabel}>TDEE (kcal/day)</Text>
               <Text style={styles.infoValue}>2,130</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.infoRow}
-              onPress={() => setShowHeightPicker(true)}
-              activeOpacity={0.7}
-            >
+            <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Height</Text>
               <Text style={styles.infoValue}>
                 {(() => {
@@ -1151,41 +1137,25 @@ export default function EnergyDetailScreen() {
                   }
                 })()}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.infoRow}
-              onPress={() => setShowAgePicker(true)}
-              activeOpacity={0.7}
-            >
+            </View>
+            <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Age</Text>
               <Text style={styles.infoValue}>{age !== null ? age.toString() : '—'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.infoRow}
-              onPress={() => setShowGenderPicker(true)}
-              activeOpacity={0.7}
-            >
+            </View>
+            <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Gender</Text>
               <Text style={styles.infoValue}>{gender !== null ? gender : '—'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.infoRow}
-              onPress={() => setShowActivityLevelPicker(true)}
-              activeOpacity={0.7}
-            >
+            </View>
+            <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Activity Level</Text>
               <Text style={styles.infoValue}>{activityLevel !== null ? activityLevel : '—'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.infoRow}
-              onPress={() => setShowDietPreferenceModal(true)}
-              activeOpacity={0.7}
-            >
+            </View>
+            <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Diet Preferences</Text>
               <Text style={[styles.infoValue, styles.infoValueMultiline]} numberOfLines={2}>
                 {dietPreference || '—'}
               </Text>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
         </View>
