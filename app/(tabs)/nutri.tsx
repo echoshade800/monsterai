@@ -82,16 +82,49 @@ export default function NutriScreen() {
     }
   }, []);
 
+  // Fetch nutrition profile from API
+  const fetchNutritionProfile = useCallback(async () => {
+    try {
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      const url = `/agent-detail/profile?dimension=nutritionist`;
+      
+      const response = await api.get(url, {
+        headers: {
+          'accept': 'application/json',
+          'passid': passIdValue,
+        },
+      });
+
+      if (response.isSuccess() && response.data && response.data.data && response.data.data.current) {
+        const current = response.data.data.current;
+        setProfile({
+          dailyCalorieNeed: current.daily_calorie_need || null,
+          currentWeight: current.current_weight || null,
+          eatingWindow: current.eating_window || null,
+          foodPreferences: current.food_preferences || null,
+          triggerFoods: current.trigger_foods || null,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch nutrition profile:', error);
+      // 如果获取失败，保持 profile 为初始状态
+    }
+  }, []);
+
   // Fetch goal title on component mount
   useEffect(() => {
     fetchGoalTitle();
-  }, [fetchGoalTitle]);
+    fetchNutritionProfile();
+  }, [fetchGoalTitle, fetchNutritionProfile]);
 
-  // 每次切换到 Nutri tab 时重新获取目标信息
+  // 每次切换到 Nutri tab 时重新获取目标信息和个人资料
   useFocusEffect(
     useCallback(() => {
       fetchGoalTitle();
-    }, [fetchGoalTitle])
+      fetchNutritionProfile();
+    }, [fetchGoalTitle, fetchNutritionProfile])
   );
 
   // Function to render the value or placeholder
