@@ -26,48 +26,6 @@ export default function TabLayout() {
           title: 'Nutri',
         }}
       />
-      <Tabs.Screen
-        name="somno"
-        options={{
-          title: 'Somno',
-        }}
-      />
-      <Tabs.Screen
-        name="coach"
-        options={{
-          title: 'Coach',
-        }}
-      />
-      <Tabs.Screen
-        name="zen"
-        options={{
-          title: 'Zen',
-        }}
-      />
-      <Tabs.Screen
-        name="muse"
-        options={{
-          title: 'Muse',
-        }}
-      />
-      <Tabs.Screen
-        name="fiscal"
-        options={{
-          title: 'Fiscal',
-        }}
-      />
-      <Tabs.Screen
-        name="brew"
-        options={{
-          title: 'Brew',
-        }}
-      />
-      <Tabs.Screen
-        name="architect"
-        options={{
-          title: 'Architect',
-        }}
-      />
     </Tabs>
   );
 }
