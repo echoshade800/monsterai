@@ -1357,7 +1357,35 @@ export default function HomeScreen() {
       // 构建展示内容：第一行为 memory_type，第二行为 [memory_tag]memory字段
       const memoryType = memoryItem.memory_type || '';
       const memoryTag = memoryItem.memory_tag || '';
-      const memory = memoryItem.memory || memoryItem.raw_text || '';
+      let memory = memoryItem.memory || memoryItem.raw_text || '';
+      
+      // 应用字符串替换规则
+      if (memory) {
+        // 替换 Person1 为 Boss
+        memory = memory.replace(/Person1/g, 'Boss');
+        
+        // 根据 memoryTag 替换 person2
+        let person2Replacement = 'monster'; // 默认值
+        switch (memoryTag) {
+          case 'general':
+            person2Replacement = 'monster';
+            break;
+          case 'diet':
+            person2Replacement = 'diet';
+            break;
+          case 'sleep_energy':
+            person2Replacement = 'sleep';
+            break;
+          case 'activity':
+            person2Replacement = 'monster';
+            break;
+          case 'emotion_stress':
+            person2Replacement = 'emotion';
+            break;
+        }
+        // 替换 person2（不区分大小写）
+        memory = memory.replace(/Person2/gi, person2Replacement);
+      }
       
       // 格式化内容：memory_type\n[memory_tag]memory
       let content = '';
