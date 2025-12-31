@@ -1111,8 +1111,10 @@ export default function EnergyDetailScreen() {
             >
               {insideMindData.map((item, index) => (
                 <View key={index} style={styles.insideMindRow}>
-                  <Text style={styles.insideMindTime}>{item.time}</Text>
-                  <Text style={styles.insideMindText}> {item.text}</Text>
+                  <Text style={styles.insideMindTextContainer}>
+                    <Text style={styles.insideMindTime}>{item.time} </Text>
+                    <Text style={styles.insideMindText}>{item.text}</Text>
+                  </Text>
                 </View>
               ))}
             </ScrollView>
@@ -1728,20 +1730,19 @@ const styles = StyleSheet.create({
     paddingBottom: 8, // Extra padding at bottom for better scroll experience
   },
   insideMindRow: {
-    flexDirection: 'row',
+    marginBottom: 12,
   },
-  insideMindTime: {
+  insideMindTextContainer: {
     fontSize: 13,
-    color: '#8B7FE8',
-    fontWeight: '600',
-    fontFamily: 'Nunito',
-  },
-  insideMindText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#666666',
     lineHeight: 18,
     fontFamily: 'Nunito',
+  },
+  insideMindTime: {
+    color: '#8B7FE8',
+    fontWeight: '600',
+  },
+  insideMindText: {
+    color: '#666666',
   },
   strategyCard: {
     backgroundColor: '#FFFFFF',
