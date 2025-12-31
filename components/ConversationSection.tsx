@@ -78,37 +78,37 @@ const MONSTER_CONFIG: Record<string, { color: string; avatar: string; displayNam
   },
   nutri: {
     color: '#92D216',
-    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/pronutri.png',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/monsterfile2.png',
     displayName: 'Nutri',
   },
   somno: {
     color: '#5644A3',
-    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/prosomno.png',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/monsterfile4.png',
     displayName: 'Somno',
   },
   coach: {
     color: '#F04E1E',
-    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/procoach.png',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/monsterfile3.png',
     displayName: 'Coach',
   },
   muse: {
     color: '#E6878C',
-    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/promuse.png',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/monsterfile1.png',
     displayName: 'Muse',
   },
   zen: {
     color: '#82B7D3',
-    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/prozen.png',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/monsterfile5.png',
     displayName: 'Zen',
   },
   brew: {
     color: '#8B4427',
-    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/probrew.png',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/monsterfile8.png',
     displayName: 'Brew',
   },
   architect: {
     color: '#3071BB',
-    avatar: 'https://vsa-bucket-public-new.s3.amazonaws.com/monster/avatar_v1/proarchitect.png',
+    avatar: 'https://dzdbhsix5ppsc.cloudfront.net/monster/monsterfile7.png',
     displayName: 'Architect',
   },
   fiscal: {
