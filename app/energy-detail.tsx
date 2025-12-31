@@ -22,6 +22,8 @@ import { GenderPickerModal } from '../components/GenderPickerModal';
 import { HeightPickerModal } from '../components/HeightPickerModal';
 import { TimePickerModal } from '../components/TimePickerModal';
 import { WeightPickerModal } from '../components/WeightPickerModal';
+import api from '../src/services/api-clients/client';
+import { getHeadersWithPassId } from '../src/services/api/api';
 import userService from '../src/services/userService';
 import storageManager from '../src/utils/storage';
 
@@ -80,6 +82,13 @@ export default function EnergyDetailScreen() {
   const [showGenderPicker, setShowGenderPicker] = useState(false);
   const [showActivityLevelPicker, setShowActivityLevelPicker] = useState(false);
   const [showDietPreferenceModal, setShowDietPreferenceModal] = useState(false);
+
+  // Nutritionist profile data from API
+  const [dailyCalorieNeed, setDailyCalorieNeed] = useState<string | null>(null); // e.g., "1200kcal"
+  const [nutritionistCurrentWeight, setNutritionistCurrentWeight] = useState<string | null>(null); // e.g., "58kg"
+  const [nutritionistGoalWeight, setNutritionistGoalWeight] = useState<string | null>(null); // e.g., "54kg"
+  const [eatingWindow, setEatingWindow] = useState<string | null>(null); // e.g., "10:00-18:00"
+  const [insideMindData, setInsideMindData] = useState<Array<{ time: string; text: string }>>([]);
 
   // Today's meals
   const todayMeals: MealItem[] = [
@@ -316,16 +325,107 @@ export default function EnergyDetailScreen() {
     }
   }, []);
 
+  // Helper function to format timestamp to [YYYY-MM-DD HH:mm] format
+  const formatTimestamp = (timestamp: number): string => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `[${year}-${month}-${day} ${hours}:${minutes}]`;
+  };
+
+  // Load nutritionist profile data from API
+  const loadNutritionistProfile = useCallback(async () => {
+    try {
+      const baseHeaders = await getHeadersWithPassId();
+      const passIdValue = (baseHeaders as any).passId || (baseHeaders as any).passid;
+      
+      const response = await api.get('/agent-detail/profile?dimension=nutritionist', {
+        headers: {
+          'accept': 'application/json',
+          'passid': passIdValue,
+        },
+      });
+
+      if (response.isSuccess() && response.data?.data) {
+        const data = response.data.data;
+        const current = data.current;
+        
+        // Extract daily_calorie_need (e.g., "1200kcal")
+        if (current?.daily_calorie_need) {
+          // Format: "1200kcal" -> "1,200 kcal"
+          const calorieMatch = current.daily_calorie_need.match(/(\d+)/);
+          if (calorieMatch) {
+            const calorieNum = parseInt(calorieMatch[1], 10);
+            const formattedCalorie = calorieNum.toLocaleString('en-US');
+            setDailyCalorieNeed(`${formattedCalorie} kcal`);
+          } else {
+            setDailyCalorieNeed(current.daily_calorie_need);
+          }
+        }
+        
+        // Extract current_weight (e.g., "58kg")
+        if (current?.current_weight) {
+          setNutritionistCurrentWeight(current.current_weight);
+        }
+        
+        // Extract goal_weight (e.g., "54kg")
+        if (current?.goal_weight) {
+          setNutritionistGoalWeight(current.goal_weight);
+        }
+        
+        // Extract eating_window (e.g., "10:00-18:00") and convert to display format "10:00 – 18:00"
+        if (current?.eating_window) {
+          const windowStr = current.eating_window.replace('-', ' – ');
+          setEatingWindow(windowStr);
+          
+          // Update reminders with eating window
+          setReminders(prev => prev.map(r => 
+            r.id === '4' 
+              ? { ...r, time: windowStr, enabled: true } 
+              : r
+          ));
+        }
+        
+        // Extract history data for Inside My Mind
+        if (data.history && Array.isArray(data.history)) {
+          const mindData = data.history
+            .filter((item: any) => {
+              // Filter: must have updated_at, change_log must exist and be a string type
+              return item.updated_at && 
+                     item.change_log && 
+                     typeof item.change_log === 'string';
+            })
+            .map((item: any) => ({
+              time: formatTimestamp(item.updated_at),
+              text: item.change_log,
+              timestamp: item.updated_at, // Keep timestamp for sorting
+            }))
+            .sort((a: { timestamp: number }, b: { timestamp: number }) => b.timestamp - a.timestamp) // Sort by timestamp descending (newest first)
+            .map(({ timestamp, ...item }: { timestamp: number; time: string; text: string }) => item); // Remove timestamp from final data
+          
+          setInsideMindData(mindData);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load nutritionist profile:', error);
+    }
+  }, []);
+
   // Load data on mount
   useEffect(() => {
     loadUserProfileData();
-  }, [loadUserProfileData]);
+    loadNutritionistProfile();
+  }, [loadUserProfileData, loadNutritionistProfile]);
 
   // Reload data when page gains focus (e.g., returning from Profile page)
   useFocusEffect(
     useCallback(() => {
       loadUserProfileData();
-    }, [loadUserProfileData])
+      loadNutritionistProfile();
+    }, [loadUserProfileData, loadNutritionistProfile])
   );
 
   // Dynamically calculate eating window data based on reminders
@@ -378,23 +478,6 @@ export default function EnergyDetailScreen() {
       eatingSlots,
     };
   }, [reminders]); // Recalculate when reminders change
-
-  // Inside My Mind data
-  const insideMindData = [
-    { time: '[6:30pm]', text: 'User logged "pizza + soda".' },
-    { time: '[6:32pm]', text: 'High carb load → predict energy crash in 60–90min.' },
-    { time: '[6:35pm]', text: 'Suggest: Eat fiber-rich salad to slow digestion.' },
-    { time: '[11:00am]', text: 'User logged "coffee + donut".' },
-    { time: '[11:07am]', text: 'Sugar spike detected → energy surge in 20min.' },
-    { time: '[9:15am]', text: 'Fasting window ended. Ready to eat.' },
-    { time: '[9:20am]', text: 'User logged "scrambled eggs + avocado toast".' },
-    { time: '[9:25am]', text: 'Good protein start → stable blood sugar expected.' },
-    { time: '[2:45pm]', text: 'User logged "apple + handful of almonds".' },
-    { time: '[2:47pm]', text: 'Light snack → won\'t disrupt dinner appetite.' },
-    { time: '[8:00pm]', text: 'Eating window closing soon. Plan tomorrow\'s first meal.' },
-    { time: '[8:15pm]', text: 'User inactive for 3 hours → may have skipped dinner.' },
-    { time: '[10:30pm]', text: 'Sleep pattern analysis: 7.2 hours average this week.' },
-  ];
 
   const handleReminderPress = (id: string) => {
     const reminder = reminders.find(r => r.id === id);
@@ -749,7 +832,9 @@ export default function EnergyDetailScreen() {
           <View style={styles.dataCard}>
             <View style={styles.caloriesSection}>
               <Text style={styles.caloriesLabel}>Calories left</Text>
-              <Text style={styles.caloriesValue}>1,480 kcal</Text>
+              <Text style={styles.caloriesValue}>
+                {dailyCalorieNeed || '—'}
+              </Text>
             </View>
             
             <View style={styles.macrosRow}>
@@ -1120,6 +1205,18 @@ export default function EnergyDetailScreen() {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>TDEE (kcal/day)</Text>
               <Text style={styles.infoValue}>2,130</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Current Weight</Text>
+              <Text style={styles.infoValue}>
+                {nutritionistCurrentWeight || '—'}
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Goal Weight</Text>
+              <Text style={styles.infoValue}>
+                {nutritionistGoalWeight || '—'}
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Height</Text>
