@@ -57,9 +57,11 @@ interface ReminderItemRowProps {
   disabled?: boolean;
   reminderId: string; // Reminder 唯一标识 (messageId + index)
   onSendMessage?: (operation: string, text: string) => void; // 发送消息的回调函数，operation 和 text 字段
+  hasAnyReminderSubmitted?: boolean; // 是否有任何提醒已经被提交
+  onReminderSubmitted?: () => void; // 当提醒被提交时的回调
 }
 
-function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, reminderId, onSendMessage }: ReminderItemRowProps) {
+function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, reminderId, onSendMessage, hasAnyReminderSubmitted = false, onReminderSubmitted }: ReminderItemRowProps) {
   const { title, task_type } = reminder;
   const [selected, setSelected] = useState<'yes' | 'no' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -163,11 +165,16 @@ function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, remin
         // 保存选择结果到本地存储
         await storageManager.setReminderSelection(reminderId, 'yes');
         setIsSubmitted(true);
-        // 发送消息：已经设置 XX 时间提醒做XX事情
-        const operationMessage = `reminder_yes_${time}_${title}`;
-        const textMessage = `已经设置 ${time} 提醒做${title}`;
-        if (onSendMessage) {
+        // 只有在没有其他提醒已经被提交的情况下才发送消息
+        if (!hasAnyReminderSubmitted && onSendMessage) {
+          // 发送消息：已经设置 XX 时间提醒做XX事情
+          const operationMessage = `reminder_yes_${time}_${title}`;
+          const textMessage = `已经设置 ${time} 提醒做${title}`;
           onSendMessage(operationMessage, textMessage);
+        }
+        // 通知父组件有提醒被提交了
+        if (onReminderSubmitted) {
+          onReminderSubmitted();
         }
         // Show custom success modal instead of Alert
         setShowSuccessModal(true);
@@ -208,11 +215,16 @@ function ReminderItemRow({ reminder, time, onTimeChange, disabled = false, remin
     // 保存选择结果到本地存储
     await storageManager.setReminderSelection(reminderId, 'no');
     
-    // 发送消息：取消提醒
-    const operationMessage = 'reminder_no';
-    const textMessage = '取消提醒';
-    if (onSendMessage) {
+    // 只有在没有其他提醒已经被提交的情况下才发送消息
+    if (!hasAnyReminderSubmitted && onSendMessage) {
+      // 发送消息：取消提醒
+      const operationMessage = 'reminder_no';
+      const textMessage = '取消提醒';
       onSendMessage(operationMessage, textMessage);
+    }
+    // 通知父组件有提醒被提交了
+    if (onReminderSubmitted) {
+      onReminderSubmitted();
     }
     
     // Trigger scale animation
@@ -374,6 +386,7 @@ export function ReminderCard({ title, monster, reminders, disabled = false, mess
   const [reminderTimes, setReminderTimes] = useState<string[]>(
     reminders.map(r => r.time)
   );
+  const [hasAnyReminderSubmitted, setHasAnyReminderSubmitted] = useState(false);
 
   const handleTimeChange = (index: number, newTime: string) => {
     setReminderTimes(prev => {
@@ -381,6 +394,10 @@ export function ReminderCard({ title, monster, reminders, disabled = false, mess
       updated[index] = newTime;
       return updated;
     });
+  };
+
+  const handleReminderSubmitted = () => {
+    setHasAnyReminderSubmitted(true);
   };
 
   return (
@@ -417,6 +434,8 @@ export function ReminderCard({ title, monster, reminders, disabled = false, mess
                   disabled={disabled}
                   reminderId={reminderId}
                   onSendMessage={onSendMessage}
+                  hasAnyReminderSubmitted={hasAnyReminderSubmitted}
+                  onReminderSubmitted={handleReminderSubmitted}
                 />
               );
             })}
