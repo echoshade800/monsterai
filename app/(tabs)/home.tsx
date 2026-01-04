@@ -40,6 +40,7 @@ export default function HomeScreen() {
   const lastRefreshTimeRef = useRef<number>(0);
   const refreshDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isPageFocusedRef = useRef<boolean>(false); // 跟踪页面是否处于聚焦状态
+  const newUserMessageSentRef = useRef<boolean>(false); // 跟踪是否已发送新用户消息
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -1228,6 +1229,12 @@ export default function HomeScreen() {
   // 发送新用户欢迎语消息
   const sendNewUserMessage = useCallback(async (userDataParam = null) => {
     try {
+      // 如果已经发送过新用户消息，直接返回，避免重复发送
+      if (newUserMessageSentRef.current) {
+        console.log('sendNewUserMessage already sent, skipping duplicate call');
+        return;
+      }
+      
       console.log('sendNewUserMessage ing');
       
       // 优先使用传入的参数，如果没有则使用状态中的 userData
@@ -1237,6 +1244,9 @@ export default function HomeScreen() {
         console.log('sendNewUserMessage end with no userData');
         return;
       }
+      
+      // 标记为已发送，防止重复调用
+      newUserMessageSentRef.current = true;
       
       // 获取设备信息
       const deviceId = await getDeviceId();
@@ -1256,15 +1266,15 @@ export default function HomeScreen() {
       
       console.log('Sending new_user message:', requestBody);
       
-      // 调用通用处理函数，静默处理，不显示响应和错误
+      // 调用通用处理函数，静默处理，不显示错误
       await handleStreamRequest({
         requestBody,
         tempMessageId: 'temp_new_user',
         logPrefix: 'New User message',
         onComplete: () => {
-          // new_user 消息不需要显示响应，直接返回 false 停止默认处理
+          // new_user 消息需要显示响应，返回 true 继续默认处理
           console.log('New User message sent');
-          return false;
+          return true;
         },
         errorMessage: 'Failed to send New User message',
         silent: true, // 静默模式，不显示错误提示
@@ -1318,15 +1328,15 @@ export default function HomeScreen() {
       setIsSending(true);
       setCurrentResponse('');
       
-      // 调用通用处理函数，静默处理，不显示响应和错误
+      // 调用通用处理函数，静默处理，不显示错误
       await handleStreamRequest({
         requestBody,
         tempMessageId: 'temp_enter_user',
         logPrefix: 'Enter User message',
         onComplete: () => {
-          // enter 消息不需要显示响应，直接返回 false 停止默认处理
+          // enter 消息需要显示响应，返回 true 继续默认处理
           console.log('Enter User message sent');
-          return false;
+          return true;
         },
         errorMessage: 'Failed to send Enter User message',
         silent: true, // 静默模式，不显示错误提示
@@ -1625,6 +1635,8 @@ export default function HomeScreen() {
           console.warn('User data not loaded, cannot send new user message');
         }
       } else {
+        // 历史消息有值，重置新用户消息标记（允许在历史消息被清空后再次发送）
+        newUserMessageSentRef.current = false;
         // 历史消息有值，发送 enter 消息
         console.log('History messages exist, sending enter message');
         if (currentUserData) {
